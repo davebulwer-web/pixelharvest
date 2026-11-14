@@ -38,6 +38,24 @@ godot --headless --path . --import          # catches parse errors, bad resource
 godot --headless --path . --quit-after 10   # catches runtime errors on startup
 ```
 
+**Always run `--import` before any other Godot invocation on a fresh checkout.** Without
+it every texture fails to load and the resulting errors are misleading — they look like
+broken resources when nothing is wrong.
+
+**Claude can also see the game running.** `xvfb` is available, so Godot can render with a
+real OpenGL driver to a virtual display and write out frames:
+
+```bash
+xvfb-run -a godot --path . --rendering-driver opengl3 \
+    --write-movie /tmp/frames/shot.png --quit-after 60
+```
+
+Combined with a temporary autoload that presses input actions in `_physics_process`, this
+makes movement, animation, collision and Y-sorting verifiable before delivery. Two rules
+learned the hard way: drive input from `_physics_process`, never `_process` (otherwise the
+press/release races the player's own physics step and produces phantom bugs), and delete
+the test harness before shipping.
+
 Delivering code that hasn't been through that is not acceptable — Dave can't debug it
 himself, so an avoidable error costs him a wasted session.
 

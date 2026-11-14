@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 0 (awaiting Dave's confirmation that the project opens).**
+**Current stage: 1 — walking skeleton.**
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -21,20 +21,38 @@ the work is more of the same. Haiku for mechanical bulk edits.
 - [x] Placeholder `main.tscn` that proves the project runs
 - [x] `CLAUDE.md`, `DESIGN.md`, `DECISIONS.md`, `STAGES.md`, `art/STYLE.md`
 - [x] Verified: headless import and run, no errors
-- [ ] Dave confirms the project opens in Godot and F5 shows the banner
-- [ ] Git initialised, remote added, first commit pushed
+- [x] Dave confirms the project opens in Godot and F5 shows the banner
+- [x] Git initialised, remote added, first commit pushed (2026-11-14)
 
 ## Stage 1 — Walking skeleton · 1–2 sessions · Opus
 
-- [ ] Lock the art spec in `art/STYLE.md`; generate the first character in Pixellab
-- [ ] Import sprite sheet, set up `AnimatedSprite2D` with 4-direction idle and walk
-- [ ] `CharacterBody2D` player with movement and animation state
-- [ ] A blank `TileMapLayer` with a ground tileset and collision
-- [ ] `Camera2D` following the player, pixel-snapped, zoom set for ~20×11 tiles
-- [ ] Y-sorting so the player passes behind tall objects
+Built against generated placeholder art first, so code progress doesn't wait on asset
+production. The real Pixellab sprite drops into the same slot with no code changes.
 
-**Why this first:** it proves the whole Pixellab → Godot pipeline end to end before any
-game systems exist. If the art pipeline has a problem, this is the cheapest place to find it.
+**1a — mechanics on placeholder art**
+
+- [x] Placeholder player sprite sheet, 32×32, 4 directions × (2 idle + 4 walk)
+- [x] Placeholder ground tileset, 16×16, in Harvest 32, plus a tree prop
+- [x] `SpriteFrames` resource; `AnimatedSprite2D` with 4-direction idle and walk
+- [x] `CharacterBody2D` player with movement and animation state
+- [x] `TileMapLayer` with ground tileset and collision
+- [x] `Camera2D` following the player, pixel-snapped, ~20×11 tiles visible
+- [x] Y-sorting so the player passes behind tall objects
+- [x] Verified in a rendered recording: animation switches correctly per direction,
+      player stops dead against the tree trunk, sorts in front when below it and
+      behind when above it
+- [ ] Dave confirms it plays correctly on Windows
+
+**1b — real art**
+
+- [ ] Agree the character's look; generate in Pixellab from the `art/STYLE.md` template
+- [ ] Save the approved sprite as `art/reference.png` — the style anchor for everything after
+- [ ] Verify against spec (size, frame grid, transparency, palette) and swap it in
+- [ ] Log the generation in `art/STYLE.md`
+
+**Why this stage first:** it proves the whole Pixellab → Godot pipeline end to end before
+any game systems exist. If the art pipeline has a problem, this is the cheapest place to
+find it.
 
 ## Stage 2 — Core loop and seams · 3–4 sessions · Opus
 
