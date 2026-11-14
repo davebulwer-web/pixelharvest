@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 6 — seasons made real.** Session 1 built 2026-11-14; awaiting Dave's check on Windows. Session 2 is the real seasonal art.
+**Current stage: 7 — the town.** Session 1 built and confirmed 2026-11-14 on placeholder art. Next: real town art (Pixellab), then more of the town.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -219,7 +219,7 @@ Session 1 (2026-11-14) — the town, three shops, doors and shopkeepers on place
       points, dialogue then menu, buying, selling, shop stock and upgrade categories, no
       farming or sleeping in town, sleeping on the farm still works, a version 5 save
       upgraded and walked through the gate) and in a rendered recording of the whole trip
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-14)
 
 - [x] Real town art from Pixellab (2026-11-14, DECISIONS 028): three shop fronts, three
       shopkeepers, counter, shelf and the interior tileset, all on the 41-colour palette.
