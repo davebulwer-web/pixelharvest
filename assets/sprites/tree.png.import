@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://vx85gjbswqqx"
-path="res://.godot/imported/ground_winter_placeholder.png-0e9ea44b41ccf329d40a19a069a62032.ctex"
+uid="uid://b4xy67jg2qrpv"
+path="res://.godot/imported/tree.png-15cb16b197553088007c6ba3ce2f75b0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/tilesets/ground_winter_placeholder.png"
-dest_files=["res://.godot/imported/ground_winter_placeholder.png-0e9ea44b41ccf329d40a19a069a62032.ctex"]
+source_file="res://assets/sprites/tree.png"
+dest_files=["res://.godot/imported/tree.png-15cb16b197553088007c6ba3ce2f75b0.ctex"]
 
 [params]
 

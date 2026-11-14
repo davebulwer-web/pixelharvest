@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://do2md2v1qfe82"
-path="res://.godot/imported/tree_placeholder.png-582aaea1341e378e6e25a44232b63ff0.ctex"
+uid="uid://bf8wgtvq1xem0"
+path="res://.godot/imported/tree_winter.png-7f6b05125c6d14b44f52ef444f78de61.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/tree_placeholder.png"
-dest_files=["res://.godot/imported/tree_placeholder.png-582aaea1341e378e6e25a44232b63ff0.ctex"]
+source_file="res://assets/sprites/tree_winter.png"
+dest_files=["res://.godot/imported/tree_winter.png-7f6b05125c6d14b44f52ef444f78de61.ctex"]
 
 [params]
 

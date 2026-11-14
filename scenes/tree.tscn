@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/tree_placeholder.png" id="1_tree"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tree.png" id="1_tree"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_trunk"]
 size = Vector2(10, 6)
@@ -9,7 +9,7 @@ size = Vector2(10, 6)
 
 [node name="Sprite" type="Sprite2D" parent="."]
 texture = ExtResource("1_tree")
-offset = Vector2(0, -16)
+offset = Vector2(0, -22)
 
 [node name="Collision" type="CollisionShape2D" parent="."]
 position = Vector2(0, -3)

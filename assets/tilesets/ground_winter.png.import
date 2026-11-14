@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c8lnc2ihohtnw"
-path="res://.godot/imported/ground_summer_placeholder.png-ab42680d8b3f880963e1977f4ebaa0fd.ctex"
+uid="uid://bv344w8jt6gm6"
+path="res://.godot/imported/ground_winter.png-2d934ebd365c13c9193f91a16a106063.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/tilesets/ground_summer_placeholder.png"
-dest_files=["res://.godot/imported/ground_summer_placeholder.png-ab42680d8b3f880963e1977f4ebaa0fd.ctex"]
+source_file="res://assets/tilesets/ground_winter.png"
+dest_files=["res://.godot/imported/ground_winter.png-2d934ebd365c13c9193f91a16a106063.ctex"]
 
 [params]
 

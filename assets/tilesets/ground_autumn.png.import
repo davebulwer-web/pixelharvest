@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c5lkpyyj8d65m"
-path="res://.godot/imported/tree_autumn_placeholder.png-197fac9fab38c029ad6d3976728af3a1.ctex"
+uid="uid://d87k1vsd2iqg"
+path="res://.godot/imported/ground_autumn.png-1e57ef7c708cac642e3b66b804e29a14.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/tree_autumn_placeholder.png"
-dest_files=["res://.godot/imported/tree_autumn_placeholder.png-197fac9fab38c029ad6d3976728af3a1.ctex"]
+source_file="res://assets/tilesets/ground_autumn.png"
+dest_files=["res://.godot/imported/ground_autumn.png-1e57ef7c708cac642e3b66b804e29a14.ctex"]
 
 [params]
 
