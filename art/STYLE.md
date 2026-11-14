@@ -149,3 +149,17 @@ including the thicket in column 8.
 About 42 generations including tests and dead ends (a one-strip pixflux tileset came out flat;
 Tiles Pro showed a grid on grass). Tiles Pro images are on a host the cloud proxy blocks;
 fetch them as a zip from `api.pixellab.ai/mcp/tiles-pro/<id>/download`.
+
+**Real town art, 2026-11-14 (Stage 7, DECISIONS 028).** pixflux, palette-forced, `init_image` = the placeholder.
+
+| Asset | Strength | Prompt subject |
+|---|---|---|
+| `town/seed_shop.png` (80×64) | 60 | front view of a small wooden village seed shop, red tiled roof, green sign board above a wide double door centred at the bottom, two small windows, a few seed sacks and potted plants by the door |
+| `town/general_store.png` | 100 | front view of a small wooden village general store, teal tiled roof, cream sign board, a wide open dark double doorway in the exact centre of the bottom edge, one small window each side, a crate and a barrel at the far edges |
+| `town/blacksmith.png` | 100 | front view of a small stone and timber village blacksmith forge, grey slate roof with a stone chimney, anvil sign board, a wide dark double doorway in the exact centre of the bottom edge, one small window each side glowing orange, an anvil at the far edge (sign lettering replaced by an anvil, by script) |
+| `town/keeper_seeds.png` (56×56, Hollis) | 80 | old gardener shopkeeper, full body, front view facing the viewer, standing still, arms at sides, white beard, green flat cap, green apron over a cream shirt, brown trousers, brown boots |
+| `town/keeper_general.png` (Marlow) | 80 | cheerful middle-aged woman shopkeeper, … brown hair in a bun, teal dress with a white shirt and brown apron, brown shoes |
+| `town/keeper_smith.png` (Brann) | 130 | tall burly blacksmith shopkeeper, … short black beard, dark leather apron over an orange shirt, dark trousers, black boots |
+| `town/counter.png` (48×24) | 80 | front view of a wooden shop counter, polished light wood top, panelled dark wood front |
+| `town/shelf.png` (32×28) | 80 | two front view wooden shop shelves side by side, each with three shelves of jars, sacks and small boxes (64×28, left one kept; pixflux needs area ≥ 1024) |
+| `tilesets/interior.png` (80×16) | — | `/create-tileset` standard: "warm honey-brown wooden plank floor" + "deep red woven rug with a cream pattern"; plain tiles mapped by brightness, other tiles derived by script |

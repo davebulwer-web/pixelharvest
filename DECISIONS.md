@@ -683,3 +683,34 @@ costs nothing (no clock to spend), so the town is a convenience tax of a minute,
 decision, until Stage 8 gives it reasons to be visited on particular days. All town art
 is placeholder (list in STAGES.md).
 
+
+---
+
+## 028 — Real town art: pixflux redraws of the placeholders, interior tiles from the terrain tool
+
+**Decision.** The Stage 7 placeholders are replaced by Pixellab art, file for file, so no
+code or data changed.
+
+- *Shop fronts, shopkeepers, counter and shelf* are pixflux (1 generation each,
+  `color_image` = `art/palette.png`, so they land exactly on the palette) with the
+  **placeholder as `init_image`**. Strength 60–130 keeps what the code depends on (the
+  80×64 outline, the 32px doorway centred on the bottom row, the keeper's size and feet
+  position) while Pixellab redraws the detail. At 300 it barely changed the placeholder;
+  with no init it drew an isometric house and a keeper too big for the frame.
+- Keepers were nudged by a pixel so their feet sit on the same row as the placeholder's
+  (what `Npc.SPRITE_OFFSET` expects). The blacksmith's sign came with made-up lettering,
+  replaced by script with a small anvil in the sign's own colours.
+- *Interior tiles*: one `/create-tileset` pair (wooden plank floor / red woven rug) gave
+  the plain floor and rug tiles, mapped onto palette shades by brightness as in 026.
+  A second pair (beam / plaster wall) came out flat and wasn't used. The floor variant
+  (knots), the wall top (the planks on the two darkest browns) and the wall face (plaster
+  over a wainscot made from the planks turned upright) are built from those tiles by
+  script, so the room shares one wood. A pixflux wall strip was tried and was muddy.
+
+**Why.** Using the placeholder as the starting image is what makes these drop-in: the
+layout the code relies on is already in the picture. Deriving the room's other tiles from
+one generated plank tile keeps floor, walls and trim matching.
+
+**Cost.** 20 generations including the look test and dead ends. The counter is two copies
+of one 48px picture side by side, so its rounded ends meet in the middle; a single 96px
+counter would need a code change in `interior.gd`.
