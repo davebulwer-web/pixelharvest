@@ -163,3 +163,19 @@ fetch them as a zip from `api.pixellab.ai/mcp/tiles-pro/<id>/download`.
 | `town/counter.png` (48×24) | 80 | front view of a wooden shop counter, polished light wood top, panelled dark wood front |
 | `town/shelf.png` (32×28) | 80 | two front view wooden shop shelves side by side, each with three shelves of jars, sacks and small boxes (64×28, left one kept; pixflux needs area ≥ 1024) |
 | `tilesets/interior.png` (80×16) | — | `/create-tileset` standard: "warm honey-brown wooden plank floor" + "deep red woven rug with a cream pattern"; plain tiles mapped by brightness, other tiles derived by script |
+
+**Town decoration and townsfolk, 2026-11-14 (Stage 7 session 2, DECISIONS 030).** pixflux, palette-forced, `init_image` = the placeholder (small pieces centred on a 32×32 canvas and cut back out).
+
+| Asset | Strength | Prompt subject |
+|---|---|---|
+| `town/fountain.png` (48×40) | 140 | front view of a wide stone village fountain, grey stone basin filling the whole width, clear teal water, a central grey stone pillar with a small bowl on top spraying water |
+| `town/fountain_winter.png` | 150 (init = the fountain) | same fountain in winter, water frozen into pale blue ice, snow on the rim; water then recoloured to ice shades by script |
+| `town/bench.png` (32×16) | 100 | front view of a wooden park bench with dark iron legs, two brown wooden back slats and a wooden seat |
+| `town/lamp_post.png` (16×32) | 100 | front view of a tall dark iron village street lamp post with a glowing warm orange lantern on top |
+| `town/flower_bed.png` (16×16) | 100 | front view of a small wooden planter box full of green leaves and red, white and yellow flowers |
+| `town/flower_bed_winter.png` | — | the flower bed with leaves and flowers recoloured to snow shades by script |
+| `town/fence.png` (16×16) | 100 | front view of one section of a brown wooden garden fence, two horizontal rails between two posts |
+| `town/notice_board.png` (32×32) | 100 | front view of a wooden village notice board on two posts, small red roof on top, several blank cream paper notices pinned on it, no text (roof lettering repainted by script) |
+| `town/mayor.png` (56×56, Bramble) | 150 | slim elderly village mayor, full body, front view facing the viewer, standing still, arms at sides, white beard, navy blue flat cap, navy blue coat over a white shirt, brown trousers, brown boots |
+| `town/angler.png` (56×56, Wren) | 150 | slim village angler fisherman, full body, front view …, wide brimmed tan hat, green checked shirt, olive green waders with braces, brown boots |
+

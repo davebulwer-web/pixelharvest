@@ -763,3 +763,30 @@ which until now meant remembering the crop files.
 south. Lines don't react to anything yet: no "you sold me 40 parsnips". All the new art is
 placeholder (STAGES.md lists it). The garden's fence is horizontal pieces only, so it is
 open at both ends rather than closed with corner posts.
+
+---
+
+## 030 — Real town decoration and townsfolk: pixflux redraws, winter versions by recolour
+
+**Decision.** The Stage 7 session 2 placeholders are replaced by Pixellab art, file for file
+(same sizes, same bases and feet rows), so no code or data changed. Same route as 028.
+
+- *Fountain, notice board, Mayor Bramble, Wren*: pixflux, `color_image` = `art/palette.png`,
+  `init_image` = the placeholder. The people needed strength 150: at 80 the mayor came out
+  half as wide again as the shopkeepers. The fountain needed 140 to keep its full 48px width.
+- *Bench, lamp post, flower bed, fence*: too small for pixflux (area under 1024), so each
+  placeholder was centred on a transparent 32×32 canvas, generated, and the middle cut back
+  out to the original size. The fence's posts sit on its edges, so pieces still join.
+- *Winter versions are recolours, not fresh pictures.* Asked for a frozen fountain, pixflux
+  kept the water teal; asked for a snowed bed, it kept the flowers. So the frozen fountain is
+  the generated winter fountain with its water shades mapped to the palette's ice shades, and
+  the snowy bed is the real bed with its leaves and flowers mapped to snow shades. Both share
+  every other pixel's shape with their summer picture, so the season change doesn't jump.
+- *The notice board's roof* came with garbled lettering; it was repainted flat by script in
+  its own reds. The notices are blank paper; the game draws the real text when it's read.
+
+**Why.** As 028: starting from the placeholder is what makes them drop-in. Recolouring for
+winter is the same rule as 005 (seasons derived from one base) applied to single objects.
+
+**Cost.** 12 generations including the look test and its two rejects (about 27 left).
+
