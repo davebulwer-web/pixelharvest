@@ -245,10 +245,9 @@ Session 2 (2026-11-14) — a designed town, townsfolk and a notice board, on pla
       gate both ways, a version 5 save still upgrades) and rendered in spring and winter
 - [ ] Dave confirms it plays correctly on Windows
 
-**Needs real art (Pixellab, from the cloud environment):** `assets/sprites/town/` fountain,
-fountain_winter, bench, lamp_post, flower_bed, flower_bed_winter, fence, notice_board
-(drawn by script) and mayor, angler (recoloured copies of the seed keeper and the farmer).
-Same sizes as the placeholders, feet/base on the bottom row.
+- [x] Real art from Pixellab for every session 2 piece (2026-11-14, DECISIONS 030): fountain
+      and frozen fountain, bench, lamp post, flower bed and snowed bed, fence, notice board,
+      Mayor Bramble and Wren. Drop-in replacements, same sizes, feet/base on the bottom row.
 
 **Not done / for a later session:** a farmhouse and bed on the farm, shop opening hours
 (needs a clock, which the game doesn't have), townsfolk who walk about.
