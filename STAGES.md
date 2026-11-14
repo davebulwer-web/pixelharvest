@@ -221,12 +221,9 @@ Session 1 (2026-11-14) — the town, three shops, doors and shopkeepers on place
       upgraded and walked through the gate) and in a rendered recording of the whole trip
 - [ ] Dave confirms it plays correctly on Windows
 
-**Left over (placeholder art, a Pixellab job from the cloud environment):**
-- Shop fronts ×3 (`assets/sprites/town/seed_shop.png`, `general_store.png`, `blacksmith.png`,
-  80×64, doorway 32px wide centred on the bottom row)
-- Shopkeepers ×3 (`keeper_*.png`, 56×56, recoloured farmer)
-- Interior tileset (`assets/tilesets/interior.png`: floor, floor variant, wall face, wall
-  top, rug), counter (48×24) and shelf (32×28)
+- [x] Real town art from Pixellab (2026-11-14, DECISIONS 028): three shop fronts, three
+      shopkeepers, counter, shelf and the interior tileset, all on the 41-colour palette.
+      Drop-in replacements for the placeholders, same sizes and doorways.
 - Not seasonal: the shop fronts and interiors have no winter version; the town's ground and
   trees use the farm's seasonal art.
 
