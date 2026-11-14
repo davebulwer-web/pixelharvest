@@ -54,6 +54,17 @@ signal gold_changed(amount: int, delta: int)
 signal item_added(item_id: StringName, amount: int)
 signal item_removed(item_id: StringName, amount: int)
 
+## Something was bought from the shop. `cost` is the total paid.
+signal item_bought(item_id: StringName, amount: int, cost: int)
+
+## The player put produce in the shipping bin: `count` items, worth `value`
+## gold when they sell overnight. Both are 0 if there was nothing to ship.
+signal items_shipped(count: int, value: int)
+
+## Overnight, the shipping bin was emptied and paid out `gold`. Emitted during
+## the night (before day_started), only if anything was in the bin.
+signal shipment_sold(gold: int)
+
 signal tool_selected(tool_id: StringName)
 signal tool_upgraded(tool_id: StringName, tier: int)
 

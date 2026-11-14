@@ -12,9 +12,10 @@ extends Resource
 @export var starting_gold: int = 0
 @export var max_energy: float = 100.0
 
-## The tools in the player's hands at the start of a new game, in toolbar order.
-## Adding a tool to the starting kit is a data change here, never a code change.
-@export var starting_tools: Array[ToolDef] = []
+## What's in the bag at the start of a new game, and how many of each, in
+## hotbar order. Adding something to the starting kit is a data change here,
+## never a code change.
+@export var starting_inventory: Dictionary[ItemDef, int] = {}
 
 ## Every place in the world, and where a new game begins.
 @export var locations: Array[LocationDef] = []

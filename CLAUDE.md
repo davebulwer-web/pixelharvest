@@ -101,8 +101,12 @@ project.godot        Engine config — see DECISIONS.md 009 before changing disp
 icon.svg
 scenes/              .tscn scene files
 scripts/             Game code
-  autoload/          Global services (EventBus, ContentDB, GameState, SaveSystem…)
-data/                Content resources (.tres) — crops, tools, upgrades
+  autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem…)
+  items/             Inventory
+data/                Content resources (.tres), indexed by ContentDB
+  crops/             CropDef — how each plant grows and looks
+  produce/           ItemDef — what a harvest gives, and its sell price
+  tools/             ToolDef — tools and seeds (seeds are tools)
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab
 assets/tilesets/     Ground and world tilesets

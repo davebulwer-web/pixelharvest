@@ -40,6 +40,7 @@ const GRASS_VARIATION := 0.18
 ## What to put in the world for each FarmTile.object_id.
 const OBJECT_SCENES: Dictionary = {
 	&"tree": preload("res://scenes/tree.tscn"),
+	&"shipping_bin": preload("res://scenes/shipping_bin.tscn"),
 }
 
 @onready var _ground: TileMapLayer = $Ground
@@ -73,10 +74,11 @@ func _ready() -> void:
 		_draw_all()
 	)
 
-	print("--- Pixel Harvest · Stage 3 ---")
-	print("WASD/arrows move. Space uses the tool on the highlighted tile.")
-	print("Tab / Q switch tool: hoe, watering can, parsnip seeds.")
-	print("E harvests a ready crop. Enter sleeps; watered crops grow overnight.")
+	print("--- Pixel Harvest · Stage 4 ---")
+	print("WASD/arrows move. Space uses the item on the highlighted tile.")
+	print("Tab / Q move along the hotbar: tools and seeds. Seeds are used up.")
+	print("E harvests a ready crop, or (facing the bin) ships all your produce.")
+	print("B opens the seed shop. Enter sleeps; the bin sells overnight.")
 	print("The game saves every morning and loads on launch. F9 starts a new game.")
 	print("-------------------------------")
 
@@ -179,6 +181,9 @@ func _place_objects() -> void:
 	for cell: Vector2i in GameState.farm.cells():
 		var object_id: StringName = GameState.farm.tile(cell).object_id
 		if object_id == &"":
+			continue
+		if not OBJECT_SCENES.has(object_id):
+			push_warning("Farm has an object '%s' with no scene to show it" % object_id)
 			continue
 		var node: Node2D = OBJECT_SCENES[object_id].instantiate()
 		node.position = cell_base(cell)

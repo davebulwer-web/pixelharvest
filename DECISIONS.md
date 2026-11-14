@@ -395,3 +395,55 @@ per tile position. Every future change to saved data costs a version bump and an
 step — that's the point, but it must not be skipped. `ContentDB` only knows crops and tools
 until Stage 4 extends it.
 
+
+---
+
+## 023 — Items: one `ItemDef` for everything carried; the hotbar is a view of the bag; a crop is three files
+
+**Decision.** Stage 4's inventory and economy rest on these choices:
+
+- *One item type.* `ItemDef` (id, name, icon, `sell_price`, `buy_price`) is anything that
+  can be carried. `ToolDef` now *extends* `ItemDef`, so tools and seeds are items too.
+  Produce is a plain `ItemDef` in `data/produce/`. A price of 0 means "the bin won't take
+  it" or "the shop doesn't sell it" — that's the only rule the bin and the shop apply.
+- *The hotbar isn't a separate list.* `GameState.inventory` (an `Inventory`: ordered stacks
+  of item + count) holds everything. The hotbar is simply the `ToolDef`s in it, in bag
+  order; produce is shown beside it but isn't selectable. Seeds have `consumed_on_use`, so
+  planting takes one from the bag, and the last packet leaves the hotbar on its own.
+  `GameRules.starting_tools` became `starting_inventory`, a dictionary of item → count.
+- *A crop is three small files:* `data/crops/X.tres` (how it grows and looks),
+  `data/produce/X.tres` (what it gives and its sell price), `data/tools/X_seeds.tres`
+  (what plants it, and its shop price), plus a sprite sheet and two icons. `CropDef.sell_price`
+  moved to the produce item. `ContentDB` loads them all and *checks they agree* at startup
+  — crop without produce, seeds that plant nothing, duplicate ids — naming the file to fix.
+- *Prices are only read through `Economy`.* `Economy.buy_price()` / `sell_price()` return
+  the item's number today; market days and difficulty (Stage 8) change them in that one
+  place.
+- *The shipping bin:* a farm object (like a tree) at the end of the path. E while facing
+  it moves every sellable item from the bag into `GameState.shipping_bin`. `Economy` sells
+  it on `day_ended`, step 1 of the overnight sequence. Because the save is written at dawn,
+  after the sale, the bin is always empty when saved and isn't in the save file.
+- *Interacting is generic.* E harvests if there's a ready crop; otherwise the player looks
+  for a node in the `interactable` group that `occupies()` the facing tile and calls its
+  `interact()`. The bin is the first; Stage 7's doors and shopkeepers join the same way.
+- *Save version 3.* `tools` became `inventory` (`[{id, count}]`). The 2 → 3 step gives each
+  old tool a count of 1 and the old unlimited parsnip seeds a count of 10, and places the
+  bin at (13, 12) — all frozen in the step. `tests/saves/v2_example.json` is a real version 2
+  save made by the Stage 3 build; both it and the v1 example load through the chain.
+- *The shop is a stopgap menu (B),* listing whatever has a `buy_price`. It pauses the game
+  while open.
+
+**Why.** One item type means the bag, bin and shop never ask "what kind of thing is
+this?", which is what keeps them from growing special cases as content arrives. Making the
+hotbar a *view* of the bag avoids two lists that must be kept in step (Stardew's model,
+without its fixed slots). Three files per crop is more than one, but each is small, has a
+clear job and is editable in the inspector; the alternative — the crop file generating its
+seeds and produce invisibly — would have been less typing and harder to understand. The
+startup check is the price of spreading a crop over three files, and it's cheap.
+
+**Cost.** Seeds still live in `data/tools/` (they are tools, DECISIONS 020) rather than a
+folder of their own — moving `parsnip_seeds.tres` would have meant deleting files on Dave's
+machine, which the bridge can't do. The bag has no size limit; whether it should is a
+design question for Stage 5. Nothing comes back out of the bin once shipped. Prices are a
+first guess (radish 10 → 20 over 3 days … cabbage 60 → 120 over 9; green beans 50, then
+15 every 3 days); Stage 5 is the real balance pass. All new art is placeholder.

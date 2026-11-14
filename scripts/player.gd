@@ -2,7 +2,7 @@ class_name Player
 extends CharacterBody2D
 ##
 ## Player — movement, four-direction animation, and the player's actions:
-## using the held tool, harvesting, and going to sleep.
+## using the held tool, interacting (harvest, shipping bin), and going to sleep.
 ##
 ## The node origin sits at the character's FEET, not the centre of the sprite.
 ## The AnimatedSprite2D is offset upward to achieve that. This matters for two
@@ -87,12 +87,26 @@ func _use_tool() -> void:
 	if not GameState.try_spend_energy(tool.energy_cost):
 		return
 	tool.action.apply(GameState.farm, cell)
+	# Seeds are used up as they're planted. Removing the last one takes the
+	# packet off the hotbar, and GameState moves the selection along.
+	if tool.consumed_on_use:
+		GameState.inventory.remove(tool)
 
 
-## E: harvest a ready crop by hand. Harvesting is free — the work was in
-## growing it. Later, interact will also open doors and talk to people.
+## E: harvest a ready crop by hand, or use whatever stands on the tile ahead
+## (the shipping bin now; doors and people in Stage 7). Harvesting is free —
+## the work was in growing it.
+##
+## Anything usable joins the "interactable" group and offers occupies(cell)
+## and interact(), so this never grows a list of things it knows about.
 func _interact() -> void:
-	GameState.farm.harvest(target_cell())
+	var cell := target_cell()
+	if GameState.harvest(cell):
+		return
+	for node in get_tree().get_nodes_in_group(&"interactable"):
+		if node.occupies(cell):
+			node.interact()
+			return
 
 
 func _update_animation(direction: Vector2) -> void:

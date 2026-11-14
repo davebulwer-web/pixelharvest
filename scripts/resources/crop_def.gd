@@ -1,12 +1,12 @@
 class_name CropDef
 extends Resource
 ##
-## CropDef — everything that distinguishes one crop from another.
+## CropDef — everything that distinguishes one crop from another: how it grows,
+## what it looks like, and what harvesting it gives you.
 ##
-## Introduced in Stage 2 rather than Stage 4 (DECISIONS 017): the plan said
-## "one hardcoded crop", but hardcoding grow times would break rule 6. So the
-## first crop is a resource from day one, and Stage 4's job shrinks to adding
-## ContentDB and more .tres files.
+## A crop is three small files (DECISIONS 023): this, the produce it yields
+## (an ItemDef in data/produce/) and the seeds that plant it (a ToolDef in
+## data/tools/). ContentDB checks at startup that the three agree.
 ##
 ## Kept deliberately small. Fields get added when a stage needs them, not before.
 ##
@@ -27,11 +27,11 @@ extends Resource
 ## (DECISIONS 006).
 @export var regrow_days: int = 0
 
-## How many items one harvest gives.
+## What one harvest puts in the bag, and how many of it. Its price is on the
+## produce item, so the shop, the bin and (Stage 8) the market all read the
+## same number.
+@export var produce: ItemDef
 @export var harvest_amount: int = 1
-
-## Gold per item when sold through the shipping bin (Stage 4).
-@export var sell_price: int = 0
 
 ## One row of equal-width frames: frame 0 is the planted seed, then one frame
 ## per growth stage, the last being "ready to harvest". So the sheet must have
@@ -51,3 +51,9 @@ func days_to_grow_from(stage: int, regrowing: bool) -> int:
 	if regrowing and stage == growth_stages - 1:
 		return regrow_days
 	return days_per_stage
+
+
+## Total watered days from planting to the first harvest. Handy for the shop
+## and for balancing; nothing in the growing code uses it.
+func days_to_mature() -> int:
+	return growth_stages * days_per_stage

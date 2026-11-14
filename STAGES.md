@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 3 — save and load.** Built 2026-11-14; awaiting Dave's check on Windows. Next: Stage 4.
+**Current stage: 4 — content pipeline and economy.** Built 2026-11-14; awaiting Dave's check on Windows. Next: Stage 5.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -119,20 +119,37 @@ Session 1 (2026-11-14) — see DECISIONS 022.
 - [x] Verified headless: save/reload round trip, v1 upgrade, damaged / newer / incomplete
       saves set aside, unknown crop and tool dropped, F6 doesn't save, F9 leaves the file
       alone. Rendered recording: plant two tiles, sleep, relaunch — sprouts still there
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-14)
 
 **Early, not late.** Retrofitting versioning after there's a save worth keeping is misery.
 
 ## Stage 4 — Content pipeline and economy · 2–3 sessions · Opus, then Sonnet
 
-- [ ] `CropDef` resource script, including `regrow_days`
-- [ ] `ContentDB` autoload loading all definitions from `data/` (crops and tools done in Stage 3)
-- [ ] Convert the Stage 2 hardcoded crop to a resource — the proof that content is data
-- [ ] Inventory system
-- [ ] Shipping bin: drop produce, sold overnight, gold at dawn
-- [ ] Menu-based seed shop (replaced by the town in Stage 7)
-- [ ] Basic HUD: gold, day, season, energy, selected tool
-- [ ] Five crops, including at least one regrowing
+Session 1 (2026-11-14) — see DECISIONS 023.
+
+- [x] `CropDef` resource script, including `regrow_days` (done in Stage 2, DECISIONS 017);
+      `sell_price` moved to the produce item
+- [x] `ContentDB` loads crops and every item (tools, seeds, produce), lists the shop's
+      stock, and checks content hangs together at startup, naming the file to fix
+- [x] Convert the Stage 2 hardcoded crop to a resource (done in Stage 2, DECISIONS 017)
+- [x] Inventory system: `ItemDef`, `Inventory`; the hotbar is the usable items in the bag;
+      seeds are counted and used up
+- [x] Shipping bin: E ships all produce, sold overnight, gold at dawn; generic
+      `interactable` group for things E can use
+- [x] Menu-based seed shop on B (replaced by the town in Stage 7); pauses the game
+- [x] HUD: season, day, gold, energy, value waiting in the bin, hotbar with icons and counts
+- [x] Five crops: radish, parsnip, potato, cabbage, green bean (regrowing)
+- [x] Save version 3 (inventory replaces tools; bin added to old farms);
+      `tests/saves/v2_example.json` added
+- [x] Verified headless (over 30 checks: starting kit, seeds used up, buying, can't overspend,
+      shipping, overnight sale, bean regrow, save round trip, v1 and v2 upgrades, bad saves,
+      broken content reported) and in a rendered recording: harvest four crops, ship them,
+      shop, buy, sleep, morning shows the sale
+- [ ] Dave confirms it plays correctly on Windows
+
+**Left over:** the four new crops, all item icons and the shipping bin are placeholder art
+(generated locally, on palette). Real versions are a Pixellab job, from the cloud
+environment that can reach it (DECISIONS 019), once Dave has approved the looks.
 
 ## Stage 5 — The incremental spine · 2–3 sessions · Opus to design, Sonnet to build
 

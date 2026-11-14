@@ -16,6 +16,10 @@ const POND := Rect2i(21, 3, 5, 4)
 const PATH_ROW := 12
 const PATH_LENGTH := 14
 
+## The end of the path, right beside where the player wakes up. A path cell
+## can never be tilled, so the bin can't end up sitting on a crop.
+const SHIPPING_BIN := Vector2i(13, 12)
+
 const TREE_CELLS: Array[Vector2i] = [
 	Vector2i(4, 4), Vector2i(7, 3), Vector2i(5, 8),
 	Vector2i(19, 6), Vector2i(23, 10), Vector2i(26, 14),
@@ -35,6 +39,7 @@ static func build_default() -> FarmData:
 			farm.set_tile(cell, t)
 	for cell in TREE_CELLS:
 		farm.tile(cell).object_id = &"tree"
+	farm.tile(SHIPPING_BIN).object_id = &"shipping_bin"
 	return farm
 
 

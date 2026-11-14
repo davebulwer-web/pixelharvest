@@ -7,7 +7,7 @@ extends Node
 ## fixed order:
 ##
 ##   1. day_ended is announced — anything that needs to settle up against
-##      *today* (the shipping bin, in Stage 4) does it now.
+##      *today* does it now. Economy sells the shipping bin here.
 ##   2. The farm grows: watered crops advance, soil dries.
 ##   3. The calendar moves on and energy refills.
 ##   4. day_started is announced — the farm redraws, the HUD updates.

@@ -19,7 +19,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 2, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 3, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -36,7 +36,9 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##   1 — first format. Saved the selected tool as a toolbar position, and
 ##       terrain as a number. Both break if the lists are ever reordered.
 ##   2 — selected tool saved by id; terrain saved by name.
-const CURRENT_VERSION := 2
+##   3 — the tool list becomes an inventory of items with counts (seeds are no
+##       longer unlimited), and the farm gains a shipping bin.
+const CURRENT_VERSION := 3
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -48,7 +50,7 @@ const REQUIRED_FIELDS: Dictionary = {
 	"year": TYPE_FLOAT,
 	"energy": TYPE_FLOAT,
 	"max_energy": TYPE_FLOAT,
-	"tools": TYPE_ARRAY,
+	"inventory": TYPE_ARRAY,
 	"selected_tool": TYPE_STRING,
 	"location": TYPE_STRING,
 	"farm": TYPE_DICTIONARY,
@@ -160,9 +162,12 @@ func _check_fields(game: Dictionary) -> String:
 	if typeof(farm.get("tiles")) != TYPE_ARRAY or typeof(farm.get("width")) != TYPE_FLOAT \
 			or typeof(farm.get("height")) != TYPE_FLOAT:
 		return "the farm is incomplete"
-	for tool_id: Variant in game["tools"]:
-		if typeof(tool_id) != TYPE_STRING:
-			return "the tool list has something that isn't a tool id"
+	for entry: Variant in game["inventory"]:
+		# A count read from the file is a float (JSON has only one kind of
+		# number); one written by an upgrade step may be an int. Either is fine.
+		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("id")) != TYPE_STRING \
+				or typeof(entry.get("count")) not in [TYPE_FLOAT, TYPE_INT]:
+			return "the inventory has something that isn't an item id and a count"
 	for entry: Variant in farm["tiles"]:
 		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("x")) != TYPE_FLOAT \
 				or typeof(entry.get("y")) != TYPE_FLOAT:
@@ -191,6 +196,8 @@ func _upgrade(data: Dictionary) -> String:
 		match version:
 			1:
 				_upgrade_1_to_2(data["game"])
+			2:
+				_upgrade_2_to_3(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -218,3 +225,33 @@ func _upgrade_1_to_2(game: Dictionary) -> void:
 		if entry.has("terrain"):
 			var number := int(entry["terrain"])
 			entry["terrain"] = V1_TERRAIN[number] if number >= 0 and number < V1_TERRAIN.size() else "GRASS"
+
+
+## Version 2 -> 3: tools become an inventory, and the farm gets a shipping bin.
+##
+## Version 2 had a list of tool ids and unlimited seeds. Each tool becomes one
+## of that item; seeds become a counted stack. The number of seeds, and the
+## cell the bin goes on, are written here rather than read from game_rules or
+## FarmLayout, so this step means the same thing however those change later.
+const V2_SEED_GRANT: Dictionary = {"parsnip_seeds": 10}
+const V3_SHIPPING_BIN := Vector2i(13, 12)
+
+
+func _upgrade_2_to_3(game: Dictionary) -> void:
+	var inventory: Array = []
+	for tool_id: Variant in game.get("tools", []):
+		inventory.append({"id": tool_id, "count": V2_SEED_GRANT.get(tool_id, 1)})
+	game["inventory"] = inventory
+	game.erase("tools")
+
+	# The bin's cell is the end of the path, which can never be tilled or
+	# planted, so in any version 2 farm it's free. If it somehow isn't, the
+	# farm is left alone rather than something being overwritten.
+	var farm: Dictionary = game.get("farm", {})
+	for entry: Dictionary in farm.get("tiles", []):
+		if int(entry.get("x", -999)) == V3_SHIPPING_BIN.x and int(entry.get("y", -999)) == V3_SHIPPING_BIN.y:
+			if entry.has("object") or entry.has("crop") or entry.get("tilled", false):
+				push_warning("No room for the shipping bin at %s; this farm won't have one" % V3_SHIPPING_BIN)
+			else:
+				entry["object"] = "shipping_bin"
+			return

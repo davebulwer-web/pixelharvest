@@ -1,17 +1,17 @@
 extends CanvasLayer
 ##
-## Hud — a minimal readout of the day, selected tool and energy, plus a short
-## message line and the fade between days.
+## Hud — the always-on readout: season and day, gold, energy, what's waiting in
+## the shipping bin, a short message line, the hotbar (hotbar.gd), and the fade
+## between days.
 ##
-## A stopgap so the loop is visible while testing. The real HUD (gold, season,
-## icons) is Stage 4 work and will replace this. Note that it never reads from
-## the player: it only listens to EventBus, which is the pattern the real HUD
-## will follow too.
+## It never reads from the player and nothing calls it: it listens on EventBus
+## and reads GameState. That's what will let Stage 8's quest log or a market-day
+## banner join the screen without anything else changing.
 ##
 
 ## How long a message stays up, and how long the morning fade-in takes.
 ## These are presentation timings, not balance numbers, so they live here.
-const MESSAGE_SECONDS := 2.0
+const MESSAGE_SECONDS := 2.5
 const FADE_SECONDS := 0.6
 
 @onready var _label: Label = $Label
@@ -20,12 +20,21 @@ const FADE_SECONDS := 0.6
 
 var _message_tween: Tween
 
+## What the bin paid overnight. It's sold during the night, before the morning
+## starts, so it's held here and moved into _morning_sales when day breaks.
+var _overnight_sales: int = 0
+var _morning_sales: int = 0
+
 
 func _ready() -> void:
 	EventBus.tool_selected.connect(func(_id: StringName) -> void: _refresh())
 	EventBus.energy_changed.connect(func(_c: float, _m: float) -> void: _refresh())
+	EventBus.gold_changed.connect(func(_g: int, _d: int) -> void: _refresh())
 	EventBus.day_started.connect(_on_day_started)
 	EventBus.crop_harvested.connect(_on_crop_harvested)
+	EventBus.items_shipped.connect(_on_items_shipped)
+	EventBus.shipment_sold.connect(func(gold: int) -> void: _overnight_sales = gold)
+	EventBus.item_bought.connect(_on_item_bought)
 	EventBus.game_saved.connect(_on_game_saved)
 	_fade.modulate.a = 0.0
 	_message.text = ""
@@ -33,32 +42,59 @@ func _ready() -> void:
 
 
 func _refresh() -> void:
-	var tool := GameState.selected_tool()
-	var tool_name := tool.display_name if tool != null else "—"
-	_label.text = "Day %d   ·   %s   ·   Energy %d / %d" % [
-		GameState.day, tool_name, roundi(GameState.energy), roundi(GameState.max_energy)
+	var theme := GameState.current_season_theme()
+	var season_name := theme.display_name if theme != null else "Season %d" % (GameState.season + 1)
+	var text := "%s · Day %d    %dg    Energy %d / %d" % [
+		season_name, GameState.day, GameState.gold,
+		roundi(GameState.energy), roundi(GameState.max_energy),
 	]
+	var in_bin := Economy.bin_value()
+	if in_bin > 0:
+		text += "    In the bin: %dg" % in_bin
+	_label.text = text
 
 
 ## Night falls instantly; morning fades in. Snapping to black and easing back
 ## reads as "time passed" without making the player wait twice.
-func _on_day_started(day: int, _season: int, _year: int) -> void:
+func _on_day_started(_day: int, _season: int, _year: int) -> void:
+	_morning_sales = _overnight_sales
+	_overnight_sales = 0
 	_refresh()
 	_fade.modulate.a = 1.0
 	create_tween().tween_property(_fade, ^"modulate:a", 0.0, FADE_SECONDS)
-	_show_message("Day %d" % day)
+	_show_message(_morning_text())
 
 
 ## The save lands just after the morning message, so it extends it rather
 ## than replacing it.
 func _on_game_saved() -> void:
-	_show_message("Day %d   ·   Saved" % GameState.day)
+	_show_message(_morning_text() + "    Saved")
+
+
+func _morning_text() -> String:
+	var text := "Day %d" % GameState.day
+	if _morning_sales > 0:
+		text += "    The bin sold for %dg" % _morning_sales
+	return text
 
 
 func _on_crop_harvested(_cell: Vector2i, crop_id: StringName, amount: int) -> void:
-	# Until ContentDB exists there's no lookup from id to display name, so
-	# the id is shown as-is. Stage 4 replaces this with the crop's name.
-	_show_message("Harvested %d %s" % [amount, String(crop_id).capitalize()])
+	var crop := ContentDB.crop(crop_id)
+	var item_name := crop.produce.display_name if crop != null and crop.produce != null else String(crop_id)
+	_show_message("Harvested %d %s" % [amount, item_name])
+
+
+func _on_items_shipped(count: int, value: int) -> void:
+	_refresh()
+	if count == 0:
+		_show_message("Nothing to ship — the bin takes produce")
+	else:
+		_show_message("Shipped %d for %dg — paid overnight" % [count, value])
+
+
+func _on_item_bought(item_id: StringName, amount: int, cost: int) -> void:
+	var item := ContentDB.item(item_id)
+	_show_message("Bought %d %s for %dg" % [amount, item.display_name if item else String(item_id), cost])
 
 
 func _show_message(text: String) -> void:
