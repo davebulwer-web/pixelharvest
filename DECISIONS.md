@@ -711,6 +711,6 @@ code or data changed.
 layout the code relies on is already in the picture. Deriving the room's other tiles from
 one generated plank tile keeps floor, walls and trim matching.
 
-**Cost.** 22 generations including the look test and dead ends. The counter is two copies
+**Cost.** 20 generations including the look test and dead ends. The counter is two copies
 of one 48px picture side by side, so its rounded ends meet in the middle; a single 96px
 counter would need a code change in `interior.gd`.
