@@ -614,7 +614,7 @@ Tiles Pro (10 generations) drew a visible grid on the grass. The terrain tool ga
 texture for the least spend. Editing one tile at a time is what keeps the seasons true to
 the base, which is the point of DECISIONS 005.
 
-**Cost.** About 33 generations including the failed routes. Known weak spots that could
+**Cost.** About 42 generations including tests and the failed routes. Known weak spots that could
 be redone cheaply (1 generation each): the winter path and winter thicket repeat visibly
 over large areas, and the cliff's crack pattern repeats. The bin and sprinklers still have
 no seasonal versions.

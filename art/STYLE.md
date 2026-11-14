@@ -146,6 +146,6 @@ including the thicket in column 8.
 | `sprites/tree.png` (32×48) | pixflux, palette-forced, no background | one leafy oak tree, round full green canopy, short brown trunk, front view | |
 | `sprites/tree_{autumn,winter}.png` | Pixen edit of `tree.png` | autumn leaves orange/red/gold; bare branches with snow | Snapped to palette |
 
-About 33 generations including dead ends (a one-strip pixflux tileset came out flat;
+About 42 generations including tests and dead ends (a one-strip pixflux tileset came out flat;
 Tiles Pro showed a grid on grass). Tiles Pro images are on a host the cloud proxy blocks;
 fetch them as a zip from `api.pixellab.ai/mcp/tiles-pro/<id>/download`.
