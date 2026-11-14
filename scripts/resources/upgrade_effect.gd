@@ -20,6 +20,13 @@ extends Resource
 ##
 
 
+## Which kind of upgrade this is, so a shop can sell just its own kind: the
+## blacksmith sells &"tools", the general store &"energy" and &"land"
+## (ShopDef.upgrade_categories). A new kind of effect names a new category.
+func category() -> StringName:
+	return &""
+
+
 ## The tier this upgrade gives the tool with `tool_id`, or 0 if it's not
 ## about that tool.
 func tool_tier(_tool_id: StringName) -> int:

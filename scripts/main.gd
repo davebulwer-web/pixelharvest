@@ -13,32 +13,26 @@ extends Node2D
 ##
 ##   Farm
 ##   ├── Ground     (TileMapLayer, z_index -1, NOT y-sorted — always underfoot)
-##   ├── SpawnPoints (Marker2Ds where LocationManager can put an arriving player)
+##   ├── SpawnPoints (Marker2Ds where LocationManager can put an arriving player:
+##   │               "default", and "from_town" just inside the gate)
 ##   ├── TileCursor (outline on the tile the player is facing; drawn under entities)
 ##   ├── Entities   (y-sorted — player, trees and crops sort against each other
 ##   │               by their node origin, which for all of them sits at their base)
 ##   ├── Weather    (holds the season's overlay, e.g. winter: a cold tint on the
 ##   │               world, and snow falling on a CanvasLayer over it, under the HUD)
-##   └── Hud        (CanvasLayer, layer 2 — fixed to the screen, not the world)
+##   └── Hud        (scenes/hud.tscn, shared with the town — CanvasLayer 2, fixed to
+##                   the screen, not the world)
+##
+## The way to the town is the gap at the west end of the path (FarmLayout.TOWN_GATE):
+## an ExitZone is added there, and walking into it goes to the town.
 ##
 
 const TILE_PX := 16
-const SOURCE_ID := 0
+const SOURCE_ID := GroundTiles.SOURCE_ID
 
-# Atlas coordinates into the season's ground tileset (assets/tilesets/ground_<season>.png)
-const TILE_GRASS := Vector2i(0, 0)
-const TILE_GRASS_ALT := Vector2i(1, 0)
-const TILE_PATH := Vector2i(2, 0)
-const TILE_TILLED := Vector2i(3, 0)
-const TILE_TILLED_WET := Vector2i(4, 0)
-const TILE_WATER := Vector2i(5, 0)
-const TILE_CLIFF := Vector2i(7, 0)
-const TILE_THICKET := Vector2i(8, 0)
-
-## Roughly how much of the grass uses the variant tile. Purely cosmetic, which
-## is why it's here and not in FarmData: which grass tile a cell shows is a
-## drawing decision, not a fact about the farm.
-const GRASS_VARIATION := 0.18
+## Where the town is, and which spawn point in the town the farm gate leads to.
+const TOWN_ID := &"town"
+const TOWN_ARRIVAL := &"from_farm"
 
 
 @onready var _ground: TileMapLayer = $Ground
@@ -58,6 +52,7 @@ var _object_nodes: Dictionary = {}
 
 func _ready() -> void:
 	_place_player()
+	_add_town_gate()
 	_apply_season_theme()
 	_draw_all()
 	_place_objects()
@@ -88,11 +83,12 @@ func _ready() -> void:
 		_apply_season_overlay()
 	)
 
-	print("--- Pixel Harvest · Stage 6 ---")
+	print("--- Pixel Harvest · Stage 7 ---")
 	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
 	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
 	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler.")
-	print("B opens the shop: seeds, sprinklers, and upgrades (tools, energy, fields).")
+	print("Walk out of the gate at the west end of the path to reach the town: seeds,")
+	print("supplies and upgrades are bought from the shopkeepers there. E talks to them.")
 	print("Enter sleeps; the bin sells overnight and sprinklers water at dawn.")
 	print("Seasons last %d days. Seeds only go in during their own seasons, and crops"
 			% GameState.RULES.days_per_season)
@@ -107,8 +103,15 @@ func _process(_delta: float) -> void:
 	_cursor.set_cells(_player.target_cells())
 
 
+## The way out to the town: the gate cells at the west end of the path.
+func _add_town_gate() -> void:
+	var top_left: Vector2i = FarmLayout.TOWN_GATE[0]
+	var rect := Rect2(top_left * TILE_PX, Vector2(TILE_PX, TILE_PX * FarmLayout.TOWN_GATE.size()))
+	add_child(ExitZone.create(rect, TOWN_ID, TOWN_ARRIVAL))
+
+
 ## Put the player at the spawn point LocationManager asked for, if any.
-## Arriving from the town (Stage 7) will name the farm gate, for example.
+## Arriving from the town names "from_town", just inside the gate.
 func _place_player() -> void:
 	var point := LocationManager.take_arrival_point()
 	if point == &"":
@@ -124,9 +127,7 @@ func _place_player() -> void:
 ## atlas layout (see season_theme.gd), so the redraw that follows puts every
 ## tile back in the right place with the new season's pixels.
 func _apply_season_theme() -> void:
-	var theme := GameState.current_season_theme()
-	if theme != null and theme.ground_tileset != null:
-		_ground.tile_set = theme.ground_tileset
+	SeasonLook.apply_ground(_ground)
 
 
 func _draw_all() -> void:
@@ -175,21 +176,17 @@ func _redraw_cell(cell: Vector2i) -> void:
 func _atlas_for(cell: Vector2i) -> Vector2i:
 	var t: FarmTile = GameState.farm.tile(cell)
 	if t.tilled:
-		return TILE_TILLED_WET if t.watered else TILE_TILLED
+		return GroundTiles.TILLED_WET if t.watered else GroundTiles.TILLED
 	match t.terrain:
 		FarmTile.Terrain.CLIFF:
-			return TILE_CLIFF
+			return GroundTiles.CLIFF
 		FarmTile.Terrain.WATER:
-			return TILE_WATER
+			return GroundTiles.WATER
 		FarmTile.Terrain.PATH:
-			return TILE_PATH
+			return GroundTiles.PATH
 		FarmTile.Terrain.THICKET:
-			return TILE_THICKET
-	# hash() gives the same answer for the same cell every run, so the grass
-	# pattern is stable without storing anything.
-	if float(hash(cell) % 1000) / 1000.0 < GRASS_VARIATION:
-		return TILE_GRASS_ALT
-	return TILE_GRASS
+			return GroundTiles.THICKET
+	return GroundTiles.grass_for(cell)
 
 
 ## Where a cell's bottom edge sits — the anchor for anything standing on it.
@@ -239,24 +236,11 @@ func _reskin_objects() -> void:
 
 
 ## Show `node` with the current season's picture for `object_id`, if the
-## season has one, or else the picture its scene was built with — which is
-## remembered on the sprite the first time, so winter's snowy tree can turn
-## back into spring's green one.
+## season has one (SeasonLook).
 func _skin_object(node: Node, object_id: StringName) -> void:
-	var sprite := node.get_node_or_null(^"Sprite") as Sprite2D
-	if sprite == null:
-		return
-	if not sprite.has_meta(&"base_texture"):
-		sprite.set_meta(&"base_texture", sprite.texture)
-	var theme := GameState.current_season_theme()
-	var seasonal: Texture2D = theme.object_sprites.get(object_id) if theme != null else null
-	sprite.texture = seasonal if seasonal != null else sprite.get_meta(&"base_texture")
+	SeasonLook.skin_object(node, object_id)
 
 
 ## Replace the screen overlay (winter's snow) with this season's, or none.
 func _apply_season_overlay() -> void:
-	for child in _weather.get_children():
-		child.queue_free()
-	var theme := GameState.current_season_theme()
-	if theme != null and theme.overlay != null:
-		_weather.add_child(theme.overlay.instantiate())
+	SeasonLook.apply_overlay(_weather)

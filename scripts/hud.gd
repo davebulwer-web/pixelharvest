@@ -42,6 +42,8 @@ func _ready() -> void:
 	EventBus.crop_died.connect(func(_cell: Vector2i, _id: StringName) -> void: _overnight_deaths += 1)
 	EventBus.season_changed.connect(func(_s: int) -> void: _overnight_new_season = true)
 	EventBus.item_bought.connect(_on_item_bought)
+	EventBus.items_sold_to_shop.connect(_on_items_sold_to_shop)
+	EventBus.message_posted.connect(_show_message)
 	EventBus.upgrade_bought.connect(_on_upgrade_bought)
 	EventBus.object_placed.connect(_on_object_placed)
 	EventBus.object_removed.connect(_on_object_removed)
@@ -120,6 +122,11 @@ func _on_items_shipped(count: int, value: int) -> void:
 func _on_item_bought(item_id: StringName, amount: int, cost: int) -> void:
 	var item := ContentDB.item(item_id)
 	_show_message("Bought %d %s for %dg" % [amount, item.display_name if item else String(item_id), cost])
+
+
+func _on_items_sold_to_shop(item_id: StringName, amount: int, gold: int) -> void:
+	var item := ContentDB.item(item_id)
+	_show_message("Sold %d %s for %dg" % [amount, item.display_name if item else String(item_id), gold])
 
 
 func _on_upgrade_bought(upgrade_id: StringName, cost: int) -> void:

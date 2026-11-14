@@ -10,6 +10,10 @@ extends UpgradeEffect
 @export var tier: int = 1
 
 
+func category() -> StringName:
+	return &"tools"
+
+
 func tool_tier(tool_id: StringName) -> int:
 	return tier if tool != null and tool.id == tool_id else 0
 

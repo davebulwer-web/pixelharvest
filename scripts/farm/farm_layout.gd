@@ -20,6 +20,12 @@ const POND := Rect2i(21, 3, 5, 4)
 const PATH_ROW := 12
 const PATH_LENGTH := 14
 
+## The gap in the cliffs at the west end of the path, the way out to the town
+## (Stage 7): two cells tall so the player needn't line up exactly. It's part
+## of the farm's map, so it's saved with it: saves from before Stage 7 have it
+## opened by the version 6 upgrade (save_system.gd).
+const TOWN_GATE: Array[Vector2i] = [Vector2i(-1, PATH_ROW), Vector2i(-1, PATH_ROW + 1)]
+
 ## The end of the path, right beside where the player wakes up. A path cell
 ## can never be tilled, so the bin can't end up sitting on a crop.
 const SHIPPING_BIN := Vector2i(13, 12)
@@ -61,6 +67,8 @@ static func _overgrow_fields(farm: FarmData) -> void:
 
 
 static func _terrain_for(cell: Vector2i) -> FarmTile.Terrain:
+	if cell in TOWN_GATE:
+		return FarmTile.Terrain.PATH
 	var outside := (
 		cell.x < 0 or cell.y < 0
 		or cell.x >= FARM_SIZE.x or cell.y >= FARM_SIZE.y

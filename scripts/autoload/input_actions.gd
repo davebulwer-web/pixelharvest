@@ -28,7 +28,6 @@ const ACTIONS: Dictionary = {
 	&"prev_tool": [KEY_Q],
 	&"sleep": [KEY_ENTER],
 	&"new_game": [KEY_N | KEY_MASK_CTRL],
-	&"open_shop": [KEY_B],
 	# Godot's built-in menu actions already have the arrow keys; adding WASD
 	# lets the shop menu be driven from the same hand as walking.
 	&"ui_up": [KEY_W],

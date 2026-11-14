@@ -618,3 +618,68 @@ the base, which is the point of DECISIONS 005.
 be redone cheaply (1 generation each): the winter path and winter thicket repeat visibly
 over large areas, and the cliff's crack pattern repeats. The bin and sprinklers still have
 no seasonal versions.
+
+---
+
+## 027 — The town: shops are rooms with data, doors are walk-in zones, the shopkeeper opens the menu
+
+**Decision.** Stage 7 session 1 adds the town and three shops. The pieces:
+
+- *Locations again, not a new system.* The town, and each shop interior, is a `LocationDef`
+  (DECISIONS 021). `LocationManager` changed only by two lookups (`current()`, `all()`).
+  A shop's `LocationDef` also says where its door is on the town map (`outside`,
+  `door_cell`) and carries its front picture (`exterior`), and points at a `ShopDef`.
+  `town.gd` builds a `Building` for every location whose door is on the town, so **a new
+  shop is data**: a `ShopDef`, a `LocationDef`, two pictures, and a line in
+  `game_rules.tres`. No code names a shop.
+- *One interior scene for every shop* (`interior.tscn`, `interior.gd`). The room is the
+  same; the `ShopDef` supplies the shopkeeper, their greetings and what the menu offers.
+  Chosen over a scene per shop because there is nothing yet that differs but the keeper
+  and the stock, and three copies of a room would drift apart.
+- *What a shop sells is a filter over everything, not a list.* `ShopDef` has switches
+  (`sells_seeds`, `sells_supplies`, `upgrade_categories`, `buys_produce`), and
+  `Economy.shop_stock()` / `upgrades_on_offer(shop)` apply them to `ContentDB`. So a new
+  crop's seeds appear at the seed shop with nothing edited (rule 3). Each `UpgradeEffect`
+  names its own `category()` (tools / energy / land). `ContentDB` warns about any
+  upgrade no shop sells.
+  - Seed shop: seeds. Blacksmith: sprinklers and tool upgrades. General store: energy and
+    field upgrades, and it buys produce.
+- *The general store pays 80% now; the shipping bin pays 100% tomorrow.* The rate is
+  `ShopDef.produce_pay_rate`, and prices still pass through `Economy` (`store_price`,
+  `sell_to_shop`), so market days can adjust them in one place. The gap is what keeps the
+  bin worth using. It's a first guess; Dave's play decides.
+- *Doors are walk-in `ExitZone`s* (an `Area2D`), not an E-key action: walk into the doorway,
+  arrive inside. The farm gate, shop doors, and the doormats are all the same class. Shop
+  doorways are 32px wide and the gates two tiles tall, because a one-tile gap with a 12px
+  player demands pixel-perfect aim; the first test run showed exactly that.
+- *Talking is `E` at the counter, via `EventBus.npc_talked_to`.* `Npc` (an `interactable`
+  like the shipping bin) only announces the id. The interior listens for its own keeper
+  and runs the dialogue box, then the shop menu. Stage 8's quest characters can listen to
+  the same signal. The keeper can't be reached, so facing any counter cell counts.
+- *The B shop key is gone.* The menu now opens only at a shop counter (`ShopMenu.open(shop)`),
+  as DECISIONS 023 said it would. The `open_shop` action was removed.
+- *Away from the farm, farming is off.* `Player.can_farm` is switched off by the town and
+  the interiors. Otherwise Space would hoe the farm's tiles at the same coordinates, E
+  would harvest invisible crops, and Enter would end the day with the player standing in
+  town. Enter in town says to walk home. A save is therefore only ever written on the farm.
+- *The farm gets a gate: save version 6.* The cliff at the west end of the path becomes
+  two path tiles (`FarmLayout.TOWN_GATE`). The map is saved, so old farms need the same
+  change: the 5 → 6 step opens those two cells (frozen in the step, like earlier ones).
+  `tests/saves/v5_example.json` is a real version 5 save from the Stage 6 build.
+- *Shared pieces pulled out so the town didn't copy the farm:* `scenes/hud.tscn` (the
+  HUD, now instanced by farm, town and interior), `SeasonLook` (season ground, object
+  skins and overlay), `GroundTiles` (atlas coordinates). The town uses the farm's
+  seasonal tilesets and the same winter snow.
+- *The town has no state.* No `FarmData`: its map is a function (`TownLayout`), so there
+  is nothing in it to save.
+
+**Why.** The Stage 2 seam was built for this and held: the town needed no change to saving,
+the calendar or the farm's logic beyond the gate. Keeping the shops as data is rule 3 applied
+to places, and is what will let Stage 8's market and quest characters appear without code.
+
+**Cost.** Interiors are identical apart from keeper and stock. There is no day or night in
+town, no opening hours, and no way to see the bin's value there. Walking to the shops
+costs nothing (no clock to spend), so the town is a convenience tax of a minute, not a
+decision, until Stage 8 gives it reasons to be visited on particular days. All town art
+is placeholder (list in STAGES.md).
+

@@ -4,6 +4,10 @@ extends CharacterBody2D
 ## Player — movement, four-direction animation, and the player's actions:
 ## using the held tool, interacting (harvest, shipping bin), and going to sleep.
 ##
+## Away from the farm (the town, a shop) `can_farm` is switched off by the
+## scene: tools, harvesting and sleeping are about the farm's tiles, which
+## aren't there.
+##
 ## The node origin sits at the character's FEET, not the centre of the sprite.
 ## The AnimatedSprite2D is offset upward to achieve that. This matters for two
 ## reasons: Y-sorting compares node positions, so the feet are the correct
@@ -38,6 +42,9 @@ const FACING_VECTORS: Dictionary = {
 ## Last direction faced, so idle animation keeps facing the right way.
 var _facing: StringName = &"down"
 
+## True on the farm. The town and the shops switch it off (see above).
+var can_farm: bool = true
+
 
 func _physics_process(_delta: float) -> void:
 	var direction := Input.get_vector(
@@ -52,13 +59,17 @@ func _physics_process(_delta: float) -> void:
 ## _physics_process, so one key press is exactly one action.
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"use_tool"):
-		_use_tool()
+		if can_farm:
+			_use_tool()
 	elif event.is_action_pressed(&"interact"):
 		_interact()
 	elif event.is_action_pressed(&"sleep"):
 		# No bed yet: sleep is a key press anywhere on the farm. When the
 		# farmhouse exists this moves to interacting with the bed.
-		TimeSystem.end_day()
+		if can_farm:
+			TimeSystem.end_day()
+		else:
+			EventBus.message_posted.emit("You sleep at the farm. Walk home first")
 	elif event.is_action_pressed(&"next_tool"):
 		GameState.cycle_tool(1)
 	elif event.is_action_pressed(&"prev_tool"):
@@ -116,14 +127,13 @@ func _use_tool() -> void:
 
 
 ## E: harvest a ready crop by hand, or use whatever stands on the tile ahead
-## (the shipping bin, or a sprinkler to pick it up; doors and people in
-## Stage 7). Harvesting is free — the work was in growing it.
+## (the shipping bin, a sprinkler to pick it up, a shopkeeper to talk to). Harvesting is free — the work was in growing it.
 ##
 ## Anything usable joins the "interactable" group and offers occupies(cell)
 ## and interact(), so this never grows a list of things it knows about.
 func _interact() -> void:
 	var cell := target_cell()
-	if GameState.harvest(cell):
+	if can_farm and GameState.harvest(cell):
 		return
 	for node in get_tree().get_nodes_in_group(&"interactable"):
 		if node.occupies(cell):

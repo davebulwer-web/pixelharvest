@@ -2,10 +2,11 @@ extends Node
 ##
 ## LocationManager — moves the player between places (DECISIONS 004).
 ##
-## Only the farm exists until Stage 7, so this does little yet. It's here now
-## because the hard part of locations isn't the town, it's making sure nothing
-## important lives in a scene that gets thrown away on the way out. Building
-## the seam early forces that discipline on everything from Stage 2 onward.
+## The farm, the town and every shop are locations. The seam was built in
+## Stage 2, well before the town, because the hard part of locations isn't the
+## town, it's making sure nothing important lives in a scene that gets thrown
+## away on the way out. It paid off: Stage 7 changed nothing here but two
+## small lookups.
 ##
 ## How a trip works:
 ##   1. Something calls go_to(&"town", &"from_farm").
@@ -39,6 +40,21 @@ func go_to(location_id: StringName, arrival_point: StringName = &"") -> void:
 		push_error("Could not open '%s' for location '%s'" % [location.scene_path, location_id])
 		return
 	EventBus.location_changed.emit(location_id)
+
+
+## The location the player is in now, or null if GameState names one that
+## game_rules.tres doesn't list.
+func current() -> LocationDef:
+	return _locations.get(GameState.location)
+
+
+## Every location, in game_rules.tres order. The town uses it to find the
+## buildings whose doors it should show.
+func all() -> Array[LocationDef]:
+	var result: Array[LocationDef] = []
+	for location: LocationDef in _locations.values():
+		result.append(location)
+	return result
 
 
 ## Called once by a location scene as it opens. Returns the arrival point and

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ShopDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/shop_def.gd" id="1_shop"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/keeper_general.png" id="2_keeper"]
+
+[resource]
+script = ExtResource("1_shop")
+id = &"general_store"
+display_name = "Marlow's General Store"
+keeper_name = "Marlow"
+keeper_sprite = ExtResource("2_keeper")
+greetings = Array[String](["Welcome in! I'll buy your produce, and sell you a bit of land or a hearty breakfast.", "Bring me fresh vegetables and I'll pay you now. The shipping bin pays more, but it pays tomorrow.", "Looking to farm a bigger patch? Ask me about the fields."])
+upgrade_categories = Array[StringName]([&"energy", &"land"])
+buys_produce = true
+produce_pay_rate = 0.8

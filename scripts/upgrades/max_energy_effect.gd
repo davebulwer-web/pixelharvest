@@ -8,5 +8,9 @@ extends UpgradeEffect
 @export var amount: float = 20.0
 
 
+func category() -> StringName:
+	return &"energy"
+
+
 func max_energy_bonus() -> float:
 	return amount

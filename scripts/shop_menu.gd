@@ -1,36 +1,38 @@
 extends CanvasLayer
 ##
-## ShopMenu — the shop, opened with B anywhere on the farm.
+## ShopMenu — what a shopkeeper's counter offers, opened by talking to them.
 ##
-## Two columns: on the left, things to carry (seeds, sprinklers) — whatever
-## ContentDB says has a buy_price; on the right, upgrades — whatever Economy
-## says is on offer right now, one step of each line at a time (the great hoe
-## appears once the wide hoe is bought). Stocking either is a data change.
-## Buying goes through Economy; this file only draws the lists and passes on
-## clicks and key presses.
+## Which shop it is decides everything (ShopDef). Two columns, each shown only
+## if the shop has anything for it: on the left, things to buy — seeds and
+## supplies, then whichever upgrades this shop sells, one step of each line at a
+## time (the great hoe appears once the wide hoe is bought); on the right, produce
+## in the bag that the shop will buy for gold now. Stocking a shop is a data
+## change. Buying and selling go through Economy; this file only draws the lists
+## and passes on clicks and key presses.
 ##
-## A stopgap until the town (Stage 7), where the seed shop and the blacksmith
-## will open these same lists.
+## While it's open the game is paused, so energy can't run out mid-purchase.
+## This node keeps running while paused (process_mode ALWAYS in the scene).
 ##
-## While it's open the game is paused, so the player can't walk off or swing a
-## hoe, and energy can't run out mid-purchase. This node keeps running while
-## paused (process_mode ALWAYS, set in main.tscn).
-##
-## Keys: WASD or arrows to choose, Space or Enter to buy one, B or Esc to
-## close. The mouse works too.
+## Keys: WASD or arrows to choose, Space or Enter to buy or sell, Esc to leave.
+## The mouse works too. Before Stage 7 this menu opened with B anywhere on the
+## farm; now the shopkeeper opens it (DECISIONS 027).
 ##
 
 const PANEL_WIDTH := 520
 const COLUMN_WIDTH := 250
 
+var _shop: ShopDef
+var _title: Label
+var _buy_box: VBoxContainer
+var _sell_box: VBoxContainer
 var _goods: VBoxContainer
-var _upgrades: VBoxContainer
+var _sells: VBoxContainer
 var _gold_label: Label
 var _detail: Label
 var _note: Label
 
-## Each button -> what it buys (an ItemDef or an UpgradeDef), so focus can be
-## put back on the same thing after the lists are rebuilt.
+## Each button -> what it buys or sells (an ItemDef or an UpgradeDef), so focus
+## can be put back on the same thing after the lists are rebuilt.
 var _buttons: Dictionary = {}
 
 
@@ -40,18 +42,15 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible:
-		# Only open from normal play — not over another pause.
-		if event.is_action_pressed(&"open_shop") and not get_tree().paused:
-			open()
-			get_viewport().set_input_as_handled()
-		return
-	if event.is_action_pressed(&"open_shop") or event.is_action_pressed(&"ui_cancel"):
+	if visible and event.is_action_pressed(&"ui_cancel"):
 		close()
 		get_viewport().set_input_as_handled()
 
 
-func open() -> void:
+## Open the counter of `shop`. Pauses the game until it's closed.
+func open(shop: ShopDef) -> void:
+	_shop = shop
+	_title.text = shop.display_name
 	visible = true
 	get_tree().paused = true
 	_fill(null)
@@ -80,6 +79,13 @@ func _buy_upgrade(upgrade: UpgradeDef) -> void:
 		_show_note("Not enough gold for %s" % upgrade.display_name, UiStyle.WARNING)
 
 
+func _sell_item(item: ItemDef) -> void:
+	var gold := Economy.sell_to_shop(item, _shop)
+	if gold > 0:
+		_fill(item)
+		_show_note("Sold for %dg" % gold, UiStyle.GOLD)
+
+
 # --- Building the panel ------------------------------------------------------
 
 func _build() -> void:
@@ -104,11 +110,10 @@ func _build() -> void:
 
 	var header := HBoxContainer.new()
 	column.add_child(header)
-	var title := Label.new()
-	title.text = "Shop"
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	UiStyle.style_label(title, 12)
-	header.add_child(title)
+	_title = Label.new()
+	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	UiStyle.style_label(_title, 12)
+	header.add_child(_title)
 	_gold_label = Label.new()
 	UiStyle.style_label(_gold_label, 12, UiStyle.GOLD)
 	header.add_child(_gold_label)
@@ -116,8 +121,10 @@ func _build() -> void:
 	var lists := HBoxContainer.new()
 	lists.add_theme_constant_override(&"separation", 12)
 	column.add_child(lists)
-	_goods = _add_list(lists, "Seeds and supplies")
-	_upgrades = _add_list(lists, "Upgrades")
+	_goods = _add_list(lists, "For sale")
+	_buy_box = _goods.get_parent()
+	_sells = _add_list(lists, "Sell your produce (paid now)")
+	_sell_box = _sells.get_parent()
 
 	_detail = Label.new()
 	_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -149,8 +156,9 @@ func _add_list(parent: Container, heading: String) -> VBoxContainer:
 
 ## Rebuild both lists from ContentDB and Economy, so new content and newly
 ## offered upgrades show up without anything here changing. Done on opening
-## and after every purchase (buying an upgrade can bring on its successor).
-## `keep_focus_on` is what was just bought: focus goes back to it, or to
+## and after every purchase or sale (buying an upgrade can bring on its
+## successor; selling the last of something removes its row).
+## `keep_focus_on` is what was just dealt in: focus goes back to it, or to
 ## whatever has taken its place in the list.
 func _fill(keep_focus_on: Resource) -> void:
 	var focus_list: VBoxContainer = _goods
@@ -159,35 +167,58 @@ func _fill(keep_focus_on: Resource) -> void:
 		if _buttons[button] == keep_focus_on:
 			focus_list = button.get_parent()
 			focus_index = button.get_index()
-	for list: VBoxContainer in [_goods, _upgrades]:
+	for list: VBoxContainer in [_goods, _sells]:
 		for child in list.get_children():
 			list.remove_child(child)
 			child.queue_free()
 	_buttons.clear()
 
-	for item in ContentDB.shop_stock():
+	for item in Economy.shop_stock(_shop):
 		var button := _add_button(_goods, item, item.icon, _item_text(item),
 				Economy.buy_price(item), _item_detail(item))
 		button.pressed.connect(_buy_item.bind(item))
-	for upgrade in Economy.upgrades_on_offer():
+	for upgrade in Economy.upgrades_on_offer(_shop):
 		var price := Economy.upgrade_price(upgrade)
-		var button := _add_button(_upgrades, upgrade, upgrade.icon,
+		var button := _add_button(_goods, upgrade, upgrade.icon,
 				"%s   %dg" % [upgrade.display_name, price], price, upgrade.description)
 		button.pressed.connect(_buy_upgrade.bind(upgrade))
-	if _upgrades.get_child_count() == 0:
-		var none := Label.new()
-		none.text = "Nothing more for now"
-		UiStyle.style_label(none, 10, UiStyle.TEXT_DIM)
-		_upgrades.add_child(none)
+	if _goods.get_child_count() == 0:
+		_add_none(_goods, "Nothing for sale right now")
+	_buy_box.visible = true
+
+	_sell_box.visible = _shop.buys_produce
+	if _shop.buys_produce:
+		for item in GameState.inventory.items():
+			if Economy.sell_price(item) <= 0:
+				continue
+			var amount := GameState.inventory.count(item)
+			var button := _add_button(_sells, item, item.icon,
+					"%s x%d   %dg each" % [item.display_name, amount, Economy.store_price(item, _shop)],
+					0, "Sell all %d for %dg. The shipping bin on the farm pays full price, but only overnight."
+					% [amount, Economy.store_price(item, _shop) * amount])
+			button.pressed.connect(_sell_item.bind(item))
+		if _sells.get_child_count() == 0:
+			_add_none(_sells, "No produce to sell")
 
 	_gold_label.text = "%dg" % GameState.gold
-	_show_note("Space / Enter: buy     B / Esc: close", UiStyle.TEXT_DIM)
+	_show_detail("")
+	_show_note("Space / Enter: %s     Esc: leave" % ("buy or sell" if _shop.buys_produce else "buy"),
+			UiStyle.TEXT_DIM)
 
 	var target := _button_at(focus_list, focus_index)
 	if target == null:
 		target = _button_at(_goods, 0)
+	if target == null:
+		target = _button_at(_sells, 0)
 	if target != null:
 		target.grab_focus()
+
+
+func _add_none(list: VBoxContainer, text: String) -> void:
+	var none := Label.new()
+	none.text = text
+	UiStyle.style_label(none, 10, UiStyle.TEXT_DIM)
+	list.add_child(none)
 
 
 func _button_at(list: VBoxContainer, index: int) -> Button:

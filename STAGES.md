@@ -205,10 +205,33 @@ Session 2 (2026-11-14) — real art, from the cloud environment that reaches Pix
 
 ## Stage 7 — The town · 2–3 sessions · Sonnet 5.5
 
-- [ ] Town scene and transitions via `LocationManager`
-- [ ] Building exteriors and one or two interiors
-- [ ] Seed shop, general store, blacksmith
-- [ ] Shopkeeper sprites and simple dialogue
+Session 1 (2026-11-14) — the town, three shops, doors and shopkeepers on placeholder art. See DECISIONS 027.
+
+- [x] Town scene and transitions via `LocationManager`: a gate at the west end of the farm
+      path, the town's east road leads back; walk-in `ExitZone` doors
+- [x] Building exteriors and a shared shop interior (one scene, the `ShopDef` decides whose)
+- [x] Seed shop, general store (also buys produce, 80%), blacksmith (sprinklers, tool upgrades)
+- [x] Shopkeeper sprites and simple dialogue (a greeting a day, then the menu)
+- [x] Shops are data: `ShopDef` + `LocationDef`; what a shop sells is a filter over `ContentDB`
+- [x] B shop key removed; farming, harvesting and sleeping switched off away from the farm
+- [x] Save version 6 (the farm gate); `tests/saves/v5_example.json`
+- [x] Verified headless (46 checks: gate both ways, every shop door in and out, arrival
+      points, dialogue then menu, buying, selling, shop stock and upgrade categories, no
+      farming or sleeping in town, sleeping on the farm still works, a version 5 save
+      upgraded and walked through the gate) and in a rendered recording of the whole trip
+- [ ] Dave confirms it plays correctly on Windows
+
+**Left over (placeholder art, a Pixellab job from the cloud environment):**
+- Shop fronts ×3 (`assets/sprites/town/seed_shop.png`, `general_store.png`, `blacksmith.png`,
+  80×64, doorway 32px wide centred on the bottom row)
+- Shopkeepers ×3 (`keeper_*.png`, 56×56, recoloured farmer)
+- Interior tileset (`assets/tilesets/interior.png`: floor, floor variant, wall face, wall
+  top, rug), counter (48×24) and shelf (32×28)
+- Not seasonal: the shop fronts and interiors have no winter version; the town's ground and
+  trees use the farm's seasonal art.
+
+**Not done / for later sessions:** more characters (a mayor, a notice board), town
+decoration and a designed map, a farmhouse and bed on the farm, shop opening hours.
 
 ## Stage 8 — Events and quests · 2–3 sessions · Sonnet, Haiku for bulk
 

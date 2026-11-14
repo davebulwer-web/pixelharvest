@@ -102,6 +102,7 @@ icon.svg
 scenes/              .tscn scene files
 scripts/             Game code
   autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem…)
+  town/              The town, shop interiors, shop fronts, shopkeepers (Stage 7)
   items/             Inventory
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects)
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
@@ -112,8 +113,10 @@ data/                Content resources (.tres), indexed by ContentDB
   objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers)
   upgrades/          UpgradeDef — bought once: tool tiers, energy, fields
   seasons/           SeasonTheme — each season's name and look (crops list their own seasons)
+  locations/         LocationDef — the farm, the town, each shop interior (and where its door is)
+  shops/             ShopDef — a shopkeeper, their words, and what the counter offers
 tests/saves/         Old-version save files, for proving save upgrades still work
-assets/sprites/      Character and object art from Pixellab
+assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers)
 assets/tilesets/     Ground and world tilesets
 art/                 Art specification and generation log (not shipped art)
 ```

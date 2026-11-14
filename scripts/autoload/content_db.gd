@@ -195,8 +195,41 @@ func _check() -> void:
 		if each.item != null and item(each.item.id) != each.item:
 			push_error("ContentDB: '%s' gives back an item that isn't in data/tools/" % where)
 
+	# Every kind of upgrade should be sold somewhere, or it can never be bought.
+	var sold_categories: Array[StringName] = []
+	var shop_ids: Array[StringName] = []
+	for location in RULES.locations:
+		if location == null or location.id == &"":
+			push_error("ContentDB: game_rules.tres lists a location with no id")
+		elif location.scene_path == "" or not ResourceLoader.exists(location.scene_path):
+			push_error("ContentDB: location '%s' has no scene at '%s'" % [location.id, location.scene_path])
+		if location.outside != &"":
+			if location.exterior == null:
+				push_error("ContentDB: '%s' has a door on '%s' but no exterior picture"
+						% [location.id, location.outside])
+			if not RULES.locations.any(func(l: LocationDef) -> bool: return l.id == location.outside):
+				push_error("ContentDB: '%s' has its door on '%s', which isn't a location"
+						% [location.id, location.outside])
+		if location.shop != null:
+			var shop := location.shop
+			if shop.id != location.id:
+				push_error("ContentDB: shop '%s' sits in location '%s'; the ids must match, because the keeper is found by shop id"
+						% [shop.id, location.id])
+			if shop.id in shop_ids:
+				push_error("ContentDB: two shops use the id '%s'" % shop.id)
+			shop_ids.append(shop.id)
+			if shop.keeper_sprite == null:
+				push_warning("ContentDB: shop '%s' has no keeper_sprite, so the counter is empty" % shop.id)
+			if shop.greetings.is_empty():
+				push_warning("ContentDB: shop '%s' has no greetings; the menu will open without a word" % shop.id)
+			for category in shop.upgrade_categories:
+				sold_categories.append(category)
+
 	for each: UpgradeDef in _upgrades.values():
 		var where := each.resource_path
+		if each.effect != null and each.effect.category() not in sold_categories:
+			push_warning("ContentDB: '%s' is a '%s' upgrade, which no shop sells"
+					% [where, each.effect.category()])
 		if each.effect == null:
 			push_error("ContentDB: '%s' has no effect, so buying it does nothing" % where)
 		elif each.effect is ToolTierEffect:

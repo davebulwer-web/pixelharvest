@@ -14,6 +14,10 @@ extends UpgradeEffect
 @export var area: Rect2i
 
 
+func category() -> StringName:
+	return &"land"
+
+
 func locked_area() -> Rect2i:
 	return area
 

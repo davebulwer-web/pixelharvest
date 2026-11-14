@@ -1,6 +1,6 @@
 extends Node
 ##
-## Economy — buying and selling: the shop, upgrades and the shipping bin.
+## Economy — buying and selling: the shops, upgrades and the shipping bin.
 ##
 ## GameState holds the gold and the items; this file holds the rules for
 ## turning one into the other. Every price in the game is read through
@@ -37,11 +37,24 @@ func upgrade_price(upgrade: UpgradeDef) -> int:
 	return upgrade.price
 
 
-## The upgrades the shop offers right now, cheapest first: not yet owned,
-## whatever they require already owned, and they'd actually do something.
-## So the great hoe appears only once the wide hoe is bought, and each
-## upgrade line shows one step at a time.
-func upgrades_on_offer() -> Array[UpgradeDef]:
+## What `shop` has on its shelves: seed packets and supplies, per its switches
+## (ShopDef), cheapest first. Decided from ContentDB's whole stock, so new
+## crops and tools appear in the right shop with no file here edited.
+func shop_stock(shop: ShopDef) -> Array[ItemDef]:
+	var stock: Array[ItemDef] = []
+	for item in ContentDB.shop_stock():
+		var is_seed := item is ToolDef and item.action is PlantAction
+		if (is_seed and shop.sells_seeds) or (not is_seed and shop.sells_supplies):
+			stock.append(item)
+	return stock
+
+
+## The upgrades on offer right now, cheapest first: not yet owned, whatever
+## they require already owned, and they'd actually do something. So the great
+## hoe appears only once the wide hoe is bought, and each upgrade line shows
+## one step at a time. With a `shop`, only the kinds that shop sells; with
+## none (tests, tools), every kind.
+func upgrades_on_offer(shop: ShopDef = null) -> Array[UpgradeDef]:
 	var offer: Array[UpgradeDef] = []
 	for upgrade in ContentDB.upgrades():
 		if GameState.has_upgrade(upgrade):
@@ -50,12 +63,15 @@ func upgrades_on_offer() -> Array[UpgradeDef]:
 			continue
 		if upgrade.effect == null or not upgrade.effect.is_useful():
 			continue
+		if shop != null and upgrade.effect.category() not in shop.upgrade_categories:
+			continue
 		offer.append(upgrade)
 	return offer
 
 
 ## Buy an upgrade. Returns false, changing nothing, if it isn't on offer or
-## the player can't afford it.
+## the player can't afford it. (Which shop sells it is the menu's business:
+## it only ever lists what its own shop offers.)
 func buy_upgrade(upgrade: UpgradeDef) -> bool:
 	if not upgrade in upgrades_on_offer():
 		return false
@@ -76,6 +92,27 @@ func buy(item: ItemDef, amount: int = 1) -> bool:
 	GameState.inventory.add(item, amount)
 	EventBus.item_bought.emit(item.id, amount, cost)
 	return true
+
+
+## What `shop` pays for one of `item` across the counter: the usual price
+## times the shop's rate, never less than 1 for something sellable.
+func store_price(item: ItemDef, shop: ShopDef) -> int:
+	if sell_price(item) <= 0:
+		return 0
+	return maxi(1, roundi(sell_price(item) * shop.produce_pay_rate))
+
+
+## Sell everything the player carries of `item` to `shop`, for gold now.
+## Returns the gold paid, 0 if the shop doesn't buy or there was none.
+func sell_to_shop(item: ItemDef, shop: ShopDef) -> int:
+	var amount := GameState.inventory.count(item)
+	if not shop.buys_produce or amount <= 0 or sell_price(item) <= 0:
+		return 0
+	var gold := store_price(item, shop) * amount
+	GameState.inventory.remove(item, amount)
+	GameState.add_gold(gold)
+	EventBus.items_sold_to_shop.emit(item.id, amount, gold)
+	return gold
 
 
 ## Move everything sellable from the bag into the shipping bin. Returns how

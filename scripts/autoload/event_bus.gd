@@ -65,6 +65,10 @@ signal items_shipped(count: int, value: int)
 ## the night (before day_started), only if anything was in the bin.
 signal shipment_sold(gold: int)
 
+## Produce was sold across a shop counter (not the shipping bin): `amount`
+## of one item for `gold`, paid at once.
+signal items_sold_to_shop(item_id: StringName, amount: int, gold: int)
+
 ## An upgrade was bought from the shop. `cost` is what was paid. Its effect
 ## has already happened by the time this is announced.
 signal upgrade_bought(upgrade_id: StringName, cost: int)
@@ -83,6 +87,14 @@ signal plot_unlocked(plot_id: StringName)
 ## Trees and the bin are part of the farm from the start and don't announce.
 signal object_placed(cell: Vector2i, object_id: StringName)
 signal object_removed(cell: Vector2i, object_id: StringName)
+
+## The player spoke to someone. `npc_id` is the character's id (a shopkeeper's
+## is its shop's id). Whatever should happen next — a conversation, a quest
+## step — listens for this; the player doesn't know who it is talking to.
+signal npc_talked_to(npc_id: StringName)
+
+## Something the player should be told, in the HUD's message line.
+signal message_posted(text: String)
 
 # --- Meta -------------------------------------------------------------------
 

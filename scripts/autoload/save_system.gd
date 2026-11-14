@@ -19,7 +19,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 5, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 6, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -42,7 +42,9 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       because it's worked out from the upgrades.
 ##   5 — `day` means the day of the season (1 to days_per_season), not a
 ##       count of days since the game began.
-const CURRENT_VERSION := 5
+##   6 — the town: the cliff at the west end of the farm's path opens into a
+##       gate (two farm tiles change from CLIFF to PATH). No new fields.
+const CURRENT_VERSION := 6
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -209,6 +211,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_3_to_4(data["game"])
 			4:
 				_upgrade_4_to_5(data["game"])
+			5:
+				_upgrade_5_to_6(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -298,3 +302,19 @@ func _upgrade_4_to_5(game: Dictionary) -> void:
 	if day < 1 or day > V5_SEASON_DAYS:
 		game["day"] = 1.0
 	game["season"] = 0.0
+
+
+## Version 5 -> 6: the town. The farm gets a gate in its western cliff, the
+## way out to the town. The map is saved, so an old farm has to be told: two
+## border tiles change from CLIFF to PATH. The cells are frozen here
+## (V6_TOWN_GATE), not read from FarmLayout, so this step means the same thing
+## however the layout changes later. Nothing else about the farm is touched.
+const V6_TOWN_GATE: Array[Vector2i] = [Vector2i(-1, 12), Vector2i(-1, 13)]
+
+
+func _upgrade_5_to_6(game: Dictionary) -> void:
+	var farm: Dictionary = game.get("farm", {})
+	for entry: Dictionary in farm.get("tiles", []):
+		var cell := Vector2i(int(entry.get("x", -999)), int(entry.get("y", -999)))
+		if cell in V6_TOWN_GATE:
+			entry["terrain"] = "PATH"
