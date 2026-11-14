@@ -1,0 +1,12 @@
+# Godot 4 editor cache and imported assets — regenerated on open, never committed.
+.godot/
+
+# Exported builds
+builds/
+export_presets.cfg
+*.tmp
+
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini
