@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b4cng2tw0gcbe"
-path="res://.godot/imported/shipping_bin_placeholder.png-9b46d61ea820641e4010c126a6810371.ctex"
+uid="uid://df6tdw7e7t6as"
+path="res://.godot/imported/parsnip.png-1ac2ec54cd24b0d481aeae0b2abd323a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/shipping_bin_placeholder.png"
-dest_files=["res://.godot/imported/shipping_bin_placeholder.png-9b46d61ea820641e4010c126a6810371.ctex"]
+source_file="res://assets/sprites/crops/parsnip.png"
+dest_files=["res://.godot/imported/parsnip.png-1ac2ec54cd24b0d481aeae0b2abd323a.ctex"]
 
 [params]
 

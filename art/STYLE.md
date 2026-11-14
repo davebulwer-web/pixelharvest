@@ -101,8 +101,21 @@ Every asset, with the exact prompt that made it, so anything can be reproduced o
 | Date | Asset | Prompt subject | Size | Notes |
 |---|---|---|---|---|
 | 2026-11-14 | `farmer.png` | middle-aged farmer, straw hat, blue denim overalls, red checked shirt, brown boots | 448×280 (8 × 5 cells of 56px) | Row 0 rotations (S/W/E/N), rows 1–4 an 8-frame Walking cycle per direction. 19 colours. `reference.png` is the south-facing frame and is the style anchor for every later asset |
+| 2026-11-14 | `crops/radish.png`, `potato.png`, `cabbage.png` | "four growth stages of a <crop> crop in a row … tiny cluster of three pale seeds, small sprout, …, fully grown <crop>. No soil, no dirt mound" | 64×16 (4 cells) | pixflux, one image per crop so the stages match. `init_image` = an earlier take with its soil cut away, strength 250 |
+| 2026-11-14 | `crops/parsnip.png`, `green_bean.png` | same, five stages | 80×16 (5 cells) | pixflux, `init_image` = the Stage 4 placeholder with its soil line removed, strength 150 — without it five-cell strips drew a ground strip |
+| 2026-11-14 | `items/*.png` (12 icons) | "four inventory item icons in a row … <item>, <item>, <item>, <item>" | 64×16, cut into 16×16 | pixflux, four per image. `green_bean_seeds` from a separate strip of packets (init = the cabbage packet, strength 200) |
+| 2026-11-14 | `shipping_bin.png` | small wooden shipping bin crate with a closed hinged lid, front view | 16×16 | Pro Flash, style image = a 16×16 crop of `reference.png`, `target_palette` = the 33 colours |
 
 Re-exporting with the walk cycle changed the cell size from 48 to 56 and the row layout
 entirely, but **not a single colour** — the same 19 came back. That is a useful property
 to know about Pixellab: adding animations to an existing character is colour-stable, so
 the palette can be locked once a character is final without fear of later drift.
+
+**How the 2026-11-14 batch was made, and why.** Every image went through Pixellab's v2 API
+with `color_image` (or `target_palette`) set to `art/palette.png`, so all of it landed
+exactly on the 33 colours and the palette did not grow. A crop's stages are drawn together
+in one strip, not one image per stage: separately generated stages don't look like the
+same plant. Crops carry **no soil of their own** (Dave's call) because the game already
+draws tilled ground under them. pixflux costs one generation but refuses canvases under
+32×32 in area, which is why icons come four to a strip; Pro Flash can do a single 16×16
+but costs five. The whole batch, including tests and redos, was about 35 generations.

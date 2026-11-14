@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dclofn1fs6grb"
-path="res://.godot/imported/green_bean_placeholder.png-ae0aa69211ff8576b166df94ba81970c.ctex"
+uid="uid://dcd2w83q26avr"
+path="res://.godot/imported/potato.png-0189093a3c14ca72139ef9ef54ac8244.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/crops/green_bean_placeholder.png"
-dest_files=["res://.godot/imported/green_bean_placeholder.png-ae0aa69211ff8576b166df94ba81970c.ctex"]
+source_file="res://assets/sprites/crops/potato.png"
+dest_files=["res://.godot/imported/potato.png-0189093a3c14ca72139ef9ef54ac8244.ctex"]
 
 [params]
 

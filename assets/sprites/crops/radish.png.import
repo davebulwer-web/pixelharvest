@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dcdhe8bwnttru"
-path="res://.godot/imported/potato_placeholder.png-0e813373740bbcfa509b47fe845b1c70.ctex"
+uid="uid://bkc4ls418kof2"
+path="res://.godot/imported/radish.png-d9b97cbf112b054713146c82ccbd1699.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/crops/potato_placeholder.png"
-dest_files=["res://.godot/imported/potato_placeholder.png-0e813373740bbcfa509b47fe845b1c70.ctex"]
+source_file="res://assets/sprites/crops/radish.png"
+dest_files=["res://.godot/imported/radish.png-d9b97cbf112b054713146c82ccbd1699.ctex"]
 
 [params]
 
