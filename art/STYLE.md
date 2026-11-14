@@ -119,3 +119,11 @@ same plant. Crops carry **no soil of their own** (Dave's call) because the game 
 draws tilled ground under them. pixflux costs one generation but refuses canvases under
 32×32 in area, which is why icons come four to a strip; Pro Flash can do a single 16×16
 but costs five. The whole batch, including tests and redos, was about 35 generations.
+
+**Ready stages redrawn, 2026-11-14.** Dave found that some crops didn't look obviously ready.
+The last frame of radish, potato and parsnip was redrawn in one pixflux strip (init =
+the old ready frames, strength 100) with the harvest described as large and visible. The
+green bean pods wouldn't show at 16px, so the whole bean sheet is now **80×32**, five
+16×32 frames: a climbing vine whose ready stage is a tall, full vine on a stake (init =
+the old sheet in the bottom half, strength 30). Taller frames need no code: `CropDef`
+bottom-aligns its frames. 8 generations.
