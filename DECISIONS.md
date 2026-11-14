@@ -714,3 +714,52 @@ one generated plank tile keeps floor, walls and trim matching.
 **Cost.** 20 generations including the look test and dead ends. The counter is two copies
 of one 48px picture side by side, so its rounded ends meet in the middle; a single 96px
 counter would need a code change in `interior.gd`.
+
+
+---
+
+## 029 — Townsfolk are data, decoration is ObjectDefs, the notice board is worked out, not written
+
+**Decision.** Stage 7 session 2 gives the town a designed map, people and a notice board.
+
+- *Townsfolk are `CharacterDef`s* (`data/characters/`): id, name, picture, which location,
+  the cells they stand on (`spots`) and what they say (`lines`). `town.gd` builds an `Npc`
+  for everyone whose `location` is the town, so **a new townsperson is a .tres and a
+  picture**, no code. Chosen over reusing `ShopDef` (a shopkeeper comes with a counter and a
+  menu; a townsperson has neither) and over one scene per character (the only differences
+  are data). Stage 8's quest characters are meant to be the same resource with more fields.
+  - One line a day and one spot a day, both cycling through the lists by the day of the
+    season (the shopkeepers' rule). The mayor moves round the square and the angler round
+    the pond, so the town looks a little different each morning with no wandering code.
+  - Talking uses the `npc_talked_to` signal the shopkeepers already use. Shop ids and
+    character ids share that one namespace, so `ContentDB` refuses a character with a
+    shop's id, and also checks the location exists, there is at least one spot, and there
+    is a picture and something to say.
+- *Decoration is `ObjectDef`s* (fountain, bench, lamp post, flower bed, fence, notice board),
+  the same resource as the farm's tree and bin. `TownLayout.OBJECTS` lists cell → object
+  id; the town's trees moved into that list too. Reusing `ObjectDef` means every piece can
+  wear a seasonal picture through `SeasonTheme.object_sprites` with no code: winter now has
+  a frozen fountain and snowed-over flower beds.
+- *The map stays a function* (`TownLayout`), not a resource or a hand-painted TileMap.
+  Considered painting it in the editor: easier to look at, but the town would then be the
+  only map not built from code, and a shop's door cell (from its `LocationDef`) would have
+  to be kept in step with paint by hand. The layout is drawn as a comment map at the top of
+  the file. The square and the pond path are rectangles of path tiles.
+- *The notice board is worked out each time it's read* (`Notices.today()`): the date and
+  how long the season has left (with a warning from three days before the turn), what
+  grows now and where to buy the seeds, and what grows next season. All from the calendar
+  and `ContentDB`, so a new crop is on the board the day its files exist. Reading it is
+  announced as `EventBus.notice_board_read`, which Stage 8's market days and requests can
+  also answer. It's a two-tile board, so facing either half counts.
+- *Nothing is saved.* People and decoration come from data and the day, so there's no
+  save version change. Old saves load as before.
+
+**Why.** It's rule 3 applied to people and props: the town should fill up in Stage 8 by
+adding files. The notice board is the cheapest useful way to make the town worth a visit
+before Stage 8 gives it events: it answers "what can I plant, and how long have I got",
+which until now meant remembering the crop files.
+
+**Cost.** Townsfolk stand still (no walking between spots during the day), and only face
+south. Lines don't react to anything yet: no "you sold me 40 parsnips". All the new art is
+placeholder (STAGES.md lists it). The garden's fence is horizontal pieces only, so it is
+open at both ends rather than closed with corner posts.

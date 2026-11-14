@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 7 — the town.** Session 1 built and confirmed 2026-11-14 on placeholder art. Next: real town art (Pixellab), then more of the town.
+**Current stage: 7 — the town.** Session 1 and its real art confirmed 2026-11-14. Session 2 (designed map, townsfolk, notice board) built 2026-11-14 on placeholder art, waiting for Dave's test.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -227,8 +227,31 @@ Session 1 (2026-11-14) — the town, three shops, doors and shopkeepers on place
 - Not seasonal: the shop fronts and interiors have no winter version; the town's ground and
   trees use the farm's seasonal art.
 
-**Not done / for later sessions:** more characters (a mayor, a notice board), town
-decoration and a designed map, a farmhouse and bed on the farm, shop opening hours.
+Session 2 (2026-11-14) — a designed town, townsfolk and a notice board, on placeholder art. See DECISIONS 029.
+
+- [x] Designed town map (`TownLayout`): a paved square south of the road with a fountain,
+      benches and lamps; flower beds and lamps along the shop fronts; a fenced flower
+      garden; a path up to the pond; trees moved to frame it all
+- [x] Decoration as `ObjectDef`s (fountain, bench, lamp post, flower bed, fence, notice
+      board) placed from `TownLayout.OBJECTS`; winter has a frozen fountain and snowy beds
+- [x] `CharacterDef` resources (`data/characters/`): Mayor Bramble in the square and Wren
+      the angler by the pond; a different spot and a new line each day; E to talk
+- [x] Notice board: the date and days left in the season (warns from three days out),
+      what grows now and where to buy it, what grows next season
+- [x] `ContentDB` loads and checks characters; no save change (version stays 6)
+- [x] Verified headless (56 checks: every object stands, every door, the notice board and
+      both townsfolk can be walked up to, talking and paging, notices in all four seasons
+      and at the season's end, spots change by day, shop doors and keepers unchanged, farm
+      gate both ways, a version 5 save still upgrades) and rendered in spring and winter
+- [ ] Dave confirms it plays correctly on Windows
+
+**Needs real art (Pixellab, from the cloud environment):** `assets/sprites/town/` fountain,
+fountain_winter, bench, lamp_post, flower_bed, flower_bed_winter, fence, notice_board
+(drawn by script) and mayor, angler (recoloured copies of the seed keeper and the farmer).
+Same sizes as the placeholders, feet/base on the bottom row.
+
+**Not done / for a later session:** a farmhouse and bed on the farm, shop opening hours
+(needs a clock, which the game doesn't have), townsfolk who walk about.
 
 ## Stage 8 — Events and quests · 2–3 sessions · Sonnet, Haiku for bulk
 

@@ -22,12 +22,14 @@ extends Node
 ##   data/objects/   ObjectDef — things standing on the farm: trees, the bin,
 ##                   sprinklers
 ##   data/upgrades/  UpgradeDef — bought once: tool tiers, energy, fields
+##   data/characters/ CharacterDef — townsfolk you can talk to (not shopkeepers)
 ##
 
 const CROPS_DIR := "res://data/crops/"
 const ITEM_DIRS: Array[String] = ["res://data/tools/", "res://data/produce/"]
 const OBJECTS_DIR := "res://data/objects/"
 const UPGRADES_DIR := "res://data/upgrades/"
+const CHARACTERS_DIR := "res://data/characters/"
 
 ## For checking crops name real seasons. Read directly rather than through
 ## GameState, because ContentDB starts first.
@@ -37,6 +39,7 @@ var _crops: Dictionary = {}  # StringName -> CropDef
 var _items: Dictionary = {}  # StringName -> ItemDef (ToolDef is an ItemDef)
 var _objects: Dictionary = {}  # StringName -> ObjectDef
 var _upgrades: Dictionary = {}  # StringName -> UpgradeDef
+var _characters: Dictionary = {}  # StringName -> CharacterDef
 
 
 func _ready() -> void:
@@ -45,15 +48,25 @@ func _ready() -> void:
 		_index(dir, _items)
 	_index(OBJECTS_DIR, _objects)
 	_index(UPGRADES_DIR, _upgrades)
+	_index(CHARACTERS_DIR, _characters)
 	_check()
-	print("ContentDB: %d crops, %d items, %d objects, %d upgrades"
-			% [_crops.size(), _items.size(), _objects.size(), _upgrades.size()])
+	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters"
+			% [_crops.size(), _items.size(), _objects.size(), _upgrades.size(), _characters.size()])
 
 
 ## The crop with this id, or null if there isn't one (for example, a save from
 ## before a crop was removed from the game).
 func crop(id: StringName) -> CropDef:
 	return _crops.get(id)
+
+
+## Every crop in the game, by name (the notice board lists them).
+func crops() -> Array[CropDef]:
+	var result: Array[CropDef] = []
+	for each: CropDef in _crops.values():
+		result.append(each)
+	result.sort_custom(func(a: CropDef, b: CropDef) -> bool: return a.display_name < b.display_name)
+	return result
 
 
 ## The item with this id — produce, seeds or tool — or null.
@@ -64,6 +77,22 @@ func item(id: StringName) -> ItemDef:
 ## What a farm object id (FarmTile.object_id) means, or null.
 func object(id: StringName) -> ObjectDef:
 	return _objects.get(id)
+
+
+## The townsperson with this id, or null.
+func character(id: StringName) -> CharacterDef:
+	return _characters.get(id)
+
+
+## Everyone who lives in `location_id`, by id, so they're always built in the
+## same order.
+func characters_in(location_id: StringName) -> Array[CharacterDef]:
+	var result: Array[CharacterDef] = []
+	for each: CharacterDef in _characters.values():
+		if each.location == location_id:
+			result.append(each)
+	result.sort_custom(func(a: CharacterDef, b: CharacterDef) -> bool: return a.id < b.id)
+	return result
 
 
 ## The upgrade with this id, or null.
@@ -224,6 +253,23 @@ func _check() -> void:
 				push_warning("ContentDB: shop '%s' has no greetings; the menu will open without a word" % shop.id)
 			for category in shop.upgrade_categories:
 				sold_categories.append(category)
+
+	# Townsfolk and shopkeepers share one set of names on EventBus.npc_talked_to,
+	# so a character can't use a shop's id.
+	for each: CharacterDef in _characters.values():
+		var where := each.resource_path
+		if each.id in shop_ids:
+			push_error("ContentDB: '%s' uses the id '%s', which is a shop's; talking to one would answer as the other"
+					% [where, each.id])
+		if not RULES.locations.any(func(l: LocationDef) -> bool: return l.id == each.location):
+			push_error("ContentDB: '%s' lives in '%s', which isn't a location in game_rules.tres"
+					% [where, each.location])
+		if each.spots.is_empty():
+			push_error("ContentDB: '%s' has no spots, so there's nowhere to stand" % where)
+		if each.sprite == null:
+			push_warning("ContentDB: '%s' has no sprite, so they can't be seen" % where)
+		if each.lines.is_empty():
+			push_warning("ContentDB: '%s' has no lines, so talking to them does nothing" % where)
 
 	for each: UpgradeDef in _upgrades.values():
 		var where := each.resource_path

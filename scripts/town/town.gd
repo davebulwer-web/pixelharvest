@@ -1,19 +1,26 @@
 extends Node2D
 ##
-## Town — the town scene: a road, a pond, trees, and a door for every shop.
+## Town — the town scene: the road, the square, a door for every shop, and
+## the people who live here.
 ##
-## Like the farm it owns no game state. It draws a fixed map (TownLayout),
-## builds a Building for every location whose door is on this map (so a new
-## shop appears here with no edit), and puts the arriving player at the spawn
-## point LocationManager asked for. Tools are off in town (the farm's tiles
-## aren't here to be hoed), and so is sleeping.
+## Like the farm it owns no game state. It draws a fixed map (TownLayout) and
+## stands its decoration on it, builds a Building for every location whose
+## door is on this map and an Npc for every CharacterDef who lives here (so a
+## new shop or a new townsperson appears with no edit to this file), and puts
+## the arriving player at the spawn point LocationManager asked for. Tools are
+## off in town (the farm's tiles aren't here to be hoed), and so is sleeping.
+##
+## Talking: E on a townsperson or the notice board is announced on EventBus
+## (npc_talked_to, notice_board_read); this scene answers with the dialogue
+## box. A shopkeeper's id never reaches here, because shopkeepers stand inside.
 ##
 ##   Town
 ##   ├── Ground      (TileMapLayer, same seasonal tilesets as the farm)
 ##   ├── SpawnPoints (Marker2Ds, made here: one per door, one for the farm gate)
-##   ├── Entities    (y-sorted: player, trees, shop fronts)
+##   ├── Entities    (y-sorted: player, trees, decoration, shop fronts, people)
 ##   ├── Weather     (the season's overlay — winter's snow — as on the farm)
-##   └── Hud         (the same HUD scene as the farm)
+##   ├── Hud         (the same HUD scene as the farm)
+##   └── Dialogue    (the dialogue box, as in the shops)
 ##
 
 const TILE_PX := 16
@@ -25,6 +32,7 @@ const FARM_ID := &"farm"
 @onready var _player: Player = $Entities/Player
 @onready var _spawns: Node2D = $SpawnPoints
 @onready var _weather: Node = $Weather
+@onready var _dialogue = $Dialogue
 
 
 func _ready() -> void:
@@ -44,11 +52,14 @@ func _ready() -> void:
 		_add_spawn(StringName("from_%s" % def.id), Vector2(
 				def.door_cell.x * TILE_PX + TILE_PX / 2.0, (def.door_cell.y + 2) * TILE_PX - 2))
 	_add_spawn(&"from_farm", TownLayout.ARRIVAL_FROM_FARM)
-	_place_trees()
+	_place_objects()
+	_place_townsfolk()
 	_add_farm_gate()
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
 	_limit_camera()
+	EventBus.npc_talked_to.connect(_on_npc_talked_to)
+	EventBus.notice_board_read.connect(_on_notice_board_read)
 
 
 ## Every location with its door on this map.
@@ -71,16 +82,28 @@ func _add_spawn(point_name: StringName, at: Vector2) -> void:
 	_spawns.add_child(marker)
 
 
-func _place_trees() -> void:
-	var tree := ContentDB.object(&"tree")
-	if tree == null or tree.scene == null:
-		push_warning("Town has no tree to plant: data/objects/tree.tres is missing or has no scene")
-		return
-	for cell in TownLayout.TREE_CELLS:
-		var node: Node2D = tree.scene.instantiate()
+## Stand every tree, lamp, bench and flower bed from TownLayout.OBJECTS. Each
+## is an ObjectDef, so it wears its season's picture if the season has one.
+func _place_objects() -> void:
+	for cell: Vector2i in TownLayout.OBJECTS:
+		var id: StringName = TownLayout.OBJECTS[cell]
+		var def := ContentDB.object(id)
+		if def == null or def.scene == null:
+			push_warning("Town can't place '%s' at %s: no data/objects/ file with that id and a scene"
+					% [id, cell])
+			continue
+		var node: Node2D = def.scene.instantiate()
 		node.position = _base_of(cell)
 		_entities.add_child(node)
-		SeasonLook.skin_object(node, &"tree")
+		SeasonLook.skin_object(node, id)
+
+
+## An Npc for everyone who lives in town, at today's spot.
+func _place_townsfolk() -> void:
+	for person in ContentDB.characters_in(TOWN_ID):
+		if person.spots.is_empty():
+			continue  # ContentDB has already said so
+		_entities.add_child(Npc.create(person.id, person.sprite, person.spot_on(GameState.day)))
 
 
 ## The way back: the gap beyond the east end of the road.
@@ -111,3 +134,20 @@ func _limit_camera() -> void:
 	camera.limit_top = -TILE_PX
 	camera.limit_right = (TownLayout.SIZE.x + 1) * TILE_PX
 	camera.limit_bottom = (TownLayout.SIZE.y + 1) * TILE_PX
+
+
+# --- Talking -----------------------------------------------------------------
+
+func _on_npc_talked_to(npc_id: StringName) -> void:
+	var person := ContentDB.character(npc_id)
+	if person == null or person.location != TOWN_ID:
+		return
+	var line := person.line_on(GameState.day)
+	if line == "":
+		return
+	var lines: Array[String] = [line]
+	_dialogue.say(person.display_name, lines)
+
+
+func _on_notice_board_read() -> void:
+	_dialogue.say("Notice board", Notices.today())

@@ -1,14 +1,16 @@
 class_name ObjectDef
 extends Resource
 ##
-## ObjectDef — something that stands on a farm tile: a tree, the shipping bin,
-## a sprinkler.
+## ObjectDef — something that stands on a map tile: a tree, the shipping bin,
+## a sprinkler on the farm; a fountain, a bench or a lamp post in town.
 ##
 ## FarmTile only records the id (`object_id`); this says what that id means —
 ## the scene that shows it, whether the player can pick it back up, and
 ## whether it waters the ground around it each morning. The farm scene used
 ## to have a hardcoded list of object scenes; now a new kind of object is a
-## .tres in data/objects/ and a scene, nothing else (rule 3).
+## .tres in data/objects/ and a scene, nothing else (rule 3). The town uses
+## the same files for its decoration (TownLayout.OBJECTS), so a winter
+## picture for any of them is one line in a SeasonTheme's object_sprites.
 ##
 
 @export var id: StringName

@@ -93,6 +93,10 @@ signal object_removed(cell: Vector2i, object_id: StringName)
 ## step — listens for this; the player doesn't know who it is talking to.
 signal npc_talked_to(npc_id: StringName)
 
+## The player read the notice board in town. The town shows what's on it;
+## Stage 8's market days and requests can listen too and pin up their own.
+signal notice_board_read()
+
 ## Something the player should be told, in the HUD's message line.
 signal message_posted(text: String)
 
