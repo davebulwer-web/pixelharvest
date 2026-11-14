@@ -20,9 +20,11 @@ config/icon="res://icon.svg"
 
 EventBus="*res://scripts/autoload/event_bus.gd"
 InputActions="*res://scripts/autoload/input_actions.gd"
+ContentDB="*res://scripts/autoload/content_db.gd"
 GameState="*res://scripts/autoload/game_state.gd"
 TimeSystem="*res://scripts/autoload/time_system.gd"
 LocationManager="*res://scripts/autoload/location_manager.gd"
+SaveSystem="*res://scripts/autoload/save_system.gd"
 
 [display]
 

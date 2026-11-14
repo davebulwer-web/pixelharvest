@@ -23,6 +23,7 @@ const ACTIONS: Dictionary = {
 	&"next_tool": [KEY_TAB],
 	&"prev_tool": [KEY_Q],
 	&"sleep": [KEY_ENTER],
+	&"new_game": [KEY_F9],
 }
 
 

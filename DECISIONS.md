@@ -350,3 +350,48 @@ every seasonal tileset will share the base atlas layout, which image-to-image gu
 **Cost.** `main.tscn` is now the farm and not the entry point, a slightly misleading name
 kept to avoid churn; F6 on it still runs the farm directly. Seasonal tilesets *must* keep
 the base layout exactly, or tiles will draw as the wrong thing.
+
+---
+
+## 022 — Saves are JSON, written each morning, upgraded step by step; a minimal `ContentDB` arrives early
+
+**Decision.** `SaveSystem` (autoload) writes `user://save.json` (on Windows,
+`%APPDATA%\Godot\app_userdata\Pixel Harvest\save.json`) as plain JSON:
+`{ "save_version": 2, "game": { … } }`. `GameState.to_save()` decides what goes in;
+`SaveSystem` decides when, where, and how old versions are upgraded. The save is written
+once a day, as the last step of the overnight sequence in `TimeSystem`, and loaded once,
+by the boot scene. Every load runs through `_upgrade()`, a chain of one-version steps
+(1 → 2 → …). Crops and tools are saved by id and found again through a minimal
+`ContentDB` autoload that indexes `data/crops/` and `data/tools/` by their `id` field —
+pulled forward from Stage 4, as DECISIONS 020 predicted. F9 starts a new game until there
+is a title screen.
+
+**Why.**
+- *JSON rather than Godot's own formats.* `ResourceSaver` and `store_var` can embed
+  objects and scripts, so loading a save could run code from it, and their files can't
+  be read or hand-edited. JSON is inert, opens in Notepad, and is just dictionaries and
+  lists — exactly what an upgrade step wants to work on.
+- *Once a day, at dawn.* A save is then always a clean morning, never half an action, and
+  there's one obvious moment it happens. Quitting mid-day loses that day, as in most games
+  of this kind. No player position is saved: every day starts at the spawn point.
+- *The whole farm is saved,* terrain and trees included, not just the player's changes. If
+  the starting layout is redesigned, existing farms keep the map they were played on rather
+  than having crops land in a new pond. Default fields are omitted per tile to keep it short.
+- *Names, not numbers.* Version 1 saved the selected tool as a toolbar position and terrain
+  as an enum number; both silently change meaning if a list is reordered. Version 2 saves
+  the tool id and the terrain name. This was the deliberate break the stage plan asked for:
+  the 1 → 2 step converts both, and `tests/saves/v1_example.json` is a version 1 save
+  that loads correctly through it. The step keeps its own frozen copy of version 1's
+  terrain numbering, because an upgrade must never depend on today's code.
+- *Fail safe, never silently.* A save that is damaged, from a newer version, or missing a
+  field is moved to `save.unreadable.json` and the game starts new, with the reason in the
+  Output panel. A crop or tool the game no longer has is dropped with a warning and the rest
+  of the save loads.
+- *Saving is armed by the boot scene,* so running `main.tscn` alone with F6 plays a
+  throwaway game and can't overwrite the real save.
+
+**Cost.** One save slot (slots are Stage 9). The file is around 30 KB, mostly one line
+per tile position. Every future change to saved data costs a version bump and an upgrade
+step — that's the point, but it must not be skipped. `ContentDB` only knows crops and tools
+until Stage 4 extends it.
+

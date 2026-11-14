@@ -26,6 +26,7 @@ func _ready() -> void:
 	EventBus.energy_changed.connect(func(_c: float, _m: float) -> void: _refresh())
 	EventBus.day_started.connect(_on_day_started)
 	EventBus.crop_harvested.connect(_on_crop_harvested)
+	EventBus.game_saved.connect(_on_game_saved)
 	_fade.modulate.a = 0.0
 	_message.text = ""
 	_refresh()
@@ -46,6 +47,12 @@ func _on_day_started(day: int, _season: int, _year: int) -> void:
 	_fade.modulate.a = 1.0
 	create_tween().tween_property(_fade, ^"modulate:a", 0.0, FADE_SECONDS)
 	_show_message("Day %d" % day)
+
+
+## The save lands just after the morning message, so it extends it rather
+## than replacing it.
+func _on_game_saved() -> void:
+	_show_message("Day %d   ·   Saved" % GameState.day)
 
 
 func _on_crop_harvested(_cell: Vector2i, crop_id: StringName, amount: int) -> void:

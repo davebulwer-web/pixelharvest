@@ -4,8 +4,8 @@ extends RefCounted
 ## FarmData — the single source of truth for every tile on the farm (rule 1).
 ##
 ## The TileMapLayer you see is a *picture* of this. Nothing in the game ever
-## asks the tilemap "is this tile tilled?" — it asks FarmData. That's what will
-## let Stage 3 save the farm without touching any node, and Stage 6 repaint
+## asks the tilemap "is this tile tilled?" — it asks FarmData. That's what lets
+## the save system save the farm without touching any node, and Stage 6 repaint
 ## the whole farm for a new season without losing a single crop.
 ##
 ## Every change goes through a method here, and every method announces what it
@@ -41,7 +41,7 @@ func tile(cell: Vector2i) -> FarmTile:
 	return _tiles.get(cell)
 
 
-## Used only while building a farm (FarmLayout, and in Stage 3, loading a save).
+## Used only while building a farm (FarmLayout, and from_save below).
 func set_tile(cell: Vector2i, farm_tile: FarmTile) -> void:
 	_tiles[cell] = farm_tile
 
@@ -145,3 +145,26 @@ func _grow(cell: Vector2i, t: FarmTile) -> void:
 	t.crop_stage += 1
 	t.crop_days = 0
 	EventBus.crop_grew.emit(cell, t.crop_stage)
+
+
+# --- Saving ------------------------------------------------------------------
+# The whole farm is saved, terrain and trees included, not just the changes the
+# player made. The save is then the complete truth about this farm: if the
+# starting layout is redesigned later, existing farms keep the map they were
+# played on instead of having their crops land in a new pond.
+
+func to_save() -> Dictionary:
+	var tiles: Array = []
+	for cell: Vector2i in _tiles:
+		var entry := {"x": cell.x, "y": cell.y}
+		entry.merge((_tiles[cell] as FarmTile).to_save())
+		tiles.append(entry)
+	return {"width": size.x, "height": size.y, "tiles": tiles}
+
+
+static func from_save(data: Dictionary) -> FarmData:
+	var farm := FarmData.new(Vector2i(int(data["width"]), int(data["height"])))
+	for entry: Dictionary in data["tiles"]:
+		var cell := Vector2i(int(entry["x"]), int(entry["y"]))
+		farm.set_tile(cell, FarmTile.from_save(entry))
+	return farm

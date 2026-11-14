@@ -11,6 +11,8 @@ extends Node
 ##   2. The farm grows: watered crops advance, soil dries.
 ##   3. The calendar moves on and energy refills.
 ##   4. day_started is announced — the farm redraws, the HUD updates.
+##   5. The game is saved. Last, so the save is the finished morning: crops
+##      grown, energy full. Loading it puts you exactly at the start of a day.
 ##
 ## Keeping that order in one place is the point of this file. Season rollover
 ## joins step 3 in Stage 6.
@@ -34,4 +36,5 @@ func end_day() -> void:
 	EventBus.day_ended.emit(GameState.day)
 	GameState.farm.advance_day()
 	GameState.start_next_day()
+	SaveSystem.save_game()
 	_ending_day = false

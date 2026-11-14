@@ -101,8 +101,9 @@ project.godot        Engine config — see DECISIONS.md 009 before changing disp
 icon.svg
 scenes/              .tscn scene files
 scripts/             Game code
-  autoload/          Global services (EventBus, InputActions, later GameState, ContentDB…)
+  autoload/          Global services (EventBus, ContentDB, GameState, SaveSystem…)
 data/                Content resources (.tres) — crops, tools, upgrades
+tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab
 assets/tilesets/     Ground and world tilesets
 art/                 Art specification and generation log (not shipped art)

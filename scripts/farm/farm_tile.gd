@@ -4,8 +4,9 @@ extends RefCounted
 ## FarmTile — the authoritative state of one cell of the farm.
 ##
 ## This is plain data: no nodes, no textures, nothing about how it looks.
-## Saving (Stage 3) will write these fields out and read them back; drawing
-## reads them and turns them into tiles. Neither of those is this file's job.
+## Drawing reads these fields and turns them into tiles — not this file's job.
+## Saving is: to_save() and from_save() below turn a tile into plain values a
+## save file can hold, and back again.
 ##
 
 ## What the ground fundamentally is. Fixed for the life of the farm.
@@ -20,8 +21,8 @@ var object_id: StringName = &""
 var tilled: bool = false
 var watered: bool = false
 
-## The crop growing here, or null. Held as the definition itself rather than
-## its id for now; Stage 3 saves `crop.id` and looks it up again on load.
+## The crop growing here, or null. Held as the definition itself; the save
+## file holds `crop.id`, and loading looks it up again in ContentDB.
 var crop: CropDef = null
 
 ## 0 is the planted seed; crop.growth_stages is ready to harvest.
@@ -47,3 +48,57 @@ func clear_crop() -> void:
 	crop_stage = 0
 	crop_days = 0
 	crop_regrowing = false
+
+
+# --- Saving ------------------------------------------------------------------
+# Only fields that differ from a fresh tile are written. A farm is mostly plain
+# grass, so most tiles are saved as nothing more than their position.
+#
+# Terrain is written by NAME ("WATER"), not by its number in the enum. If the
+# enum is ever reordered or grows, numbers in old saves would silently mean a
+# different terrain; names can't. (Save version 1 made exactly that mistake —
+# see the migration in save_system.gd.)
+
+func to_save() -> Dictionary:
+	var data := {}
+	if terrain != Terrain.GRASS:
+		data["terrain"] = Terrain.find_key(terrain)
+	if object_id != &"":
+		data["object"] = String(object_id)
+	if tilled:
+		data["tilled"] = true
+	if watered:
+		data["watered"] = true
+	if crop != null:
+		data["crop"] = String(crop.id)
+		data["crop_stage"] = crop_stage
+		data["crop_days"] = crop_days
+		if crop_regrowing:
+			data["crop_regrowing"] = true
+	return data
+
+
+## Rebuild a tile from what to_save() wrote. Missing fields mean "as a fresh
+## tile". A crop whose id the game no longer knows is dropped with a warning
+## rather than stopping the load — one lost parsnip beats a lost farm.
+static func from_save(data: Dictionary) -> FarmTile:
+	var t := FarmTile.new()
+	var terrain_name: String = data.get("terrain", "GRASS")
+	if Terrain.has(terrain_name):
+		t.terrain = Terrain[terrain_name]
+	else:
+		push_warning("Save has unknown terrain '%s'; treating it as grass" % terrain_name)
+	t.object_id = StringName(data.get("object", ""))
+	t.tilled = data.get("tilled", false)
+	t.watered = data.get("watered", false)
+	if data.has("crop"):
+		var crop_def := ContentDB.crop(StringName(data["crop"]))
+		if crop_def == null:
+			push_warning("Save has a crop '%s' the game doesn't know; it's been removed" % data["crop"])
+		else:
+			t.crop = crop_def
+			# JSON stores every number as a float, so turn counts back into ints.
+			t.crop_stage = int(data.get("crop_stage", 0))
+			t.crop_days = int(data.get("crop_days", 0))
+			t.crop_regrowing = data.get("crop_regrowing", false)
+	return t

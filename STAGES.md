@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 3 — save and load.** Stage 2 built 2026-11-14; awaiting Dave's check of the final slice.
+**Current stage: 3 — save and load.** Built 2026-11-14; awaiting Dave's check on Windows. Next: Stage 4.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -99,26 +99,34 @@ find it.
 - [x] `SeasonTheme` swap hook, wired with one theme (spring) — see DECISIONS 005, 021
 - [x] Verified: farm scene reloaded mid-game keeps tilled soil, crop, tool and energy, and
       places the player at the spawn point; a test second theme repaints the ground
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-14)
 
 **The whole game in miniature.** Everything after this is content or convenience.
 
 ## Stage 3 — Save and load · 1 session · Opus
 
-Probably needs a minimal `ContentDB` (id → `CropDef`/`ToolDef`) pulled forward from
-Stage 4, so a save can store ids and find the resources again (DECISIONS 020).
+Session 1 (2026-11-14) — see DECISIONS 022.
 
-- [ ] Versioned save file with `save_version` and a migration function
-- [ ] Serialise `FarmData`, `GameState`, inventory, upgrades
-- [ ] Save on sleep, load on launch, new-game path
-- [ ] Deliberately break and migrate a save once, to prove the mechanism works
+- [x] Minimal `ContentDB` (id → `CropDef`/`ToolDef`) pulled forward from Stage 4
+- [x] Versioned save file (`user://save.json`, JSON) with `save_version` and an upgrade chain
+- [x] Serialise `FarmData` and `GameState` (gold, calendar, energy, tools, selected tool,
+      location, whole farm). Inventory and upgrades don't exist yet; each joins the save
+      with a version bump in Stages 4 and 5
+- [x] Save at the end of every night, load on launch, F9 for a new game; F6 on the farm
+      scene never saves
+- [x] Deliberately broke the format (version 1 → 2: tool by id, terrain by name) and
+      migrated `tests/saves/v1_example.json` through it
+- [x] Verified headless: save/reload round trip, v1 upgrade, damaged / newer / incomplete
+      saves set aside, unknown crop and tool dropped, F6 doesn't save, F9 leaves the file
+      alone. Rendered recording: plant two tiles, sleep, relaunch — sprouts still there
+- [ ] Dave confirms it plays correctly on Windows
 
 **Early, not late.** Retrofitting versioning after there's a save worth keeping is misery.
 
 ## Stage 4 — Content pipeline and economy · 2–3 sessions · Opus, then Sonnet
 
 - [ ] `CropDef` resource script, including `regrow_days`
-- [ ] `ContentDB` autoload loading all definitions from `data/`
+- [ ] `ContentDB` autoload loading all definitions from `data/` (crops and tools done in Stage 3)
 - [ ] Convert the Stage 2 hardcoded crop to a resource — the proof that content is data
 - [ ] Inventory system
 - [ ] Shipping bin: drop produce, sold overnight, gold at dawn

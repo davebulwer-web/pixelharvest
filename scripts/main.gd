@@ -73,10 +73,11 @@ func _ready() -> void:
 		_draw_all()
 	)
 
-	print("--- Pixel Harvest · Stage 2 ---")
+	print("--- Pixel Harvest · Stage 3 ---")
 	print("WASD/arrows move. Space uses the tool on the highlighted tile.")
 	print("Tab / Q switch tool: hoe, watering can, parsnip seeds.")
 	print("E harvests a ready crop. Enter sleeps; watered crops grow overnight.")
+	print("The game saves every morning and loads on launch. F9 starts a new game.")
 	print("-------------------------------")
 
 
