@@ -65,6 +65,16 @@ func can_water(cell: Vector2i) -> bool:
 	return t != null and t.tilled and not t.watered
 
 
+func can_plant(cell: Vector2i) -> bool:
+	var t := tile(cell)
+	return t != null and t.tilled and not t.has_crop()
+
+
+func can_harvest(cell: Vector2i) -> bool:
+	var t := tile(cell)
+	return t != null and t.is_crop_ready()
+
+
 # --- Changes -----------------------------------------------------------------
 # Each one checks its own precondition, so a caller that forgets to ask first
 # can't corrupt the farm — it just gets a no-op.
@@ -81,3 +91,57 @@ func water(cell: Vector2i) -> void:
 		return
 	tile(cell).watered = true
 	EventBus.tile_watered.emit(cell)
+
+
+func plant(cell: Vector2i, crop: CropDef) -> void:
+	if not can_plant(cell):
+		return
+	var t := tile(cell)
+	t.crop = crop
+	t.crop_stage = 0
+	t.crop_days = 0
+	t.crop_regrowing = false
+	EventBus.crop_planted.emit(cell, crop.id)
+
+
+## Pick a ready crop. Single-harvest crops leave the soil tilled but empty;
+## regrowing ones drop back a stage and start again. Returns how many items
+## were picked (0 if nothing was ready).
+func harvest(cell: Vector2i) -> int:
+	if not can_harvest(cell):
+		return 0
+	var t := tile(cell)
+	var crop := t.crop
+	var amount := crop.harvest_amount
+	if crop.regrow_days > 0:
+		t.crop_stage = crop.growth_stages - 1
+		t.crop_days = 0
+		t.crop_regrowing = true
+	else:
+		t.clear_crop()
+	EventBus.crop_harvested.emit(cell, crop.id, amount)
+	return amount
+
+
+# --- Overnight ---------------------------------------------------------------
+
+## Everything that happens to the farm while the player sleeps: each watered
+## crop gets one day of growth, then all the soil dries out.
+##
+## Called by TimeSystem once per day. It deliberately knows nothing about
+## *when* days end — only what a day's passing does to the farm.
+func advance_day() -> void:
+	for cell: Vector2i in _tiles:
+		var t: FarmTile = _tiles[cell]
+		if t.has_crop() and t.watered and not t.is_crop_ready():
+			_grow(cell, t)
+		t.watered = false
+
+
+func _grow(cell: Vector2i, t: FarmTile) -> void:
+	t.crop_days += 1
+	if t.crop_days < t.crop.days_to_grow_from(t.crop_stage, t.crop_regrowing):
+		return
+	t.crop_stage += 1
+	t.crop_days = 0
+	EventBus.crop_grew.emit(cell, t.crop_stage)

@@ -15,3 +15,11 @@ extends Resource
 ## The tools in the player's hands at the start of a new game, in toolbar order.
 ## Adding a tool to the starting kit is a data change here, never a code change.
 @export var starting_tools: Array[ToolDef] = []
+
+## Every place in the world, and where a new game begins.
+@export var locations: Array[LocationDef] = []
+@export var starting_location: StringName = &"farm"
+
+## The seasons in calendar order. GameState.season is an index into this.
+## One for now; Stage 6 adds the other three and the season length.
+@export var seasons: Array[SeasonTheme] = []

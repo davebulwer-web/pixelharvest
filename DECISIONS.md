@@ -303,3 +303,50 @@ generations cost credits.
 
 **Cost.** Generation depends on that environment being selected for the session. Placeholder
 art (decision 014) is still made locally, so code work never waits on it.
+
+---
+
+## 020 — The overnight sequence lives in `TimeSystem`; seeds are tools until there's an inventory
+
+**Decision.** `TimeSystem` (autoload) is the only thing that ends a day, whether from the
+sleep key or from energy reaching zero, and it always runs the same order: announce
+`day_ended`, `FarmData.advance_day()` (watered crops grow one step, all soil dries), move
+the calendar and refill energy, announce `day_started`. Seeds are a `ToolDef` with a
+`PlantAction` naming the crop, so they sit on the toolbar and are unlimited. Harvesting is
+the interact key (E), free, and not a tool. A planted tile holds its `CropDef` directly.
+
+**Why.** Ordering bugs in the overnight step are the kind that are miserable to find later
+(sell before or after growth? dry before or after?), so one place owns the order. Running
+out of energy ends the day *deferred*, so the action that spent the last point completes
+first. Seeds as a tool reuse rule 5's interface with no new code path; the inventory in
+Stage 4 will replace "unlimited" with a count without changing how planting works.
+Harvesting by hand costs nothing because the effort was in growing the crop. Holding the
+`CropDef` on the tile avoids building `ContentDB` early just to look up an id.
+
+**Cost.** Stage 3 needs an id → `CropDef` lookup to load a save, so a minimal `ContentDB`
+will probably be pulled forward from Stage 4 into Stage 3. Sleep is a key press anywhere
+until there's a farmhouse and bed. Unwatered crops pause rather than die, for now.
+
+---
+
+## 021 — Locations and seasons are data; the game starts in a boot scene
+
+**Decision.** `LocationManager` (autoload) moves between locations defined as `LocationDef`
+resources (id plus a scene *path*), listed in `data/game_rules.tres`. The project's main
+scene is now `scenes/boot.tscn`, which sends the player to `GameState.location`. Location
+scenes place an arriving player at a named `Marker2D` under `SpawnPoints`. Each season's
+look is a `SeasonTheme` resource (only a ground tileset so far), also listed in the rules;
+the farm swaps its tileset and redraws on `season_changed`.
+
+**Why.** The seam's real job is to prove nothing important lives in a scene: the farm was
+reloaded mid-game in testing and came back with its tilled soil, crop, tool and energy
+intact. A scene *path* rather than a `PackedScene` avoids loading every location at startup
+and breaks a load loop (rules → location → farm scene → scripts reading the rules) that
+stopped the game starting when first tried. The boot scene gives Stage 3's "load the save
+or start new" and Stage 9's title screen an obvious home. Swapping one tileset works because
+every seasonal tileset will share the base atlas layout, which image-to-image guarantees
+(DECISIONS 005).
+
+**Cost.** `main.tscn` is now the farm and not the entry point, a slightly misleading name
+kept to avoid churn; F6 on it still runs the farm directly. Seasonal tilesets *must* keep
+the base layout exactly, or tiles will draw as the wrong thing.

@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="CropDef" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="CropDef" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/crop_def.gd" id="1_crop"]
+[ext_resource type="Texture2D" path="res://assets/sprites/crops/parsnip_placeholder.png" id="2_sheet"]
 
 [resource]
 script = ExtResource("1_crop")
@@ -9,4 +10,6 @@ display_name = "Parsnip"
 growth_stages = 4
 days_per_stage = 1
 regrow_days = 0
+harvest_amount = 1
 sell_price = 35
+sprite_sheet = ExtResource("2_sheet")

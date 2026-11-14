@@ -1,7 +1,8 @@
 class_name Player
 extends CharacterBody2D
 ##
-## Player — movement, four-direction animation, and using the held tool.
+## Player — movement, four-direction animation, and the player's actions:
+## using the held tool, harvesting, and going to sleep.
 ##
 ## The node origin sits at the character's FEET, not the centre of the sprite.
 ## The AnimatedSprite2D is offset upward to achieve that. This matters for two
@@ -51,6 +52,12 @@ func _physics_process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"use_tool"):
 		_use_tool()
+	elif event.is_action_pressed(&"interact"):
+		_interact()
+	elif event.is_action_pressed(&"sleep"):
+		# No bed yet: sleep is a key press anywhere on the farm. When the
+		# farmhouse exists this moves to interacting with the bed.
+		TimeSystem.end_day()
 	elif event.is_action_pressed(&"next_tool"):
 		GameState.cycle_tool(1)
 	elif event.is_action_pressed(&"prev_tool"):
@@ -80,6 +87,12 @@ func _use_tool() -> void:
 	if not GameState.try_spend_energy(tool.energy_cost):
 		return
 	tool.action.apply(GameState.farm, cell)
+
+
+## E: harvest a ready crop by hand. Harvesting is free — the work was in
+## growing it. Later, interact will also open doors and talk to people.
+func _interact() -> void:
+	GameState.farm.harvest(target_cell())
 
 
 func _update_animation(direction: Vector2) -> void:

@@ -1,12 +1,20 @@
-[gd_resource type="Resource" script_class="GameRules" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="GameRules" load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/game_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="2_tooldef"]
 [ext_resource type="Resource" path="res://data/tools/hoe.tres" id="3_hoe"]
 [ext_resource type="Resource" path="res://data/tools/watering_can.tres" id="4_can"]
+[ext_resource type="Resource" path="res://data/tools/parsnip_seeds.tres" id="5_seeds"]
+[ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="6_locdef"]
+[ext_resource type="Resource" path="res://data/locations/farm.tres" id="7_farm"]
+[ext_resource type="Script" path="res://scripts/resources/season_theme.gd" id="8_theme"]
+[ext_resource type="Resource" path="res://data/seasons/spring.tres" id="9_spring"]
 
 [resource]
 script = ExtResource("1_rules")
 starting_gold = 100
 max_energy = 100.0
-starting_tools = Array[ExtResource("2_tooldef")]([ExtResource("3_hoe"), ExtResource("4_can")])
+starting_tools = Array[ExtResource("2_tooldef")]([ExtResource("3_hoe"), ExtResource("4_can"), ExtResource("5_seeds")])
+locations = Array[ExtResource("6_locdef")]([ExtResource("7_farm")])
+starting_location = &"farm"
+seasons = Array[ExtResource("8_theme")]([ExtResource("9_spring")])

@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 2 — core loop and seams** (first session done; Stage 1 awaiting Dave's Windows check).
+**Current stage: 3 — save and load.** Stage 2 built 2026-11-14; awaiting Dave's check of the final slice.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -41,7 +41,7 @@ production. The real Pixellab sprite drops into the same slot with no code chang
 - [x] Verified in a rendered recording: animation switches correctly per direction,
       player stops dead against the tree trunk, sorts in front when below it and
       behind when above it
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-14)
 
 **1b — real art**
 
@@ -52,7 +52,7 @@ production. The real Pixellab sprite drops into the same slot with no code chang
 - [x] Rebuild the palette from the art; every asset now sits exactly on it
 - [x] Log the generation in `art/STYLE.md`
 - [x] Verified in a rendered recording: 8-frame walk cycle plays in all four directions
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-14)
 
 **Left over for later:** `player_placeholder.png` is now unused and can be deleted
 whenever convenient; the tree and ground tiles are still placeholder and get replaced
@@ -77,19 +77,36 @@ find it.
 - [x] Stopgap HUD: selected tool and energy
 - [x] Verified headless and in a rendered recording: tilling, watering, tool switching,
       no-ops on path/pond/tree/cliff cost no energy
+- [x] Dave confirms it plays correctly on Windows (2026-11-14)
+
+**Session 2 (2026-11-14) — plant, grow, harvest, sleep**
+
+- [x] Seeds as a tool (`PlantAction`), unlimited until the inventory (DECISIONS 020)
+- [x] Harvest a ready crop with E; regrowing crops drop back a stage and come again
+- [x] `TimeSystem` — Enter sleeps, or energy at zero ends the day; watered crops advance
+      one stage overnight, soil dries, energy refills
+- [x] Crop sprites per growth stage (placeholder parsnip sheet,
+      `assets/sprites/crops/parsnip_placeholder.png`), Y-sorted with the player
+- [x] HUD shows the day; morning fades in; harvest message
+- [x] Verified headless (energy-out ends the day after the last action lands; regrow
+      timing) and in a rendered recording: till, water, plant, five days, harvest
+- [x] Dave confirms it plays correctly on Windows (2026-11-14)
+
+**Session 3 (2026-11-14) — the seams**
+
+- [x] `LocationManager` seam (farm only for now), `LocationDef` resources, boot scene,
+      spawn points — see DECISIONS 004, 021
+- [x] `SeasonTheme` swap hook, wired with one theme (spring) — see DECISIONS 005, 021
+- [x] Verified: farm scene reloaded mid-game keeps tilled soil, crop, tool and energy, and
+      places the player at the spawn point; a test second theme repaints the ground
 - [ ] Dave confirms it plays correctly on Windows
-
-**Still to do**
-
-- [ ] Plant and harvest (seeds as a tool action), crop sprites per growth stage
-- [ ] `TimeSystem` — sleep advances the day, watered crops advance one stage, soil dries
-- [ ] Day ends at zero energy
-- [ ] `LocationManager` seam (farm only for now) — see DECISIONS 004
-- [ ] `SeasonTheme` swap hook, wired but with one theme — see DECISIONS 005
 
 **The whole game in miniature.** Everything after this is content or convenience.
 
 ## Stage 3 — Save and load · 1 session · Opus
+
+Probably needs a minimal `ContentDB` (id → `CropDef`/`ToolDef`) pulled forward from
+Stage 4, so a save can store ids and find the resources again (DECISIONS 020).
 
 - [ ] Versioned save file with `save_version` and a migration function
 - [ ] Serialise `FarmData`, `GameState`, inventory, upgrades

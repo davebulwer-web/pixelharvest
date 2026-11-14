@@ -31,6 +31,10 @@ var _selected_tool_index: int = 0
 
 var farm: FarmData
 
+## Where the player is. LocationManager changes it; Stage 3 saves it, so a
+## loaded game opens in the right place.
+var location: StringName = &""
+
 
 func _ready() -> void:
 	new_game()
@@ -48,13 +52,32 @@ func new_game() -> void:
 	tools = RULES.starting_tools.duplicate()
 	_selected_tool_index = 0
 	farm = FarmLayout.build_default()
+	location = RULES.starting_location
+
+
+## Move the calendar on one day and refill energy. Called by TimeSystem as
+## part of the overnight sequence — nothing else should call it.
+func start_next_day() -> void:
+	day += 1
+	energy = max_energy
+	EventBus.energy_changed.emit(energy, max_energy)
+	EventBus.day_started.emit(day, season, year)
+
+
+## How the current season looks. Seasons beyond the list wrap round, so a
+## calendar with more seasons than themes still draws something.
+func current_season_theme() -> SeasonTheme:
+	if RULES.seasons.is_empty():
+		return null
+	return RULES.seasons[posmod(season, RULES.seasons.size())]
 
 
 # --- Energy ------------------------------------------------------------------
 
 ## Pay `amount` of energy if there's enough. Returns false and changes nothing
 ## if there isn't, so an action the player can't afford simply doesn't happen.
-## (Ending the day when energy hits zero arrives with the TimeSystem, next session.)
+## Hitting zero announces energy_exhausted, which TimeSystem turns into the
+## end of the day.
 func try_spend_energy(amount: float) -> bool:
 	if amount > energy:
 		return false

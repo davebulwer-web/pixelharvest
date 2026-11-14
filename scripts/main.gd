@@ -1,6 +1,7 @@
 extends Node2D
 ##
 ## Farm — the farm scene: draws FarmData and holds the things standing on it.
+## It's one location among (eventually) several; LocationManager opens it.
 ##
 ## Since Stage 2 this script owns no game state at all. It reads the farm from
 ## GameState, paints it once on load, then listens on EventBus and repaints
@@ -12,9 +13,10 @@ extends Node2D
 ##
 ##   Farm
 ##   ├── Ground     (TileMapLayer, z_index -1, NOT y-sorted — always underfoot)
+##   ├── SpawnPoints (Marker2Ds where LocationManager can put an arriving player)
 ##   ├── TileCursor (outline on the tile the player is facing; drawn under entities)
-##   ├── Entities   (y-sorted — player and props sort against each other by
-##   │               their node origin, which for both sits at their base)
+##   ├── Entities   (y-sorted — player, trees and crops sort against each other
+##   │               by their node origin, which for all of them sits at their base)
 ##   └── Hud        (CanvasLayer — fixed to the screen, not the world)
 ##
 
@@ -45,17 +47,36 @@ const OBJECT_SCENES: Dictionary = {
 @onready var _player: Player = $Entities/Player
 @onready var _cursor: Node2D = $TileCursor
 
+## cell -> the Sprite2D showing the crop there. Purely a view cache: it can
+## always be rebuilt from FarmData, and is, every morning.
+var _crop_sprites: Dictionary = {}
+
 
 func _ready() -> void:
+	_place_player()
+	_apply_season_theme()
 	_draw_all()
 	_place_objects()
 	EventBus.tile_tilled.connect(_redraw_cell)
 	EventBus.tile_watered.connect(_redraw_cell)
 	EventBus.tile_cleared.connect(_redraw_cell)
+	EventBus.crop_planted.connect(func(cell: Vector2i, _id: StringName) -> void: _redraw_crop(cell))
+	EventBus.crop_grew.connect(func(cell: Vector2i, _stage: int) -> void: _redraw_crop(cell))
+	EventBus.crop_harvested.connect(
+		func(cell: Vector2i, _id: StringName, _n: int) -> void: _redraw_crop(cell)
+	)
+	# Overnight, many cells change at once (all the soil dries), so rather
+	# than a signal per cell the morning simply redraws the whole farm.
+	EventBus.day_started.connect(func(_d: int, _s: int, _y: int) -> void: _draw_all())
+	EventBus.season_changed.connect(func(_s: int) -> void:
+		_apply_season_theme()
+		_draw_all()
+	)
 
 	print("--- Pixel Harvest · Stage 2 ---")
 	print("WASD/arrows move. Space uses the tool on the highlighted tile.")
-	print("Tab / Q switch tool. Hoe tills grass; watering can waters tilled soil.")
+	print("Tab / Q switch tool: hoe, watering can, parsnip seeds.")
+	print("E harvests a ready crop. Enter sleeps; watered crops grow overnight.")
 	print("-------------------------------")
 
 
@@ -65,9 +86,62 @@ func _process(_delta: float) -> void:
 	_cursor.position = Vector2(_player.target_cell() * TILE_PX)
 
 
+## Put the player at the spawn point LocationManager asked for, if any.
+## Arriving from the town (Stage 7) will name the farm gate, for example.
+func _place_player() -> void:
+	var point := LocationManager.take_arrival_point()
+	if point == &"":
+		return
+	var marker := get_node_or_null(NodePath("SpawnPoints/%s" % point)) as Marker2D
+	if marker == null:
+		push_warning("Farm has no spawn point '%s'" % point)
+		return
+	_player.position = marker.position
+
+
+## Swap the ground to this season's tileset. Every season's tileset shares one
+## atlas layout (see season_theme.gd), so the redraw that follows puts every
+## tile back in the right place with the new season's pixels.
+func _apply_season_theme() -> void:
+	var theme := GameState.current_season_theme()
+	if theme != null and theme.ground_tileset != null:
+		_ground.tile_set = theme.ground_tileset
+
+
 func _draw_all() -> void:
 	for cell: Vector2i in GameState.farm.cells():
 		_redraw_cell(cell)
+		_redraw_crop(cell)
+
+
+## Make the crop sprite at `cell` match FarmData: create it, update its growth
+## frame, or remove it.
+func _redraw_crop(cell: Vector2i) -> void:
+	var t: FarmTile = GameState.farm.tile(cell)
+	var sprite: Sprite2D = _crop_sprites.get(cell)
+	if t.has_crop() and t.crop.sprite_sheet == null:
+		# A content mistake, not a code one: say which crop, and carry on
+		# rather than crash. The crop still grows; it just can't be seen.
+		push_warning("Crop '%s' has no sprite_sheet set" % t.crop.id)
+		return
+	if not t.has_crop():
+		if sprite != null:
+			sprite.queue_free()
+			_crop_sprites.erase(cell)
+		return
+	if sprite == null:
+		sprite = Sprite2D.new()
+		# Crops live with the player and trees so they Y-sort against them:
+		# walk above a tall crop and you're hidden behind it.
+		sprite.position = cell_base(cell)
+		_entities.add_child(sprite)
+		_crop_sprites[cell] = sprite
+	var sheet := t.crop.sprite_sheet
+	sprite.texture = sheet
+	sprite.hframes = t.crop.growth_stages + 1
+	# Lift the sprite so its bottom edge sits on the bottom of the tile.
+	sprite.offset = Vector2(0, -sheet.get_height() / 2.0)
+	sprite.frame = t.crop_stage
 
 
 func _redraw_cell(cell: Vector2i) -> void:
