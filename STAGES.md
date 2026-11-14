@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 4 — content pipeline and economy.** Built 2026-11-14; awaiting Dave's check on Windows. Next: Stage 5.
+**Current stage: 5 — the incremental spine.** Built 2026-11-14; awaiting Dave's check on Windows. Next: Stage 6.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -145,7 +145,7 @@ Session 1 (2026-11-14) — see DECISIONS 023.
       shipping, overnight sale, bean regrow, save round trip, v1 and v2 upgrades, bad saves,
       broken content reported) and in a rendered recording: harvest four crops, ship them,
       shop, buy, sleep, morning shows the sale
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-14)
 
 **Left over:** the four new crops, all item icons and the shipping bin are placeholder art
 (generated locally, on palette). Real versions are a Pixellab job, from the cloud
@@ -153,13 +153,27 @@ environment that can reach it (DECISIONS 019), once Dave has approved the looks.
 
 ## Stage 5 — The incremental spine · 2–3 sessions · Opus to design, Sonnet to build
 
-- [ ] `ToolDef` resource with tiers and area of effect
-- [ ] Hoe and watering can at 1 → 3 → 9 tiles
-- [ ] Energy upgrades
-- [ ] Sprinklers — the first thing that removes a daily chore entirely
-- [ ] Plot unlocking to expand the farm
-- [ ] `UpgradeDef` resources and a purchase flow
-- [ ] First real balance pass: is the curve satisfying?
+Session 1 (2026-11-14) — see DECISIONS 024.
+
+- [x] `ToolDef` with tiers (`ToolTier`: name, energy, length × width); the cursor outlines
+      every tile a swing will cover
+- [x] Hoe and watering can at 1 → 3 → 9 tiles (wide, then great)
+- [x] Energy upgrades: Packed lunch, Hearty breakfast, Farmer's stamina (+25, +25, +50)
+- [x] Sprinklers (4 tiles) and big sprinklers (8 tiles): bought, placed with Space, picked
+      up with E, water at dawn; `ObjectDef` resources replace the hardcoded object list
+- [x] Plot unlocking: three fields start as thicket and are cleared when bought
+- [x] `UpgradeDef` + `UpgradeEffect` resources; the shop gains an Upgrades column
+- [x] Save version 4 (upgrades saved, max energy worked out); `tests/saves/v3_example.json`
+- [x] Verified headless (78 checks: tiers and areas, energy charging, offers and
+      prerequisites, fields, sprinklers overnight, pick-up, save round trip, v1/v2/v3
+      upgrades, bad saves) and in a rendered recording: buy four upgrades, wide hoe, wide
+      can, place a sprinkler, sleep
+- [~] First balance pass: numbers set and reasoned (DECISIONS 024); needs Dave's play to
+      judge whether the curve feels right
+- [x] New game moved from F9 (the editor's pause key) to Ctrl+N
+- [ ] Dave confirms it plays correctly on Windows
+
+**Left over:** thicket, sprinklers and the energy/field icons are placeholder art.
 
 ## Stage 6 — Seasons made real · 2 sessions · Sonnet 5.5
 

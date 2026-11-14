@@ -10,6 +10,10 @@ extends RefCounted
 ## The layout itself is placeholder and will be replaced when the farm gets a
 ## designed map. Only this file will change when it does.
 ##
+## Fields the player can buy (Stage 5) start as thicket. Where they are isn't
+## written here: each field's upgrade .tres knows its own area, and this
+## overgrows whatever those areas say. Adding a field is one data file.
+##
 
 const FARM_SIZE := Vector2i(30, 20)
 const POND := Rect2i(21, 3, 5, 4)
@@ -40,7 +44,20 @@ static func build_default() -> FarmData:
 	for cell in TREE_CELLS:
 		farm.tile(cell).object_id = &"tree"
 	farm.tile(SHIPPING_BIN).object_id = &"shipping_bin"
+	_overgrow_fields(farm)
 	return farm
+
+
+## Turn the grass in every buyable field into thicket. Ponds, paths and trees
+## inside a field are left alone — they're still there once it's cleared.
+static func _overgrow_fields(farm: FarmData) -> void:
+	for upgrade in ContentDB.upgrades():
+		var area := upgrade.effect.locked_area() if upgrade.effect != null else Rect2i()
+		for y in range(area.position.y, area.end.y):
+			for x in range(area.position.x, area.end.x):
+				var t := farm.tile(Vector2i(x, y))
+				if t != null and t.terrain == FarmTile.Terrain.GRASS:
+					t.terrain = FarmTile.Terrain.THICKET
 
 
 static func _terrain_for(cell: Vector2i) -> FarmTile.Terrain:

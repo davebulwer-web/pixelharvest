@@ -31,17 +31,13 @@ const TILE_TILLED := Vector2i(3, 0)
 const TILE_TILLED_WET := Vector2i(4, 0)
 const TILE_WATER := Vector2i(5, 0)
 const TILE_CLIFF := Vector2i(7, 0)
+const TILE_THICKET := Vector2i(8, 0)
 
 ## Roughly how much of the grass uses the variant tile. Purely cosmetic, which
 ## is why it's here and not in FarmData: which grass tile a cell shows is a
 ## drawing decision, not a fact about the farm.
 const GRASS_VARIATION := 0.18
 
-## What to put in the world for each FarmTile.object_id.
-const OBJECT_SCENES: Dictionary = {
-	&"tree": preload("res://scenes/tree.tscn"),
-	&"shipping_bin": preload("res://scenes/shipping_bin.tscn"),
-}
 
 @onready var _ground: TileMapLayer = $Ground
 @onready var _entities: Node2D = $Entities
@@ -51,6 +47,10 @@ const OBJECT_SCENES: Dictionary = {
 ## cell -> the Sprite2D showing the crop there. Purely a view cache: it can
 ## always be rebuilt from FarmData, and is, every morning.
 var _crop_sprites: Dictionary = {}
+
+## cell -> the node showing the object there (tree, bin, sprinkler). Also only
+## a view: what stands where is in FarmData.
+var _object_nodes: Dictionary = {}
 
 
 func _ready() -> void:
@@ -66,6 +66,13 @@ func _ready() -> void:
 	EventBus.crop_harvested.connect(
 		func(cell: Vector2i, _id: StringName, _n: int) -> void: _redraw_crop(cell)
 	)
+	EventBus.object_placed.connect(func(cell: Vector2i, _id: StringName) -> void:
+		_redraw_cell(cell)
+		_place_object(cell)
+	)
+	EventBus.object_removed.connect(func(cell: Vector2i, _id: StringName) -> void: _remove_object(cell))
+	# A field bought: its thicket is grass now. Rare enough to redraw it all.
+	EventBus.plot_unlocked.connect(func(_id: StringName) -> void: _draw_all())
 	# Overnight, many cells change at once (all the soil dries), so rather
 	# than a signal per cell the morning simply redraws the whole farm.
 	EventBus.day_started.connect(func(_d: int, _s: int, _y: int) -> void: _draw_all())
@@ -74,19 +81,20 @@ func _ready() -> void:
 		_draw_all()
 	)
 
-	print("--- Pixel Harvest · Stage 4 ---")
-	print("WASD/arrows move. Space uses the item on the highlighted tile.")
-	print("Tab / Q move along the hotbar: tools and seeds. Seeds are used up.")
-	print("E harvests a ready crop, or (facing the bin) ships all your produce.")
-	print("B opens the seed shop. Enter sleeps; the bin sells overnight.")
-	print("The game saves every morning and loads on launch. F9 starts a new game.")
+	print("--- Pixel Harvest · Stage 5 ---")
+	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
+	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
+	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler.")
+	print("B opens the shop: seeds, sprinklers, and upgrades (tools, energy, fields).")
+	print("Enter sleeps; the bin sells overnight and sprinklers water at dawn.")
+	print("The game saves every morning and loads on launch. Ctrl+N starts a new game.")
 	print("-------------------------------")
 
 
 func _process(_delta: float) -> void:
 	# The cursor follows wherever the player is facing, so it's always clear
-	# which tile Space will act on.
-	_cursor.position = Vector2(_player.target_cell() * TILE_PX)
+	# which tiles Space will act on — three or nine with an upgraded tool.
+	_cursor.set_cells(_player.target_cells())
 
 
 ## Put the player at the spawn point LocationManager asked for, if any.
@@ -165,6 +173,8 @@ func _atlas_for(cell: Vector2i) -> Vector2i:
 			return TILE_WATER
 		FarmTile.Terrain.PATH:
 			return TILE_PATH
+		FarmTile.Terrain.THICKET:
+			return TILE_THICKET
 	# hash() gives the same answer for the same cell every run, so the grass
 	# pattern is stable without storing anything.
 	if float(hash(cell) % 1000) / 1000.0 < GRASS_VARIATION:
@@ -179,12 +189,28 @@ func cell_base(cell: Vector2i) -> Vector2:
 
 func _place_objects() -> void:
 	for cell: Vector2i in GameState.farm.cells():
-		var object_id: StringName = GameState.farm.tile(cell).object_id
-		if object_id == &"":
-			continue
-		if not OBJECT_SCENES.has(object_id):
-			push_warning("Farm has an object '%s' with no scene to show it" % object_id)
-			continue
-		var node: Node2D = OBJECT_SCENES[object_id].instantiate()
-		node.position = cell_base(cell)
-		_entities.add_child(node)
+		_place_object(cell)
+
+
+## Show whatever FarmData says stands at `cell`. What scene that is comes from
+## its ObjectDef (data/objects/), so a new kind of object needs no code here.
+func _place_object(cell: Vector2i) -> void:
+	var object_id: StringName = GameState.farm.tile(cell).object_id
+	if object_id == &"":
+		return
+	var object_def := ContentDB.object(object_id)
+	if object_def == null or object_def.scene == null:
+		push_warning("Farm has an object '%s' with no scene to show it" % object_id)
+		return
+	_remove_object(cell)
+	var node: Node2D = object_def.scene.instantiate()
+	node.position = cell_base(cell)
+	_entities.add_child(node)
+	_object_nodes[cell] = node
+
+
+func _remove_object(cell: Vector2i) -> void:
+	var node: Node2D = _object_nodes.get(cell)
+	if node != null:
+		node.queue_free()
+		_object_nodes.erase(cell)

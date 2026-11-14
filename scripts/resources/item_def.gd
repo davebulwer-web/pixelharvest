@@ -15,6 +15,10 @@ extends Resource
 @export var id: StringName
 @export var display_name: String
 
+## One line for the shop, saying what it's for. Optional: seeds describe
+## themselves from their crop (grow time, sell price) when this is empty.
+@export_multiline var description: String = ""
+
 ## 16×16, shown in the hotbar and the shop.
 @export var icon: Texture2D
 

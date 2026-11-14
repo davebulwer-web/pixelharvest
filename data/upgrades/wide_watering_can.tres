@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="UpgradeDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/upgrade_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/upgrades/tool_tier_effect.gd" id="2_effect"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/watering_can.png" id="3_icon"]
+
+[ext_resource type="Resource" path="res://data/tools/watering_can.tres" id="5_tool"]
+
+[sub_resource type="Resource" id="Resource_effect"]
+script = ExtResource("2_effect")
+tool = ExtResource("5_tool")
+tier = 1
+
+[resource]
+script = ExtResource("1_def")
+id = &"wide_watering_can"
+display_name = "Wide watering can"
+description = "Waters 3 tiles in a row at once, for 2 energy (was 1 a tile)."
+icon = ExtResource("3_icon")
+price = 200
+effect = SubResource("Resource_effect")

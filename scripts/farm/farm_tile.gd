@@ -9,12 +9,15 @@ extends RefCounted
 ## save file can hold, and back again.
 ##
 
-## What the ground fundamentally is. Fixed for the life of the farm.
-enum Terrain { GRASS, PATH, WATER, CLIFF }
+## What the ground fundamentally is. Fixed for the life of the farm, except
+## that THICKET (a field not yet bought) becomes GRASS when it's bought.
+## New values go on the end; saves store the name, never the number.
+enum Terrain { GRASS, PATH, WATER, CLIFF, THICKET }
 
 var terrain: Terrain = Terrain.GRASS
 
-## Something standing on the cell that blocks tools, e.g. &"tree".
+## Something standing on the cell that blocks tools, e.g. &"tree" or
+## &"sprinkler". What the id means is an ObjectDef in data/objects/.
 ## Empty StringName means nothing is there.
 var object_id: StringName = &""
 

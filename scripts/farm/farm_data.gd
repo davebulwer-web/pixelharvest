@@ -75,6 +75,27 @@ func can_harvest(cell: Vector2i) -> bool:
 	return t != null and t.is_crop_ready()
 
 
+## Room to put an object down: open grass (tilled or not) with nothing on it.
+func can_place(cell: Vector2i) -> bool:
+	var t := tile(cell)
+	return (
+		t != null
+		and t.terrain == FarmTile.Terrain.GRASS
+		and t.object_id == &""
+		and not t.has_crop()
+	)
+
+
+## True if any cell in `area` has this terrain.
+func has_terrain_in(area: Rect2i, terrain: FarmTile.Terrain) -> bool:
+	for y in range(area.position.y, area.end.y):
+		for x in range(area.position.x, area.end.x):
+			var t := tile(Vector2i(x, y))
+			if t != null and t.terrain == terrain:
+				return true
+	return false
+
+
 # --- Changes -----------------------------------------------------------------
 # Each one checks its own precondition, so a caller that forgets to ask first
 # can't corrupt the farm — it just gets a no-op.
@@ -123,10 +144,48 @@ func harvest(cell: Vector2i) -> int:
 	return amount
 
 
+## Put an object (a sprinkler) on the tile. Any tilling there is undone:
+## the object stands on the ground, not in a seed bed.
+func place_object(cell: Vector2i, object_id: StringName) -> void:
+	if not can_place(cell):
+		return
+	var t := tile(cell)
+	t.object_id = object_id
+	t.tilled = false
+	t.watered = false
+	EventBus.object_placed.emit(cell, object_id)
+
+
+func remove_object(cell: Vector2i) -> void:
+	var t := tile(cell)
+	if t == null or t.object_id == &"":
+		return
+	var object_id := t.object_id
+	t.object_id = &""
+	EventBus.object_removed.emit(cell, object_id)
+
+
+## A field has been bought: its thicket becomes grass. Water, trees and
+## anything else in the area are left as they are. Returns how many cells
+## were cleared. Announcing it is the caller's job (PlotEffect), because it
+## knows which field this was.
+func clear_thicket(area: Rect2i) -> int:
+	var cleared := 0
+	for y in range(area.position.y, area.end.y):
+		for x in range(area.position.x, area.end.x):
+			var t := tile(Vector2i(x, y))
+			if t != null and t.terrain == FarmTile.Terrain.THICKET:
+				t.terrain = FarmTile.Terrain.GRASS
+				cleared += 1
+	return cleared
+
+
 # --- Overnight ---------------------------------------------------------------
 
 ## Everything that happens to the farm while the player sleeps: each watered
-## crop gets one day of growth, then all the soil dries out.
+## crop gets one day of growth, then all the soil dries out, then sprinklers
+## water the ground around them — so the player wakes to wet soil around every
+## sprinkler, and those crops grow the following night without being touched.
 ##
 ## Called by TimeSystem once per day. It deliberately knows nothing about
 ## *when* days end — only what a day's passing does to the farm.
@@ -136,6 +195,21 @@ func advance_day() -> void:
 		if t.has_crop() and t.watered and not t.is_crop_ready():
 			_grow(cell, t)
 		t.watered = false
+	_run_sprinklers()
+
+
+## Any object with water_offsets waters those tiles. water() only wets tilled
+## soil, so a sprinkler next to grass or a path simply does nothing there.
+func _run_sprinklers() -> void:
+	for cell: Vector2i in _tiles:
+		var object_id: StringName = _tiles[cell].object_id
+		if object_id == &"":
+			continue
+		var object_def := ContentDB.object(object_id)
+		if object_def == null:
+			continue
+		for offset in object_def.water_offsets:
+			water(cell + offset)
 
 
 func _grow(cell: Vector2i, t: FarmTile) -> void:

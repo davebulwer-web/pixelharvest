@@ -103,10 +103,14 @@ scenes/              .tscn scene files
 scripts/             Game code
   autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem…)
   items/             Inventory
+  tools/             ToolAction scripts (hoe, watering can, planting, placing objects)
+  upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
 data/                Content resources (.tres), indexed by ContentDB
   crops/             CropDef — how each plant grows and looks
   produce/           ItemDef — what a harvest gives, and its sell price
-  tools/             ToolDef — tools and seeds (seeds are tools)
+  tools/             ToolDef — tools, seeds and sprinklers (all things you use)
+  objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers)
+  upgrades/          UpgradeDef — bought once: tool tiers, energy, fields
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab
 assets/tilesets/     Ground and world tilesets

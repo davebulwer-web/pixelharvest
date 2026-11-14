@@ -15,25 +15,35 @@ extends Node
 ## (&"parsnip" the vegetable, &"parsnip_seeds", &"hoe"). An id must be unique
 ## within its set.
 ##
-## Where things live (DECISIONS 023):
+## Where things live (DECISIONS 023, 024):
 ##   data/crops/     CropDef — how a plant grows and looks
 ##   data/produce/   ItemDef — what a harvest gives you, and its sell price
-##   data/tools/     ToolDef — tools, and seeds (seeds are tools: DECISIONS 020)
+##   data/tools/     ToolDef — tools, seeds and sprinklers (all things you use)
+##   data/objects/   ObjectDef — things standing on the farm: trees, the bin,
+##                   sprinklers
+##   data/upgrades/  UpgradeDef — bought once: tool tiers, energy, fields
 ##
 
 const CROPS_DIR := "res://data/crops/"
 const ITEM_DIRS: Array[String] = ["res://data/tools/", "res://data/produce/"]
+const OBJECTS_DIR := "res://data/objects/"
+const UPGRADES_DIR := "res://data/upgrades/"
 
 var _crops: Dictionary = {}  # StringName -> CropDef
 var _items: Dictionary = {}  # StringName -> ItemDef (ToolDef is an ItemDef)
+var _objects: Dictionary = {}  # StringName -> ObjectDef
+var _upgrades: Dictionary = {}  # StringName -> UpgradeDef
 
 
 func _ready() -> void:
 	_index(CROPS_DIR, _crops)
 	for dir in ITEM_DIRS:
 		_index(dir, _items)
+	_index(OBJECTS_DIR, _objects)
+	_index(UPGRADES_DIR, _upgrades)
 	_check()
-	print("ContentDB: %d crops, %d items" % [_crops.size(), _items.size()])
+	print("ContentDB: %d crops, %d items, %d objects, %d upgrades"
+			% [_crops.size(), _items.size(), _objects.size(), _upgrades.size()])
 
 
 ## The crop with this id, or null if there isn't one (for example, a save from
@@ -45,6 +55,30 @@ func crop(id: StringName) -> CropDef:
 ## The item with this id — produce, seeds or tool — or null.
 func item(id: StringName) -> ItemDef:
 	return _items.get(id)
+
+
+## What a farm object id (FarmTile.object_id) means, or null.
+func object(id: StringName) -> ObjectDef:
+	return _objects.get(id)
+
+
+## The upgrade with this id, or null.
+func upgrade(id: StringName) -> UpgradeDef:
+	return _upgrades.get(id)
+
+
+## Every upgrade in the game, owned or not, cheapest first. Which ones are on
+## offer right now is Economy's question, because it depends on the game.
+func upgrades() -> Array[UpgradeDef]:
+	var result: Array[UpgradeDef] = []
+	for each: UpgradeDef in _upgrades.values():
+		result.append(each)
+	result.sort_custom(func(a: UpgradeDef, b: UpgradeDef) -> bool:
+		if a.price != b.price:
+			return a.price < b.price
+		return a.display_name < b.display_name
+	)
+	return result
 
 
 ## Everything the shop sells, cheapest first. An item is on sale simply by
@@ -108,6 +142,13 @@ func _check() -> void:
 					push_error("ContentDB: '%s' plants a crop that isn't in %s" % [where, CROPS_DIR])
 				else:
 					planted[seed_crop.id] = true
+			elif tool_def.action is PlaceObjectAction:
+				if object(tool_def.action.object_id) == null:
+					push_error("ContentDB: '%s' places an object '%s' that isn't in %s"
+							% [where, tool_def.action.object_id, OBJECTS_DIR])
+			for tier in tool_def.tiers:
+				if tier == null or tier.display_name == "":
+					push_error("ContentDB: '%s' has a tier with no name" % where)
 
 	for each: CropDef in _crops.values():
 		var where := each.resource_path
@@ -122,3 +163,26 @@ func _check() -> void:
 					% [where, each.growth_stages + 1, each.growth_stages])
 		if not planted.has(each.id):
 			push_warning("ContentDB: no seeds plant '%s', so it can never be grown" % each.id)
+
+	for each: ObjectDef in _objects.values():
+		var where := each.resource_path
+		if each.scene == null:
+			push_error("ContentDB: '%s' has no scene, so it can't be shown" % where)
+		if each.item != null and item(each.item.id) != each.item:
+			push_error("ContentDB: '%s' gives back an item that isn't in data/tools/" % where)
+
+	for each: UpgradeDef in _upgrades.values():
+		var where := each.resource_path
+		if each.effect == null:
+			push_error("ContentDB: '%s' has no effect, so buying it does nothing" % where)
+		elif each.effect is ToolTierEffect:
+			var tier_effect := each.effect as ToolTierEffect
+			if tier_effect.tool == null or item(tier_effect.tool.id) != tier_effect.tool:
+				push_error("ContentDB: '%s' upgrades a tool that isn't in data/tools/" % where)
+			elif tier_effect.tier < 1 or tier_effect.tier > tier_effect.tool.max_tier():
+				push_error("ContentDB: '%s' gives tier %d, but '%s' only has tiers 1 to %d"
+						% [where, tier_effect.tier, tier_effect.tool.id, tier_effect.tool.max_tier()])
+		if each.requires != null and upgrade(each.requires.id) != each.requires:
+			push_error("ContentDB: '%s' requires an upgrade that isn't in %s" % [where, UPGRADES_DIR])
+		if each.price <= 0:
+			push_warning("ContentDB: '%s' has no price, so it's free" % where)

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ObjectDef" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/object_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/big_sprinkler.tscn" id="2_scene"]
+[ext_resource type="Resource" path="res://data/tools/big_sprinkler.tres" id="3_item"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"big_sprinkler"
+display_name = "Big sprinkler"
+scene = ExtResource("2_scene")
+item = ExtResource("3_item")
+water_offsets = Array[Vector2i]([Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(-1, 1), Vector2i(0, 1), Vector2i(1, 1)])

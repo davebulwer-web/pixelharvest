@@ -1,11 +1,26 @@
-[gd_resource type="Resource" script_class="ToolDef" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="ToolDef" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="1_def"]
 [ext_resource type="Script" path="res://scripts/tools/watering_can_action.gd" id="2_action"]
+[ext_resource type="Script" path="res://scripts/resources/tool_tier.gd" id="4_tier"]
 [ext_resource type="Texture2D" path="res://assets/sprites/items/watering_can.png" id="3_icon"]
 
 [sub_resource type="Resource" id="Resource_action"]
 script = ExtResource("2_action")
+
+[sub_resource type="Resource" id="ToolTier_1"]
+script = ExtResource("4_tier")
+display_name = "Wide watering can"
+energy_cost = 2.0
+length = 3
+width = 1
+
+[sub_resource type="Resource" id="ToolTier_2"]
+script = ExtResource("4_tier")
+display_name = "Great watering can"
+energy_cost = 4.0
+length = 3
+width = 3
 
 [resource]
 script = ExtResource("1_def")
@@ -14,3 +29,4 @@ display_name = "Watering can"
 icon = ExtResource("3_icon")
 energy_cost = 1.0
 action = SubResource("Resource_action")
+tiers = Array[ExtResource("4_tier")]([SubResource("ToolTier_1"), SubResource("ToolTier_2")])

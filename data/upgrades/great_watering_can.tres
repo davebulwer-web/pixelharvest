@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="UpgradeDef" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/upgrade_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/upgrades/tool_tier_effect.gd" id="2_effect"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/watering_can.png" id="3_icon"]
+[ext_resource type="Resource" path="res://data/upgrades/wide_watering_can.tres" id="4_requires"]
+[ext_resource type="Resource" path="res://data/tools/watering_can.tres" id="5_tool"]
+
+[sub_resource type="Resource" id="Resource_effect"]
+script = ExtResource("2_effect")
+tool = ExtResource("5_tool")
+tier = 2
+
+[resource]
+script = ExtResource("1_def")
+id = &"great_watering_can"
+display_name = "Great watering can"
+description = "Waters a 3 by 3 square ahead of you at once, for 4 energy."
+icon = ExtResource("3_icon")
+price = 800
+requires = ExtResource("4_requires")
+effect = SubResource("Resource_effect")

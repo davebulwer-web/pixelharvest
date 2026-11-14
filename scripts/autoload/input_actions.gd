@@ -10,6 +10,10 @@ extends Node
 ## Physical keycodes are used deliberately, so the WASD cluster stays in the
 ## same place on non-QWERTY keyboards.
 ##
+## A key can carry Ctrl by adding KEY_MASK_CTRL, e.g. KEY_N | KEY_MASK_CTRL.
+## Avoid bare function keys: the Godot editor keeps several for itself while
+## the game runs (F9 pauses the running project), so the game never sees them.
+##
 
 ## action name -> list of physical keys that trigger it
 const ACTIONS: Dictionary = {
@@ -23,12 +27,14 @@ const ACTIONS: Dictionary = {
 	&"next_tool": [KEY_TAB],
 	&"prev_tool": [KEY_Q],
 	&"sleep": [KEY_ENTER],
-	&"new_game": [KEY_F9],
+	&"new_game": [KEY_N | KEY_MASK_CTRL],
 	&"open_shop": [KEY_B],
-	# Godot's built-in menu actions already have the arrow keys; adding W and
-	# S lets the shop menu be driven from the same hand as walking.
+	# Godot's built-in menu actions already have the arrow keys; adding WASD
+	# lets the shop menu be driven from the same hand as walking.
 	&"ui_up": [KEY_W],
 	&"ui_down": [KEY_S],
+	&"ui_left": [KEY_A],
+	&"ui_right": [KEY_D],
 }
 
 
@@ -42,5 +48,6 @@ func _register_actions() -> void:
 			InputMap.add_action(action_name)
 		for keycode: Key in ACTIONS[action_name]:
 			var event := InputEventKey.new()
-			event.physical_keycode = keycode
+			event.physical_keycode = keycode & KEY_CODE_MASK
+			event.ctrl_pressed = (keycode & KEY_MASK_CTRL) != 0
 			InputMap.action_add_event(action_name, event)

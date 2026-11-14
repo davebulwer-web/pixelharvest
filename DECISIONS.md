@@ -447,3 +447,73 @@ machine, which the bridge can't do. The bag has no size limit; whether it should
 design question for Stage 5. Nothing comes back out of the bin once shipped. Prices are a
 first guess (radish 10 → 20 over 3 days … cabbage 60 → 120 over 9; green beans 50, then
 15 every 3 days); Stage 5 is the real balance pass. All new art is placeholder.
+
+---
+
+## 024 — Upgrades are data with a small effect script; tool tiers live on the tool; fields start as thicket
+
+**Decision.** Stage 5's progression rests on these choices:
+
+- *Tool tiers are on the tool.* `ToolDef.tiers` is a list of `ToolTier` (name, energy per
+  swing, `length` × `width` of the area). Tier 0 is the tool as it comes, one tile. The area
+  starts at the tile in front and runs away from the player: 3 × 1 is three in a line, 3 × 3
+  a square of nine. The `ToolAction` interface is unchanged — it is still asked about one
+  tile at a time, and the player asks it about each tile in the area. A swing costs the
+  tier's energy, but never more than doing the same tiles one by one with the basic tool,
+  so an upgrade is never worse than what it replaced.
+- *An upgrade is an `UpgradeDef`* (id, name, description, icon, price, `requires`) holding
+  an `UpgradeEffect` sub-resource — the same shape as a tool and its action. Three effect
+  scripts so far: `ToolTierEffect`, `MaxEnergyEffect`, `PlotEffect`. Lasting bonuses are
+  *asked for* (GameState adds up what every owned upgrade says), so only "this upgrade is
+  owned" is stored; one-off changes to the world (clearing a field) happen once in
+  `on_bought()` and are kept because the farm is saved. `requires` makes a line of upgrades
+  (wide hoe → great hoe) and the shop shows one step of each line at a time.
+- *Fields are thicket.* A new terrain, `THICKET`, impassable and untillable. Each field's
+  area is written once, in its upgrade's `.tres`; `FarmLayout` overgrows those areas when it
+  builds a new farm, and buying the field turns its thicket to grass. A new game starts
+  with the clearing around the path (18 × 13 tiles) and three fields to buy.
+- *Sprinklers are items you place.* A `ToolDef` with a `PlaceObjectAction` puts an object
+  on the tile; E picks it back up. What objects *are* moved out of `main.gd`'s hardcoded
+  list into `ObjectDef` resources in `data/objects/` (scene, what you get back for picking
+  it up, which tiles it waters). `FarmData.advance_day()` runs sprinklers *after* the soil
+  dries, so you wake to wet soil around each one and those crops grow the next night.
+- *Save version 4.* `upgrades` (a list of ids) is added and `max_energy` is dropped — it's
+  worked out from the upgrades, so a rebalanced energy upgrade reaches existing games.
+  `tests/saves/v3_example.json` is a real version 3 save made by the Stage 4 build.
+- *The shop has two columns*: seeds and supplies on the left (anything with a `buy_price`),
+  upgrades on the right (whatever Economy says is on offer), and a line underneath
+  describing whatever is focused. Items gained an optional `description` for that line.
+
+**Why.** The alternatives for upgrades were a `match upgrade.id` somewhere (exactly the
+growing if/else rule 5 forbids) or one upgrade script per upgrade (code for every price
+change). An effect script per *kind* of upgrade means a fourth energy upgrade or a better
+watering can is one `.tres`. Thicket inside the existing map, rather than new land beyond
+the cliffs, keeps fields visible from the start — you can see what you're saving for — and
+needs no special drawing, collision or saving: it is just terrain. Asking for bonuses
+rather than storing them avoids two numbers (max energy and the upgrades that set it)
+that could disagree.
+
+**Cost.**
+- Farms saved before Stage 5 have no thicket, so all their land is already open and the
+  fields are never offered there (`PlotEffect.is_useful()`). Press Ctrl+N for a new game to
+  see the fields. Converting old farms was rejected: it would mean turning land the player
+  may have planted into thicket.
+- A new *kind* of upgrade (a bigger bag, say) still needs a method on `UpgradeEffect` and a
+  small script. Accepted: that is a new mechanic, not new content.
+- The thicket tile was added as column 8 of `ground_placeholder.png` (and `8:0`, with
+  collision, in `ground_tileset.tres`). Stage 6's seasonal tilesets must keep that column.
+- All new art is placeholder: thicket, both sprinklers, the energy and field icons. Tool
+  upgrades reuse the hoe and watering can icons.
+
+**Balance, first pass.** Energy per tile, basic → wide → great: hoe 2 → 1 → 0.67, watering
+can 1 → 0.67 → 0.44. Starting with 100 energy and parsnips (7 energy a tile over four days),
+roughly 50 tiles can be kept going by hand, but early on gold, not energy, is the limit. The
+first upgrades (wide can 200g, wide hoe 250g, packed lunch 400g, north field 500g) should
+land within the first week or so of careful play; the great tools (800g, 1000g) and the
+sprinklers (200g for 4 tiles, 750g for 8) in the second; the last field (2000g) and
+Farmer's stamina (3000g) are the long goals. These are guesses until Dave has played it —
+every number is in a `.tres` file and can be changed in the inspector.
+
+**Also changed.** "New game" moved from F9 to Ctrl+N. Dave found that F9 pauses the running
+project in the Godot editor, so the game never saw it and looked hung. Function keys are
+best left to the editor.

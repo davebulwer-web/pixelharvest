@@ -25,6 +25,7 @@ func _ready() -> void:
 	EventBus.item_added.connect(func(_id: StringName, _n: int) -> void: queue_redraw())
 	EventBus.item_removed.connect(func(_id: StringName, _n: int) -> void: queue_redraw())
 	EventBus.tool_selected.connect(func(_id: StringName) -> void: queue_redraw())
+	EventBus.tool_upgraded.connect(func(_id: StringName, _tier: int) -> void: queue_redraw())
 	EventBus.game_loaded.connect(queue_redraw)
 	resized.connect(queue_redraw)
 
@@ -46,7 +47,7 @@ func _draw() -> void:
 		var is_selected := tool_def == selected
 		_draw_slot(Vector2(x, y), tool_def, is_selected, tool_def.consumed_on_use)
 		if is_selected:
-			_draw_name(tool_def.display_name, Vector2(x + SLOT_PX / 2.0, y - 4))
+			_draw_name(GameState.tool_name(tool_def), Vector2(x + SLOT_PX / 2.0, y - 4))
 		x += SLOT_PX + GAP
 	x += GROUP_GAP
 	for item in others:

@@ -19,7 +19,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 3, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 4, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -38,7 +38,9 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##   2 — selected tool saved by id; terrain saved by name.
 ##   3 — the tool list becomes an inventory of items with counts (seeds are no
 ##       longer unlimited), and the farm gains a shipping bin.
-const CURRENT_VERSION := 3
+##   4 — upgrades bought are saved by id; maximum energy is no longer saved,
+##       because it's worked out from the upgrades.
+const CURRENT_VERSION := 4
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -49,7 +51,7 @@ const REQUIRED_FIELDS: Dictionary = {
 	"season": TYPE_FLOAT,
 	"year": TYPE_FLOAT,
 	"energy": TYPE_FLOAT,
-	"max_energy": TYPE_FLOAT,
+	"upgrades": TYPE_ARRAY,
 	"inventory": TYPE_ARRAY,
 	"selected_tool": TYPE_STRING,
 	"location": TYPE_STRING,
@@ -168,6 +170,9 @@ func _check_fields(game: Dictionary) -> String:
 		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("id")) != TYPE_STRING \
 				or typeof(entry.get("count")) not in [TYPE_FLOAT, TYPE_INT]:
 			return "the inventory has something that isn't an item id and a count"
+	for entry: Variant in game["upgrades"]:
+		if typeof(entry) != TYPE_STRING:
+			return "the upgrades list has something that isn't an upgrade id"
 	for entry: Variant in farm["tiles"]:
 		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("x")) != TYPE_FLOAT \
 				or typeof(entry.get("y")) != TYPE_FLOAT:
@@ -198,6 +203,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_1_to_2(data["game"])
 			2:
 				_upgrade_2_to_3(data["game"])
+			3:
+				_upgrade_3_to_4(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -255,3 +262,14 @@ func _upgrade_2_to_3(game: Dictionary) -> void:
 			else:
 				entry["object"] = "shipping_bin"
 			return
+
+
+## Version 3 -> 4: upgrades arrive. A version 3 game had bought none.
+##
+## max_energy is dropped: from now on it's worked out from the upgrades, and
+## with none it's the starting amount. The farm is left exactly as it was —
+## a farm from before Stage 5 has no thicket, so all its land stays open and
+## the fields simply aren't offered in the shop (DECISIONS 024).
+func _upgrade_3_to_4(game: Dictionary) -> void:
+	game["upgrades"] = []
+	game.erase("max_energy")

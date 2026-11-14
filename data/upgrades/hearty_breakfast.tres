@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="UpgradeDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/upgrade_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/upgrades/max_energy_effect.gd" id="2_effect"]
+[ext_resource type="Texture2D" path="res://assets/sprites/upgrades/energy_placeholder.png" id="3_icon"]
+[ext_resource type="Resource" path="res://data/upgrades/packed_lunch.tres" id="4_requires"]
+
+[sub_resource type="Resource" id="Resource_effect"]
+script = ExtResource("2_effect")
+amount = 25.0
+
+[resource]
+script = ExtResource("1_def")
+id = &"hearty_breakfast"
+display_name = "Hearty breakfast"
+description = "+25 more energy every day."
+icon = ExtResource("3_icon")
+price = 1200
+requires = ExtResource("4_requires")
+effect = SubResource("Resource_effect")

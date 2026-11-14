@@ -1,6 +1,6 @@
 extends Node
 ##
-## Economy — buying and selling: the shop and the shipping bin.
+## Economy — buying and selling: the shop, upgrades and the shipping bin.
 ##
 ## GameState holds the gold and the items; this file holds the rules for
 ## turning one into the other. Every price in the game is read through
@@ -31,6 +31,40 @@ func buy_price(item: ItemDef) -> int:
 
 func sell_price(item: ItemDef) -> int:
 	return item.sell_price
+
+
+func upgrade_price(upgrade: UpgradeDef) -> int:
+	return upgrade.price
+
+
+## The upgrades the shop offers right now, cheapest first: not yet owned,
+## whatever they require already owned, and they'd actually do something.
+## So the great hoe appears only once the wide hoe is bought, and each
+## upgrade line shows one step at a time.
+func upgrades_on_offer() -> Array[UpgradeDef]:
+	var offer: Array[UpgradeDef] = []
+	for upgrade in ContentDB.upgrades():
+		if GameState.has_upgrade(upgrade):
+			continue
+		if upgrade.requires != null and not GameState.has_upgrade(upgrade.requires):
+			continue
+		if upgrade.effect == null or not upgrade.effect.is_useful():
+			continue
+		offer.append(upgrade)
+	return offer
+
+
+## Buy an upgrade. Returns false, changing nothing, if it isn't on offer or
+## the player can't afford it.
+func buy_upgrade(upgrade: UpgradeDef) -> bool:
+	if not upgrade in upgrades_on_offer():
+		return false
+	var cost := upgrade_price(upgrade)
+	if not GameState.try_spend_gold(cost):
+		return false
+	GameState.add_upgrade(upgrade)
+	EventBus.upgrade_bought.emit(upgrade.id, cost)
+	return true
 
 
 ## Buy `amount` of `item` from the shop. Returns false, changing nothing, if

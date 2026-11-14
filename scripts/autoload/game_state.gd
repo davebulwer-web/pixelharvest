@@ -1,7 +1,7 @@
 extends Node
 ##
 ## GameState — the player's progress: gold, the calendar, energy, the bag of
-## items, and the farm itself.
+## items, the upgrades bought, and the farm itself.
 ##
 ## It's an autoload so it outlives any one scene. When Stage 7 adds the town,
 ## walking there swaps the scene but not this — the farm, the gold and the day
@@ -24,7 +24,15 @@ var season: int = 0
 var year: int = 1
 
 var energy: float = 0.0
+
+## Today's maximum: the starting amount in game_rules.tres plus whatever the
+## energy upgrades add. Worked out from those two, never saved (DECISIONS 024).
 var max_energy: float = 0.0
+
+## Every upgrade bought, in the order bought. Owning one is the only thing
+## stored about it; tool tiers and maximum energy are worked out from this
+## list whenever they're needed.
+var upgrades: Array[UpgradeDef] = []
 
 ## Everything the player is carrying: tools, seeds and produce.
 var inventory: Inventory
@@ -62,7 +70,8 @@ func new_game() -> void:
 	day = 1
 	season = 0
 	year = 1
-	max_energy = RULES.max_energy
+	upgrades = []
+	max_energy = _work_out_max_energy()
 	energy = max_energy
 	inventory = Inventory.new(true)
 	_give_starting_kit()
@@ -109,6 +118,53 @@ func try_spend_energy(amount: float) -> bool:
 	if energy <= 0.0:
 		EventBus.energy_exhausted.emit()
 	return true
+
+
+## The starting maximum plus every energy upgrade owned.
+func _work_out_max_energy() -> float:
+	var total := RULES.max_energy
+	for upgrade in upgrades:
+		if upgrade.effect != null:
+			total += upgrade.effect.max_energy_bonus()
+	return total
+
+
+# --- Upgrades ----------------------------------------------------------------
+# Economy decides what's on offer and takes the gold; this keeps the list and
+# applies the result.
+
+func has_upgrade(upgrade: UpgradeDef) -> bool:
+	return upgrade in upgrades
+
+
+## Add a bought upgrade. A bigger energy maximum is topped up straight away,
+## so buying one mid-afternoon is felt the same day.
+func add_upgrade(upgrade: UpgradeDef) -> void:
+	if has_upgrade(upgrade):
+		return
+	upgrades.append(upgrade)
+	var old_max := max_energy
+	max_energy = _work_out_max_energy()
+	if max_energy != old_max:
+		energy += max_energy - old_max
+		EventBus.energy_changed.emit(energy, max_energy)
+	if upgrade.effect != null:
+		upgrade.effect.on_bought(upgrade)
+
+
+## The tier of `tool` the player owns: the best any upgrade gives, and never
+## more than the tool actually has.
+func tool_tier(tool: ToolDef) -> int:
+	var best := 0
+	for upgrade in upgrades:
+		if upgrade.effect != null:
+			best = maxi(best, upgrade.effect.tool_tier(tool.id))
+	return mini(best, tool.max_tier())
+
+
+## What the player calls this tool now, e.g. "Wide hoe" once upgraded.
+func tool_name(tool: ToolDef) -> String:
+	return tool.name_at(tool_tier(tool))
 
 
 # --- Gold --------------------------------------------------------------------
@@ -184,6 +240,20 @@ func harvest(cell: Vector2i) -> bool:
 	return true
 
 
+## E on a placed object (a sprinkler): take it back into the bag. Returns
+## false for things that can't be picked up, like trees and the bin.
+func pick_up_object(cell: Vector2i) -> bool:
+	var t := farm.tile(cell)
+	if t == null or t.object_id == &"":
+		return false
+	var object_def := ContentDB.object(t.object_id)
+	if object_def == null or object_def.item == null:
+		return false
+	farm.remove_object(cell)
+	inventory.add(object_def.item)
+	return true
+
+
 # --- Saving ------------------------------------------------------------------
 # GameState says WHAT is saved; SaveSystem decides where, when, and how old
 # saves are upgraded. Items and crops are saved as their ids and looked up
@@ -192,8 +262,9 @@ func harvest(cell: Vector2i) -> bool:
 # There's no player position: the game saves at the start of a day, and every
 # day starts with the player at the spawn point.
 #
-# Upgrades join this when they exist (Stage 5), as a new field plus a
-# save-version bump.
+# Upgrades are saved as a list of ids (save version 4). Maximum energy isn't
+# saved at all: it's worked out from the upgrades on load, so a rebalanced
+# energy upgrade reaches existing games too.
 
 func to_save() -> Dictionary:
 	var selected := selected_tool()
@@ -203,7 +274,7 @@ func to_save() -> Dictionary:
 		"season": season,
 		"year": year,
 		"energy": energy,
-		"max_energy": max_energy,
+		"upgrades": upgrades.map(func(u: UpgradeDef) -> String: return String(u.id)),
 		"inventory": inventory.to_save(),
 		"selected_tool": String(selected.id) if selected != null else "",
 		"location": String(location),
@@ -222,8 +293,16 @@ func load_from_save(data: Dictionary) -> void:
 	day = int(data["day"])
 	season = int(data["season"])
 	year = int(data["year"])
-	energy = float(data["energy"])
-	max_energy = float(data["max_energy"])
+
+	upgrades = []
+	for id: Variant in data["upgrades"]:
+		var upgrade := ContentDB.upgrade(StringName(id))
+		if upgrade == null:
+			push_warning("Save has an upgrade '%s' the game doesn't know; it's been removed" % id)
+		elif not has_upgrade(upgrade):
+			upgrades.append(upgrade)
+	max_energy = _work_out_max_energy()
+	energy = minf(float(data["energy"]), max_energy)
 
 	inventory = Inventory.from_save(data["inventory"], true)
 	if hotbar().is_empty():

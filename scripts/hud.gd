@@ -35,6 +35,9 @@ func _ready() -> void:
 	EventBus.items_shipped.connect(_on_items_shipped)
 	EventBus.shipment_sold.connect(func(gold: int) -> void: _overnight_sales = gold)
 	EventBus.item_bought.connect(_on_item_bought)
+	EventBus.upgrade_bought.connect(_on_upgrade_bought)
+	EventBus.object_placed.connect(_on_object_placed)
+	EventBus.object_removed.connect(_on_object_removed)
 	EventBus.game_saved.connect(_on_game_saved)
 	_fade.modulate.a = 0.0
 	_message.text = ""
@@ -95,6 +98,27 @@ func _on_items_shipped(count: int, value: int) -> void:
 func _on_item_bought(item_id: StringName, amount: int, cost: int) -> void:
 	var item := ContentDB.item(item_id)
 	_show_message("Bought %d %s for %dg" % [amount, item.display_name if item else String(item_id), cost])
+
+
+func _on_upgrade_bought(upgrade_id: StringName, cost: int) -> void:
+	var upgrade := ContentDB.upgrade(upgrade_id)
+	_show_message("Bought %s for %dg" % [upgrade.display_name if upgrade else String(upgrade_id), cost])
+
+
+func _on_object_placed(_cell: Vector2i, object_id: StringName) -> void:
+	var object_def := ContentDB.object(object_id)
+	if object_def == null:
+		return
+	var text := "Placed the %s" % object_def.display_name.to_lower()
+	if not object_def.water_offsets.is_empty():
+		text += " — it waters %d tiles every morning" % object_def.water_offsets.size()
+	_show_message(text)
+
+
+func _on_object_removed(_cell: Vector2i, object_id: StringName) -> void:
+	var object_def := ContentDB.object(object_id)
+	if object_def != null:
+		_show_message("Picked up the %s" % object_def.display_name.to_lower())
 
 
 func _show_message(text: String) -> void:

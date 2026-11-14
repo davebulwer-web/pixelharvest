@@ -11,7 +11,8 @@ extends CharacterBody2D
 ## simply the tile under the origin.
 ##
 ## Tools act on the tile *in front of* the player, not under them — you hoe
-## the ground ahead of you, as in every game of this kind.
+## the ground ahead of you, as in every game of this kind. Upgraded tools
+## (Stage 5) cover more tiles, starting from that one and running ahead.
 ##
 
 ## Pixels per second. At 16px tiles this is roughly 4.4 tiles a second.
@@ -75,27 +76,48 @@ func target_cell() -> Vector2i:
 	return standing_cell() + FACING_VECTORS[_facing]
 
 
-## Ask the tool whether it can act, pay for it, then act. The player never
-## needs to know *which* tool it's holding — see tool_action.gd.
+## Every cell the held tool would act on, at the tier the player owns. One
+## cell (the one in front) for anything not upgraded.
+func target_cells() -> Array[Vector2i]:
+	var tool := GameState.selected_tool()
+	if tool == null:
+		return [target_cell()]
+	return tool.cells_at(GameState.tool_tier(tool), target_cell(), FACING_VECTORS[_facing])
+
+
+## Ask the tool which of its cells it can act on, pay once for the swing,
+## then act on each. The player never needs to know *which* tool it's
+## holding — see tool_action.gd.
+##
+## The swing costs the tier's energy, but never more than doing the same
+## tiles one at a time with the basic tool would: a great hoe that only
+## catches one tile of grass at the edge of a field costs what a plain hoe
+## would. So an upgrade is never worse than what it replaced.
 func _use_tool() -> void:
 	var tool := GameState.selected_tool()
 	if tool == null:
 		return
-	var cell := target_cell()
-	if not tool.action.can_use(GameState.farm, cell):
+	var usable: Array[Vector2i] = []
+	for cell in target_cells():
+		if tool.action.can_use(GameState.farm, cell):
+			usable.append(cell)
+	if usable.is_empty():
 		return
-	if not GameState.try_spend_energy(tool.energy_cost):
+	var tier_cost := tool.energy_cost_at(GameState.tool_tier(tool))
+	var cost := minf(tier_cost, tool.energy_cost * usable.size())
+	if not GameState.try_spend_energy(cost):
 		return
-	tool.action.apply(GameState.farm, cell)
-	# Seeds are used up as they're planted. Removing the last one takes the
-	# packet off the hotbar, and GameState moves the selection along.
-	if tool.consumed_on_use:
-		GameState.inventory.remove(tool)
+	for cell in usable:
+		# Seeds and sprinklers are used up as they're used. Removing the last
+		# one takes it off the hotbar, and GameState moves the selection along.
+		if tool.consumed_on_use and not GameState.inventory.remove(tool):
+			break
+		tool.action.apply(GameState.farm, cell)
 
 
 ## E: harvest a ready crop by hand, or use whatever stands on the tile ahead
-## (the shipping bin now; doors and people in Stage 7). Harvesting is free —
-## the work was in growing it.
+## (the shipping bin, or a sprinkler to pick it up; doors and people in
+## Stage 7). Harvesting is free — the work was in growing it.
 ##
 ## Anything usable joins the "interactable" group and offers occupies(cell)
 ## and interact(), so this never grows a list of things it knows about.

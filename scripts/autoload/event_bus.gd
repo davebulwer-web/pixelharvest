@@ -65,13 +65,24 @@ signal items_shipped(count: int, value: int)
 ## the night (before day_started), only if anything was in the bin.
 signal shipment_sold(gold: int)
 
+## An upgrade was bought from the shop. `cost` is what was paid. Its effect
+## has already happened by the time this is announced.
+signal upgrade_bought(upgrade_id: StringName, cost: int)
+
 signal tool_selected(tool_id: StringName)
 signal tool_upgraded(tool_id: StringName, tier: int)
 
 # --- World ------------------------------------------------------------------
 
 signal location_changed(location_id: StringName)
+
+## A field was bought and its thicket cleared. `plot_id` is the upgrade's id.
 signal plot_unlocked(plot_id: StringName)
+
+## Something was put down on, or picked up from, a farm tile (a sprinkler).
+## Trees and the bin are part of the farm from the start and don't announce.
+signal object_placed(cell: Vector2i, object_id: StringName)
+signal object_removed(cell: Vector2i, object_id: StringName)
 
 # --- Meta -------------------------------------------------------------------
 
