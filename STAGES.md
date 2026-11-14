@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 1 — walking skeleton.**
+**Current stage: 2 — core loop and seams** (first session done; Stage 1 awaiting Dave's Windows check).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -64,12 +64,26 @@ find it.
 
 ## Stage 2 — Core loop and seams · 3–4 sessions · Opus
 
-- [ ] `FarmData` — authoritative tile state, entirely separate from the tilemap
-- [ ] Till, plant, water, harvest on a small plot
-- [ ] One hardcoded crop with growth stages
-- [ ] `TimeSystem` — sleep advances the day, crops advance one stage
-- [ ] `GameState` autoload — gold, day, season, energy; survives scene changes
-- [ ] Energy costs per action; day ends at zero
+**Session 1 (2026-11-14) — data, tools, tilling and watering**
+
+- [x] `FarmData` — authoritative tile state (`FarmTile` per cell), entirely separate from
+      the tilemap; `FarmLayout` builds the starting farm; `main.gd` only draws it
+- [x] `GameState` autoload — gold, day, season, energy, tools, the farm; starting values
+      from `data/game_rules.tres`
+- [x] Tool interface: `ToolDef` + `ToolAction` (DECISIONS 018); hoe and watering can act on
+      the tile in front of the player, shown by an outline cursor
+- [x] Energy charged per action, only when the action does something
+- [x] `CropDef` resource and `data/crops/parsnip.tres` (DECISIONS 017)
+- [x] Stopgap HUD: selected tool and energy
+- [x] Verified headless and in a rendered recording: tilling, watering, tool switching,
+      no-ops on path/pond/tree/cliff cost no energy
+- [ ] Dave confirms it plays correctly on Windows
+
+**Still to do**
+
+- [ ] Plant and harvest (seeds as a tool action), crop sprites per growth stage
+- [ ] `TimeSystem` — sleep advances the day, watered crops advance one stage, soil dries
+- [ ] Day ends at zero energy
 - [ ] `LocationManager` seam (farm only for now) — see DECISIONS 004
 - [ ] `SeasonTheme` swap hook, wired but with one theme — see DECISIONS 005
 

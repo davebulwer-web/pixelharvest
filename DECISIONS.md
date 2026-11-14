@@ -248,3 +248,58 @@ compass points (south, west, east, north), which is not the order anything else 
 
 **Cost.** A build step between art and engine. Worth it: the next re-export costs one
 command.
+
+---
+
+## 017 — The first crop is a `CropDef` resource from Stage 2, not hardcoded
+
+**Decision.** `CropDef` (`scripts/resources/crop_def.gd`) and `data/crops/parsnip.tres`
+exist from Stage 2. The stage plan originally said "one hardcoded crop", converted in
+Stage 4.
+
+**Why.** Hardcoding grow times would break rule 6 (no balance numbers in scripts) for
+two whole stages. A small resource costs almost nothing now and shrinks Stage 4 to adding
+`ContentDB` and more `.tres` files. Agreed with Dave, 2026-11-14.
+
+**Cost.** Until `ContentDB` arrives the crop is loaded by path. The resource is kept
+deliberately small; fields are added when a stage needs them.
+
+---
+
+## 018 — Tools are a `ToolDef` with an embedded `ToolAction`; farm state lives in `GameState`
+
+**Decision.** A tool is one `.tres` file: a `ToolDef` (id, name, energy cost) holding a
+`ToolAction` sub-resource whose script does the work through two methods, `can_use()` and
+`apply()`. The player asks the selected tool those two questions and never knows which
+tool it holds. `FarmData` is a plain `RefCounted` owned by the `GameState` autoload, not a
+node in the farm scene and not an autoload of its own.
+
+**Why.** Rule 5. The alternatives were a `match tool.id` in the player (exactly the growing
+if/else the rule forbids) or a separate handler registry keyed by id (two places to edit
+per tool). Embedding the action in the definition keeps a tool to one data file plus one
+small script. Splitting `can_use` from `apply` means energy is only charged when something
+actually happens. `FarmData` sits in `GameState` because it must survive scene changes
+(DECISIONS 004) and be saved with everything else (Stage 3); a node in the farm scene would
+be destroyed on the first trip to town.
+
+**Cost.** Tool behaviour lives in a script referenced from data, so a designer can't invent
+a wholly new kind of tool in the inspector alone — but they can create, tune and reorder
+tools there freely. The starting toolbar comes from `data/game_rules.tres` until there's an
+inventory (Stage 4).
+
+---
+
+## 019 — Pixellab generation moves to the API, from a cloud environment
+
+**Decision.** From the next real art onward, Claude generates through Pixellab's API from
+a cloud environment that has network access to it, then verifies and delivers the files.
+This supersedes the "two routes" note in `art/STYLE.md`, which said Claude's sandbox could
+not reach `api.pixellab.ai`.
+
+**Why.** It removes the manual generate → download → copy loop, and every generation is
+checked against the spec and palette, and turned into a `SpriteFrames` from its JSON, in
+the same step. Dave still approves each look before it goes in — taste is his call, and
+generations cost credits.
+
+**Cost.** Generation depends on that environment being selected for the session. Placeholder
+art (decision 014) is still made locally, so code work never waits on it.

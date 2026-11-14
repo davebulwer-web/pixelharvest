@@ -79,6 +79,9 @@ reliable than hoping to avoid it.
 
 ## How generations get made
 
+> **Superseded by DECISIONS 019:** generation now goes through Pixellab's API from a
+> cloud environment that can reach it. The routes below remain as fallbacks.
+
 Pixellab isn't in Claude's connector directory, so there's no one-click connection. Two
 routes, either fine:
 

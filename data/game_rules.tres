@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="GameRules" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/game_rules.gd" id="1_rules"]
+[ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="2_tooldef"]
+[ext_resource type="Resource" path="res://data/tools/hoe.tres" id="3_hoe"]
+[ext_resource type="Resource" path="res://data/tools/watering_can.tres" id="4_can"]
+
+[resource]
+script = ExtResource("1_rules")
+starting_gold = 100
+max_energy = 100.0
+starting_tools = Array[ExtResource("2_tooldef")]([ExtResource("3_hoe"), ExtResource("4_can")])
