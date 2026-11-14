@@ -191,7 +191,7 @@ Session 1 (2026-11-14) — mechanics, on placeholder art. See DECISIONS 025.
 - [x] Verified headless (50 checks: calendar, year rollover, planting gate, deaths and
       survivors at the turn, event order, re-theming, save round trip, v1–v4 upgrades,
       clamping, newer save refused) and in a rendered recording through all four seasons
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-14)
 
 Session 2 (2026-11-14) — real art, from the cloud environment that reaches Pixellab (DECISIONS 019, 026):
 
@@ -201,7 +201,7 @@ Session 2 (2026-11-14) — real art, from the cloud environment that reaches Pix
 - [x] Autumn and winter trees (snowy bin and sprinklers not done)
 - [x] Palette 33 → 41 colours (snow, ice, autumn orange, olive); all new art on it
 - [x] Verified: Godot 4.7.2 import clean, headless run clean, rendered all four seasons
-- [ ] Dave confirms the look on Windows
+- [x] Dave confirms the look on Windows and merges it (PR #3, 2026-11-14)
 
 ## Stage 7 — The town · 2–3 sessions · Sonnet 5.5
 
