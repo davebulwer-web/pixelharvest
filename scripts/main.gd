@@ -25,7 +25,7 @@ extends Node2D
 const TILE_PX := 16
 const SOURCE_ID := 0
 
-# Atlas coordinates into assets/tilesets/ground_placeholder.png
+# Atlas coordinates into the season's ground tileset (assets/tilesets/ground_<season>.png)
 const TILE_GRASS := Vector2i(0, 0)
 const TILE_GRASS_ALT := Vector2i(1, 0)
 const TILE_PATH := Vector2i(2, 0)

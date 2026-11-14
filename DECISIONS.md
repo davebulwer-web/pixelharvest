@@ -576,3 +576,45 @@ leaving a dead plant to clear) keeps the farm state unchanged and the save the s
   seasonal versions.
 - 28 days is a lot of sleeping to see a season change while testing: set `days_per_season`
   low in `data/game_rules.tres`, and put it back.
+
+---
+
+## 026 — Real ground and trees: Pixellab terrain tiles, seasons by per-tile image-to-image, palette grows to 41
+
+**Decision.** Stage 6 session 2 replaced every ground and tree placeholder with Pixellab art.
+
+- *Base (spring) ground* comes from Pixellab's terrain-tileset tool (`/create-tileset`,
+  standard, 16 px, 1 generation per pair of terrains). Only the plain, all-one-terrain tile
+  of each pair is used. The blends between terrains are thrown away, because the farm draws
+  one tile per cell. Those plain tiles repeat with no visible seam.
+- That tool can't be held to a palette, so each tile is mapped onto 2 or 3 hand-picked
+  palette shades by brightness rank (darkest pixels to the darkest shade, and so on).
+  Plain nearest-colour snapping flattened the grass to one green, which is why it isn't used.
+- *Seasons* are image-to-image from the base, one tile at a time: Pixen edit (1 generation)
+  on that tile repeated 3×3, keeping the centre copy. Editing a repeated tile keeps the
+  result seamless, and a whole strip edited at once got snow borders around each tile.
+  Only tiles that change in a season were edited: winter all nine, autumn grass, flowery
+  grass, path and thicket, summer grass, flowery grass and thicket.
+- Pixen pays no attention to the palette, so results are snapped to the nearest palette
+  colour. Two touch-ups were done by script, not by generation. Summer grass is moved one step
+  darker on the green ramp because Pixen barely changed it. Winter's dry tilled tile is
+  the wet one with its soil lightened, so the pair matches.
+- *Trees* are now 32×48 (pixflux, palette-forced), not 16×32, so they stand taller than
+  the farmer. Autumn and winter trees are Pixen edits of it. `scenes/tree.tscn` lifts the
+  sprite by 22 px so the trunk's base sits on the cell, and the collision box is unchanged.
+- *Palette grows from 33 to 41.* Four snow and ice colours (the palette had no cool
+  whites, which is why the placeholder snow was peach), two autumn oranges and two
+  olive greens for autumn grass. Accepted deliberately, as DECISIONS 015 allows.
+- The atlas layout is unchanged (grass, flowery grass, path, tilled, wet tilled, water,
+  stone, cliff, thicket in columns 0–8), so no code changed. Files were renamed from
+  `*_placeholder.png` to `ground_<season>.png`, `tree.png`, `tree_<season>.png`.
+
+**Why.** Drawing all nine tiles in one pixflux strip gave nearly flat single-colour tiles.
+Tiles Pro (10 generations) drew a visible grid on the grass. The terrain tool gave the best
+texture for the least spend. Editing one tile at a time is what keeps the seasons true to
+the base, which is the point of DECISIONS 005.
+
+**Cost.** About 42 generations including tests and the failed routes. Known weak spots that could
+be redone cheaply (1 generation each): the winter path and winter thicket repeat visibly
+over large areas, and the cliff's crack pattern repeats. The bin and sprinklers still have
+no seasonal versions.
