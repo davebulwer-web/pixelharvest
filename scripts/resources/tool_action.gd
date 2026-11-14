@@ -25,3 +25,11 @@ func can_use(_farm: FarmData, _cell: Vector2i) -> bool:
 ## Do it. Only called after can_use() returned true and the energy was paid.
 func apply(_farm: FarmData, _cell: Vector2i) -> void:
 	pass
+
+
+## False if this tool can't be used at all in the season `season_id` — seeds
+## out of season. Most tools work all year, so that's the default. The player
+## asks this before can_use(), and the hotbar asks it to grey out what can't
+## be used today.
+func usable_in_season(_season_id: StringName) -> bool:
+	return true

@@ -20,6 +20,9 @@ const GAP := 2
 const GROUP_GAP := 10
 const BOTTOM_MARGIN := 6
 
+## How an item that can't be used today (seeds out of season) is drawn.
+const UNUSABLE_TINT := Color(1, 1, 1, 0.35)
+
 
 func _ready() -> void:
 	EventBus.item_added.connect(func(_id: StringName, _n: int) -> void: queue_redraw())
@@ -27,6 +30,8 @@ func _ready() -> void:
 	EventBus.tool_selected.connect(func(_id: StringName) -> void: queue_redraw())
 	EventBus.tool_upgraded.connect(func(_id: StringName, _tier: int) -> void: queue_redraw())
 	EventBus.game_loaded.connect(queue_redraw)
+	# Seeds grey out and come back as the seasons turn.
+	EventBus.season_changed.connect(func(_s: int) -> void: queue_redraw())
 	resized.connect(queue_redraw)
 
 
@@ -43,11 +48,17 @@ func _draw() -> void:
 	var x := roundf((size.x - width) / 2.0)
 	var y := size.y - SLOT_PX - BOTTOM_MARGIN
 
+	var season := GameState.season_id()
 	for tool_def in tools:
 		var is_selected := tool_def == selected
-		_draw_slot(Vector2(x, y), tool_def, is_selected, tool_def.consumed_on_use)
+		# Seeds out of season are greyed out, and say so when selected.
+		var usable := tool_def.action == null or tool_def.action.usable_in_season(season)
+		_draw_slot(Vector2(x, y), tool_def, is_selected, tool_def.consumed_on_use, usable)
 		if is_selected:
-			_draw_name(GameState.tool_name(tool_def), Vector2(x + SLOT_PX / 2.0, y - 4))
+			var label := GameState.tool_name(tool_def)
+			if not usable:
+				label += " · not in %s" % GameState.season_name(season).to_lower()
+			_draw_name(label, Vector2(x + SLOT_PX / 2.0, y - 4))
 		x += SLOT_PX + GAP
 	x += GROUP_GAP
 	for item in others:
@@ -55,12 +66,13 @@ func _draw() -> void:
 		x += SLOT_PX + GAP
 
 
-func _draw_slot(at: Vector2, item: ItemDef, is_selected: bool, show_count: bool) -> void:
+func _draw_slot(at: Vector2, item: ItemDef, is_selected: bool, show_count: bool,
+		usable: bool = true) -> void:
 	var rect := Rect2(at, Vector2(SLOT_PX, SLOT_PX))
 	draw_rect(rect, UiStyle.SLOT)
 	draw_rect(rect.grow(-0.5), UiStyle.HIGHLIGHT if is_selected else UiStyle.SLOT_EDGE, false, 1.0)
 	if item.icon != null:
-		draw_texture(item.icon, at + Vector2(1, 1))
+		draw_texture(item.icon, at + Vector2(1, 1), Color.WHITE if usable else UNUSABLE_TINT)
 	if show_count:
 		var text := str(GameState.inventory.count(item))
 		var font := get_theme_default_font()

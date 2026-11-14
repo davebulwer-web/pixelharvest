@@ -222,8 +222,13 @@ func _add_button(list: VBoxContainer, buys: Resource, icon: Texture2D, text: Str
 
 
 func _item_text(item: ItemDef) -> String:
-	return "%s   %dg   (have %d)" % [
+	var text := "%s   %dg   (have %d)" % [
 		item.display_name, Economy.buy_price(item), GameState.inventory.count(item)]
+	# Still for sale out of season — buying ahead is planning — but marked.
+	if item is ToolDef and item.action != null \
+			and not item.action.usable_in_season(GameState.season_id()):
+		text += "   · off-season"
+	return text
 
 
 ## What an item is for. Its own description if it has one; seeds otherwise
@@ -233,7 +238,11 @@ func _item_detail(item: ItemDef) -> String:
 		return item.description
 	if item is ToolDef and item.action is PlantAction and item.action.crop != null:
 		var crop: CropDef = item.action.crop
-		var text := "Ready in %d watered days" % crop.days_to_mature()
+		var text := "Grows all year.  " if crop.seasons.is_empty() \
+				else "Grows in %s.  " % GameState.describe_seasons(crop.seasons).to_lower()
+		if not crop.grows_in(GameState.season_id()):
+			text += "Can't be planted in %s.  " % GameState.season_name(GameState.season_id()).to_lower()
+		text += "Ready in %d watered days" % crop.days_to_mature()
 		if crop.regrow_days > 0:
 			text += ", then again every %d" % crop.regrow_days
 		if crop.produce != null:

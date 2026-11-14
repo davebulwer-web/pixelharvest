@@ -111,6 +111,7 @@ data/                Content resources (.tres), indexed by ContentDB
   tools/             ToolDef — tools, seeds and sprinklers (all things you use)
   objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers)
   upgrades/          UpgradeDef — bought once: tool tiers, energy, fields
+  seasons/           SeasonTheme — each season's name and look (crops list their own seasons)
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab
 assets/tilesets/     Ground and world tilesets

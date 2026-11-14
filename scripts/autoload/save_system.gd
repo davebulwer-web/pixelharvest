@@ -19,7 +19,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 4, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 5, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -40,7 +40,9 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       longer unlimited), and the farm gains a shipping bin.
 ##   4 — upgrades bought are saved by id; maximum energy is no longer saved,
 ##       because it's worked out from the upgrades.
-const CURRENT_VERSION := 4
+##   5 — `day` means the day of the season (1 to days_per_season), not a
+##       count of days since the game began.
+const CURRENT_VERSION := 5
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -205,6 +207,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_2_to_3(data["game"])
 			3:
 				_upgrade_3_to_4(data["game"])
+			4:
+				_upgrade_4_to_5(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -273,3 +277,24 @@ func _upgrade_2_to_3(game: Dictionary) -> void:
 func _upgrade_3_to_4(game: Dictionary) -> void:
 	game["upgrades"] = []
 	game.erase("max_energy")
+
+
+## Version 4 -> 5: seasons arrive, and `day` becomes the day of the season.
+##
+## Before Stage 6 the calendar never left spring, and `day` just counted up.
+## A version 4 game still within the first season's days keeps its date. One
+## that had gone past it restarts at day 1 of spring, rather than being moved
+## on to summer: its crops were planted with no idea seasons existed, so it
+## gets a whole spring before the first season change. The season length is
+## frozen here (V5_SEASON_DAYS), not read from game_rules.tres, so this step
+## means the same thing however the rules change later.
+const V5_SEASON_DAYS := 28
+
+
+func _upgrade_4_to_5(game: Dictionary) -> void:
+	# Written as floats, like every number read from JSON, so the field check
+	# that follows sees the same kind of value whether or not a step ran.
+	var day := int(game.get("day", 1))
+	if day < 1 or day > V5_SEASON_DAYS:
+		game["day"] = 1.0
+	game["season"] = 0.0

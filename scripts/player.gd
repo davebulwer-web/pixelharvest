@@ -95,7 +95,7 @@ func target_cells() -> Array[Vector2i]:
 ## would. So an upgrade is never worse than what it replaced.
 func _use_tool() -> void:
 	var tool := GameState.selected_tool()
-	if tool == null:
+	if tool == null or tool.action == null or not tool.action.usable_in_season(GameState.season_id()):
 		return
 	var usable: Array[Vector2i] = []
 	for cell in target_cells():

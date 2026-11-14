@@ -21,6 +21,11 @@ extends Resource
 @export var locations: Array[LocationDef] = []
 @export var starting_location: StringName = &"farm"
 
-## The seasons in calendar order. GameState.season is an index into this.
-## One for now; Stage 6 adds the other three and the season length.
+## The seasons in calendar order. GameState.season is an index into this;
+## after the last one the year rolls over and the first comes round again.
 @export var seasons: Array[SeasonTheme] = []
+
+## How many days each season lasts. On the night after the last day, the
+## season turns and crops that can't grow in the new one die (DECISIONS 025).
+## Lower it (to 3, say) to try out the seasons quickly — and put it back.
+@export var days_per_season: int = 28

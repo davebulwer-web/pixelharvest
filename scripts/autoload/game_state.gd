@@ -19,6 +19,9 @@ extends Node
 const RULES: GameRules = preload("res://data/game_rules.tres")
 
 var gold: int = 0
+
+## The calendar. `day` is the day of the season, 1 to RULES.days_per_season;
+## `season` is an index into RULES.seasons; `year` counts up from 1.
 var day: int = 1
 var season: int = 0
 var year: int = 1
@@ -87,21 +90,61 @@ func _give_starting_kit() -> void:
 		inventory.add(item, RULES.starting_inventory[item])
 
 
-## Move the calendar on one day and refill energy. Called by TimeSystem as
-## part of the overnight sequence — nothing else should call it.
-func start_next_day() -> void:
-	day += 1
+# --- The calendar ------------------------------------------------------------
+
+## Move the calendar on one day and refill energy. After the last day of a
+## season comes day 1 of the next; after the last season, a new year. Returns
+## true if the season turned, so TimeSystem knows to run the season change.
+## Called by TimeSystem as part of the overnight sequence — nothing else
+## should call it. It announces nothing: TimeSystem announces the new day
+## once everything overnight is done.
+func advance_calendar() -> bool:
 	energy = max_energy
-	EventBus.energy_changed.emit(energy, max_energy)
-	EventBus.day_started.emit(day, season, year)
+	day += 1
+	if day <= RULES.days_per_season:
+		return false
+	day = 1
+	season += 1
+	if season >= RULES.seasons.size():
+		season = 0
+		year += 1
+	return true
 
 
-## How the current season looks. Seasons beyond the list wrap round, so a
-## calendar with more seasons than themes still draws something.
+## The current season, or null if game_rules.tres lists none.
 func current_season_theme() -> SeasonTheme:
 	if RULES.seasons.is_empty():
 		return null
 	return RULES.seasons[posmod(season, RULES.seasons.size())]
+
+
+## The current season's id (&"spring"), which is what crops are checked against.
+func season_id() -> StringName:
+	var theme := current_season_theme()
+	return theme.id if theme != null else &""
+
+
+## The display name of the season with id `id`, e.g. "Summer". Unknown ids
+## come back as they are, so a typo in a crop file is visible, not hidden.
+func season_name(id: StringName) -> String:
+	for theme in RULES.seasons:
+		if theme.id == id:
+			return theme.display_name
+	return String(id)
+
+
+## "Spring and autumn", "Summer", "all year": the seasons in `ids`, in words,
+## for the shop and the hotbar.
+func describe_seasons(ids: Array[StringName]) -> String:
+	if ids.is_empty():
+		return "all year"
+	var names: Array[String] = []
+	for id in ids:
+		names.append(season_name(id).to_lower())
+	var text := names[0]
+	if names.size() > 1:
+		text = ", ".join(names.slice(0, names.size() - 1)) + " and " + names[-1]
+	return text.left(1).to_upper() + text.substr(1)
 
 
 # --- Energy ------------------------------------------------------------------
@@ -290,9 +333,12 @@ func to_save() -> Dictionary:
 func load_from_save(data: Dictionary) -> void:
 	# JSON keeps every number as a float, hence the int() calls.
 	gold = int(data["gold"])
-	day = int(data["day"])
-	season = int(data["season"])
-	year = int(data["year"])
+	# Kept inside the calendar, in case game_rules.tres has been changed since
+	# the save was made (fewer seasons, or shorter ones). A day past the end of
+	# the season becomes its last day, so the season turns tonight.
+	day = clampi(int(data["day"]), 1, maxi(1, RULES.days_per_season))
+	season = posmod(int(data["season"]), maxi(1, RULES.seasons.size()))
+	year = maxi(1, int(data["year"]))
 
 	upgrades = []
 	for id: Variant in data["upgrades"]:

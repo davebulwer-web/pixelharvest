@@ -1,10 +1,13 @@
 class_name SeasonTheme
 extends Resource
 ##
-## SeasonTheme — how the world looks in one season (DECISIONS 005).
+## SeasonTheme — one season of the calendar: its name, and how the world looks
+## while it lasts (DECISIONS 005, 021, 025).
 ##
-## Only the look. Which crops grow when is a property of the crop (Stage 6),
-## not of the theme.
+## GameRules.seasons lists these in calendar order; GameState.season is an
+## index into that list. Which crops grow when is NOT here: each crop lists the
+## season ids it grows in (CropDef.seasons), so adding a crop never means
+## editing four season files.
 ##
 ## The rule that makes swapping safe: every season's ground tileset has the
 ## SAME atlas layout — grass at the same coordinates, tilled soil at the same
@@ -12,9 +15,20 @@ extends Resource
 ## image-to-image from one base tileset produces. So the farm can swap the
 ## tileset and redraw, and every tile lands in the right place.
 ##
-## Tree and prop textures join this in Stage 6 alongside the seasonal art.
-##
 
+## Crops name seasons by this id (&"spring"), so it must not change once
+## crops refer to it. display_name is free to change.
 @export var id: StringName
 @export var display_name: String
+
 @export var ground_tileset: TileSet
+
+## Different pictures for farm objects this season, by object id — for
+## example &"tree" -> a bare or snowy tree. The object's scene must have a
+## Sprite2D called "Sprite" (they all do). Anything not listed keeps the
+## picture its scene was built with.
+@export var object_sprites: Dictionary[StringName, Texture2D] = {}
+
+## Optional scene added to the farm while this season lasts, such as winter's
+## cold tint and falling snow (scenes/snowfall.tscn). Empty for none.
+@export var overlay: PackedScene

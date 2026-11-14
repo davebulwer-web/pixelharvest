@@ -212,6 +212,21 @@ func _run_sprinklers() -> void:
 			water(cell + offset)
 
 
+## The season has turned: every crop that can't grow in `season_id` dies and
+## its tile is left as empty tilled soil. Called by TimeSystem, once, on the
+## night a season changes. Returns how many died.
+func wither_out_of_season(season_id: StringName) -> int:
+	var died := 0
+	for cell: Vector2i in _tiles:
+		var t: FarmTile = _tiles[cell]
+		if t.has_crop() and not t.crop.grows_in(season_id):
+			var crop_id := t.crop.id
+			t.clear_crop()
+			died += 1
+			EventBus.crop_died.emit(cell, crop_id)
+	return died
+
+
 func _grow(cell: Vector2i, t: FarmTile) -> void:
 	t.crop_days += 1
 	if t.crop_days < t.crop.days_to_grow_from(t.crop_stage, t.crop_regrowing):

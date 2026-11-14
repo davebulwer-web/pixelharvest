@@ -17,7 +17,9 @@ extends Node2D
 ##   ├── TileCursor (outline on the tile the player is facing; drawn under entities)
 ##   ├── Entities   (y-sorted — player, trees and crops sort against each other
 ##   │               by their node origin, which for all of them sits at their base)
-##   └── Hud        (CanvasLayer — fixed to the screen, not the world)
+##   ├── Weather    (holds the season's overlay, e.g. winter: a cold tint on the
+##   │               world, and snow falling on a CanvasLayer over it, under the HUD)
+##   └── Hud        (CanvasLayer, layer 2 — fixed to the screen, not the world)
 ##
 
 const TILE_PX := 16
@@ -43,6 +45,7 @@ const GRASS_VARIATION := 0.18
 @onready var _entities: Node2D = $Entities
 @onready var _player: Player = $Entities/Player
 @onready var _cursor: Node2D = $TileCursor
+@onready var _weather: Node = $Weather
 
 ## cell -> the Sprite2D showing the crop there. Purely a view cache: it can
 ## always be rebuilt from FarmData, and is, every morning.
@@ -58,6 +61,7 @@ func _ready() -> void:
 	_apply_season_theme()
 	_draw_all()
 	_place_objects()
+	_apply_season_overlay()
 	EventBus.tile_tilled.connect(_redraw_cell)
 	EventBus.tile_watered.connect(_redraw_cell)
 	EventBus.tile_cleared.connect(_redraw_cell)
@@ -66,6 +70,7 @@ func _ready() -> void:
 	EventBus.crop_harvested.connect(
 		func(cell: Vector2i, _id: StringName, _n: int) -> void: _redraw_crop(cell)
 	)
+	EventBus.crop_died.connect(func(cell: Vector2i, _id: StringName) -> void: _redraw_crop(cell))
 	EventBus.object_placed.connect(func(cell: Vector2i, _id: StringName) -> void:
 		_redraw_cell(cell)
 		_place_object(cell)
@@ -79,14 +84,19 @@ func _ready() -> void:
 	EventBus.season_changed.connect(func(_s: int) -> void:
 		_apply_season_theme()
 		_draw_all()
+		_reskin_objects()
+		_apply_season_overlay()
 	)
 
-	print("--- Pixel Harvest · Stage 5 ---")
+	print("--- Pixel Harvest · Stage 6 ---")
 	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
 	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
 	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler.")
 	print("B opens the shop: seeds, sprinklers, and upgrades (tools, energy, fields).")
 	print("Enter sleeps; the bin sells overnight and sprinklers water at dawn.")
+	print("Seasons last %d days. Seeds only go in during their own seasons, and crops"
+			% GameState.RULES.days_per_season)
+	print("still in the ground when their season ends die overnight.")
 	print("The game saves every morning and loads on launch. Ctrl+N starts a new game.")
 	print("-------------------------------")
 
@@ -159,9 +169,9 @@ func _redraw_cell(cell: Vector2i) -> void:
 	_ground.set_cell(cell, SOURCE_ID, _atlas_for(cell))
 
 
-## The one place that decides what a FarmTile looks like.
-## Stage 6's seasonal tilesets will change the atlas this points into,
-## not this logic.
+## The one place that decides what a FarmTile looks like. The season decides
+## which tileset these coordinates point into (_apply_season_theme), never
+## which coordinates are used.
 func _atlas_for(cell: Vector2i) -> Vector2i:
 	var t: FarmTile = GameState.farm.tile(cell)
 	if t.tilled:
@@ -207,6 +217,7 @@ func _place_object(cell: Vector2i) -> void:
 	node.position = cell_base(cell)
 	_entities.add_child(node)
 	_object_nodes[cell] = node
+	_skin_object(node, object_id)
 
 
 func _remove_object(cell: Vector2i) -> void:
@@ -214,3 +225,38 @@ func _remove_object(cell: Vector2i) -> void:
 	if node != null:
 		node.queue_free()
 		_object_nodes.erase(cell)
+
+
+# --- Seasons -----------------------------------------------------------------
+# The ground tileset is swapped in _apply_season_theme above. Objects and the
+# screen overlay are below. All three only change how the farm looks: nothing
+# about what's on it.
+
+## Give every object on the farm this season's picture.
+func _reskin_objects() -> void:
+	for cell: Vector2i in _object_nodes:
+		_skin_object(_object_nodes[cell], GameState.farm.tile(cell).object_id)
+
+
+## Show `node` with the current season's picture for `object_id`, if the
+## season has one, or else the picture its scene was built with — which is
+## remembered on the sprite the first time, so winter's snowy tree can turn
+## back into spring's green one.
+func _skin_object(node: Node, object_id: StringName) -> void:
+	var sprite := node.get_node_or_null(^"Sprite") as Sprite2D
+	if sprite == null:
+		return
+	if not sprite.has_meta(&"base_texture"):
+		sprite.set_meta(&"base_texture", sprite.texture)
+	var theme := GameState.current_season_theme()
+	var seasonal: Texture2D = theme.object_sprites.get(object_id) if theme != null else null
+	sprite.texture = seasonal if seasonal != null else sprite.get_meta(&"base_texture")
+
+
+## Replace the screen overlay (winter's snow) with this season's, or none.
+func _apply_season_overlay() -> void:
+	for child in _weather.get_children():
+		child.queue_free()
+	var theme := GameState.current_season_theme()
+	if theme != null and theme.overlay != null:
+		_weather.add_child(theme.overlay.instantiate())

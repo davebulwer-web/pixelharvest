@@ -29,7 +29,10 @@ y_sort_enabled = true
 [node name="Player" parent="Entities" instance=ExtResource("3_player")]
 position = Vector2(232, 208)
 
+[node name="Weather" type="Node" parent="."]
+
 [node name="Hud" type="CanvasLayer" parent="."]
+layer = 2
 script = ExtResource("5_hud")
 
 [node name="Label" type="Label" parent="Hud"]

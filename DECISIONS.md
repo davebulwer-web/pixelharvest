@@ -517,3 +517,62 @@ every number is in a `.tres` file and can be changed in the inspector.
 **Also changed.** "New game" moved from F9 to Ctrl+N. Dave found that F9 pauses the running
 project in the Godot editor, so the game never saw it and looked hung. Function keys are
 best left to the editor.
+
+---
+
+## 025 — Seasons: 28-day seasons, crops list their seasons, the night of the turn kills, the look is a SeasonTheme
+
+**Decision.** Stage 6's seasons rest on these choices:
+
+- *The calendar.* `GameRules.days_per_season` (28) and the four `SeasonTheme`s in
+  `GameRules.seasons` make the year. `GameState.day` is now the day *of the season* (1–28);
+  after day 28 comes day 1 of the next season, and after winter, spring of a new year. The
+  HUD reads "Spring · Day 5 · Year 1".
+- *Crops say when they grow.* `CropDef.seasons` is a list of season ids (`&"summer"`); empty
+  means all year. Seasons don't list crops, so a new crop is still only its own three files.
+  First assignment, chosen so every season has at least two crops and the starting parsnips
+  work in spring: parsnip spring/autumn/winter, radish spring/summer/autumn, potato
+  spring/summer, green bean summer, cabbage autumn/winter. `ContentDB` reports a crop naming a
+  season that doesn't exist, and warns about a season nothing grows in.
+- *Planting out of season simply doesn't happen.* `ToolAction` gained `usable_in_season()`
+  (true by default; seeds answer from their crop). The player asks it before anything else,
+  so no energy and no seed is spent, and the hotbar greys the packet out and says
+  "not in spring" when it's selected. The shop still sells out-of-season seeds — buying ahead
+  is planning — marked "off-season", with the seasons in the description.
+  *Why not inside `PlantAction.can_use()`:* asking `GameState` from there makes a load loop
+  (GameState → rules → seeds → PlantAction → GameState) that stops the game starting — the
+  same trap as DECISIONS 021.
+- *The turn happens overnight, after growth.* TimeSystem's order is now: day ended, farm
+  grows, calendar moves, **if the season turned: out-of-season crops die, `season_changed`**,
+  day started, save. A crop on its last night therefore grows and then dies — anything ready
+  must be picked before sleeping on day 28. A dead crop vanishes and leaves its soil tilled;
+  each one is announced as `crop_died`, and the morning message says how many died.
+- *How a season looks is all in its `SeasonTheme`:* the ground tileset (same atlas layout as
+  spring's, thicket column included), `object_sprites` (object id → a different picture, so
+  far only trees in autumn and winter), and an optional `overlay` scene (winter's falling
+  snow, `scenes/snowfall.tscn`, drawn over the world and under the HUD). The farm swaps all
+  three on `season_changed`; nothing about what's on the farm changes.
+- *Save version 5.* Nothing new is stored, but `day` changed meaning, so the version moved.
+  The 4 → 5 step keeps a game's date if it's within the first 28 days, and otherwise restarts
+  it at day 1 of spring, so an old farm gets a whole spring before its first season change.
+  Loading also keeps the date inside whatever the rules now say, so shortening seasons in
+  the inspector can't leave a game on day 40 of 28. `tests/saves/v4_example.json` is a real
+  version 4 save made by the Stage 5 build.
+
+**Why.** 28 days lets the Stage 5 upgrade curve (first upgrades in week one, great tools and
+sprinklers in week two) play out inside the first spring, and fits the slowest crop (cabbage,
+9 days) three times. Making the crop own its seasons keeps rule 3: content is added in one
+place. Withering at the turn rather than mid-season is the planning pressure DESIGN.md asks
+for, and is easy to read: one morning, one message. Withered crops vanishing (rather than
+leaving a dead plant to clear) keeps the farm state unchanged and the save the same shape.
+
+**Cost.**
+- Old farms keep crops that are now out of season until the first turn (a version 4 farm's
+  cabbages grow through spring and die at summer). Accepted; nothing is lost early.
+- All seasonal art is placeholder, recoloured from the spring placeholders by a script and
+  exactly on `art/palette.png`: summer, autumn and winter ground tiles, autumn and winter trees.
+  The real versions are Pixellab image-to-image from a real base tileset (DECISIONS 005),
+  from the cloud environment (DECISIONS 019). Buildings, the bin and sprinklers have no
+  seasonal versions.
+- 28 days is a lot of sleeping to see a season change while testing: set `days_per_season`
+  low in `data/game_rules.tres`, and put it back.

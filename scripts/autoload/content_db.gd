@@ -29,6 +29,10 @@ const ITEM_DIRS: Array[String] = ["res://data/tools/", "res://data/produce/"]
 const OBJECTS_DIR := "res://data/objects/"
 const UPGRADES_DIR := "res://data/upgrades/"
 
+## For checking crops name real seasons. Read directly rather than through
+## GameState, because ContentDB starts first.
+const RULES: GameRules = preload("res://data/game_rules.tres")
+
 var _crops: Dictionary = {}  # StringName -> CropDef
 var _items: Dictionary = {}  # StringName -> ItemDef (ToolDef is an ItemDef)
 var _objects: Dictionary = {}  # StringName -> ObjectDef
@@ -126,6 +130,16 @@ func _index(dir: String, into: Dictionary) -> void:
 
 func _check() -> void:
 	var planted: Dictionary = {}  # crop id -> true, for crops some seeds plant
+	var season_ids: Array[StringName] = []
+	for theme: SeasonTheme in RULES.seasons:
+		if theme == null or theme.id == &"":
+			push_error("ContentDB: game_rules.tres has a season with no id")
+		elif theme.id in season_ids:
+			push_error("ContentDB: game_rules.tres lists the season '%s' twice" % theme.id)
+		else:
+			season_ids.append(theme.id)
+	if RULES.days_per_season < 1:
+		push_error("ContentDB: game_rules.tres has days_per_season below 1")
 	for each: ItemDef in _items.values():
 		var where := each.resource_path
 		if each.icon == null:
@@ -163,6 +177,16 @@ func _check() -> void:
 					% [where, each.growth_stages + 1, each.growth_stages])
 		if not planted.has(each.id):
 			push_warning("ContentDB: no seeds plant '%s', so it can never be grown" % each.id)
+		for season_id in each.seasons:
+			if not season_ids.has(season_id):
+				push_error("ContentDB: '%s' grows in a season '%s' that isn't in game_rules.tres"
+						% [where, season_id])
+
+	# A season nothing grows in is allowed (a winter rest, say), but it's worth
+	# knowing about, in case it's a typo in a crop file.
+	for season_id in season_ids:
+		if not _crops.values().any(func(c: CropDef) -> bool: return c.grows_in(season_id)):
+			push_warning("ContentDB: no crop grows in '%s'" % season_id)
 
 	for each: ObjectDef in _objects.values():
 		var where := each.resource_path

@@ -127,3 +127,12 @@ green bean pods wouldn't show at 16px, so the whole bean sheet is now **80×32**
 16×32 frames: a climbing vine whose ready stage is a tall, full vine on a stake (init =
 the old sheet in the bottom half, strength 30). Taller frames need no code: `CropDef`
 bottom-aligns its frames. 8 generations.
+
+**Seasonal placeholders, 2026-11-14 (Stage 6).** Not Pixellab: recoloured by a script from
+the spring placeholders, using only palette colours, so the atlas layout is identical.
+`tilesets/ground_{summer,autumn,winter}_placeholder.png` (summer: brighter grass; autumn:
+darker grass with fallen leaves, russet thicket; winter: snow, iced pond, snow-capped cliffs
+and thicket) and `sprites/tree_{autumn,winter}_placeholder.png`. Still owed as real art:
+the base ground tileset and tree (Stage 1 placeholders), then the three seasonal sets and
+seasonal trees by **image-to-image from that base** — keep all nine atlas columns,
+including the thicket in column 8.

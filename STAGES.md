@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 5 — the incremental spine.** Built 2026-11-14; awaiting Dave's check on Windows. Next: Stage 6.
+**Current stage: 6 — seasons made real.** Session 1 built 2026-11-14; awaiting Dave's check on Windows. Session 2 is the real seasonal art.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -171,17 +171,34 @@ Session 1 (2026-11-14) — see DECISIONS 024.
 - [~] First balance pass: numbers set and reasoned (DECISIONS 024); needs Dave's play to
       judge whether the curve feels right
 - [x] New game moved from F9 (the editor's pause key) to Ctrl+N
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-14)
 
 **Left over:** thicket, sprinklers and the energy/field icons are placeholder art.
 
 ## Stage 6 — Seasons made real · 2 sessions · Sonnet 5.5
 
-- [ ] Calendar: season length, year rollover
-- [ ] Crops gated by season; out-of-season crops die at the turn
-- [ ] Seasonal tilesets via image-to-image from the base set
-- [ ] `SeasonTheme` resources; swap on `season_changed`
-- [ ] Winter snow overlay
+Session 1 (2026-11-14) — mechanics, on placeholder art. See DECISIONS 025.
+
+- [x] Calendar: 28-day seasons (`days_per_season` in game_rules.tres), year rollover;
+      HUD shows "Spring · Day 5 · Year 1"
+- [x] Crops gated by season (`CropDef.seasons`); seeds can't be planted out of season and
+      grey out on the hotbar; the shop says when each crop grows
+- [x] Out-of-season crops die on the night the season turns; the morning says how many
+- [x] `SeasonTheme` resources for all four seasons; ground, trees and overlay swap on
+      `season_changed`
+- [x] Winter snow overlay (falling snow, `scenes/snowfall.tscn`)
+- [x] Save version 5 (`day` is the day of the season); `tests/saves/v4_example.json`
+- [x] Verified headless (50 checks: calendar, year rollover, planting gate, deaths and
+      survivors at the turn, event order, re-theming, save round trip, v1–v4 upgrades,
+      clamping, newer save refused) and in a rendered recording through all four seasons
+- [ ] Dave confirms it plays correctly on Windows
+
+Session 2 — real art, from the cloud environment that reaches Pixellab (DECISIONS 019):
+
+- [ ] Real base ground tileset and tree (still Stage 1 placeholders), keeping the atlas
+      layout including the thicket column
+- [ ] Summer, autumn and winter tilesets via image-to-image from that base
+- [ ] Autumn and winter trees; optionally snowy versions of the bin and sprinklers
 
 ## Stage 7 — The town · 2–3 sessions · Sonnet 5.5
 

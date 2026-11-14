@@ -39,6 +39,17 @@ extends Resource
 ## bottom edge, so tall crops simply use taller frames.
 @export var sprite_sheet: Texture2D
 
+## The seasons this crop grows in, by SeasonTheme id (&"spring"). It can only
+## be planted in one of them, and if the season turns to one it isn't in, it
+## dies that night (DECISIONS 025). Leave it empty for a crop that grows all
+## year round.
+@export var seasons: Array[StringName] = []
+
+
+## True if this crop can be planted, and keeps growing, in the season `season_id`.
+func grows_in(season_id: StringName) -> bool:
+	return seasons.is_empty() or season_id in seasons
+
 
 ## True if `stage` is the final, harvestable one.
 func is_ready_stage(stage: int) -> bool:
