@@ -1,0 +1,73 @@
+{
+  "character": {
+    "id": "6f772e05-9806-4395-bb74-caa2b1b615b4",
+    "name": "Idle",
+    "prompt": "16-bit top-down three-quarter farming game sprite, Stardew Valley style,\nflat colours with hard-edged shading, dark selective outline, light source\ntop-left, no dithering, no anti-aliasing, limited earthy palette of muted\ngreens browns and warm accents, transparent background. Subject: middle-aged\nfarmer, straw hat, blue denim overalls, red checked shirt, brown boots",
+    "size": {
+      "width": 48,
+      "height": 48
+    },
+    "directions": 4,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "16-bit_top-down_three-qu-Idle.png",
+    "cell_size": {
+      "width": 56,
+      "height": 56
+    },
+    "sheet_size": {
+      "width": 448,
+      "height": 280
+    },
+    "columns": 8,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 4,
+        "directions": [
+          "south",
+          "west",
+          "east",
+          "north"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "Walking",
+        "animation_group_id": "2c44b6f7-3378-40a5-9da4-4c789edf4538",
+        "direction": "south"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "Walking",
+        "animation_group_id": "2c44b6f7-3378-40a5-9da4-4c789edf4538",
+        "direction": "west"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "Walking",
+        "animation_group_id": "2c44b6f7-3378-40a5-9da4-4c789edf4538",
+        "direction": "east"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "Walking",
+        "animation_group_id": "2c44b6f7-3378-40a5-9da4-4c789edf4538",
+        "direction": "north"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-11-14T12:19:14.353922+00:00"
+}

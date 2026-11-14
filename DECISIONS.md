@@ -207,3 +207,44 @@ already known good.
 
 **Cost.** The game looks crude until Stage 1b. Deliberate — placeholder art that is
 obviously placeholder is a feature, because it never gets mistaken for finished work.
+
+---
+
+## 015 — The palette is derived from the art, not imposed on it
+
+**Decision.** `art/palette.png` is the project's only palette definition. It is the union
+of every colour present in the art, rebuilt by `make_palette.py` and read directly by the
+asset checker. This supersedes the hand-written Harvest 32 from decision 005.
+
+**Why.** Harvest 32 was written before any art existed and contained no skin tones, so the
+first real character matched none of its 32 entries exactly. The choice was to snap good
+art onto a guess or to rebuild the guess around the art. The second is obviously right:
+the palette exists to prevent *drift*, not to be correct in advance. Rebuilt from the
+actual assets it came out at 33 colours — barely larger — and every asset now sits exactly
+on it.
+
+**Cost.** The palette is no longer fixed, so it could creep if colours are accepted
+carelessly. Contained by the checker: new colours are reported as off-palette, which forces
+a deliberate choice between accepting them (and regenerating) or correcting the asset.
+The failure mode to avoid is silence, not growth.
+
+**Also learned.** Re-exporting a Pixellab character with added animations changed the cell
+size (48 → 56) and the whole row layout, but returned the identical 19 colours. Adding
+animations to an existing character is colour-stable; sheet geometry is not. Read geometry
+from the JSON, never assume it.
+
+---
+
+## 016 — Sprite sheet resources are generated from Pixellab's JSON
+
+**Decision.** `player_frames.tres` is produced by `make_spriteframes.py` reading
+`farmer.json`, not hand-written and not built from assumptions about the sheet.
+
+**Why.** Across two exports of the same character the cell size changed from 48 to 56, the
+sheet grew from one row to five, and the row schema itself changed shape — rotation rows
+carry a `directions` array, animation rows carry a single `direction` plus an animation
+name. Anything hand-written would have broken silently. Pixellab also orders directions as
+compass points (south, west, east, north), which is not the order anything else uses.
+
+**Cost.** A build step between art and engine. Worth it: the next re-export costs one
+command.

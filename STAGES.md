@@ -45,10 +45,18 @@ production. The real Pixellab sprite drops into the same slot with no code chang
 
 **1b — real art**
 
-- [ ] Agree the character's look; generate in Pixellab from the `art/STYLE.md` template
-- [ ] Save the approved sprite as `art/reference.png` — the style anchor for everything after
-- [ ] Verify against spec (size, frame grid, transparency, palette) and swap it in
-- [ ] Log the generation in `art/STYLE.md`
+- [x] Agree the character's look; generate in Pixellab from the `art/STYLE.md` template
+- [x] Save the approved sprite as `art/reference.png` — the style anchor for everything after
+- [x] Build `SpriteFrames` from Pixellab's JSON rather than assumed geometry
+- [x] Verify against spec (size, frame grid, transparency, palette) and swap it in
+- [x] Rebuild the palette from the art; every asset now sits exactly on it
+- [x] Log the generation in `art/STYLE.md`
+- [x] Verified in a rendered recording: 8-frame walk cycle plays in all four directions
+- [ ] Dave confirms it plays correctly on Windows
+
+**Left over for later:** `player_placeholder.png` is now unused and can be deleted
+whenever convenient; the tree and ground tiles are still placeholder and get replaced
+in Stage 6 alongside the seasonal tilesets.
 
 **Why this stage first:** it proves the whole Pixellab → Godot pipeline end to end before
 any game systems exist. If the art pipeline has a problem, this is the cheapest place to
