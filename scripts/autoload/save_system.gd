@@ -19,7 +19,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 7, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 8, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -46,7 +46,9 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       gate (two farm tiles change from CLIFF to PATH). No new fields.
 ##   7 — the farmhouse: the cells it stands on become BUILDING terrain, and
 ##       whatever was on them is cleared (sprinklers go back in the bag).
-const CURRENT_VERSION := 7
+##   8 — requests (quests): which have been taken and finished, and a count
+##       for each. Older games have taken none.
+const CURRENT_VERSION := 8
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -62,6 +64,7 @@ const REQUIRED_FIELDS: Dictionary = {
 	"selected_tool": TYPE_STRING,
 	"location": TYPE_STRING,
 	"farm": TYPE_DICTIONARY,
+	"quests": TYPE_DICTIONARY,
 }
 
 ## Saving is switched on by load_or_new_game(), i.e. only when the game was
@@ -217,6 +220,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_5_to_6(data["game"])
 			6:
 				_upgrade_6_to_7(data["game"])
+			7:
+				_upgrade_7_to_8(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -361,3 +366,9 @@ func _upgrade_6_to_7(game: Dictionary) -> void:
 			inventory.append({"id": item_id, "count": 1.0})
 	game["inventory"] = inventory
 	game["location"] = "farmhouse"
+
+
+## Version 7 -> 8: requests arrive (DECISIONS 038). A version 7 game had taken
+## none, so its log starts empty and the townsfolk ask as if for the first time.
+func _upgrade_7_to_8(game: Dictionary) -> void:
+	game["quests"] = {}

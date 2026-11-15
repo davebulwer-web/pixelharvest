@@ -23,6 +23,9 @@ static func today() -> Array[String]:
 		var text := _event_notice(event)
 		if text != "":
 			notices.append(text)
+	var requests := _requests()
+	if requests != "":
+		notices.append(requests)
 	notices.append(_in_season())
 	notices.append(_coming_up())
 	var hours := _opening_hours()
@@ -163,6 +166,19 @@ static func _seed_shop_name() -> String:
 		if location.shop != null and location.shop.sells_seeds:
 			return location.shop.display_name
 	return ""
+
+
+## "Wanted: a hand for Mabel and Pip. Look for the ! over their heads." —
+## everyone with a request to make today (DECISIONS 038), or "" if nobody has.
+static func _requests() -> String:
+	var names: Array[String] = []
+	for id in Quests.givers_with_offers():
+		var person := ContentDB.character(id)
+		names.append(person.display_name if person != null else String(id))
+	if names.is_empty():
+		return ""
+	return "Wanted: a hand for %s. Look for the ! over %s." % [_list(names),
+			"their heads" if names.size() > 1 else "their head"]
 
 
 ## "A", "A and B", "A, B and C".

@@ -1097,3 +1097,68 @@ per day than cabbage: rare is meant to be worth the trip). Stalls only stand in 
 market doesn't move prices anywhere else (the bin and shops pay as usual). All new art is
 placeholder: two stalls, two keepers (recoloured from existing keepers), three crop
 sheets, six icons.
+
+## 038 — Requests are data with a goal script; progress comes only from EventBus
+
+**Decision.** Stage 8 session 2 adds the townsfolk's requests (quests), and three people
+who make them.
+
+- *`QuestDef`* (`data/quests/`, loaded by `ContentDB`): id, title, `giver` (a
+  CharacterDef id), a `goal`, what they say (`offer_lines`, `reminder_line`,
+  `thanks_lines`), a reward (`reward_gold`, `reward_items`), and when it's offered:
+  `first_day` (a day number, as in 037), `seasons`, `on_event` (a CalendarEvent id, so a
+  request can be asked only on market day) and `requires` (another request finished
+  first, which is how one person's requests come in a chain). Each person asks one thing
+  at a time; they ask the first one in `first_day`, then id, order that's available.
+- *A goal is a small script*, `QuestGoal` with one subclass per kind, like `ToolAction`
+  and `UpgradeEffect`: `DeliverGoal` (bring N of an item; it looks in the bag, and the
+  hand-in takes them), `HarvestGoal` (pick N of a crop after accepting; you keep them) and
+  `SellGoal` (sell N gold of produce, by the bin, a shop or a market stall). A new request
+  of an existing kind is a `.tres`; a new kind is one small script.
+- *Progress comes only from EventBus.* The new `Quests` autoload listens to signals that
+  already existed (`crop_harvested`, `items_shipped`, `items_sold_to_shop`, `item_bought`)
+  and offers each to every active request's goal (`counts(event, args)`), which says what
+  it's worth. The goal never connects to anything and touches no autoload. This was the
+  stage's exam: **no farming, bin or shop code changed** for quests. The Quests listeners
+  are deferred, so the HUD's "Harvested 1 Strawberry" comes first and the request's
+  "Pip's strawberries: 2 / 3" shows over it.
+- *Talking is a question, not a signal.* When someone in town is spoken to, the town asks
+  `Quests.talk(id)`: it returns what to say about a request (asking one, a reminder with
+  progress "(3 / 5)", or taking it in and paying) or nothing, and then they say their usual
+  line for the day. It's asked directly, like ContentDB, because the town has to know the
+  answer before deciding what to say. Accepting is just listening: nothing to confirm.
+- *What the player sees.* A "!" over someone's head when they have something to ask, a
+  "?" when you have what they asked for (bobbing labels, made by the town, asked of
+  `Quests.marker_for`). J opens the request log at the top right (`quest_panel.gd`, part
+  of the HUD scene, so it's everywhere); the game keeps running while it's open. The
+  notice board says who wants a hand today. When a request has everything it needs, the
+  message line says "done! Go and see Mabel". New EventBus signals: `quest_started`,
+  `quest_progressed`, `quest_completed`.
+- *Saved: only where the player has got to.* `GameState.quests` is a `QuestLog` (like the
+  Inventory, plain data): request id → active or done, and a running count. Save version
+  8; the 7 → 8 step adds an empty log. A request since removed from the game is dropped
+  with a warning on load. `tests/saves/v7_example.json` was made by the version 7 game.
+- *The first requests* (first guesses at the numbers):
+  - The mayor, from day 1: sell 200g of produce. 50g and 5 potato seeds.
+  - Mabel the baker (new, by the garden): 5 parsnips in spring (250g); then 5 potatoes in
+    spring or summer (400g); then one pumpkin in autumn (150g and a sprinkler), which
+    needs Fennel's market seeds.
+  - Pip (new, a child near the square): on a spring market day, asks you to grow and pick
+    3 strawberries (200g of pocket money; you keep the strawberries).
+
+Options considered for where progress lives: each goal connecting itself to EventBus when
+its request starts (neat, but then data resources hold live connections and touch an
+autoload, and they're shared between games — a new game would inherit the old one's
+hooks); or a counter per signal name in the QuestDef (no scripts at all, but every new
+kind of request would have to be squeezed into "count this signal", and "bring 5" isn't a
+signal). Chosen: one service listens, goals answer questions.
+
+**Why.** Rules 2 and 3. Requests sit on top of the game rather than inside it, and the
+next request is a file.
+
+**Cost.** Requests are only given in town (the town is where the CharacterDefs stand).
+The listener list in `quests.gd` must grow when a new kind of goal needs a signal nobody
+listens to yet (one line). A delivery counts what's in the bag, so selling the parsnips
+before handing them in undoes it. Rewards are gold and items; cosmetics come next session.
+Art for Mabel and Pip is placeholder (recoloured from Marlow and Wren; Pip squashed
+shorter).

@@ -60,6 +60,10 @@ var _selected_slot: int = 0
 
 var farm: FarmData
 
+## The townsfolk's requests taken on and finished (DECISIONS 038). The
+## requests themselves are data; this is only where the player has got to.
+var quests: QuestLog
+
 ## Where the player is. LocationManager changes it; it's saved, so a loaded
 ## game opens in the right place.
 var location: StringName = &""
@@ -89,6 +93,7 @@ func new_game() -> void:
 	_selected_tool_id = &""
 	_selected_slot = 0
 	farm = FarmLayout.build_default()
+	quests = QuestLog.new()
 	location = RULES.starting_location
 
 
@@ -354,6 +359,9 @@ func pick_up_object(cell: Vector2i) -> bool:
 # There's no player position: the game saves at the start of a day, and every
 # day starts with the player at the spawn point.
 #
+# Requests (quests) are saved by id with how far each has got (save version
+# 8); what each one asks is in data/quests/, not in the save.
+#
 # Upgrades are saved as a list of ids (save version 4). Maximum energy isn't
 # saved at all: it's worked out from the upgrades on load, so a rebalanced
 # energy upgrade reaches existing games too.
@@ -371,6 +379,7 @@ func to_save() -> Dictionary:
 		"selected_tool": String(selected.id) if selected != null else "",
 		"location": String(location),
 		"farm": farm.to_save(),
+		"quests": quests.to_save(),
 	}
 
 
@@ -415,3 +424,4 @@ func load_from_save(data: Dictionary) -> void:
 		location = RULES.starting_location
 
 	farm = FarmData.from_save(data["farm"])
+	quests = QuestLog.from_save(data["quests"])

@@ -112,6 +112,17 @@ signal npc_talked_to(npc_id: StringName)
 ## Stage 8's market days and requests can listen too and pin up their own.
 signal notice_board_read()
 
+## The player took on a request from someone in town (a QuestDef id).
+signal quest_started(quest_id: StringName)
+
+## Something counted towards a request in hand: it's now at `progress` of
+## `needed` (DECISIONS 038). Deliveries count the bag, so they don't announce
+## this; their giver's "?" and quest_completed say enough.
+signal quest_progressed(quest_id: StringName, progress: int, needed: int)
+
+## A request was handed in and its reward given.
+signal quest_completed(quest_id: StringName)
+
 ## Something the player should be told, in the HUD's message line.
 signal message_posted(text: String)
 

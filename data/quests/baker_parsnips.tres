@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="2_goal"]
+[ext_resource type="Resource" path="res://data/produce/parsnip.tres" id="3_item"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_goal")
+amount = 5
+item = ExtResource("3_item")
+
+[resource]
+script = ExtResource("1_def")
+id = &"baker_parsnips"
+title = "Mabel's parsnip cakes"
+giver = &"baker"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Oh, you're the new farmer? I'm Mabel. I bake for half the town.", "I'm making parsnip cakes for the spring, but I can't get parsnips for love nor money. Could you bring me five?"])
+reminder_line = "Any luck with those parsnips, love?"
+thanks_lines = Array[String](["Lovely, fresh as anything! The cakes will be the talk of the town.", "Here, for your trouble."])
+reward_gold = 250
+first_day = 1
+seasons = Array[StringName]([&"spring"])

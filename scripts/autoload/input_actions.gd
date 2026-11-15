@@ -24,6 +24,7 @@ const ACTIONS: Dictionary = {
 	&"use_tool": [KEY_SPACE],
 	&"interact": [KEY_E],
 	&"open_inventory": [KEY_I],
+	&"quest_log": [KEY_J],
 	&"next_tool": [KEY_TAB],
 	&"prev_tool": [KEY_Q],
 	&"sleep": [KEY_ENTER],

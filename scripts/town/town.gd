@@ -16,6 +16,11 @@ extends Node2D
 ## box. Shopkeepers indoors never reach here; a market stall's keeper does,
 ## and is served by a ShopCounter, exactly as a keeper indoors is.
 ##
+## Requests (DECISIONS 038): a townsperson with a request to make, remind you
+## of or take in says that instead of their line for the day — the Quests
+## service decides, this scene only says it. A "!" over someone's head means
+## they have something to ask, a "?" that you have what they asked for.
+##
 ##   Town
 ##   ├── Ground      (TileMapLayer, same seasonal tilesets as the farm)
 ##   ├── SpawnPoints (Marker2Ds, made here: one per door, one for the farm gate)
@@ -49,6 +54,12 @@ var _stall_shops: Dictionary = {}  # StringName -> ShopDef
 ## packed away when the market closes.
 var _stall_nodes: Dictionary = {}  # StringName -> Array[Node]
 
+## The "!" or "?" over each townsperson's head, by character id.
+var _markers: Dictionary = {}  # StringName -> Label
+
+## How high the marker floats above a townsperson's feet, in pixels.
+const MARKER_HEIGHT := 54
+
 
 func _ready() -> void:
 	_player.can_farm = false
@@ -78,6 +89,11 @@ func _ready() -> void:
 	EventBus.npc_talked_to.connect(_on_npc_talked_to)
 	EventBus.notice_board_read.connect(_on_notice_board_read)
 	EventBus.time_changed.connect(func(_m: int) -> void: _pack_up_closed_stalls())
+	for signal_ref: Signal in [EventBus.quest_started, EventBus.quest_completed, EventBus.item_added,
+			EventBus.item_removed]:
+		signal_ref.connect(func(_a = null, _b = null) -> void: _refresh_markers())
+	EventBus.quest_progressed.connect(func(_id: StringName, _p: int, _n: int) -> void: _refresh_markers())
+	_refresh_markers()
 
 
 func _base_of(cell: Vector2i) -> Vector2:
@@ -112,7 +128,31 @@ func _place_townsfolk() -> void:
 	for person in ContentDB.characters_in(TOWN_ID):
 		if person.spots.is_empty():
 			continue  # ContentDB has already said so
-		_entities.add_child(Npc.create(person.id, person.sprite, person.spot_on(GameState.day)))
+		var npc := Npc.create(person.id, person.sprite, person.spot_on(GameState.day))
+		_entities.add_child(npc)
+		_markers[person.id] = _add_marker(npc)
+
+
+## A small "!" or "?" floating over someone's head, bobbing gently. Empty
+## (and so invisible) until they have something to do with a request.
+func _add_marker(npc: Npc) -> Label:
+	var marker := Label.new()
+	marker.name = "QuestMarker"
+	marker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	marker.size = Vector2(16, 14)
+	marker.position = Vector2(-8, -MARKER_HEIGHT)
+	UiStyle.style_label(marker, 12, UiStyle.HIGHLIGHT)
+	npc.add_child(marker)
+	var bob := marker.create_tween().set_loops()
+	bob.tween_property(marker, ^"position:y", -MARKER_HEIGHT - 2.0, 0.5).set_trans(Tween.TRANS_SINE)
+	bob.tween_property(marker, ^"position:y", float(-MARKER_HEIGHT), 0.5).set_trans(Tween.TRANS_SINE)
+	return marker
+
+
+## Ask the Quests service what each townsperson's marker should say now.
+func _refresh_markers() -> void:
+	for id: StringName in _markers:
+		_markers[id].text = Quests.marker_for(id)
 
 
 ## Today's market stalls, if any: every stall of every calendar event on
@@ -190,6 +230,10 @@ func _on_npc_talked_to(npc_id: StringName) -> void:
 		return
 	var person := ContentDB.character(npc_id)
 	if person == null or person.location != TOWN_ID:
+		return
+	var about_requests := Quests.talk(npc_id)
+	if not about_requests.is_empty():
+		_dialogue.say(person.display_name, about_requests)
 		return
 	var line := person.line_on(GameState.day)
 	if line == "":

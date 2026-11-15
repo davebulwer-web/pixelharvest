@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="2_goal"]
+[ext_resource type="Resource" path="res://data/produce/pumpkin.tres" id="3_item"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="5_itemdef"]
+[ext_resource type="Resource" path="res://data/tools/sprinkler.tres" id="6_reward0"]
+[ext_resource type="Resource" path="res://data/quests/baker_potatoes.tres" id="7_requires"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_goal")
+amount = 1
+item = ExtResource("3_item")
+
+[resource]
+script = ExtResource("1_def")
+id = &"baker_pumpkin"
+title = "Mabel's pumpkin pie"
+giver = &"baker"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Autumn means pumpkin pie, and the best pumpkins grow from Fennel's seeds. He's at the market.", "Grow me one good pumpkin? My brother left a sprinkler in my shed and I've no garden to put it in. It's yours for a pumpkin."])
+reminder_line = "Still waiting on that pumpkin. The pastry's ready when you are."
+thanks_lines = Array[String](["What a beauty! This'll make three pies at least.", "And the sprinkler, as promised. Put it in the middle of your crops and it waters round itself."])
+reward_gold = 150
+reward_items = Dictionary[ExtResource("5_itemdef"), int]({
+ExtResource("6_reward0"): 1
+})
+requires = ExtResource("7_requires")
+first_day = 1
+seasons = Array[StringName]([&"autumn"])

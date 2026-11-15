@@ -346,13 +346,35 @@ Session 1 (2026-11-15) — calendar events and market day, on placeholder art. S
       arriving late, mayor and notice board don't open a menu, indoor shops unchanged,
       the morning announcement, strawberry grows and regrows, save round trip) and rendered
       (square on market day, both menus, the notice, the evening, winter)
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-15, committed)
 
 **Left over:** real Pixellab art for the two stalls, Rosa and Fennel, the three crops and
 their six icons (all placeholder now).
 
-- [ ] `QuestDef` resources subscribing to `EventBus` signals
-- [ ] Two or three quest characters
+Session 2 (2026-11-15) — requests (quests), on placeholder art. See DECISIONS 038.
+
+- [x] `QuestDef` resources (`data/quests/`): who asks, a goal, their words, a reward (gold
+      and items), and when it's offered (`first_day`, `seasons`, `on_event`, `requires`)
+- [x] Goals are small scripts (`scripts/quests/`): bring items (`DeliverGoal`), harvest a
+      crop (`HarvestGoal`), sell produce worth so much (`SellGoal`). The `Quests` autoload
+      counts them from signals EventBus already had: no farming, shop or bin code changed
+- [x] Three quest givers: Mabel the baker (new; parsnips, then potatoes, then an autumn
+      pumpkin for a sprinkler), Pip (new; harvest 3 strawberries, asked on market day in
+      spring) and the mayor (sell 200g of produce, from day 1)
+- [x] Talk to them: they ask, remind you with your progress, and take it in and pay.
+      "!" over someone's head means they have something to ask, "?" that you have it
+- [x] J opens the request log (top right); the notice board says who wants a hand
+- [x] Save version 8 (requests taken and finished); v1–v7 saves load with none taken
+- [x] Verified headless (94 checks: plurals and reward text, who offers what on which
+      day, one at a time, reminders with progress, ready message and markers, hand-in
+      takes the items and pays, chains, seasons, market-day only, a real strawberry
+      harvest and real bin and shop sales counted, the notice board, the town's talk,
+      markers and log, save round trip, v1–v7 saves) and rendered (markers, Mabel
+      asking, the log, "?" over Mabel, the hand-in, the notice)
+- [ ] Dave confirms it plays correctly on Windows
+
+**Left over:** real Pixellab art for Mabel and Pip (recoloured placeholders now).
+
 - [ ] Cosmetic purchases and farm decoration
 - [ ] `DifficultyDef` resources and a new-game difficulty choice
 

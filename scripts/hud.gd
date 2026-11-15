@@ -5,8 +5,8 @@ extends CanvasLayer
 ## between days.
 ##
 ## It never reads from the player and nothing calls it: it listens on EventBus
-## and reads GameState. That's what will let Stage 8's quest log or a market-day
-## banner join the screen without anything else changing.
+## and reads GameState. The request log (J, quest_panel.gd) is a child of the
+## HUD scene and works the same way.
 ##
 
 ## How long a message stays up, and how long the morning fade-in takes.
@@ -55,6 +55,7 @@ func _ready() -> void:
 	EventBus.object_placed.connect(_on_object_placed)
 	EventBus.object_removed.connect(_on_object_removed)
 	EventBus.game_saved.connect(_on_game_saved)
+	EventBus.quest_progressed.connect(_on_quest_progressed)
 	# Carried home mid-night (out of energy in the field): start dark, so the
 	# room doesn't flash up before the morning fades in.
 	_fade.modulate.a = 1.0 if TimeSystem.is_ending_day() else 0.0
@@ -168,6 +169,15 @@ func _on_items_sold_to_shop(item_id: StringName, amount: int, gold: int) -> void
 func _on_upgrade_bought(upgrade_id: StringName, cost: int) -> void:
 	var upgrade := ContentDB.upgrade(upgrade_id)
 	_show_message("Bought %s for %dg" % [upgrade.display_name if upgrade else String(upgrade_id), cost])
+
+
+## "Pip's strawberries: 2 / 3" as a harvest or a sale counts towards a request.
+## The last step is announced by the Quests service ("done! Go and see Pip").
+func _on_quest_progressed(quest_id: StringName, progress: int, needed: int) -> void:
+	var quest := ContentDB.quest(quest_id)
+	if quest == null or progress >= needed:
+		return
+	_show_message("%s: %s" % [quest.title, quest.goal.progress_text(progress)])
 
 
 func _on_object_placed(_cell: Vector2i, object_id: StringName) -> void:

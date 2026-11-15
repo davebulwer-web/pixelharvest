@@ -107,6 +107,7 @@ scripts/             Game code
   items/             Inventory
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects)
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
+  quests/            QuestGoal scripts (deliver, harvest, sell) and the saved QuestLog
 data/                Content resources (.tres), indexed by ContentDB
   crops/             CropDef — how each plant grows and looks
   produce/           ItemDef — what a harvest gives, and its sell price
@@ -118,6 +119,7 @@ data/                Content resources (.tres), indexed by ContentDB
   shops/             ShopDef — a shopkeeper, their words, and what the counter offers
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers)
   events/            CalendarEvent — what happens on which days (market day) and its stalls
+  quests/            QuestDef — townsfolk's requests: who asks, for what, and the reward
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
                      farm/ the farmhouse and its furniture)

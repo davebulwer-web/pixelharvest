@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="2_goal"]
+[ext_resource type="Resource" path="res://data/produce/potato.tres" id="3_item"]
+[ext_resource type="Resource" path="res://data/quests/baker_parsnips.tres" id="7_requires"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_goal")
+amount = 5
+item = ExtResource("3_item")
+
+[resource]
+script = ExtResource("1_def")
+id = &"baker_potatoes"
+title = "Mabel's pasties"
+giver = &"baker"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["The parsnip cakes sold out in a morning!", "Next it's pasties. Bring me five potatoes and I'll make it worth your while."])
+reminder_line = "Pasties without potatoes are just pastry, love."
+thanks_lines = Array[String](["Perfect spuds. The pasties will fly off the shelf.", "There. You've earned every coin."])
+reward_gold = 400
+requires = ExtResource("7_requires")
+first_day = 1
+seasons = Array[StringName]([&"spring", &"summer"])

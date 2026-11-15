@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CharacterDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/character_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/child.png" id="2_sprite"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"child"
+display_name = "Pip"
+sprite = ExtResource("2_sprite")
+location = &"town"
+spots = Array[Vector2i]([Vector2i(29, 16), Vector2i(31, 19), Vector2i(27, 20)])
+lines = Array[String](["Is it true you've got a whole farm? With dirt and everything?", "I'm going to be a farmer when I grow up. Or a pirate.", "Wren says the fish are sulking. Can fish sulk?", "The mayor fell asleep on the bench again. I didn't wake him."])

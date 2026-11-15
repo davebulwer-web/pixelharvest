@@ -25,6 +25,8 @@ extends Node
 ##   data/characters/ CharacterDef — townsfolk you can talk to (not shopkeepers)
 ##   data/events/    CalendarEvent — what happens on which days (market day),
 ##                   with its stalls (DECISIONS 037)
+##   data/quests/    QuestDef — townsfolk's requests: who asks, for what, and
+##                   the reward (DECISIONS 038)
 ##
 
 const CROPS_DIR := "res://data/crops/"
@@ -33,6 +35,7 @@ const OBJECTS_DIR := "res://data/objects/"
 const UPGRADES_DIR := "res://data/upgrades/"
 const CHARACTERS_DIR := "res://data/characters/"
 const EVENTS_DIR := "res://data/events/"
+const QUESTS_DIR := "res://data/quests/"
 
 ## For checking crops name real seasons. Read directly rather than through
 ## GameState, because ContentDB starts first.
@@ -44,6 +47,7 @@ var _objects: Dictionary = {}  # StringName -> ObjectDef
 var _upgrades: Dictionary = {}  # StringName -> UpgradeDef
 var _characters: Dictionary = {}  # StringName -> CharacterDef
 var _events: Dictionary = {}  # StringName -> CalendarEvent
+var _quests: Dictionary = {}  # StringName -> QuestDef
 
 
 func _ready() -> void:
@@ -54,9 +58,12 @@ func _ready() -> void:
 	_index(UPGRADES_DIR, _upgrades)
 	_index(CHARACTERS_DIR, _characters)
 	_index(EVENTS_DIR, _events)
+	_index(QUESTS_DIR, _quests)
 	_check()
-	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters, %d events"
-			% [_crops.size(), _items.size(), _objects.size(), _upgrades.size(), _characters.size(), _events.size()])
+	_check_quests()
+	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters, %d events, %d quests"
+			% [_crops.size(), _items.size(), _objects.size(), _upgrades.size(), _characters.size(),
+			_events.size(), _quests.size()])
 
 
 ## The crop with this id, or null if there isn't one (for example, a save from
@@ -118,6 +125,27 @@ func events() -> Array[CalendarEvent]:
 ## `season_id`. GameState.events_today() is the usual way to ask.
 func events_on(day_number: int, season_id: StringName) -> Array[CalendarEvent]:
 	return events().filter(func(e: CalendarEvent) -> bool: return e.happens_on(day_number, season_id))
+
+
+## The request with this id, or null.
+func quest(id: StringName) -> QuestDef:
+	return _quests.get(id)
+
+
+## Every request, earliest first (by first_day, then id). A giver offers the
+## first one in this order that's available, so a chain reads in order.
+func quests() -> Array[QuestDef]:
+	var result: Array[QuestDef] = []
+	for each: QuestDef in _quests.values():
+		result.append(each)
+	result.sort_custom(func(a: QuestDef, b: QuestDef) -> bool:
+		if a.first_day != b.first_day:
+			return a.first_day < b.first_day
+		# As Strings: two StringNames compare by where they sit in memory,
+		# not alphabetically, which would make the order change between runs.
+		return String(a.id) < String(b.id)
+	)
+	return result
 
 
 ## The packet of seeds that plants `crop`, or null if none does.
@@ -388,3 +416,46 @@ func _check() -> void:
 			push_error("ContentDB: '%s' requires an upgrade that isn't in %s" % [where, UPGRADES_DIR])
 		if each.price <= 0:
 			push_warning("ContentDB: '%s' has no price, so it's free" % where)
+
+
+## Requests: each must have someone to ask it, a goal that can be met, and
+## anything it names (items, crops, events, the request before it) must exist.
+func _check_quests() -> void:
+	var season_ids: Array[StringName] = []
+	for theme: SeasonTheme in RULES.seasons:
+		if theme != null:
+			season_ids.append(theme.id)
+	for each: QuestDef in _quests.values():
+		var where := each.resource_path
+		if character(each.giver) == null:
+			push_error("ContentDB: '%s' is asked by '%s', who isn't in %s" % [where, each.giver, CHARACTERS_DIR])
+		if each.title == "":
+			push_warning("ContentDB: '%s' has no title, so the request log shows it blank" % where)
+		if each.offer_lines.is_empty():
+			push_warning("ContentDB: '%s' has no offer_lines, so it's given without a word" % where)
+		if each.goal == null:
+			push_error("ContentDB: '%s' has no goal, so it can never be done" % where)
+		else:
+			if each.goal.amount < 1:
+				push_error("ContentDB: '%s' asks for an amount below 1" % where)
+			if each.goal is DeliverGoal:
+				var wanted: ItemDef = each.goal.item
+				if wanted == null or item(wanted.id) != wanted:
+					push_error("ContentDB: '%s' asks for an item that isn't in data/produce/ or data/tools/" % where)
+			elif each.goal is HarvestGoal:
+				var wanted_crop: CropDef = each.goal.crop
+				if wanted_crop != null and crop(wanted_crop.id) != wanted_crop:
+					push_error("ContentDB: '%s' asks for a crop that isn't in %s" % [where, CROPS_DIR])
+		for reward: ItemDef in each.reward_items:
+			if reward == null or item(reward.id) != reward:
+				push_error("ContentDB: '%s' gives a reward item that isn't in data/produce/ or data/tools/" % where)
+		if each.requires != null and quest(each.requires.id) != each.requires:
+			push_error("ContentDB: '%s' requires a request that isn't in %s" % [where, QUESTS_DIR])
+		if each.requires == each:
+			push_error("ContentDB: '%s' requires itself, so it's never offered" % where)
+		for season_id in each.seasons:
+			if season_id not in season_ids:
+				push_error("ContentDB: '%s' is offered in a season '%s' that isn't in game_rules.tres"
+						% [where, season_id])
+		if each.on_event != &"" and event(each.on_event) == null:
+			push_error("ContentDB: '%s' is offered on '%s', which isn't in %s" % [where, each.on_event, EVENTS_DIR])
