@@ -102,6 +102,7 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	farm = FarmLayout.build_default()
 	quests = QuestLog.new()
 	location = RULES.starting_location
+	EventBus.new_game_started.emit()
 
 
 func _give_starting_kit() -> void:

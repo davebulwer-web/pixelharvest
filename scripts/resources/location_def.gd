@@ -20,6 +20,11 @@ extends Resource
 ## is only loaded when the player actually goes there.
 @export_file("*.tscn") var scene_path: String
 
+## The tune that plays here, looping (DECISIONS 042). A building left empty
+## plays its outside's tune: the shops have the town's, the farmhouse the
+## farm's, so walking indoors doesn't restart the music.
+@export var music: AudioStream
+
 ## --- Buildings -----------------------------------------------------------------
 ## A location that is a room entered through a door on another location's map
 ## (a shop or the farmhouse, in Stage 7) says where that door is. The outside location builds

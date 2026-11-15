@@ -101,8 +101,9 @@ project.godot        Engine config — see DECISIONS.md 009 before changing disp
 icon.svg
 scenes/              .tscn scene files
 scripts/             Game code
-  autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem…)
-  farm/              The farm's data and layout, the farmhouse and its bed
+  autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem,
+                     Audio, DayReport…)
+  farm/              The farm's data and layout, the farmhouse and its bed, its effects
   town/              The town, its map, shop interiors and fronts, people, notice board (Stage 7)
   items/             Inventory
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
@@ -123,9 +124,11 @@ data/                Content resources (.tres), indexed by ContentDB
   events/            CalendarEvent — what happens on which days (market day) and its stalls
   quests/            QuestDef — townsfolk's requests: who asks, for what, and the reward
   difficulties/      DifficultyDef — chosen at new game: multipliers on prices, energy, growing
+  audio/             SoundBank — what each sound the game plays sounds like (DECISIONS 042)
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
                      farm/ the farmhouse and its furniture, decorations/ the farm's decorations)
 assets/tilesets/     Ground and world tilesets
+assets/audio/        Sound effects (sfx/*.wav) and music (music/*.ogg), made by art/build_sounds.py
 art/                 Art specification and generation log (not shipped art)
 ```

@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 8 — events and quests.** Stage 7 (the town) is complete: sessions 1–4 and their real art confirmed by Dave on 2026-11-15.
+**Current stage: 9 — feel, balance and release.** Stage 8 (events and quests) is complete: sessions 1–4 and their real art confirmed by Dave on 2026-11-15.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -422,7 +422,7 @@ Session 4 (2026-11-15) — difficulty, chosen at new game, on placeholder UI. Se
       writes v9, Ctrl+N opens over the farm paused, doesn't stack, Esc keeps the game,
       Ctrl+N to Relaxed gives 200g and wakes at home, shop shows the hard days) and
       rendered (the menu at first launch, and over the farm)
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-15, committed)
 
 **Stage 8 art (2026-11-15, DECISIONS 041):** real Pixellab art for the stalls, Rosa, Fennel,
 Mabel, Pip, the three crops with their icons and seed packets, and the decorations.
@@ -436,9 +436,41 @@ wrong earlier.
 
 ## Stage 9 — Feel, balance and release · 2 sessions · Sonnet 5.5
 
-- [ ] Sound effects and music
-- [ ] Particles, screen shake, harvest pops — the juice
+Split: session 1 is the feel (sound, juice, the day's summary); session 2 is the release
+(title screen, settings, save slots, the balance pass, export and itch.io).
+
+- [x] Sound effects and music
+- [x] Particles, screen shake, harvest pops — the juice
 - [ ] Title screen, settings, save slots
-- [ ] Day-end summary screen
+- [x] Day-end summary screen
 - [ ] Full balance pass across a simulated year
 - [ ] Windows export, itch.io page
+
+Session 1 (2026-11-15) — sound, music, juice and the day's summary. See DECISIONS 042.
+
+- [x] `Audio` autoload plays a sound for each EventBus event (19 sounds in
+      `data/audio/sound_bank.tres`), pitch varied a little, once per frame, not overnight
+- [x] Music per location (`LocationDef.music`): a farm tune and a town tune; shops and
+      the farmhouse carry their outside's tune on; crossfades between them
+- [x] `Music` and `SFX` buses (`default_bus_layout.tres`); M mutes everything until the
+      settings screen
+- [x] All sounds and both tunes made by `art/build_sounds.py` (synthesised, no samples)
+- [x] `FarmEffects`: dirt, water, leaf and dust bursts; the harvest pops up out of the
+      ground; camera jolts on harvest and collapse (`ScreenShake`); crops and the bin
+      squash and stretch
+- [x] The HUD shows "+40g" / "-15g" under the purse as gold comes and goes
+- [x] `DayReport` keeps the day's tally; `DaySummary` shows it each morning on black
+      before the fade-in (Space, E or Enter); cleared by loading or a new game
+- [x] No save change (version stays 9)
+- [x] Verified headless (94 checks: every sound loads, both tunes loop, who plays which
+      tune, the farmhouse and shops carry the tune on, no door sound at launch, the door
+      sound, till/water/plant/harvest/ship/nope/coins sounds, one sound per frame,
+      unknown sound silent, particles appear and free themselves, the crop squashes and
+      springs back, the harvest pop, the camera shakes and settles at zero, the gold
+      float, M mutes and unmutes, the tally of harvest, planting, watering, spending,
+      the bin, sales and rewards, the summary after a night, after collapsing in the
+      field, paused under it, early key ignored, Space and E close it, "Saved" after,
+      quiet day, a fresh tally next day, none after loading a save or a new game, the
+      town tune and the shop carrying it, a clean quit) and rendered (dirt and water
+      bursts, the harvest pop, the gold float, the summary, a quiet day)
+- [ ] Dave confirms it plays (and sounds) right on Windows

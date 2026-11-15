@@ -19,6 +19,8 @@ extends Node2D
 ##   ├── TileCursor (outline on the tile the player is facing; drawn under entities)
 ##   ├── Entities   (y-sorted — player, trees and crops sort against each other
 ##   │               by their node origin, which for all of them sits at their base)
+##   ├── Effects    (FarmEffects: bursts of dirt and water, the harvest popping
+##   │               up, camera jolts — drawn over Entities; DECISIONS 042)
 ##   ├── Weather    (holds the season's overlay, e.g. winter: snow falling on a
 ##   │               CanvasLayer over the world, under the HUD)
 ##   ├── Daylight   (scenes/daylight.tscn: tints the world by the clock — dusk,
@@ -69,10 +71,14 @@ func _ready() -> void:
 	EventBus.tile_tilled.connect(_redraw_cell)
 	EventBus.tile_watered.connect(_redraw_cell)
 	EventBus.tile_cleared.connect(_redraw_cell)
-	EventBus.crop_planted.connect(func(cell: Vector2i, _id: StringName) -> void: _redraw_crop(cell))
+	EventBus.crop_planted.connect(func(cell: Vector2i, _id: StringName) -> void:
+		_redraw_crop(cell)
+		_squash_crop(cell)
+	)
 	EventBus.crop_grew.connect(func(cell: Vector2i, _stage: int) -> void: _redraw_crop(cell))
-	EventBus.crop_harvested.connect(
-		func(cell: Vector2i, _id: StringName, _n: int) -> void: _redraw_crop(cell)
+	EventBus.crop_harvested.connect(func(cell: Vector2i, _id: StringName, _n: int) -> void:
+		_redraw_crop(cell)
+		_squash_crop(cell)  # a crop that grows back stays, and gets a shake
 	)
 	EventBus.crop_died.connect(func(cell: Vector2i, _id: StringName) -> void: _redraw_crop(cell))
 	EventBus.object_placed.connect(func(cell: Vector2i, _id: StringName) -> void:
@@ -92,7 +98,7 @@ func _ready() -> void:
 		_apply_season_overlay()
 	)
 
-	print("--- Pixel Harvest · Stage 8 ---")
+	print("--- Pixel Harvest · Stage 9 ---")
 	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
 	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
 	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler")
@@ -105,6 +111,7 @@ func _ready() -> void:
 			% GameState.RULES.days_per_season)
 	print("still in the ground when their season ends die overnight.")
 	print("The game saves every morning and loads on launch. Ctrl+N starts a new game.")
+	print("Each night shows a summary of the day: Space to carry on. M mutes the sound.")
 	print("-------------------------------")
 
 
@@ -186,6 +193,17 @@ func _redraw_crop(cell: Vector2i) -> void:
 	# Lift the sprite so its bottom edge sits on the bottom of the tile.
 	sprite.offset = Vector2(0, -sheet.get_height() / 2.0)
 	sprite.frame = t.crop_stage
+
+
+## A quick squash and stretch of the crop at `cell`, if there's one left:
+## something just happened to it. Only the picture moves (DECISIONS 042).
+func _squash_crop(cell: Vector2i) -> void:
+	var sprite: Sprite2D = _crop_sprites.get(cell)
+	if sprite == null:
+		return
+	sprite.scale = Vector2(1.3, 0.7)
+	sprite.create_tween().tween_property(sprite, ^"scale", Vector2.ONE, 0.3) \
+			.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
 
 func _redraw_cell(cell: Vector2i) -> void:

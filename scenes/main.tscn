@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="TileSet" path="res://assets/tilesets/ground_tileset.tres" id="2_tileset"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="5_hud"]
 
 [ext_resource type="PackedScene" path="res://scenes/daylight.tscn" id="9_daylight"]
+[ext_resource type="Script" path="res://scripts/farm/farm_effects.gd" id="10_effects"]
 
 [node name="Farm" type="Node2D"]
 script = ExtResource("1_main")
@@ -31,6 +32,9 @@ y_sort_enabled = true
 
 [node name="Player" parent="Entities" instance=ExtResource("3_player")]
 position = Vector2(232, 208)
+
+[node name="Effects" type="Node2D" parent="."]
+script = ExtResource("10_effects")
 
 [node name="Weather" type="Node" parent="."]
 

@@ -1,0 +1,46 @@
+class_name DayRecord
+extends RefCounted
+##
+## DayRecord — one day's tally, kept by DayReport and shown by DaySummary
+## (DECISIONS 042). Plain numbers, so the summary screen only has to show it.
+##
+
+var day: int
+var season: int
+var year: int
+## Produce item id -> how many were picked.
+var harvested: Dictionary[StringName, int] = {}
+var planted: int = 0
+## Tiles watered by the player. Sprinklers water overnight and aren't counted.
+var watered: int = 0
+## Gold in: every coin that came in, and of that, how much was from the
+## shipping bin overnight and from shop counters and market stalls.
+var gold_in: int = 0
+var bin_sales: int = 0
+var shop_sales: int = 0
+## Gold out: seeds, decorations, upgrades.
+var spent: int = 0
+## Requests handed in today, by QuestDef id.
+var quests_done: Array[StringName] = []
+## Gold in the purse when the night's sales were done.
+var gold_at_end: int = 0
+
+
+## Whatever came in that wasn't a sale: request rewards.
+func other_income() -> int:
+	return maxi(0, gold_in - bin_sales - shop_sales)
+
+
+func income() -> int:
+	return gold_in
+
+
+## Gold gained (or lost) over the day, the night's bin sales included.
+func net() -> int:
+	return income() - spent
+
+
+## True if nothing at all happened worth listing.
+func is_quiet() -> bool:
+	return harvested.is_empty() and planted == 0 and watered == 0 \
+			and income() == 0 and spent == 0 and quests_done.is_empty()

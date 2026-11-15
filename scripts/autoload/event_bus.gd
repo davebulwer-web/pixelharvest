@@ -130,3 +130,8 @@ signal message_posted(text: String)
 
 signal game_saved()
 signal game_loaded()
+
+## A new game was set up (first launch, or Ctrl+N), replacing whatever was
+## in memory. Anything that keeps a running tally of the game in hand (the
+## day's report) starts again.
+signal new_game_started()

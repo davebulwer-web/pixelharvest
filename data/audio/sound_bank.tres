@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="SoundBank" load_steps=21 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/sound_bank.gd" id="1_bank"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/till.wav" id="2_till"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/water.wav" id="3_water"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/plant.wav" id="4_plant"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/harvest.wav" id="5_harvest"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/coins.wav" id="6_coins"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/ship.wav" id="7_ship"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/place.wav" id="8_place"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/pick_up.wav" id="9_pick_up"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/talk.wav" id="10_talk"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/quest_done.wav" id="11_quest_done"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/chime.wav" id="12_chime"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/door.wav" id="13_door"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/collapse.wav" id="14_collapse"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/sleep.wav" id="15_sleep"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/morning.wav" id="16_morning"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/tick.wav" id="17_tick"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/paper.wav" id="18_paper"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/nope.wav" id="19_nope"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/menu.wav" id="20_menu"]
+
+[resource]
+script = ExtResource("1_bank")
+sounds = Dictionary[StringName, AudioStream]({
+&"till": ExtResource("2_till"),
+&"water": ExtResource("3_water"),
+&"plant": ExtResource("4_plant"),
+&"harvest": ExtResource("5_harvest"),
+&"coins": ExtResource("6_coins"),
+&"ship": ExtResource("7_ship"),
+&"place": ExtResource("8_place"),
+&"pick_up": ExtResource("9_pick_up"),
+&"talk": ExtResource("10_talk"),
+&"quest_done": ExtResource("11_quest_done"),
+&"chime": ExtResource("12_chime"),
+&"door": ExtResource("13_door"),
+&"collapse": ExtResource("14_collapse"),
+&"sleep": ExtResource("15_sleep"),
+&"morning": ExtResource("16_morning"),
+&"tick": ExtResource("17_tick"),
+&"paper": ExtResource("18_paper"),
+&"nope": ExtResource("19_nope"),
+&"menu": ExtResource("20_menu")
+})
+pitch_variation = 0.05

@@ -2,7 +2,9 @@ extends CanvasLayer
 ##
 ## Hud — the always-on readout: the date, the time, gold, energy, what's waiting in
 ## the shipping bin, a short message line, the hotbar (hotbar.gd), and the fade
-## between days.
+## between days. Each morning after a night it first shows the day's summary
+## (DaySummary, from DayReport's tally) on black, then fades the morning in.
+## Gold going in or out shows under the purse for a moment, drifting down.
 ##
 ## It never reads from the player and nothing calls it: it listens on EventBus
 ## and reads GameState. The request log (J, quest_panel.gd) is a child of the
@@ -35,11 +37,21 @@ var _morning_too_late: bool = false
 ## The late warning is given once a day, the first time the clock passes it.
 var _warned_late: bool = false
 
+## The day's summary while it's open, so the morning waits for it.
+var _summary: DaySummary
+
+## The morning's save landed while the summary was up: say so once it closes.
+var _saved_this_morning: bool = false
+
+## How far the purse's change drifts, and for how long (presentation only).
+const GOLD_FLOAT_PIXELS := 10.0
+const GOLD_FLOAT_SECONDS := 1.0
+
 
 func _ready() -> void:
 	EventBus.tool_selected.connect(func(_id: StringName) -> void: _refresh())
 	EventBus.energy_changed.connect(func(_c: float, _m: float) -> void: _refresh())
-	EventBus.gold_changed.connect(func(_g: int, _d: int) -> void: _refresh())
+	EventBus.gold_changed.connect(_on_gold_changed)
 	EventBus.day_started.connect(_on_day_started)
 	EventBus.crop_harvested.connect(_on_crop_harvested)
 	EventBus.items_shipped.connect(_on_items_shipped)
@@ -76,7 +88,8 @@ func _refresh() -> void:
 
 
 ## Night falls instantly; morning fades in. Snapping to black and easing back
-## reads as "time passed" without making the player wait twice.
+## reads as "time passed" without making the player wait twice. After a
+## night, the day's summary comes up on the black first (DECISIONS 042).
 func _on_day_started(_day: int, _season: int, _year: int) -> void:
 	_morning_sales = _overnight_sales
 	_morning_deaths = _overnight_deaths
@@ -87,10 +100,24 @@ func _on_day_started(_day: int, _season: int, _year: int) -> void:
 	_overnight_new_season = false
 	_overnight_too_late = false
 	_warned_late = false
+	_saved_this_morning = false
 	_refresh()
 	_fade.modulate.a = 1.0
+	var record := DayReport.take_finished()
+	if record == null:
+		_begin_morning()
+		return
+	_summary = DaySummary.new()
+	_summary.record = record
+	_summary.closed.connect(_begin_morning)
+	add_child(_summary)
+
+
+## The fade into the morning, and what happened overnight.
+func _begin_morning() -> void:
+	_summary = null
 	create_tween().tween_property(_fade, ^"modulate:a", 0.0, FADE_SECONDS)
-	_show_message(_morning_text())
+	_show_message(_morning_text() + ("    Saved" if _saved_this_morning else ""))
 
 
 ## Every 10 minutes of game time. Late in the evening, one warning that the
@@ -106,7 +133,39 @@ func _on_time_changed(minutes: int) -> void:
 ## The save lands just after the morning message, so it extends it rather
 ## than replacing it.
 func _on_game_saved() -> void:
+	if _summary != null:
+		_saved_this_morning = true
+		return
 	_show_message(_morning_text() + "    Saved")
+
+
+## The purse went up or down: redraw, and show "+40g" or "-15g" just under
+## the gold figure, drifting down and fading: gold colour in, red out.
+func _on_gold_changed(_gold: int, delta: int) -> void:
+	_refresh()
+	if delta == 0:
+		return
+	var float_label := Label.new()
+	float_label.text = DaySummary.signed_gold(delta)
+	UiStyle.style_label(float_label, 10, UiStyle.GOLD if delta > 0 else UiStyle.WARNING)
+	# Keeps moving while a shop menu has the game paused, so buying shows it.
+	float_label.process_mode = Node.PROCESS_MODE_ALWAYS
+	float_label.position = _label.position + Vector2(_gold_text_end(), 12)
+	add_child(float_label)
+	var tween := float_label.create_tween().set_parallel(true)
+	tween.tween_property(float_label, ^"position:y", float_label.position.y + GOLD_FLOAT_PIXELS, GOLD_FLOAT_SECONDS) \
+			.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tween.tween_property(float_label, ^"modulate:a", 0.0, GOLD_FLOAT_SECONDS * 0.5).set_delay(GOLD_FLOAT_SECONDS * 0.5)
+	tween.chain().tween_callback(float_label.queue_free)
+
+
+## How far along the top line the gold figure starts, in pixels: the date and
+## the time come before it.
+func _gold_text_end() -> float:
+	var before := "%s    %s    " % [_date(), Clock.format(GameState.minutes)]
+	var font := _label.get_theme_font(&"font")
+	var size := _label.get_theme_font_size(&"font_size")
+	return font.get_string_size(before, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 
 
 ## "Spring · Day 5 · Year 1", plus today's events: "· Market day".

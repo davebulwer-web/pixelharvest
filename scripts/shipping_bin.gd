@@ -19,6 +19,7 @@ const TILE_PX := 16
 
 func _ready() -> void:
 	add_to_group(&"interactable")
+	EventBus.items_shipped.connect(_on_items_shipped)
 
 
 ## True if the bin stands on `cell`. The node's origin is the bottom-middle of
@@ -29,3 +30,14 @@ func occupies(cell: Vector2i) -> bool:
 
 func interact() -> void:
 	Economy.ship_all()
+
+
+## Something went in: the bin squashes down and springs back, as if the lid
+## had shut on it (DECISIONS 042). Only the picture moves, never the body.
+func _on_items_shipped(count: int, _value: int) -> void:
+	if count == 0:
+		return
+	var sprite := $Sprite as Sprite2D
+	sprite.scale = Vector2(1.2, 0.8)
+	sprite.create_tween().tween_property(sprite, ^"scale", Vector2.ONE, 0.35) \
+			.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)

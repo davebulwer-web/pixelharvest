@@ -1298,3 +1298,68 @@ needed to change.
 **Cost.** About 45 generations including look tests and retakes, under 40 cents of
 credit. The hay bale is the weakest piece: the palette has no bright straw yellow, so it
 comes out a pale tan block; three retakes didn't do better.
+
+## 042 — Sound, music, juice and the day's summary all listen on EventBus; sounds are made by a script
+
+**Decision.** Stage 9 session 1 adds the game's feel: sound effects and music, small
+visual effects, and a summary screen at the end of each day. None of it is called by the
+game's systems. Each piece subscribes to signals EventBus already had, so the farming,
+shop and quest code didn't change (`GameState.new_game()` gained one announcement).
+
+- *Sound is an `Audio` autoload* that listens on EventBus and plays a named sound for each
+  event (`till`, `water`, `plant`, `harvest`, `coins`, `ship`, `door`, `talk`,
+  `quest_done`, `sleep`, `morning`…; the whole list is in `_listen()`). What each name
+  sounds like is data: `data/audio/sound_bank.tres` (`SoundBank`), so a better sound is a
+  file swap. Each play varies the pitch by ±5% so repeated sounds don't sound mechanical,
+  and one sound asked for twice in one frame plays once (a 3×3 watering can is one
+  splash). Farm sounds are skipped overnight (sprinklers). It keeps running while paused,
+  so the shop menu and the summary still make sounds.
+- *Music is a field on `LocationDef`* (`music`). A building without one plays its
+  outside's tune, so the shops play the town's and the farmhouse the farm's, and walking
+  indoors carries the tune on instead of restarting it. Changing tune crossfades over
+  0.8 s with two players.
+- *Two buses,* `Music` (-4 dB) and `SFX`, in `default_bus_layout.tres`, ready for session
+  2's volume sliders. Until then **M** mutes and unmutes everything (not saved).
+- *The sounds and both tunes are made by `art/build_sounds.py`*: synthesised from sine,
+  triangle and soft square waves and filtered noise, no samples. The tunes are written
+  out note by note (farm: F major, 84 bpm, about 90 s; town: G major, 108 bpm with a
+  little swing, about 70 s) and rendered "round the loop" so they repeat without a gap.
+  Effects are 16-bit `.wav`; music is `.ogg` with `loop=true` in its `.import` file.
+- *Juice on the farm is `FarmEffects`* (the `Effects` node in `main.tscn`, above the
+  y-sorted entities): one-shot pixel particles in palette colours for tilling, watering,
+  planting, harvesting and putting things down or picking them up; the produce pops up
+  out of the ground on harvest ("+2" if more than one); and a small camera jolt
+  (`ScreenShake`, on the camera's offset in whole pixels) on harvest and a bigger one
+  when energy runs out. Crops squash and stretch when planted or picked, and the bin
+  when something goes in: the picture only, never the collision.
+- *Gold going in or out* shows as "+40g" / "-15g" under the purse in the HUD for a second.
+- *The day's summary:* a `DayReport` autoload keeps a tally of the day from EventBus
+  (harvested by crop, planted, watered by hand, sold in town, the bin overnight,
+  rewards, spent, requests done). At night the tally closes; the next morning the HUD
+  shows `DaySummary` on black (game paused), then fades the morning in when Space, E or
+  Enter is pressed. Empty rows are left out; a day with nothing is "A quiet day." Keys
+  in the first 0.4 s are ignored, so the E that put you to bed doesn't skip it. Loading a
+  save or starting a new game (the new `EventBus.new_game_started`) clears the tally,
+  so a summary only ever follows a night actually played. Nothing is saved: the game
+  saves at the start of a day, when the tally is empty.
+- *Closing the window* stops all sound and waits 0.15 s before quitting (Audio turns
+  off `auto_accept_quit`). Quitting with a sound still playing makes Godot print
+  "leaked instance" warnings, which look like a bug but aren't.
+
+Options considered: calling `Audio.play()` from each system (hoe, shop, bin…), which
+spreads sound through code that should only know about farming. Sounds as fields on each
+content resource (`ToolDef.use_sound`): more flexible, but most events aren't content
+(a door, a sale, the night), so it would still need the event list, in two places.
+Downloading a free sound pack: better-sounding, but licences to track, and the style
+wouldn't match without editing. A summary drawn by the HUD itself: but the HUD is
+rebuilt with every scene, and the tally has to survive the walk home.
+
+**Why.** Rule 2: this is what EventBus was for. Sound, effects and the summary are three
+new features and none of them needed a farming file opened. Rule 3: what things sound
+like and which tune plays where are data.
+
+**Cost.** Synthesised sound is simple-sounding (chiptune-ish); any file can be replaced by
+a better one at the same name later. The `Audio` autoload is an exception to "systems
+don't call each other" in one direction: UI that isn't a game event (closing the
+summary) calls `Audio.play()` directly. `build_sounds.py` needs numpy and ffmpeg to run
+again; the game itself needs neither.
