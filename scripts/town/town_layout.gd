@@ -90,7 +90,7 @@ const OBJECTS: Dictionary = {
 	Vector2i(1, 9): &"tree", Vector2i(1, 19): &"tree", Vector2i(2, 23): &"tree",
 	Vector2i(12, 23): &"tree", Vector2i(13, 19): &"tree", Vector2i(28, 18): &"tree",
 	Vector2i(30, 22): &"tree", Vector2i(33, 17): &"tree", Vector2i(36, 20): &"tree",
-	Vector2i(38, 23): &"tree", Vector2i(23, 23): &"tree",
+	Vector2i(38, 23): &"tree", Vector2i(27, 23): &"tree",
 }
 
 

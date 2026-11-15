@@ -28,3 +28,8 @@ extends Resource
 
 ## Gold the shop charges for one. 0 means the shop doesn't sell it.
 @export var buy_price: int = 0
+
+## Shop ids (ShopDef.id) that are the only places selling this, such as a
+## market stall's rare seeds (DECISIONS 037). Empty, the usual rule applies:
+## any shop whose switches cover it (seeds at the seed shop, and so on).
+@export var sold_only_by: Array[StringName] = []

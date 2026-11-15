@@ -117,6 +117,7 @@ data/                Content resources (.tres), indexed by ContentDB
   locations/         LocationDef — the farm, the farmhouse, the town, each shop (and where its door is)
   shops/             ShopDef — a shopkeeper, their words, and what the counter offers
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers)
+  events/            CalendarEvent — what happens on which days (market day) and its stalls
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
                      farm/ the farmhouse and its furniture)

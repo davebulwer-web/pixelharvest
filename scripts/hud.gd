@@ -108,11 +108,14 @@ func _on_game_saved() -> void:
 	_show_message(_morning_text() + "    Saved")
 
 
-## "Spring · Day 5 · Year 1"
+## "Spring · Day 5 · Year 1", plus today's events: "· Market day".
 func _date() -> String:
 	var theme := GameState.current_season_theme()
 	var season_name := theme.display_name if theme != null else "Season %d" % (GameState.season + 1)
-	return "%s · Day %d · Year %d" % [season_name, GameState.day, GameState.year]
+	var text := "%s · Day %d · Year %d" % [season_name, GameState.day, GameState.year]
+	for event in GameState.events_today():
+		text += " · %s" % event.display_name
+	return text
 
 
 func _morning_text() -> String:
@@ -128,7 +131,14 @@ func _morning_text() -> String:
 		text += "    %d crop%s died out of season" % [_morning_deaths, "" if _morning_deaths == 1 else "s"]
 	if _morning_sales > 0:
 		text += "    The bin sold for %dg" % _morning_sales
+	for event in GameState.events_today():
+		text += "    %s in %s today" % [event.display_name, _place_name(event.location)]
 	return text
+
+
+## "town" for &"town": a location id in words, for messages.
+func _place_name(location_id: StringName) -> String:
+	return String(location_id).replace("_", " ")
 
 
 func _on_crop_harvested(_cell: Vector2i, crop_id: StringName, amount: int) -> void:

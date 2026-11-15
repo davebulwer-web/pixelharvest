@@ -1,27 +1,31 @@
 extends Node2D
 ##
 ## Town — the town scene: the road, the square, a door for every shop, and
-## the people who live here.
+## the people who live here, and on market day the market's stalls.
 ##
 ## Like the farm it owns no game state. It draws a fixed map (TownLayout) and
 ## stands its decoration on it, builds a Building for every location whose
 ## door is on this map and an Npc for every CharacterDef who lives here (so a
-## new shop or a new townsperson appears with no edit to this file), and puts
+## new shop or a new townsperson appears with no edit to this file), sets up
+## a Stall for every stall of today's calendar events (DECISIONS 037), and puts
 ## the arriving player at the spawn point LocationManager asked for. Tools are
 ## off in town (the farm's tiles aren't here to be hoed), and so is sleeping.
 ##
 ## Talking: E on a townsperson or the notice board is announced on EventBus
 ## (npc_talked_to, notice_board_read); this scene answers with the dialogue
-## box. A shopkeeper's id never reaches here, because shopkeepers stand inside.
+## box. Shopkeepers indoors never reach here; a market stall's keeper does,
+## and is served by a ShopCounter, exactly as a keeper indoors is.
 ##
 ##   Town
 ##   ├── Ground      (TileMapLayer, same seasonal tilesets as the farm)
 ##   ├── SpawnPoints (Marker2Ds, made here: one per door, one for the farm gate)
-##   ├── Entities    (y-sorted: player, trees, decoration, shop fronts, people)
+##   ├── Entities    (y-sorted: player, trees, decoration, shop fronts, people,
+##   │                market stalls and their keepers)
 ##   ├── Weather     (the season's overlay — winter's snow — as on the farm)
 ##   ├── Daylight    (the time-of-day tint, as on the farm; lamp posts glow at night)
 ##   ├── Hud         (the same HUD scene as the farm)
-##   └── Dialogue    (the dialogue box, as in the shops)
+##   ├── Dialogue    (the dialogue box, as in the shops)
+##   └── ShopMenu    (the shop menu, for the market stalls)
 ##
 
 const TILE_PX := 16
@@ -34,6 +38,16 @@ const FARM_ID := &"farm"
 @onready var _spawns: Node2D = $SpawnPoints
 @onready var _weather: Node = $Weather
 @onready var _dialogue = $Dialogue
+@onready var _menu = $ShopMenu
+
+var _counter: ShopCounter
+
+## The market stalls' shops standing here today, by shop id.
+var _stall_shops: Dictionary = {}  # StringName -> ShopDef
+
+## Each stall's nodes (the stall and its keeper), by shop id, so they can be
+## packed away when the market closes.
+var _stall_nodes: Dictionary = {}  # StringName -> Array[Node]
 
 
 func _ready() -> void:
@@ -55,12 +69,15 @@ func _ready() -> void:
 	_add_spawn(&"from_farm", TownLayout.ARRIVAL_FROM_FARM)
 	_place_objects()
 	_place_townsfolk()
+	_place_stalls()
 	_add_farm_gate()
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
 	_limit_camera()
+	_counter = ShopCounter.new(_dialogue, _menu)
 	EventBus.npc_talked_to.connect(_on_npc_talked_to)
 	EventBus.notice_board_read.connect(_on_notice_board_read)
+	EventBus.time_changed.connect(func(_m: int) -> void: _pack_up_closed_stalls())
 
 
 func _base_of(cell: Vector2i) -> Vector2:
@@ -98,6 +115,43 @@ func _place_townsfolk() -> void:
 		_entities.add_child(Npc.create(person.id, person.sprite, person.spot_on(GameState.day)))
 
 
+## Today's market stalls, if any: every stall of every calendar event on
+## today that happens in town. They're up from the start of the day (before
+## opening time the keeper says they're not open yet) until their shop's
+## closing time, when they're packed away: the square is empty again by the
+## evening.
+func _place_stalls() -> void:
+	for event in GameState.events_today():
+		if event.location != TOWN_ID:
+			continue
+		for stall in event.stalls:
+			if stall == null or stall.shop == null:
+				continue  # ContentDB has already said so
+			if _packed_up(stall.shop):
+				continue
+			var nodes: Array[Node] = [Stall.create(stall), Stall.keeper_for(stall)]
+			for node in nodes:
+				_entities.add_child(node)
+			_stall_shops[stall.shop.id] = stall.shop
+			_stall_nodes[stall.shop.id] = nodes
+
+
+## True once `shop`'s closing time has passed today.
+func _packed_up(shop: ShopDef) -> bool:
+	return shop.keeps_hours() and GameState.minutes >= shop.closes_at
+
+
+## Every 10 minutes: take down any stall whose market has closed.
+func _pack_up_closed_stalls() -> void:
+	for shop_id: StringName in _stall_shops.keys():
+		if not _packed_up(_stall_shops[shop_id]):
+			continue
+		for node: Node in _stall_nodes[shop_id]:
+			node.queue_free()
+		_stall_shops.erase(shop_id)
+		_stall_nodes.erase(shop_id)
+
+
 ## The way back: the gap beyond the east end of the road.
 func _add_farm_gate() -> void:
 	var top_left: Vector2i = TownLayout.FARM_GATE[0]
@@ -131,6 +185,9 @@ func _limit_camera() -> void:
 # --- Talking -----------------------------------------------------------------
 
 func _on_npc_talked_to(npc_id: StringName) -> void:
+	if _stall_shops.has(npc_id):
+		_counter.serve(_stall_shops[npc_id])
+		return
 	var person := ContentDB.character(npc_id)
 	if person == null or person.location != TOWN_ID:
 		return

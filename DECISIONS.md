@@ -1037,3 +1037,63 @@ different places, so it would need a glow position per `LocationDef`, or a "lit 
 version of each picture). Easy to add later with the same `night_lights` group. No save
 change (still 7): the time isn't saved and the light follows it.
 
+
+---
+
+## 037 — Calendar events are worked out from the date; market day is stalls of ordinary shops
+
+**Decision.** Stage 8 session 1 adds calendar events and the first of them, market day.
+
+- *`CalendarEvent`* (`data/events/`, loaded by `ContentDB`): id, name, a line for the notice
+  board, `first_day`, `every_days`, optional `seasons`, the `location` it happens in, and
+  its `stalls`. Days are counted straight through the game (`GameState.day_number()`: spring
+  day 1 of year 1 is day 1), so "every 7 days" doesn't restart each season. Market day is
+  day 3 and every 7th day after: days 3, 10, 17 and 24 of every season (28 is a multiple
+  of 7), so the first one comes on the third morning of a new game.
+- *Nothing is saved.* Whether today is market day follows from the date
+  (`GameState.events_today()`), like the townsfolk's spots (029). No save version change
+  (still 7), and changing the numbers in `market_day.tres` changes every game at once.
+- *Announced, and asked.* Each morning, after `day_started`, TimeSystem announces
+  `EventBus.calendar_event_began(id)` for each of today's events; quests (session 2) can
+  listen. On loading a save nothing is announced, so anything that cares asks
+  `GameState.events_today()`. The HUD's date line says "· Market day", and so does the
+  morning message; the notice board has a page for it (today, with its hours, or when the
+  next one is: "Next market day: in 2 days, spring day 3").
+- *A stall is a `StallDef`: an ordinary `ShopDef` plus a cell and a picture.* So a stall
+  keeper has greetings, opening hours and stock exactly like a shop indoors, and the shop
+  menu needed almost nothing. The talking (closed? greeting, then menu) moved out of the
+  interior into `ShopCounter`, which the interior and the town both use. The town builds a
+  `Stall` (a picture and a solid counter, 3 cells wide) and its keeper (an `Npc` standing
+  one row behind, answering E on any counter cell) for every stall of today's events in
+  town. Stalls are up from 6 AM (before 8 the keeper says "Not open yet") and packed away
+  at closing time (2 PM), so the square is empty by the evening.
+- *The two stalls*, in the bottom row of the square either side of the fountain:
+  - *Rosa's Produce Stall* buys produce at 125%, paid now: better than the shipping bin
+    (100%, overnight) and the general store (80%, now). `ShopDef.produce_pay_rate` now
+    goes up to 2.0. A stall that only buys shows only its selling list.
+  - *Fennel's Seed Cart* sells three rare seeds you can't get from Hollis: strawberry
+    (spring, ready in 8 days, then every 3; 100g seeds, sells 40g), melon (summer, 12
+    days; 120g, sells 250g) and pumpkin (autumn, 12 days; 140g, sells 280g). Off-season
+    ones are still sold, marked, so you can buy ahead.
+- *"Only sold here" is on the item:* `ItemDef.sold_only_by` (shop ids). Empty keeps the old
+  rule (the shop's switches decide). Chosen over a "rare" flag because it says *where*, so
+  a later event or shop can have its own exclusive stock with no code. ContentDB checks the
+  shop ids exist, and the notice board lists such crops as "Rare seeds from Fennel's Seed
+  Cart: Strawberry" rather than under Hollis.
+- The mayor's two spots in the bottom of the square moved (one to the middle of the bottom
+  row, one by the notice board) so he never stands inside a stall, and the tree below the
+  seed cart moved four cells east so it doesn't hide it.
+
+Options considered for the market's place: a new location (a market field off the road) —
+more to walk and a new map for one day a week; or stalls in the square — chosen: it's where
+people already go, and it's busy on market day and plain otherwise.
+
+**Why.** Rule 3 again: a second event, another stall, or another exclusive item is files,
+not code. Working events out from the date keeps them out of the save, which is what made
+the townsfolk cheap too.
+
+**Cost.** Prices are first guesses (the melon and pumpkin are deliberately much better
+per day than cabbage: rare is meant to be worth the trip). Stalls only stand in town. The
+market doesn't move prices anywhere else (the bin and shops pay as usual). All new art is
+placeholder: two stalls, two keepers (recoloured from existing keepers), three crop
+sheets, six icons.

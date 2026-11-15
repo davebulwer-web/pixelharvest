@@ -23,6 +23,8 @@ extends Node
 ##                   sprinklers
 ##   data/upgrades/  UpgradeDef — bought once: tool tiers, energy, fields
 ##   data/characters/ CharacterDef — townsfolk you can talk to (not shopkeepers)
+##   data/events/    CalendarEvent — what happens on which days (market day),
+##                   with its stalls (DECISIONS 037)
 ##
 
 const CROPS_DIR := "res://data/crops/"
@@ -30,6 +32,7 @@ const ITEM_DIRS: Array[String] = ["res://data/tools/", "res://data/produce/"]
 const OBJECTS_DIR := "res://data/objects/"
 const UPGRADES_DIR := "res://data/upgrades/"
 const CHARACTERS_DIR := "res://data/characters/"
+const EVENTS_DIR := "res://data/events/"
 
 ## For checking crops name real seasons. Read directly rather than through
 ## GameState, because ContentDB starts first.
@@ -40,6 +43,7 @@ var _items: Dictionary = {}  # StringName -> ItemDef (ToolDef is an ItemDef)
 var _objects: Dictionary = {}  # StringName -> ObjectDef
 var _upgrades: Dictionary = {}  # StringName -> UpgradeDef
 var _characters: Dictionary = {}  # StringName -> CharacterDef
+var _events: Dictionary = {}  # StringName -> CalendarEvent
 
 
 func _ready() -> void:
@@ -49,9 +53,10 @@ func _ready() -> void:
 	_index(OBJECTS_DIR, _objects)
 	_index(UPGRADES_DIR, _upgrades)
 	_index(CHARACTERS_DIR, _characters)
+	_index(EVENTS_DIR, _events)
 	_check()
-	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters"
-			% [_crops.size(), _items.size(), _objects.size(), _upgrades.size(), _characters.size()])
+	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters, %d events"
+			% [_crops.size(), _items.size(), _objects.size(), _upgrades.size(), _characters.size(), _events.size()])
 
 
 ## The crop with this id, or null if there isn't one (for example, a save from
@@ -93,6 +98,47 @@ func characters_in(location_id: StringName) -> Array[CharacterDef]:
 			result.append(each)
 	result.sort_custom(func(a: CharacterDef, b: CharacterDef) -> bool: return a.id < b.id)
 	return result
+
+
+## The calendar event with this id, or null.
+func event(id: StringName) -> CalendarEvent:
+	return _events.get(id)
+
+
+## Every calendar event, by id.
+func events() -> Array[CalendarEvent]:
+	var result: Array[CalendarEvent] = []
+	for each: CalendarEvent in _events.values():
+		result.append(each)
+	result.sort_custom(func(a: CalendarEvent, b: CalendarEvent) -> bool: return a.id < b.id)
+	return result
+
+
+## The events on day `day_number` (GameState.day_number), whose season is
+## `season_id`. GameState.events_today() is the usual way to ask.
+func events_on(day_number: int, season_id: StringName) -> Array[CalendarEvent]:
+	return events().filter(func(e: CalendarEvent) -> bool: return e.happens_on(day_number, season_id))
+
+
+## The packet of seeds that plants `crop`, or null if none does.
+func seeds_for(crop: CropDef) -> ToolDef:
+	for each: ItemDef in _items.values():
+		if each is ToolDef and each.action is PlantAction and each.action.crop == crop:
+			return each
+	return null
+
+
+## The shop with this id, wherever it stands: behind a door in town or at a
+## market stall. Null if there's none.
+func shop(id: StringName) -> ShopDef:
+	for location in RULES.locations:
+		if location != null and location.shop != null and location.shop.id == id:
+			return location.shop
+	for each: CalendarEvent in _events.values():
+		for stall in each.stalls:
+			if stall != null and stall.shop != null and stall.shop.id == id:
+				return stall.shop
+	return null
 
 
 ## The upgrade with this id, or null.
@@ -261,6 +307,51 @@ func _check() -> void:
 				push_warning("ContentDB: shop '%s' has no greetings; the menu will open without a word" % shop.id)
 			for category in shop.upgrade_categories:
 				sold_categories.append(category)
+
+	# Market stalls: each is a shop too, so its id joins the same set.
+	var location_ids: Array[StringName] = []
+	for location in RULES.locations:
+		if location != null:
+			location_ids.append(location.id)
+	for each: CalendarEvent in _events.values():
+		var where := each.resource_path
+		if each.every_days < 1:
+			push_error("ContentDB: '%s' has every_days below 1, so it never happens" % where)
+		if each.first_day < 1:
+			push_warning("ContentDB: '%s' has first_day below 1; day 1 is the first day of the game" % where)
+		if each.location not in location_ids:
+			push_error("ContentDB: '%s' happens in '%s', which isn't a location in game_rules.tres"
+					% [where, each.location])
+		for season_id in each.seasons:
+			if not season_ids.has(season_id):
+				push_error("ContentDB: '%s' happens in a season '%s' that isn't in game_rules.tres"
+						% [where, season_id])
+		for stall in each.stalls:
+			if stall == null or stall.shop == null:
+				push_error("ContentDB: '%s' has a stall with no shop" % where)
+				continue
+			var shop_def := stall.shop
+			if shop_def.id == &"" or shop_def.id in shop_ids:
+				push_error("ContentDB: '%s' has a stall whose shop id '%s' is empty or already used by another shop"
+						% [where, shop_def.id])
+			shop_ids.append(shop_def.id)
+			if stall.picture == null:
+				push_warning("ContentDB: '%s' has a stall for '%s' with no picture" % [where, shop_def.id])
+			if shop_def.keeper_sprite == null:
+				push_warning("ContentDB: stall shop '%s' has no keeper_sprite, so nobody minds the stall" % shop_def.id)
+			for category in shop_def.upgrade_categories:
+				sold_categories.append(category)
+
+	# Things sold by one shop only must name a shop that exists, or they can
+	# never be bought.
+	for each: ItemDef in _items.values():
+		for shop_id in each.sold_only_by:
+			if shop_id not in shop_ids:
+				push_error("ContentDB: '%s' is sold only by '%s', which isn't a shop or a market stall"
+						% [each.resource_path, shop_id])
+		if not each.sold_only_by.is_empty() and each.buy_price <= 0:
+			push_warning("ContentDB: '%s' names shops to sell it but has no buy_price, so none of them will"
+					% each.resource_path)
 
 	# Townsfolk and shopkeepers share one set of names on EventBus.npc_talked_to,
 	# so a character can't use a shop's id.

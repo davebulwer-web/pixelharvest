@@ -43,6 +43,12 @@ func upgrade_price(upgrade: UpgradeDef) -> int:
 func shop_stock(shop: ShopDef) -> Array[ItemDef]:
 	var stock: Array[ItemDef] = []
 	for item in ContentDB.shop_stock():
+		# Some things are sold only by particular shops (a market stall's
+		# rare seeds); they skip the switches below entirely.
+		if not item.sold_only_by.is_empty():
+			if shop.id in item.sold_only_by:
+				stock.append(item)
+			continue
 		var is_seed := item is ToolDef and item.action is PlantAction
 		if (is_seed and shop.sells_seeds) or (not is_seed and shop.sells_supplies):
 			stock.append(item)

@@ -42,9 +42,10 @@ extends Resource
 
 ## True if the shop buys produce straight from your bag, for gold now, at
 ## `produce_pay_rate` of its usual price. The shipping bin pays in full but
-## only overnight, which is what keeps it worth using.
+## only overnight, which is what keeps it worth using. A market stall can pay
+## more than the bin (above 1.0): that's what market day is for (DECISIONS 037).
 @export var buys_produce: bool = false
-@export_range(0.0, 1.0, 0.05) var produce_pay_rate: float = 0.8
+@export_range(0.0, 2.0, 0.05) var produce_pay_rate: float = 0.8
 
 ## --- Opening hours (DECISIONS 035) --------------------------------------------
 ## Minutes after midnight, like game_rules.tres: 9 AM is 540, 5 PM is 1020.

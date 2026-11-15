@@ -182,9 +182,10 @@ func _fill(keep_focus_on: Resource) -> void:
 		var button := _add_button(_goods, upgrade, upgrade.icon,
 				"%s   %dg" % [upgrade.display_name, price], price, upgrade.description)
 		button.pressed.connect(_buy_upgrade.bind(upgrade))
+	# A stall that only buys (the market's grocer) shows just its buying list.
+	_buy_box.visible = _goods.get_child_count() > 0 or not _shop.buys_produce
 	if _goods.get_child_count() == 0:
 		_add_none(_goods, "Nothing for sale right now")
-	_buy_box.visible = true
 
 	_sell_box.visible = _shop.buys_produce
 	if _shop.buys_produce:
@@ -192,10 +193,15 @@ func _fill(keep_focus_on: Resource) -> void:
 			if Economy.sell_price(item) <= 0:
 				continue
 			var amount := GameState.inventory.count(item)
+			var total := Economy.store_price(item, _shop) * amount
+			var detail := "Sell all %d for %dg. The shipping bin on the farm pays full price, but only overnight." \
+					% [amount, total]
+			if _shop.produce_pay_rate > 1.0:
+				detail = "Sell all %d for %dg, more than the shipping bin pays (%dg)." \
+						% [amount, total, Economy.sell_price(item) * amount]
 			var button := _add_button(_sells, item, item.icon,
 					"%s x%d   %dg each" % [item.display_name, amount, Economy.store_price(item, _shop)],
-					0, "Sell all %d for %dg. The shipping bin on the farm pays full price, but only overnight."
-					% [amount, Economy.store_price(item, _shop) * amount])
+					0, detail)
 			button.pressed.connect(_sell_item.bind(item))
 		if _sells.get_child_count() == 0:
 			_add_none(_sells, "No produce to sell")

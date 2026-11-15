@@ -42,6 +42,11 @@ signal stayed_up_too_late()
 ## The season rolled over. Listeners re-theme tilesets and re-check crops.
 signal season_changed(season: int)
 
+## A calendar event (market day) is on today. Emitted each morning just
+## after day_started, once per event (DECISIONS 037). Not emitted when a save
+## is loaded: anything that needs to know asks GameState.events_today().
+signal calendar_event_began(event_id: StringName)
+
 # --- Farming ----------------------------------------------------------------
 
 signal tile_tilled(cell: Vector2i)

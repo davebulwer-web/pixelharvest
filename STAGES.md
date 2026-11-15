@@ -323,14 +323,34 @@ Evening light (2026-11-15) — see DECISIONS 036.
 - [x] Verified headless (21 checks: tint by time, fades, lamps off by day and on at night,
       interiors untinted, winter tint, dawn after the night) and rendered through the
       evening in spring and winter
-- [ ] Dave confirms it looks right on Windows
+- [x] Dave confirms it looks right on Windows (2026-11-15)
 
 **For later:** windows that glow at night. Townsfolk still stand in one spot all day.
 
 ## Stage 8 — Events and quests · 2–3 sessions · Sonnet, Haiku for bulk
 
-- [ ] `CalendarEvent` resource; market day every N days
-- [ ] Market stalls with better prices and rarer seeds
+Session 1 (2026-11-15) — calendar events and market day, on placeholder art. See DECISIONS 037.
+
+- [x] `CalendarEvent` resource (`data/events/`); market day on day 3 and every 7 days after
+      (days 3, 10, 17, 24 of each season); worked out from the date, not saved
+- [x] `EventBus.calendar_event_began` each morning; HUD date and morning message say
+      "Market day"; the notice board says it's today (with hours) or when the next one is
+- [x] Market stalls (`StallDef`: a `ShopDef` + cell + picture) in the square, 8 AM – 2 PM,
+      packed away after closing: Rosa buys produce at 125% paid now; Fennel sells rare
+      seeds (strawberry, melon, pumpkin) found nowhere else (`ItemDef.sold_only_by`)
+- [x] Shopkeeper talking moved into `ShopCounter`, shared by shop interiors and stalls
+- [x] No save change (version stays 7)
+- [x] Verified headless (68 checks: market days through the season turn, days until the
+      next, who sells what, 125% price, stalls only on market day, walking up to a counter,
+      greeting then menu at both stalls, not open yet / packed away at 2 PM / none when
+      arriving late, mayor and notice board don't open a menu, indoor shops unchanged,
+      the morning announcement, strawberry grows and regrows, save round trip) and rendered
+      (square on market day, both menus, the notice, the evening, winter)
+- [ ] Dave confirms it plays correctly on Windows
+
+**Left over:** real Pixellab art for the two stalls, Rosa and Fennel, the three crops and
+their six icons (all placeholder now).
+
 - [ ] `QuestDef` resources subscribing to `EventBus` signals
 - [ ] Two or three quest characters
 - [ ] Cosmetic purchases and farm decoration

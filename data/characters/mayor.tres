@@ -9,5 +9,5 @@ id = &"mayor"
 display_name = "Mayor Bramble"
 sprite = ExtResource("2_sprite")
 location = &"town"
-spots = Array[Vector2i]([Vector2i(22, 16), Vector2i(23, 20), Vector2i(17, 20)])
+spots = Array[Vector2i]([Vector2i(22, 16), Vector2i(20, 21), Vector2i(16, 16)])
 lines = Array[String](["Welcome to town, farmer! It's good to see that old farm worked again.", "Read the notice board now and then. It knows the calendar better than I do.", "Marlow at the general store will buy your vegetables on the spot. The bin pays better, if you can wait a night.", "When a season turns, anything that can't grow in the new one is lost. Plan ahead!", "The blacksmith can make your tools reach further. Worth saving up for.", "I sit by this fountain every day. Best seat in town."])

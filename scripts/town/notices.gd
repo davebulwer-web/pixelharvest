@@ -6,8 +6,8 @@ extends RefCounted
 ## Nothing here is stored: every notice is worked out from the calendar and
 ## the content when the board is read, so a new crop shows up on the board
 ## the day it's added to data/crops/, with nothing edited here (rule 3).
-## Stage 8 will add notices of its own (market days, requests) by listening
-## for the same EventBus.notice_board_read.
+## Calendar events (market day) get a page of their own, worked out the same
+## way from data/events/ (DECISIONS 037).
 ##
 
 ## How close to the end of a season the board starts warning that crops
@@ -19,6 +19,10 @@ const WARN_DAYS := 3
 static func today() -> Array[String]:
 	var notices: Array[String] = []
 	notices.append(_calendar())
+	for event in ContentDB.events():
+		var text := _event_notice(event)
+		if text != "":
+			notices.append(text)
 	notices.append(_in_season())
 	notices.append(_coming_up())
 	var hours := _opening_hours()
@@ -43,17 +47,73 @@ static func _calendar() -> String:
 	return text + "%d days of %s left." % [left, season.to_lower()]
 
 
-## "In season now: Parsnip, Potato and Radish. Seeds at Hollis's Seeds."
+## "Market day today! Stalls in the square … Open 8 AM – 2 PM." or "Next
+## market day: in 3 days, spring day 10." "" if it isn't coming within a year.
+static func _event_notice(event: CalendarEvent) -> String:
+	var ahead := GameState.days_until(event)
+	if ahead < 0:
+		return ""
+	if ahead == 0:
+		var text := "%s today! %s" % [event.display_name, event.description]
+		var hours := _event_hours(event)
+		if hours != "":
+			text += " Open %s." % hours
+		return text
+	var number := GameState.day_number() + ahead
+	var length := GameState.RULES.days_per_season
+	var when := "tomorrow" if ahead == 1 else "in %d days" % ahead
+	return "Next %s: %s, %s day %d. %s" % [event.display_name.to_lower(), when,
+			GameState.season_name(GameState.season_id_on(number)).to_lower(),
+			posmod(number - 1, length) + 1, event.description]
+
+
+## The hours of an event's first stall that keeps hours ("8 AM – 2 PM"), or "".
+static func _event_hours(event: CalendarEvent) -> String:
+	for stall in event.stalls:
+		if stall != null and stall.shop != null and stall.shop.keeps_hours():
+			return stall.shop.hours_text()
+	return ""
+
+
+## "In season now: Parsnip, Potato and Radish. Seeds at Hollis's Seeds. Rare
+## seeds at Fennel's Seed Cart: Strawberry." Seeds sold only at one place (a
+## market stall) are listed with where to find them.
 static func _in_season() -> String:
-	var names := _crops_in(GameState.season_id())
-	var season := GameState.season_name(GameState.season_id()).to_lower()
-	if names.is_empty():
+	var season_id := GameState.season_id()
+	var season := GameState.season_name(season_id).to_lower()
+	var everyday: Array[String] = []
+	var special: Dictionary = {}  # where they're sold -> Array of crop names
+	for crop in ContentDB.crops():
+		if not crop.grows_in(season_id):
+			continue
+		var seeds := ContentDB.seeds_for(crop)
+		if seeds == null or seeds.sold_only_by.is_empty():
+			everyday.append(crop.display_name)
+			continue
+		var where := _shop_names(seeds.sold_only_by)
+		if not special.has(where):
+			special[where] = [] as Array[String]
+		special[where].append(crop.display_name)
+	if everyday.is_empty() and special.is_empty():
 		return "Nothing grows in %s. A good time to plan, and to save up." % season
-	var text := "In season now: %s." % _list(names)
-	var seed_shop := _seed_shop_name()
-	if seed_shop != "":
-		text += " Seeds at %s." % seed_shop
-	return text
+	var text := ""
+	if not everyday.is_empty():
+		text = "In season now: %s." % _list(everyday)
+		var seed_shop := _seed_shop_name()
+		if seed_shop != "":
+			text += " Seeds at %s." % seed_shop
+	for where: String in special:
+		text += " Rare seeds from %s: %s." % [where, _list(special[where])]
+	return text.strip_edges()
+
+
+## "Fennel's Seed Cart", or "A and B": shop ids in words.
+static func _shop_names(shop_ids: Array[StringName]) -> String:
+	var names: Array[String] = []
+	for id in shop_ids:
+		var shop_def := ContentDB.shop(id)
+		names.append(shop_def.display_name if shop_def != null else String(id))
+	return _list(names)
 
 
 ## "Coming in summer: Green bean and Cabbage."

@@ -20,7 +20,8 @@ extends Node
 ##   3. The calendar moves on and energy refills.
 ##   4. If that started a new season: crops that can't grow in it die, and
 ##      season_changed is announced — the farm repaints itself for the season.
-##   5. day_started is announced — the farm redraws, the HUD updates.
+##   5. day_started is announced — the farm redraws, the HUD updates. Then
+##      calendar_event_began for each of today's events (market day).
 ##   6. The game is saved. Last, so the save is the finished morning: crops
 ##      grown, energy full. Loading it puts you exactly at the start of a day.
 ##
@@ -86,6 +87,8 @@ func end_day() -> void:
 		GameState.farm.wither_out_of_season(GameState.season_id())
 		EventBus.season_changed.emit(GameState.season)
 	EventBus.day_started.emit(GameState.day, GameState.season, GameState.year)
+	for event in GameState.events_today():
+		EventBus.calendar_event_began.emit(event.id)
 	SaveSystem.save_game()
 	_ending_day = false
 

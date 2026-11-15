@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/town/town.gd" id="1_town"]
 [ext_resource type="TileSet" path="res://assets/tilesets/ground_tileset.tres" id="2_tileset"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="4_hud"]
 [ext_resource type="Script" path="res://scripts/dialogue_box.gd" id="5_dialogue"]
+[ext_resource type="Script" path="res://scripts/shop_menu.gd" id="6_shop"]
 
 [ext_resource type="PackedScene" path="res://scenes/daylight.tscn" id="9_daylight"]
 
@@ -33,3 +34,8 @@ position = Vector2(616, 228)
 process_mode = 3
 layer = 4
 script = ExtResource("5_dialogue")
+
+[node name="ShopMenu" type="CanvasLayer" parent="."]
+process_mode = 3
+layer = 5
+script = ExtResource("6_shop")

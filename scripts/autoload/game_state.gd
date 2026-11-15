@@ -155,6 +155,38 @@ func describe_seasons(ids: Array[StringName]) -> String:
 	return text.left(1).to_upper() + text.substr(1)
 
 
+## How many days the game has been going, counting today: spring day 1 of
+## year 1 is day 1, and it counts straight on through seasons and years.
+## Calendar events (market day) are worked out from this (DECISIONS 037).
+func day_number() -> int:
+	return ((year - 1) * maxi(1, RULES.seasons.size()) + season) * RULES.days_per_season + day
+
+
+## The season id on `number` (a day_number), today's or another day's.
+func season_id_on(number: int) -> StringName:
+	if RULES.seasons.is_empty() or RULES.days_per_season < 1:
+		return &""
+	var season_index := posmod(floori((number - 1) / float(RULES.days_per_season)), RULES.seasons.size())
+	return RULES.seasons[season_index].id
+
+
+## The calendar events on today, from ContentDB. Nothing about them is saved:
+## they follow from the date.
+func events_today() -> Array[CalendarEvent]:
+	return ContentDB.events_on(day_number(), season_id())
+
+
+## How many days until `event` next happens: 0 if it's today, -1 if it
+## doesn't come round within a year.
+func days_until(event: CalendarEvent) -> int:
+	var today := day_number()
+	var year_length := RULES.days_per_season * maxi(1, RULES.seasons.size())
+	for ahead in year_length + 1:
+		if event.happens_on(today + ahead, season_id_on(today + ahead)):
+			return ahead
+	return -1
+
+
 # --- The clock ---------------------------------------------------------------
 
 ## Move the clock on by `step` minutes and announce the new time. Called by
