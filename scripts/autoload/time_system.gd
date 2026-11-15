@@ -18,8 +18,9 @@ extends Node
 ##      *today* does it now. Economy sells the shipping bin here.
 ##   2. The farm grows: watered crops advance, unwatered ones get thirstier
 ##      (and may die of it), and the soil dries. Then the night's hazards:
-##      crows, weeds, bare soil going back to grass (DECISIONS 045). Then
-##      sprinklers water, last, so the morning has wet soil round them.
+##      crows, aphids, weeds, bare soil going back to grass (DECISIONS 045,
+##      048). Then ripe blocks of melons or pumpkins may go giant (DECISIONS
+##      048). Then sprinklers water, last, so the morning has wet soil round them.
 ##   3. The calendar moves on and energy refills.
 ##   4. If that started a new season: crops that can't grow in it die, and
 ##      season_changed is announced — the farm repaints itself for the season.
@@ -98,6 +99,7 @@ func end_day() -> void:
 	GameState.farm.advance_day(GameState.difficulty.grow_time_multiplier, GameState.thirst_deadline(),
 			GameState.thirst_per_dry_night(), GameState.season_id(), GameState.weather_id())
 	_run_hazards()
+	GameState.farm.form_giants(rng)
 	GameState.farm.run_sprinklers()
 	var season_turned := GameState.advance_calendar()
 	EventBus.energy_changed.emit(GameState.energy, GameState.max_energy)
@@ -113,7 +115,7 @@ func end_day() -> void:
 	_ending_day = false
 
 
-## Crows, weeds and soil going back to grass (FarmHazards), each only once
+## Crows, aphids, weeds and soil going back to grass (FarmHazards), each only once
 ## its unlock has opened, scaled by the difficulty. Part of step 2. After a
 ## stormy day the crows stay away (DECISIONS 046), and tall crops with no
 ## fence near may have been flattened (DECISIONS 047).
@@ -126,7 +128,8 @@ func _run_hazards() -> void:
 	FarmHazards.run_night(GameState.farm, rules, GameState.difficulty.hazard_multiplier,
 			GameState.season_id(), GameState.has_unlock(rules.weeds_start),
 			GameState.has_unlock(rules.crows_start) and not storm, rng,
-			today.flattens_tall_crops if today != null else 0.0)
+			today.flattens_tall_crops if today != null else 0.0,
+			GameState.has_unlock(rules.pests_start))
 
 
 ## Step 4c: the new day's weather, and what it does to the farm at once.

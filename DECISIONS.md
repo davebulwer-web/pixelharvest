@@ -1680,3 +1680,82 @@ finally do something.
 **Cost.** A trellis can wall the player in if planted carelessly; the night (energy or
 2 AM) still carries them home, so it costs a day, not the game. Hardy crops and seed-return
 make sunflowers very cheap to keep going; the balance pass should watch them.
+
+## 048 — Aphids, the trowel, giants and trees: crops that stand on more than one tile
+
+**Decision.** Stage 12 session 2 finishes ROADMAP section 6 and the last hazard of section 7:
+aphids and Marlow's pest spray, a trowel to dig up a crop on purpose, giant melons and
+pumpkins, the apple tree, and the nine crops still to come.
+
+- *Aphids are a hazard like the others* (`FarmHazards.spread_pests`, run in the night after
+  the crows). They start with a calendar unlock, `pests_arrive` (autumn day 1, day 57), so
+  the notice board pins them up a week ahead and the morning announces them. Each night
+  there's a 30% chance aphids land on one growing crop somewhere, and each crop that has
+  them passes them to one growing neighbour (the four tiles round it) with a 50% chance.
+  A crop with aphids (`FarmTile.pests`) doesn't grow, but they don't kill it: it's stuck
+  until it's sprayed, dug up, or the season turns. They only go for crops still growing
+  (not ripe ones, giants or sleeping perennials), live only in autumn
+  (`HazardRules.pest_seasons`), and the cold clears them overnight. All the numbers are in
+  `hazard_rules.tres`, scaled by the difficulty's `hazard_multiplier` like weeds and crows.
+- *Flowers slow them.* A flower that has come up (a crop whose produce has the `&"flower"`
+  tag: sunflower, tulip, snowdrop) within 2 tiles of a crop cuts the aphids' chance of
+  reaching it to a quarter (`flower_radius`, `flower_slows_pests`). That's the first job for
+  DECISIONS 047's flower tag; bees and the flower show come later.
+- *Pest spray* is an item sold by the dose at Marlow's (`sold_only_by`, waiting for
+  `pests_arrive`), 20g, used with Space on the crop (`SprayAction`).
+- *The trowel* (`DigAction`) digs up the crop in front of you, ripe or not, and leaves
+  empty soil. A seed dug up before it came up goes back in the bag (`crop_dug_up` says so;
+  GameState gives the seed back), so a misplanted seed costs nothing. It's a tool of its
+  own rather than the hoe on a crop, because the hoe's upgrades swing at three or nine
+  tiles: hoeing beside a row must never dig the row up. It's in the starting kit, and
+  save version 13 gives older games one (after the watering can on the hotbar).
+- *Big crops hold their state on one corner tile.* A giant or a tree stands on several
+  tiles; the front-left one (the one planted, or a giant block's bottom-left) holds the
+  crop, and the others are `FarmTile.covered` by it: no crop of their own, and nothing can
+  be tilled, planted, built or weeded on them. Harvesting or digging a covered tile acts on
+  its corner (`FarmData.crop_cell`). Every way a crop leaves the farm (picked, dug, crows,
+  storm, thirst, frost, the season) goes through one `FarmData._remove_crop`, which frees
+  the covered tiles, so none can be left behind. *Covered isn't saved*: it follows from the
+  corners, so loading works it out again (FarmData.from_save).
+- *Giants*: `CropDef.giant_sprite`, `giant_chance` and `giant_harvest`. Each night a 3 × 3
+  block of one giant-capable crop, all ripe and clear of weeds and aphids, merges into a
+  giant with a 15% chance (`FarmData.form_giants`, after the hazards). Picking it gives 15
+  (nine ordinary ones give 9), it blocks the way, and crows can't carry it off. The
+  morning summary announces it. Melon and pumpkin have it. The cost is the waiting: ripe
+  crops left in the ground can still be lost to the season's turn or the frost.
+- *The apple tree* is a crop with `size = 2`: a sapling (600g at Fennel's cart) planted on a
+  2 × 2 patch of tilled soil whose front-left corner is the tile in front of the player.
+  It's hardy (never watered), perennial (sleeps through winter, losing any fruit on it),
+  grows for 28 days, then gives 3 apples (60g each) every 3 days, in spring, summer and
+  autumn. Its trunk blocks the player from the first morning on, but its leaves don't, so
+  you can walk behind it. A tree is planted from a seed like any crop, so it reuses all of
+  the growing, sleeping and saving there is.
+- *The other nine crops* are data on the existing rules: tulip (spring flower), tomato
+  (summer, regrows), chilli (heatwave-loving, regrows), blueberry (2–4 a time), beetroot,
+  cranberry (beside water, 1–3 a time), leek and Brussels sprouts (autumn into winter),
+  snowdrop (winter flower). Hollis sells the plain ones by season (his seasonal unlocks);
+  Fennel the rare ones (chilli, blueberry, cranberry, and the sapling). Chilli is
+  Hollis's questline reward in ROADMAP; that waits for Stage 13, like rhubarb. The green
+  bean became a tall trellis crop at 25g, as ROADMAP 6.2 suggested.
+- Placeholder art for all of it (strips, icons, seed packets, the tree, two giants, the
+  aphids, the trowel and the spray) is drawn by a script in the Harvest palette; Pixellab
+  replaces it at the same paths.
+- *Save version 13*: tiles may carry `pests` and `giant` (only when true), and the trowel.
+
+Options considered: digging with the hoe (no new tool, but the wide and great hoe would dig
+up crops beside the ones meant); aphids that kill (but the roadmap's "stop growth" is
+already a cost, and a crop stuck green is a clearer warning than one gone); a tree as an
+ObjectDef (but objects don't grow, sleep or fruit, and crops already do all three); giants
+and trees as nine or four crops kept in step (but weeds or aphids on one tile would put
+them out of step; one corner holding the crop can't drift).
+
+**Why.** ROADMAP sections 6 and 7: the autumn gets its pressure (aphids) and its relief
+(spray, the trowel, flowers), long-term planting gets a reward (the tree, giants), and the
+crop list reaches the roadmap's 26.
+
+**Cost.** The tree pays back its 600g in under a season once grown, which is generous;
+the balance pass (Stage 20) should look at it and at the giants' 15. Aphids can't be
+seen until morning and spread fast in a big monoculture; that's intended (mix in
+flowers), but watch it on Hard. A tree's sapling is planted by its corner, which is easy
+to misjudge; the trowel gives the sapling back if it's dug up in its first week (while
+it's still at the sapling stage), so moving it costs nothing then.

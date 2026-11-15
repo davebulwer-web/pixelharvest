@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="HazardRules" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="HazardRules" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/hazard_rules.gd" id="1_rules"]
 [ext_resource type="Resource" path="res://data/unlocks/weeds_arrive.tres" id="2_weeds"]
 [ext_resource type="Resource" path="res://data/unlocks/crows_arrive.tres" id="3_crows"]
 [ext_resource type="Resource" path="res://data/produce/fibre.tres" id="4_fibre"]
+[ext_resource type="Resource" path="res://data/unlocks/pests_arrive.tres" id="5_pests"]
 
 [resource]
 script = ExtResource("1_rules")
@@ -21,3 +22,9 @@ crows_start = ExtResource("3_crows")
 crow_safe_crops = 16
 crow_chance = 0.75
 crows_most_taken = 2
+pests_start = ExtResource("5_pests")
+pest_seasons = Array[StringName]([&"autumn"])
+pest_outbreak_chance = 0.3
+pest_spread_chance = 0.5
+flower_radius = 2
+flower_slows_pests = 0.25

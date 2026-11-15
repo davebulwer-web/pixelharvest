@@ -51,9 +51,41 @@ var dry_nights: int = 0
 ## on. Pulled with E, or cleared with the hoe.
 var weeds: bool = false
 
+## Aphids are on the crop here (Stage 12, DECISIONS 048): it doesn't grow
+## until they're sprayed off (Marlow's pest spray) or the plant is dug up,
+## and each night they may spread to a crop beside it.
+var pests: bool = false
+
+## The crop here has merged with the eight round it into a giant (DECISIONS
+## 048). Only ever set on a giant's front-left corner, the tile that holds
+## its state; the other eight are `covered`.
+var giant: bool = false
+
+## Part of a bigger crop that stands on several tiles (a giant, the apple
+## tree): `covered_by` is the corner tile that holds it. A covered tile has no
+## crop of its own and can't be tilled, planted, built on or weeded; asking
+## to harvest or dig it asks its corner. Not saved: FarmData works it out
+## again from the corners when a farm is loaded.
+var covered: bool = false
+var covered_by: Vector2i = Vector2i.ZERO
+
 
 func has_crop() -> bool:
 	return crop != null
+
+
+## How many tiles square the crop here stands on: 3 for a giant, the crop's
+## size for a tree, 1 for anything else (and for no crop).
+func span() -> int:
+	if crop == null:
+		return 1
+	return CropDef.GIANT_SIZE if giant else crop.size
+
+
+## True if a crop here is still growing: not ripe, not a giant. Aphids only
+## go for these (DECISIONS 048).
+func is_crop_growing() -> bool:
+	return crop != null and not giant and not crop.is_ready_stage(crop_stage)
 
 
 func is_crop_ready() -> bool:
@@ -74,6 +106,8 @@ func clear_crop() -> void:
 	crop_days = 0
 	crop_regrowing = false
 	dry_nights = 0
+	pests = false
+	giant = false
 
 
 # --- Saving ------------------------------------------------------------------
@@ -103,6 +137,10 @@ func to_save() -> Dictionary:
 			data["crop_regrowing"] = true
 		if dry_nights > 0:
 			data["dry_nights"] = dry_nights
+		if pests:
+			data["pests"] = true
+		if giant:
+			data["giant"] = true
 	if weeds:
 		data["weeds"] = true
 	return data
@@ -132,5 +170,7 @@ static func from_save(data: Dictionary) -> FarmTile:
 			t.crop_days = int(data.get("crop_days", 0))
 			t.crop_regrowing = data.get("crop_regrowing", false)
 			t.dry_nights = int(data.get("dry_nights", 0))
+			t.pests = data.get("pests", false)
+			t.giant = data.get("giant", false) and crop_def.can_go_giant()
 	t.weeds = data.get("weeds", false)
 	return t

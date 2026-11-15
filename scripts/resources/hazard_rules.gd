@@ -6,7 +6,7 @@ extends Resource
 ##
 ## One file, data/hazard_rules.tres, which game_rules.tres points at. Each
 ## hazard is a small overnight rule (FarmData.advance_day for thirst,
-## FarmHazards for the rest), and every number it uses is here, so tuning a
+## FarmHazards for the rest: weeds, crows, storms, aphids), and every number it uses is here, so tuning a
 ## hazard never means touching code (rule 6).
 ##
 ## The difficulty scales them (DifficultyDef.hazard_multiplier and
@@ -74,6 +74,36 @@ extends Resource
 
 ## When they come, they take between one and this many crops.
 @export var crows_most_taken: int = 2
+
+
+# --- Aphids (Stage 12, DECISIONS 048) -----------------------------------------
+
+## Aphids start the night this opens (autumn day 1). Null: from day 1.
+@export var pests_start: UnlockDef
+
+## The seasons aphids live in. Out of them, the cold clears every crop of
+## them overnight. Empty means every season.
+@export var pest_seasons: Array[StringName] = []
+
+## Each night, the chance that aphids land on one growing crop somewhere on
+## the farm (a new outbreak).
+@export_range(0.0, 1.0) var pest_outbreak_chance: float = 0.3
+
+## Each night, for each crop with aphids, the chance they pass to one growing
+## crop beside it.
+@export_range(0.0, 1.0) var pest_spread_chance: float = 0.5
+
+## A flower within this many tiles of a crop (a square round it) slows the
+## aphids reaching it...
+@export var flower_radius: int = 2
+
+## ...to this share of the spread chance (0.25: a quarter as likely).
+@export_range(0.0, 1.0) var flower_slows_pests: float = 0.25
+
+
+## True if aphids live in the season `season_id`.
+func pests_live_in(season_id: StringName) -> bool:
+	return pest_seasons.is_empty() or season_id in pest_seasons
 
 
 ## True if weeds come up in the season `season_id`.

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"pests_arrive"
+display_name = "the aphids arrive"
+announcement = "Aphids are about in autumn. Crops they land on stop growing, and they spread to the crops beside them. Marlow sells pest spray, the trowel digs a plant up, and flowers nearby slow them down."
+on_day = 57

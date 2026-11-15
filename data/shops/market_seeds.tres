@@ -9,6 +9,6 @@ id = &"market_seeds"
 display_name = "Fennel's Seed Cart"
 keeper_name = "Fennel"
 keeper_sprite = ExtResource("2_keeper")
-greetings = Array[String](["Seeds from far away, friend. You'll not find these at Hollis's.", "Strawberries for spring, melons for summer, pumpkins for autumn. Rare, every one.", "I'm only here on market day, so buy for the season ahead."])
+greetings = Array[String](["Seeds from far away, friend. You'll not find these at Hollis's.", "Strawberries for spring, melons for summer, pumpkins for autumn. Rare, every one.", "I'm only here on market day, so buy for the season ahead.", "Apple saplings! Dear, I grant you, but a tree bears every year."])
 opens_at = 480
 closes_at = 840

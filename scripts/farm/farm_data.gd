@@ -64,6 +64,7 @@ func can_till(cell: Vector2i) -> bool:
 		and t.object_id == &""
 		and not t.tilled
 		and not t.weeds
+		and not t.covered
 	)
 
 
@@ -74,20 +75,58 @@ func can_water(cell: Vector2i) -> bool:
 
 func can_plant(cell: Vector2i) -> bool:
 	var t := tile(cell)
-	return t != null and t.tilled and not t.has_crop() and not t.weeds
+	return t != null and t.tilled and not t.has_crop() and not t.weeds and not t.covered
 
 
 ## can_plant(), and whatever `crop`'s own rules ask of the spot: a
-## water-loving crop (watercress) needs water beside it (DECISIONS 047).
+## water-loving crop (watercress) needs water beside it (DECISIONS 047), and
+## a tree (CropDef.size, DECISIONS 048) needs every tile of its patch free.
 func can_plant_crop(cell: Vector2i, crop: CropDef) -> bool:
-	if crop == null or not can_plant(cell):
+	if crop == null:
 		return false
+	var area := footprint_at(cell, crop.size)
+	for y in range(area.position.y, area.end.y):
+		for x in range(area.position.x, area.end.x):
+			if not can_plant(Vector2i(x, y)):
+				return false
 	return not crop.near_water or is_next_to_water(cell)
 
 
-func can_harvest(cell: Vector2i) -> bool:
+## The cell that holds the crop showing at `cell`: `cell` itself, or the
+## corner of the giant or tree covering it (DECISIONS 048).
+func crop_cell(cell: Vector2i) -> Vector2i:
 	var t := tile(cell)
+	return t.covered_by if t != null and t.covered else cell
+
+
+## The tiles a crop `span` tiles square stands on, when its corner (the
+## tile holding it) is `cell`: the corner is front-left, and the patch runs
+## right and back (up the screen) from there.
+static func footprint_at(cell: Vector2i, span: int) -> Rect2i:
+	return Rect2i(Vector2i(cell.x, cell.y - span + 1), Vector2i(span, span))
+
+
+## The tiles the crop held at `cell` stands on (just `cell` for most crops).
+func footprint(cell: Vector2i) -> Rect2i:
+	var t := tile(cell)
+	return footprint_at(cell, t.span() if t != null else 1)
+
+
+func can_harvest(cell: Vector2i) -> bool:
+	var t := tile(crop_cell(cell))
 	return t != null and t.is_crop_ready()
+
+
+## True if there's a crop at `cell` (or covering it) that the trowel can dig
+## up: anything but a giant, which is picked, not dug.
+func can_dig(cell: Vector2i) -> bool:
+	var t := tile(crop_cell(cell))
+	return t != null and t.has_crop() and not t.giant
+
+
+func has_pests(cell: Vector2i) -> bool:
+	var t := tile(crop_cell(cell))
+	return t != null and t.pests
 
 
 ## Room to put an object down: open grass (tilled or not) with nothing on it.
@@ -99,6 +138,7 @@ func can_place(cell: Vector2i) -> bool:
 		and t.object_id == &""
 		and not t.has_crop()
 		and not t.weeds
+		and not t.covered
 	)
 
 
@@ -158,11 +198,14 @@ func water(cell: Vector2i) -> void:
 func plant(cell: Vector2i, crop: CropDef) -> void:
 	if not can_plant(cell):
 		return
+	if crop.size > 1 and not can_plant_crop(cell, crop):
+		return
 	var t := tile(cell)
 	t.crop = crop
 	t.crop_stage = 0
 	t.crop_days = 0
 	t.crop_regrowing = false
+	_cover(cell)
 	EventBus.crop_planted.emit(cell, crop.id)
 
 
@@ -170,20 +213,67 @@ func plant(cell: Vector2i, crop: CropDef) -> void:
 ## regrowing ones drop back a stage and start again. Returns how many items
 ## were picked (0 if nothing was ready). `dice` rolls a crop that comes in
 ## bunches (CropDef.harvest_max); without dice it gives the least.
+## Any tile of a giant or a tree picks the whole thing; a giant gives its
+## CropDef.giant_harvest and leaves nine tiles of empty soil.
 func harvest(cell: Vector2i, dice: RandomNumberGenerator = null) -> int:
 	if not can_harvest(cell):
 		return 0
+	cell = crop_cell(cell)
 	var t := tile(cell)
 	var crop := t.crop
+	if t.giant:
+		var giant_amount := maxi(1, crop.giant_harvest)
+		_remove_crop(cell)
+		EventBus.crop_harvested.emit(cell, crop.id, giant_amount)
+		return giant_amount
 	var amount := crop.roll_harvest(dice)
 	if crop.regrow_days > 0:
 		t.crop_stage = crop.growth_stages - 1
 		t.crop_days = 0
 		t.crop_regrowing = true
 	else:
-		t.clear_crop()
+		_remove_crop(cell)
 	EventBus.crop_harvested.emit(cell, crop.id, amount)
 	return amount
+
+
+## The trowel: dig up whatever crop is at `cell` (or the tree covering it),
+## ripe or not, and leave the soil empty (DECISIONS 048). How players clear
+## a crop they don't want any more: one with aphids, a perennial, a tree in
+## the wrong place. A crop dug up as a seed (stage 0, never harvested) is
+## announced as such, so GameState can give the seed back. Returns false if
+## there was nothing to dig.
+func dig_up(cell: Vector2i) -> bool:
+	if not can_dig(cell):
+		return false
+	cell = crop_cell(cell)
+	var t := tile(cell)
+	var crop_id := t.crop.id
+	var was_seed := t.crop_stage == 0 and not t.crop_regrowing
+	_remove_crop(cell)
+	EventBus.crop_dug_up.emit(cell, crop_id, was_seed)
+	return true
+
+
+## Aphids land on the crop at `cell` (overnight, FarmHazards). Only on a
+## crop that's still growing.
+func infest(cell: Vector2i) -> void:
+	var t := tile(cell)
+	if t == null or t.pests or not t.is_crop_growing():
+		return
+	t.pests = true
+	EventBus.pests_spread.emit(cell)
+
+
+## Aphids gone from the crop at `cell` (or the tree covering it): sprayed,
+## or the season too cold for them. Returns false if there were none.
+func clear_pests(cell: Vector2i) -> bool:
+	cell = crop_cell(cell)
+	if not has_pests(cell):
+		return false
+	tile(cell).pests = false
+	EventBus.pests_cleared.emit(cell)
+	return true
 
 
 ## Put an object (a sprinkler) on the tile. Any tilling there is undone:
@@ -202,7 +292,8 @@ func place_object(cell: Vector2i, object_id: StringName) -> void:
 ## grass or soil with nothing standing on it.
 func sprout_weeds(cell: Vector2i) -> void:
 	var t := tile(cell)
-	if t == null or t.weeds or t.object_id != &"" or t.terrain != FarmTile.Terrain.GRASS:
+	if t == null or t.weeds or t.object_id != &"" or t.terrain != FarmTile.Terrain.GRASS \
+			or t.covered or t.giant:
 		return
 	t.weeds = true
 	EventBus.weeds_sprouted.emit(cell)
@@ -235,7 +326,7 @@ func lose_to_crows(cell: Vector2i) -> void:
 	if t == null or not t.has_crop():
 		return
 	var crop_id := t.crop.id
-	t.clear_crop()
+	_remove_crop(cell)
 	crows_landed.append(cell)
 	EventBus.crop_died.emit(cell, crop_id, &"crows")
 
@@ -247,7 +338,7 @@ func flatten(cell: Vector2i) -> void:
 	if t == null or not t.has_crop():
 		return
 	var crop_id := t.crop.id
-	t.clear_crop()
+	_remove_crop(cell)
 	EventBus.crop_died.emit(cell, crop_id, &"storm")
 
 
@@ -278,7 +369,8 @@ func clear_thicket(area: Rect2i) -> int:
 # --- Overnight ---------------------------------------------------------------
 
 ## The first part of the night on the farm: each watered crop gets one day
-## of growth (unless weeds are choking it), each unwatered one gets a night
+## of growth (unless weeds are choking it or aphids are on it: DECISIONS
+## 048), each unwatered one gets a night
 ## thirstier, and then all the soil dries out.
 ##
 ## TimeSystem then runs the night's hazards (crows, weeds: FarmHazards) and
@@ -308,7 +400,7 @@ func advance_day(grow_scale: float = 1.0, die_after_dry_nights: int = 0, thirst_
 				t.dry_nights = 0
 			elif t.watered or not t.crop.needs_water:
 				t.dry_nights = 0
-				if not t.weeds:
+				if not t.weeds and not t.pests:
 					_grow(cell, t, grow_scale)
 					if weather_id != &"" and weather_id in t.crop.loves_weather and not t.is_crop_ready():
 						_grow(cell, t, grow_scale)
@@ -316,7 +408,7 @@ func advance_day(grow_scale: float = 1.0, die_after_dry_nights: int = 0, thirst_
 				t.dry_nights += maxi(1, thirst_step)
 				if die_after_dry_nights > 0 and t.dry_nights >= die_after_dry_nights:
 					var crop_id := t.crop.id
-					t.clear_crop()
+					_remove_crop(cell)
 					EventBus.crop_died.emit(cell, crop_id, &"thirst")
 		t.watered = false
 
@@ -358,7 +450,7 @@ func frost(next_season_id: StringName) -> int:
 		var t: FarmTile = _tiles[cell]
 		if t.has_crop() and not t.crop.survives(next_season_id):
 			var crop_id := t.crop.id
-			t.clear_crop()
+			_remove_crop(cell)
 			died += 1
 			EventBus.crop_died.emit(cell, crop_id, &"frost")
 	return died
@@ -386,10 +478,87 @@ func wither_out_of_season(season_id: StringName) -> int:
 			continue
 		if not t.crop.grows_in(season_id):
 			var crop_id := t.crop.id
-			t.clear_crop()
+			_remove_crop(cell)
 			died += 1
 			EventBus.crop_died.emit(cell, crop_id, &"season")
 	return died
+
+
+## Giants (DECISIONS 048): each 3 × 3 block of one giant-capable crop
+## (CropDef.can_go_giant), every tile ripe and clear of weeds and aphids, may
+## merge tonight into one giant, with the crop's giant_chance. The block's
+## front-left tile keeps the crop as a giant; the other eight are covered by
+## it. TimeSystem calls this in the night, after the hazards. Returns the
+## corners of the giants that grew (each also announced as giant_grew).
+func form_giants(dice: RandomNumberGenerator) -> Array[Vector2i]:
+	var grown: Array[Vector2i] = []
+	if dice == null:
+		return grown
+	var corners: Array = _tiles.keys()
+	corners.sort()  # a fixed order, so the same dice give the same night
+	for corner: Vector2i in corners:
+		var crop := _giant_block_crop(corner)
+		if crop == null or dice.randf() >= crop.giant_chance:
+			continue
+		var area := footprint_at(corner, CropDef.GIANT_SIZE)
+		for y in range(area.position.y, area.end.y):
+			for x in range(area.position.x, area.end.x):
+				var other := Vector2i(x, y)
+				if other != corner:
+					tile(other).clear_crop()
+		tile(corner).giant = true
+		_cover(corner)
+		grown.append(corner)
+		EventBus.giant_grew.emit(corner, crop.id)
+	return grown
+
+
+## The crop of the 3 × 3 block whose front-left corner is `corner`, if every
+## tile of it holds that same crop, ripe, ordinary-sized, and clear of weeds
+## and aphids, and the crop can go giant. Null otherwise.
+func _giant_block_crop(corner: Vector2i) -> CropDef:
+	var first := tile(corner)
+	if first == null or not first.has_crop() or not first.crop.can_go_giant():
+		return null
+	var area := footprint_at(corner, CropDef.GIANT_SIZE)
+	for y in range(area.position.y, area.end.y):
+		for x in range(area.position.x, area.end.x):
+			var t := tile(Vector2i(x, y))
+			if t == null or t.crop != first.crop or t.giant or t.covered \
+					or not t.is_crop_ready() or t.weeds or t.pests:
+				return null
+	return first.crop
+
+
+## Take the crop off `cell`, whatever the reason, and free every tile it
+## covered (a giant's eight, a tree's three). Every way a crop leaves the
+## farm goes through here, so a giant can't leave covered tiles behind.
+func _remove_crop(cell: Vector2i) -> void:
+	var t := tile(cell)
+	if t == null:
+		return
+	var area := footprint(cell)
+	for y in range(area.position.y, area.end.y):
+		for x in range(area.position.x, area.end.x):
+			var other := tile(Vector2i(x, y))
+			if other != null and other.covered and other.covered_by == cell:
+				other.covered = false
+	t.clear_crop()
+
+
+## Mark every other tile under the crop held at `cell` as covered by it.
+## Only tiles with nothing growing of their own: on a farm loaded from an
+## old or edited save, a crop already there keeps its tile.
+func _cover(cell: Vector2i) -> void:
+	var area := footprint(cell)
+	for y in range(area.position.y, area.end.y):
+		for x in range(area.position.x, area.end.x):
+			var other_cell := Vector2i(x, y)
+			var other := tile(other_cell)
+			if other_cell == cell or other == null or other.has_crop():
+				continue
+			other.covered = true
+			other.covered_by = cell
 
 
 func _grow(cell: Vector2i, t: FarmTile, grow_scale: float) -> void:
@@ -421,4 +590,9 @@ static func from_save(data: Dictionary) -> FarmData:
 	for entry: Dictionary in data["tiles"]:
 		var cell := Vector2i(int(entry["x"]), int(entry["y"]))
 		farm.set_tile(cell, FarmTile.from_save(entry))
+	# Which tiles a giant or a tree covers isn't saved: it follows from the
+	# corners that hold them (DECISIONS 048).
+	for cell: Vector2i in farm.cells():
+		if farm.tile(cell).span() > 1:
+			farm._cover(cell)
 	return farm

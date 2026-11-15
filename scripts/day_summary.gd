@@ -101,9 +101,15 @@ static func news_for(r: DayRecord) -> Array[String]:
 	var crows := crows_news(r.taken_by_crows)
 	if crows != "":
 		news.append(crows)
+	var giants := giants_news(r.giants)
+	if giants != "":
+		news.append(giants)
 	var thirst := thirst_warning()
 	if thirst != "":
 		news.append(thirst)
+	var pests := pests_warning()
+	if pests != "":
+		news.append(pests)
 	var names: Array[String] = []
 	for giver in Quests.givers_new_today():
 		names.append(Quests.giver_name(giver))
@@ -158,6 +164,29 @@ static func thirst_warning() -> String:
 	if dying > 0:
 		return "%d crop%s will die of thirst tonight unless watered." % [dying, _s(dying)]
 	return "%d crop%s %s wilting for want of water." % [wilted.size(), _s(wilted.size()), "is" if wilted.size() == 1 else "are"]
+
+
+## "A giant Pumpkin grew overnight! ...", or "" if none did (DECISIONS 048).
+static func giants_news(crop_ids: Array[StringName]) -> String:
+	if crop_ids.is_empty():
+		return ""
+	var names: Array[String] = []
+	for id in crop_ids:
+		var crop := ContentDB.crop(id)
+		names.append(crop.display_name if crop != null else String(id))
+	return "%s grew overnight! Pick %s with E." % [
+		"A giant " + names[0] if names.size() == 1 else "Giants (" + _and_list(names) + ")",
+		"it" if names.size() == 1 else "them"]
+
+
+## "Aphids are on 3 crops. ...", or "" if there are none (DECISIONS 048).
+static func pests_warning() -> String:
+	var count := GameState.crops_with_pests().size()
+	if count == 0:
+		return ""
+	return "Aphids are on %d crop%s: %s stopped growing. Spray %s (Marlow sells pest spray) or dig %s up before they spread." % [
+		count, _s(count), "it has" if count == 1 else "they have", "it" if count == 1 else "them",
+		"it" if count == 1 else "them"]
 
 
 ## "A", "A and B", "A, B and C".

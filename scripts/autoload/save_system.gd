@@ -21,7 +21,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 12, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 13, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -59,7 +59,10 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       out when they're nothing, so older tiles already read correctly.
 ##  12 — weather (DECISIONS 046): today's ("weather") and tomorrow's
 ##       forecast ("forecast"), by id.
-const CURRENT_VERSION := 12
+##  13 — crops with rules, session 2 (DECISIONS 048): a crop can have aphids
+##       ("pests") and be a giant ("giant"), both left out when false; and
+##       every farmer has a trowel, so older games are given one.
+const CURRENT_VERSION := 13
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -264,6 +267,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_10_to_11(data["game"])
 			11:
 				_upgrade_11_to_12(data["game"])
+			12:
+				_upgrade_12_to_13(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -484,3 +489,28 @@ func _upgrade_10_to_11(_game: Dictionary) -> void:
 func _upgrade_11_to_12(game: Dictionary) -> void:
 	game["weather"] = "sunny"
 	game["forecast"] = ""
+
+
+## Version 12 -> 13: aphids, giants and the trowel (DECISIONS 048). The new
+## tile fields are only written when true, so an older farm already reads as
+## "no aphids, no giants". The trowel is part of the starting kit now, so an
+## older game gets one, put just after the watering can on the hotbar (where
+## a new game has it), or first if there's no can. Its id is written here,
+## not read from game_rules.tres, so this step means the same thing however
+## the starting kit changes later.
+const V13_TROWEL := "trowel"
+const V13_AFTER := "watering_can"
+
+
+func _upgrade_12_to_13(game: Dictionary) -> void:
+	var inventory: Variant = game.get("inventory")
+	if typeof(inventory) != TYPE_ARRAY:
+		return
+	for entry: Variant in inventory:
+		if typeof(entry) == TYPE_DICTIONARY and entry.get("id") == V13_TROWEL:
+			return
+	var at := 0
+	for i in inventory.size():
+		if typeof(inventory[i]) == TYPE_DICTIONARY and inventory[i].get("id") == V13_AFTER:
+			at = i + 1
+	inventory.insert(at, {"id": V13_TROWEL, "count": 1})

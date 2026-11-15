@@ -108,14 +108,15 @@ scripts/             Game code
   town/              The town, its map, shop interiors and fronts, people, notice board (Stage 7)
   items/             Inventory
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
-                     and decorations)
+                     and decorations, the trowel's digging, pest spray)
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
   quests/            QuestGoal scripts (deliver, harvest, sell) and the saved QuestLog
 data/                Content resources (.tres), indexed by ContentDB
   game_rules.tres    Starting conditions and global numbers (GameRules)
-  hazard_rules.tres  Thirst, weeds and crows: every number (HazardRules, DECISIONS 045)
+  hazard_rules.tres  Thirst, weeds, crows and aphids: every number (HazardRules,
+                     DECISIONS 045, 048)
   crops/             CropDef — how each plant grows and looks, and its rules (trellis,
-                     perennial, hardy…; DECISIONS 047)
+                     perennial, hardy…; DECISIONS 047; giants and 2 × 2 trees, 048)
   produce/           ItemDef — what a harvest gives, and its sell price
   tools/             ToolDef — tools, seeds and sprinklers (all things you use)
   decorations/       ToolDef — decorations for the farm, placed like sprinklers (DECISIONS 039)

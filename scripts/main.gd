@@ -59,6 +59,13 @@ const RESTING_TINT := Color(0.66, 0.68, 0.74)
 ## most of its depth, so the player can't stand half inside the trellis.
 const SOLID_CROP_SIZE := Vector2(14, 10)
 
+## What a tree (a solid crop bigger than a tile: the apple tree) blocks: just
+## its trunk, so the player can walk behind its leaves (DECISIONS 048).
+const TRUNK_SIZE := Vector2(10, 8)
+
+## Aphids on a crop (DECISIONS 048): a picture laid over the crop's tile.
+const PESTS_TEXTURE: Texture2D = preload("res://assets/sprites/farm/aphids.png")
+
 ## Where the town is, and which spawn point in the town the farm gate leads to.
 const TOWN_ID := &"town"
 const TOWN_ARRIVAL := &"from_farm"
@@ -112,6 +119,9 @@ func _ready() -> void:
 		_squash_crop(cell)  # a crop that grows back stays, and gets a shake
 	)
 	EventBus.crop_died.connect(func(cell: Vector2i, _id: StringName, _cause: StringName) -> void: _redraw_crop(cell))
+	EventBus.crop_dug_up.connect(func(cell: Vector2i, _id: StringName, _seed: bool) -> void: _redraw_crop(cell))
+	EventBus.pests_spread.connect(_redraw_crop)
+	EventBus.pests_cleared.connect(_redraw_crop)
 	EventBus.object_placed.connect(func(cell: Vector2i, _id: StringName) -> void:
 		_redraw_cell(cell)
 		_place_object(cell)
@@ -157,6 +167,10 @@ func _ready() -> void:
 	print("walk through, hardy crops that need no water, watercress beside the pond,")
 	print("garlic that sleeps through winter, rhubarb that comes back every year.")
 	print("Storms can flatten tall crops (corn, peas, sunflowers) unless a fence is beside them.")
+	print("The trowel digs up a crop (a seed not yet up goes back in the bag). From autumn,")
+	print("aphids stop crops growing and spread: Marlow's pest spray clears them, flowers")
+	print("slow them. A 3 x 3 block of ripe melons or pumpkins may grow into a giant.")
+	print("Fennel sells apple saplings: a tree for a 2 x 2 patch of tilled soil.")
 	print("-------------------------------")
 
 
@@ -230,41 +244,76 @@ func _redraw_crop(cell: Vector2i) -> void:
 		sprite = Sprite2D.new()
 		# Crops live with the player and trees so they Y-sort against them:
 		# walk above a tall crop and you're hidden behind it.
-		sprite.position = cell_base(cell)
 		_entities.add_child(sprite)
 		_crop_sprites[cell] = sprite
-	var sheet := t.crop.sprite_sheet
+	# A giant or a tree (DECISIONS 048) stands on several tiles: this cell is
+	# its front-left corner, so its picture is centred over the whole patch.
+	var span := t.span()
+	sprite.position = cell_base(cell) + Vector2((span - 1) * TILE_PX / 2.0, 0)
+	var sheet := t.crop.giant_sprite if t.giant else t.crop.sprite_sheet
 	sprite.texture = sheet
-	sprite.hframes = t.crop.growth_stages + 1
+	sprite.hframes = 1 if t.giant else t.crop.growth_stages + 1
 	# Lift the sprite so its bottom edge sits on the bottom of the tile.
 	sprite.offset = Vector2(0, -sheet.get_height() / 2.0)
-	sprite.frame = t.crop_stage
+	sprite.frame = 0 if t.giant else t.crop_stage
+	_set_crop_pests(sprite, t.pests)
 	if t.is_wilted(GameState.wilt_after()):
 		sprite.modulate = WILTED_TINT
 	elif t.crop.rests_during(GameState.season_id()):
 		sprite.modulate = RESTING_TINT
 	else:
 		sprite.modulate = Color.WHITE
-	_set_crop_solid(sprite, t.crop.is_solid_at(t.crop_stage))
+	_set_crop_solid(sprite, _solid_size(t))
 
 
-## Give the crop sprite a body the player bumps into, or take it away: a
-## trellis crop blocks the way once it's come up (DECISIONS 047). The body
-## is a child of the sprite, so it goes when the crop does.
-func _set_crop_solid(sprite: Sprite2D, solid: bool) -> void:
+## How much of the crop on `t` the player bumps into: nothing for most crops;
+## a trellis crop once it's come up (DECISIONS 047); a tree's trunk; the
+## whole of a giant, bar a pixel round the edge (DECISIONS 048).
+func _solid_size(t: FarmTile) -> Vector2:
+	if t.giant:
+		return Vector2(t.span() * TILE_PX - 2, t.span() * TILE_PX - 4)
+	if not t.crop.is_solid_at(t.crop_stage):
+		return Vector2.ZERO
+	return TRUNK_SIZE if t.span() > 1 else SOLID_CROP_SIZE
+
+
+## Give the crop sprite a body of `size` the player bumps into, or take it
+## away (a zero size). The body is a child of the sprite, so it goes when
+## the crop does; one of the wrong size (a crop that went giant) is replaced.
+func _set_crop_solid(sprite: Sprite2D, size: Vector2) -> void:
 	var body := sprite.get_node_or_null(^"Solid")
-	if solid and body == null:
-		body = StaticBody2D.new()
-		body.name = "Solid"
-		var shape := CollisionShape2D.new()
-		var rect := RectangleShape2D.new()
-		rect.size = SOLID_CROP_SIZE
-		shape.shape = rect
-		shape.position = Vector2(0, -SOLID_CROP_SIZE.y / 2.0)
-		body.add_child(shape)
-		sprite.add_child(body)
-	elif not solid and body != null:
+	if body != null and body.get_meta(&"size", Vector2.ZERO) != size:
+		sprite.remove_child(body)
 		body.queue_free()
+		body = null
+	if size == Vector2.ZERO or body != null:
+		return
+	body = StaticBody2D.new()
+	body.name = "Solid"
+	body.set_meta(&"size", size)
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = size
+	shape.shape = rect
+	shape.position = Vector2(0, -size.y / 2.0)
+	body.add_child(shape)
+	sprite.add_child(body)
+
+
+## Show aphids over the crop sprite, or take them away (DECISIONS 048). A
+## child of the sprite, so it goes with the crop; it sits over the tile
+## itself, whatever the crop's height.
+func _set_crop_pests(sprite: Sprite2D, pests: bool) -> void:
+	var overlay := sprite.get_node_or_null(^"Pests")
+	if pests and overlay == null:
+		overlay = Sprite2D.new()
+		overlay.name = "Pests"
+		overlay.texture = PESTS_TEXTURE
+		overlay.position = Vector2(0, -TILE_PX / 2.0)
+		sprite.add_child(overlay)
+	elif not pests and overlay != null:
+		sprite.remove_child(overlay)
+		overlay.queue_free()
 
 
 ## Make the weeds at `cell` match FarmData: show them, or take them away.

@@ -79,6 +79,19 @@ signal crop_harvested(cell: Vector2i, crop_id: StringName, amount: int)
 ## &"frost" (couldn't take the cold, autumn's frost: DECISIONS 046).
 signal crop_died(cell: Vector2i, crop_id: StringName, cause: StringName)
 
+## The player dug up the crop at `cell` with the trowel (DECISIONS 048).
+## `was_seed` is true if it hadn't come up yet: GameState gives the seed back.
+signal crop_dug_up(cell: Vector2i, crop_id: StringName, was_seed: bool)
+
+## Aphids landed on the crop at `cell` overnight, or were cleared from it
+## (sprayed, or the season turned too cold for them; DECISIONS 048).
+signal pests_spread(cell: Vector2i)
+signal pests_cleared(cell: Vector2i)
+
+## Overnight, a 3 × 3 block of ripe crops merged into one giant, held at
+## `cell` (its front-left corner; DECISIONS 048).
+signal giant_grew(cell: Vector2i, crop_id: StringName)
+
 # --- Player and economy -----------------------------------------------------
 
 signal energy_changed(current: float, maximum: float)

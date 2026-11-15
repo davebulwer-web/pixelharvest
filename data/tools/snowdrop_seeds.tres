@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ToolDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/tools/plant_action.gd" id="2_action"]
+[ext_resource type="Resource" path="res://data/crops/snowdrop.tres" id="3_crop"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/snowdrop_seeds.png" id="4_icon"]
+[ext_resource type="Resource" path="res://data/unlocks/hollis_winter.tres" id="9_unlock"]
+
+[sub_resource type="Resource" id="Resource_action"]
+script = ExtResource("2_action")
+crop = ExtResource("3_crop")
+
+[resource]
+script = ExtResource("1_def")
+id = &"snowdrop_seeds"
+display_name = "Snowdrop seeds"
+icon = ExtResource("4_icon")
+buy_price = 20
+energy_cost = 1.0
+action = SubResource("Resource_action")
+consumed_on_use = true
+requires_unlock = ExtResource("9_unlock")

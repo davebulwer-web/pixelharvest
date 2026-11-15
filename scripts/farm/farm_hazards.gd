@@ -3,7 +3,8 @@ extends RefCounted
 ##
 ## FarmHazards — what goes wrong on the farm overnight: crows taking crops,
 ## weeds coming up, bare soil going back to grass (Stage 11, DECISIONS 045),
-## and a storm flattening tall crops (Stage 12, DECISIONS 047).
+## a storm flattening tall crops (Stage 12, DECISIONS 047), and aphids
+## spreading through the crops (DECISIONS 048).
 ##
 ## Thirst isn't here: it's part of growing (a crop that wasn't watered gets a
 ## night thirstier instead of a night older), so it lives with the growing in
@@ -26,12 +27,12 @@ extends RefCounted
 
 ## One night's hazards, in order: the storm first (if today was one,
 ## `flatten_chance` is its WeatherDef.flattens_tall_crops), then crows (so a
-## tile they empty can't also sprout weeds the same night), then weeds, then
-## bare soil reverting. Returns the cells crows took crops from (also in
-## farm.crows_landed).
+## tile they empty can't also sprout weeds the same night), then aphids, then
+## weeds, then bare soil reverting. Returns the cells crows took crops from
+## (also in farm.crows_landed).
 static func run_night(farm: FarmData, rules: HazardRules, multiplier: float, season_id: StringName,
 		weeds_started: bool, crows_started: bool, rng: RandomNumberGenerator,
-		flatten_chance: float = 0.0) -> Array[Vector2i]:
+		flatten_chance: float = 0.0, pests_started: bool = false) -> Array[Vector2i]:
 	var taken: Array[Vector2i] = []
 	if rules == null or multiplier <= 0.0:
 		return taken
@@ -39,6 +40,11 @@ static func run_night(farm: FarmData, rules: HazardRules, multiplier: float, sea
 		flatten_tall_crops(farm, flatten_chance * multiplier, rng)
 	if crows_started:
 		taken = send_crows(farm, rules, multiplier, rng)
+	if pests_started:
+		if rules.pests_live_in(season_id):
+			spread_pests(farm, rules, multiplier, season_id, rng)
+		else:
+			clear_all_pests(farm)
 	if weeds_started and rules.weeds_grow_in(season_id):
 		sprout_weeds(farm, rules, multiplier, rng)
 		revert_bare_soil(farm, rules, multiplier, rng)
@@ -73,7 +79,9 @@ static func unguarded_crops(farm: FarmData) -> Array[Vector2i]:
 	var guards := _guards(farm)
 	var exposed: Array[Vector2i] = []
 	for cell: Vector2i in farm.cells():
-		if farm.tile(cell).has_crop() and not is_guarded(cell, guards):
+		var t := farm.tile(cell)
+		# A crow can't carry off a giant or a tree (DECISIONS 048).
+		if t.has_crop() and t.span() == 1 and not is_guarded(cell, guards):
 			exposed.append(cell)
 	exposed.sort()
 	return exposed
@@ -143,6 +151,87 @@ static func _shelters(farm: FarmData) -> Array:
 		if object_def != null and object_def.shelters_radius > 0:
 			shelters.append([cell, object_def.shelters_radius])
 	return shelters
+
+
+# --- Aphids (DECISIONS 048) ---------------------------------------------------
+
+## Each crop with aphids may pass them to one growing crop beside it (the
+## four tiles round it), less likely if a flower grows near that crop. Then
+## perhaps a new outbreak on one growing crop somewhere on the farm. A crop
+## with aphids doesn't grow (FarmData.advance_day). Returns the cells that
+## got aphids tonight.
+static func spread_pests(farm: FarmData, rules: HazardRules, multiplier: float,
+		season_id: StringName, rng: RandomNumberGenerator) -> Array[Vector2i]:
+	var caught: Array[Vector2i] = []
+	var cells: Array = farm.cells()
+	cells.sort()
+	var flowers := flowers_on(farm)
+	for cell: Vector2i in cells:
+		if not farm.tile(cell).pests:
+			continue
+		var options: Array[Vector2i] = []
+		for step in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var next: Vector2i = cell + step
+			if can_catch_pests(farm, next, season_id) and next not in caught:
+				options.append(next)
+		if options.is_empty():
+			continue
+		var target := options[rng.randi_range(0, options.size() - 1)]
+		var chance := rules.pest_spread_chance * multiplier
+		if is_near_flower(target, flowers, rules.flower_radius):
+			chance *= rules.flower_slows_pests
+		if rng.randf() < chance:
+			caught.append(target)
+	if rng.randf() < minf(1.0, rules.pest_outbreak_chance * multiplier):
+		var candidates: Array[Vector2i] = []
+		for cell: Vector2i in cells:
+			if can_catch_pests(farm, cell, season_id) and cell not in caught:
+				candidates.append(cell)
+		if not candidates.is_empty():
+			caught.append(candidates[rng.randi_range(0, candidates.size() - 1)])
+	for cell in caught:
+		farm.infest(cell)
+	return caught
+
+
+## True if the crop on `cell` could get aphids tonight: one still growing,
+## awake this season, and without them already.
+static func can_catch_pests(farm: FarmData, cell: Vector2i, season_id: StringName) -> bool:
+	var t := farm.tile(cell)
+	return t != null and t.is_crop_growing() and not t.pests \
+			and not t.crop.rests_during(season_id)
+
+
+## The cold sees the aphids off: out of their seasons, every crop is cleared.
+static func clear_all_pests(farm: FarmData) -> void:
+	for cell: Vector2i in farm.cells():
+		if farm.tile(cell).pests:
+			farm.clear_pests(cell)
+
+
+## The cells where a flower has come up (a crop whose produce has the
+## &"flower" tag, past the seed).
+static func flowers_on(farm: FarmData) -> Array[Vector2i]:
+	var flowers: Array[Vector2i] = []
+	for cell: Vector2i in farm.cells():
+		var t := farm.tile(cell)
+		if t.has_crop() and t.crop_stage >= 1 and t.crop.produce != null \
+				and t.crop.produce.has_tag(FLOWER_TAG):
+			flowers.append(cell)
+	return flowers
+
+
+## True if a flower is within `radius` tiles of `cell` (a square, like a
+## fence's shelter: radius 2 is the 24 tiles round it).
+static func is_near_flower(cell: Vector2i, flowers: Array[Vector2i], radius: int) -> bool:
+	for flower in flowers:
+		var gap := (cell - flower).abs()
+		if maxi(gap.x, gap.y) <= radius:
+			return true
+	return false
+
+
+const FLOWER_TAG := &"flower"
 
 
 # --- Weeds -------------------------------------------------------------------

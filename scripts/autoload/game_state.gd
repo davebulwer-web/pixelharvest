@@ -96,6 +96,8 @@ var harvest_rng := RandomNumberGenerator.new()
 func _ready() -> void:
 	# Pulled weeds give fibre, whether pulled by hand or hoed out.
 	EventBus.weeds_pulled.connect(_on_weeds_pulled)
+	# A seed dug up before it came up goes back in the bag (DECISIONS 048).
+	EventBus.crop_dug_up.connect(_on_crop_dug_up)
 	weather_rng.randomize()
 	harvest_rng.randomize()
 	# Always start from a valid new game, so the farm scene can be run on its
@@ -447,6 +449,27 @@ func _on_weeds_pulled(_cell: Vector2i) -> void:
 		inventory.add(RULES.hazards.weed_item)
 
 
+func _on_crop_dug_up(_cell: Vector2i, crop_id: StringName, was_seed: bool) -> void:
+	var crop := ContentDB.crop(crop_id)
+	if crop == null:
+		return
+	var seeds := ContentDB.seeds_for(crop) if was_seed else null
+	if seeds != null:
+		inventory.add(seeds)
+		EventBus.message_posted.emit("Dug up the %s seed and put it back in the bag" % crop.display_name)
+	else:
+		EventBus.message_posted.emit("Dug up the %s" % crop.display_name)
+
+
+## The crops with aphids on them now (DECISIONS 048), for the morning's news.
+func crops_with_pests() -> Array[Vector2i]:
+	var infested: Array[Vector2i] = []
+	for cell: Vector2i in farm.cells():
+		if farm.tile(cell).pests:
+			infested.append(cell)
+	return infested
+
+
 # --- Weather (DECISIONS 046) -------------------------------------------------
 # What each kind of weather does is in data/weather/ (WeatherDef); the odds
 # are on each season (SeasonTheme.weather_odds). This keeps today's and
@@ -508,7 +531,8 @@ func next_season_id() -> StringName:
 func harvest(cell: Vector2i) -> bool:
 	if not farm.can_harvest(cell):
 		return false
-	var crop: CropDef = farm.tile(cell).crop
+	# A giant or a tree is held by its corner tile (DECISIONS 048).
+	var crop: CropDef = farm.tile(farm.crop_cell(cell)).crop
 	var amount := farm.harvest(cell, harvest_rng)
 	inventory.add(crop.produce, amount)
 	if crop.seed_chance > 0.0 and harvest_rng.randf() < crop.seed_chance:

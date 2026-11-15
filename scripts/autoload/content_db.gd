@@ -341,6 +341,18 @@ func _check() -> void:
 						% [where, weather_id])
 		if each.harvest_max > 0 and each.harvest_max < each.harvest_amount:
 			push_warning("ContentDB: '%s' has harvest_max below harvest_amount" % where)
+		# The big ones (DECISIONS 048): a tree's frames are size tiles wide,
+		# and a giant needs its picture and something to give.
+		if each.size > 1 and each.sprite_sheet != null \
+				and each.sprite_sheet.get_width() != (each.growth_stages + 1) * each.size * 16:
+			push_warning("ContentDB: '%s' stands on %d × %d tiles, so its frames should be %d pixels wide"
+					% [where, each.size, each.size, each.size * 16])
+		if each.giant_chance > 0.0 and each.giant_sprite == null:
+			push_warning("ContentDB: '%s' has a giant_chance but no giant_sprite, so it never goes giant" % where)
+		if each.can_go_giant() and each.giant_harvest < 1:
+			push_warning("ContentDB: '%s' goes giant but its giant_harvest is 0; picking one gives 1" % where)
+		if each.giant_sprite != null and each.size > 1:
+			push_warning("ContentDB: '%s' is bigger than a tile, so it can't go giant too" % where)
 
 	# A season nothing grows in is allowed (a winter rest, say), but it's worth
 	# knowing about, in case it's a typo in a crop file.

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="GameRules" load_steps=23 format=3]
+[gd_resource type="Resource" script_class="GameRules" load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/game_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_itemdef"]
@@ -22,6 +22,7 @@
 [ext_resource type="Resource" path="res://data/difficulties/standard.tres" id="20_standard"]
 [ext_resource type="Resource" path="res://data/difficulties/hard.tres" id="21_hard"]
 [ext_resource type="Resource" path="res://data/hazard_rules.tres" id="22_hazards"]
+[ext_resource type="Resource" path="res://data/tools/trowel.tres" id="23_trowel"]
 
 [resource]
 script = ExtResource("1_rules")
@@ -30,6 +31,7 @@ max_energy = 100.0
 starting_inventory = Dictionary[ExtResource("2_itemdef"), int]({
 ExtResource("3_hoe"): 1,
 ExtResource("4_can"): 1,
+ExtResource("23_trowel"): 1,
 ExtResource("5_seeds"): 10
 })
 locations = Array[ExtResource("6_locdef")]([ExtResource("7_farm"), ExtResource("13_town"), ExtResource("14_seeds"), ExtResource("15_general"), ExtResource("16_smith"), ExtResource("17_house")])

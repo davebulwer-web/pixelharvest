@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 12 — crops with rules.** Session 1 (crop rules, storms, first eight crops) is built, waiting for Dave to try it; session 2 is pests, giants, the apple tree and the rest of the crops. Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
+**Current stage: 12 — crops with rules.** Session 1 (crop rules, storms, first eight crops) is tested and committed by Dave (2026-11-15); session 2 (aphids, the trowel, giants, the apple tree, the last nine crops) is built, waiting for Dave to try it. Then Stage 12 is complete apart from its Pixellab art. Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -592,15 +592,28 @@ ROADMAP section 6.
 - [x] Save version: unchanged (12): nothing new is saved
 - [x] Verified in the sandbox: headless import and run clean, 385 harness checks, rendered
       farm in summer and winter, the player stopped by a pea trellis
+- [x] Dave confirms it plays correctly on Windows (tested and committed 2026-11-15)
+
+**Session 2 — pests, giants, the rest** (2026-11-15, DECISIONS 048, save version 13)
+
+- [x] From Stage 11: aphids from autumn day 1 (unlock `pests_arrive`): they stop a crop
+      growing and spread to its neighbours; flowers within 2 tiles slow them; the cold
+      clears them. Pest spray at Marlow's (20g a dose)
+- [x] The trowel: digs up a crop on purpose (a seed not yet up goes back in the bag); in
+      the starting kit, and given to older games by the save upgrade
+- [x] Giant pumpkin and melon (a ripe 3 × 3 block, 15% a night, gives 15); the apple tree
+      (Fennel's 600g sapling, 2 × 2, hardy, perennial, 28 days then 3 apples every 3)
+- [x] The other nine crops of ROADMAP 6.2 as data: tulip, tomato, chilli (heatwave-loving),
+      blueberry, beetroot, cranberry, leek, Brussels sprouts, snowdrop; green bean a tall
+      trellis crop at 25g. Chilli is at Fennel's until Hollis's line (Stage 13)
+- [x] Save version 13 (aphids, giants, the trowel); `tests/saves/v12_example.json`
+- [x] Verified in the sandbox: headless import and run clean, 163 harness checks (aphids'
+      odds and flowers over 400 tries, the trowel, giants and their covered tiles, the
+      tree through a year, saves v1–v12, shops, a real autumn of nights), rendered farm
+      with a giant, trees and aphids, the player stopped by the giant
 - [ ] Dave confirms it plays correctly on Windows
-
-**Session 2 — pests, giants, the rest**
-
-- [ ] From Stage 11: pests (aphids from autumn day 1, slowed by flowers nearby; pest spray
-      at Marlow's); digging up a crop on purpose
-- [ ] Giant pumpkin and melon; the apple tree (2 × 2 perennial); the remaining crops of
-      ROADMAP 6.2 (data, now the rules exist); weather-loving chilli
-- [ ] Pixellab: crop strips, icons and seed packets; two giant sprites
+- [ ] Pixellab: crop strips, icons and seed packets for all 17 new crops; the apple tree
+      (4 seasons); two giant sprites; aphids, trowel, pest spray
 
 ## Stage 13 — Questlines · 2 sessions · Sonnet (Haiku for bulk text)
 

@@ -18,6 +18,10 @@ extends Resource
 ## are a tag on the produce (ItemDef.tags), since bees and the flower show
 ## care about the flower, not the plant.
 ##
+## Session 2 (DECISIONS 048) added the big ones: `size` (a tree that stands on
+## a 2 × 2 patch: the apple tree) and giants (`giant_sprite`: a 3 × 3 block of
+## ripe melons or pumpkins may merge overnight into one giant crop).
+##
 
 @export var id: StringName
 @export var display_name: String
@@ -97,6 +101,33 @@ extends Resource
 ## ObjectDef.shelters_radius) stands close by (WeatherDef.flattens_tall_crops).
 @export var tall: bool = false
 
+# --- Big crops (Stage 12 session 2, DECISIONS 048) ----------------------------
+
+## How many tiles square the crop stands on: 1 for every ordinary crop, 2 for
+## the apple tree. Planted on the tile the player faces, which becomes the
+## crop's front-left corner; the patch runs right and back (up the screen)
+## from there, and every tile of it must be tilled, empty soil. The crop's
+## state lives on that corner tile; the others are only covered by it
+## (FarmTile.covered). Its sprite sheet's frames are size × 16 pixels wide.
+@export_range(1, 3) var size: int = 1
+
+## Giant: a 3 × 3 block of this crop, all ripe, may merge overnight into one
+## giant crop with this picture (48 pixels wide, its bottom on the block's
+## bottom edge). Null: this crop never goes giant.
+@export var giant_sprite: Texture2D
+
+## The chance each night, 0 to 1, that a 3 × 3 block of this crop, all ripe,
+## merges into a giant.
+@export_range(0.0, 1.0, 0.01) var giant_chance: float = 0.0
+
+## What a giant gives when it's picked, in produce (nine ordinary ones would
+## give 9 × harvest_amount).
+@export var giant_harvest: int = 0
+
+## How many tiles square a giant stands on. Not a setting: the roadmap's
+## rule is a 3 × 3 block, and the picture is drawn for it.
+const GIANT_SIZE := 3
+
 
 ## True if this crop keeps growing in the season `season_id`.
 func grows_in(season_id: StringName) -> bool:
@@ -133,6 +164,11 @@ func roll_harvest(dice: RandomNumberGenerator) -> int:
 ## True if `stage` blocks the way: a trellis crop that has come up.
 func is_solid_at(stage: int) -> bool:
 	return solid and stage >= 1
+
+
+## True if this crop can merge into a giant.
+func can_go_giant() -> bool:
+	return giant_sprite != null and giant_chance > 0.0 and size == 1
 
 
 ## True if `stage` is the final, harvestable one.
@@ -183,6 +219,10 @@ func rules_text() -> String:
 		parts.append("Sometimes gives seeds back.")
 	if tall:
 		parts.append("Tall: a storm can flatten it unless a fence is close.")
+	if size > 1:
+		parts.append("A tree: plant it on a %d × %d patch of tilled soil. The tile in front of you is its front-left corner." % [size, size])
+	if can_go_giant():
+		parts.append("Leave a 3 × 3 block ripe and it may grow into a giant.")
 	return " ".join(parts)
 
 

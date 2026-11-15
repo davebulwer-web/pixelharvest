@@ -15,3 +15,5 @@ produce = ExtResource("2_produce")
 harvest_amount = 1
 sprite_sheet = ExtResource("3_sheet")
 seasons = Array[StringName]([&"summer"])
+solid = true
+tall = true
