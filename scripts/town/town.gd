@@ -93,6 +93,8 @@ func _ready() -> void:
 			EventBus.item_removed]:
 		signal_ref.connect(func(_a = null, _b = null) -> void: _refresh_markers())
 	EventBus.quest_progressed.connect(func(_id: StringName, _p: int, _n: int) -> void: _refresh_markers())
+	# A gift of gold is ready when the purse is full enough (DECISIONS 049).
+	EventBus.gold_changed.connect(func(_g: int, _d: int) -> void: _refresh_markers())
 	_refresh_markers()
 
 

@@ -6,8 +6,8 @@ extends Node
 ## Stage 8 called this "the architecture's exam": quests had to arrive without
 ## the farming code changing. They do. Progress comes entirely from EventBus —
 ## this file listens to signals the farm, the bin and the shops already
-## announced (crop_harvested, items_shipped, items_sold_to_shop, item_bought)
-## and offers each one to every active request's goal (QuestGoal.counts).
+## announced (crop_harvested, items_shipped, items_sold_to_shop, item_bought,
+## giant_harvested) and offers each one to every active request's goal (QuestGoal.counts).
 ## Nothing that grows, ships or sells knows a request exists.
 ##
 ## What's saved lives in GameState.quests (a QuestLog). The requests
@@ -46,8 +46,12 @@ func _ready() -> void:
 		_record(&"items_sold_to_shop", [item_id, amount, gold]), CONNECT_DEFERRED)
 	EventBus.item_bought.connect(func(item_id: StringName, amount: int, cost: int) -> void:
 		_record(&"item_bought", [item_id, amount, cost]), CONNECT_DEFERRED)
-	# Deliveries count what's in the bag, so any change to the bag may finish one.
+	EventBus.giant_harvested.connect(func(cell: Vector2i, crop_id: StringName) -> void:
+		_record(&"giant_harvested", [cell, crop_id]), CONNECT_DEFERRED)
+	# Deliveries count what's in the bag, and gifts of gold the purse, so any
+	# change to either may finish one.
 	EventBus.item_added.connect(func(_id: StringName, _n: int) -> void: _check_ready(), CONNECT_DEFERRED)
+	EventBus.gold_changed.connect(func(_g: int, _d: int) -> void: _check_ready(), CONNECT_DEFERRED)
 	EventBus.game_loaded.connect(func() -> void: _told_ready.clear())
 
 
@@ -67,13 +71,14 @@ func active() -> Array[QuestDef]:
 func progress(quest: QuestDef) -> int:
 	if quest.goal == null:
 		return 0
-	return mini(quest.goal.progress(GameState.quests.recorded(quest.id), GameState.inventory), quest.goal.amount)
+	return mini(quest.goal.progress(GameState.quests.recorded(quest.id), GameState.inventory, GameState.gold),
+			quest.goal.needed())
 
 
 ## True if `quest` is taken and has everything it needs.
 func is_ready(quest: QuestDef) -> bool:
 	return GameState.quests.is_active(quest.id) and quest.goal != null \
-			and progress(quest) >= quest.goal.amount
+			and progress(quest) >= quest.goal.needed()
 
 
 ## The request `npc_id` has given you that's still open, or null.
@@ -191,7 +196,11 @@ func talk(npc_id: StringName) -> Array[String]:
 		if is_ready(quest):
 			return _complete(quest)
 		var reminder := quest.reminder_line if quest.reminder_line != "" else "%s?" % quest.goal.describe()
-		var lines: Array[String] = ["%s (%s)" % [reminder, quest.goal.progress_text(progress(quest))]]
+		var line := "%s (%s)" % [reminder, quest.goal.progress_text(progress(quest))]
+		var missing := quest.goal.still_needed(GameState.inventory)
+		if missing != "":
+			line += " Still to find: %s." % missing
+		var lines: Array[String] = [line]
 		return lines
 	quest = offer_for(npc_id)
 	if quest != null:
@@ -204,7 +213,8 @@ func _start(quest: QuestDef) -> Array[String]:
 	EventBus.quest_started.emit(quest.id)
 	var lines: Array[String] = quest.offer_lines.duplicate()
 	var text := "New request: %s. %s" % [quest.title, quest.goal.describe()]
-	if quest.goal is DeliverGoal:
+	# "Bring 5 parsnips to Mabel". A gift of gold already says what it's for.
+	if quest.goal.is_handed_over() and quest.goal.gold_to_hand_in() == 0:
 		text += " to %s" % giver_name(quest.giver)
 	text += "."
 	var reward := quest.reward_text()
@@ -217,6 +227,12 @@ func _start(quest: QuestDef) -> Array[String]:
 
 
 func _complete(quest: QuestDef) -> Array[String]:
+	# A gift of gold (DonateGoal) is taken here: the goal can't touch the
+	# purse itself. is_ready() has already checked there's enough.
+	var gift := quest.goal.gold_to_hand_in()
+	if gift > 0 and not GameState.try_spend_gold(gift):
+		var short: Array[String] = ["%s? (%s)" % [quest.goal.describe(), quest.goal.progress_text(progress(quest))]]
+		return short
 	quest.goal.hand_in(GameState.inventory)
 	GameState.quests.finish(quest.id)
 	_told_ready.erase(quest.id)
@@ -246,7 +262,7 @@ func _record(event: StringName, args: Array) -> void:
 		if amount <= 0:
 			continue
 		GameState.quests.add(quest.id, amount)
-		EventBus.quest_progressed.emit(quest.id, progress(quest), quest.goal.amount)
+		EventBus.quest_progressed.emit(quest.id, progress(quest), quest.goal.needed())
 	_check_ready()
 
 

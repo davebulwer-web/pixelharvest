@@ -1759,3 +1759,75 @@ seen until morning and spread fast in a big monoculture; that's intended (mix in
 flowers), but watch it on Hard. A tree's sapling is planted by its corner, which is easy
 to misjudge; the trowel gives the sapling back if it's dug up in its first week (while
 it's still at the sapling stage), so moving it costs nothing then.
+
+## 049 — Questlines: four new kinds of request, the lines as data, and Ivy
+
+**Decision.** Stage 13 session 1 writes the townsfolk's lines from ROADMAP section 5 as
+data, with the request kinds they need, and brings in Ivy.
+
+- *Four new goal scripts* (`scripts/quests/`), each a small `QuestGoal` like the first
+  three (DECISIONS 038):
+  - `DonateGoal`: "give 500g towards the new bridge". Ready when the player carries the
+    gold; handing in takes it. The goal says how much (`gold_to_hand_in()`) and the Quests
+    service takes it, because a goal touches no autoload. Goals' `progress()` now gets the
+    purse as well as the bag, and Quests, the town and the shop counters re-check on
+    `gold_changed`, so the "?" appears the moment there's enough.
+  - `DeliverAnyGoal`: "bring 6 strawberries or blueberries", any mix (handing in takes
+    from the first listed first).
+  - `DeliverEachGoal`: "bring one each of …". How many are needed is the list's length
+    (new `QuestGoal.needed()`, which everything that used `goal.amount` now asks), and
+    `still_needed()` names what's missing in reminders and the request log.
+  - `GiantGoal`: "grow and pick a giant pumpkin", counted from a new EventBus signal,
+    `giant_harvested`, which FarmData announces when a giant is picked (the only farm
+    change: one line).
+- *ROADMAP's "ship variety" became "bring one of each".* Counting what was shipped would
+  have meant saving which items each request had seen (a new save version), and shipping
+  before taking the request wouldn't count. Bringing them looks in the bag like every
+  other delivery, counts what was grown before, and Hollis seeing your crops reads better
+  than him counting the bin. No save change: still version 13.
+- *The lines written now* (the rest wait for what they're about):
+  - Mayor: **the old bridge**, from spring day 20 after his welcome: 500g → unlock
+    `woods_bridge` ("ready by summer"). Stage 14 makes the bridge and the Woods wait for
+    it. The pride of the valley now follows the bridge rather than the welcome.
+  - Hollis (a shopkeeper giver, DECISIONS 044): **spring set** from spring day 18 (one each
+    of parsnip, radish, potato, spring onion, pea, tulip) → 150g, 2 rhubarb crowns, his
+    summer seeds early and rhubarb crowns on his shelves; **summer set** (tomato, green
+    bean, sunflower, watercress, corn) → 250g, 3 chilli seeds, autumn seeds early, chilli
+    on his shelves; **autumn set** (beetroot, cabbage, leek, Brussels sprouts) → 400g,
+    5 garlic, winter seeds early. Each set is offered only in its season. Rhubarb and
+    chilli left Fennel's cart for Hollis's, behind the new unlocks `rhubarb_crowns` and
+    `hollis_chilli`, as ROADMAP and DECISIONS 047–048 planned. Rhubarb seeds are called
+    rhubarb crowns now (same id).
+  - Mabel: **summer tarts** (6 strawberries or blueberries, 450g) and **winter leek pies**
+    (5 leeks, 500g), both after her pasties; her pumpkin pie stays in autumn. Her kitchen
+    lessons wait for cooking (Stage 16).
+  - Pip: **the giant pumpkin**, autumn from day 70 → 150g and 5 melon seeds. The mushroom
+    hunt and the biggest fish wait for Stages 14 and 15, the snowman for Stage 18 or 19.
+  - Ivy (new): **her autumn basket** (one each of beetroot, cabbage, pumpkin, cranberry)
+    → 200g and an apple sapling; **snowdrops** in winter (5) → 300g and 10 tulip bulbs.
+- *Ivy* is a CharacterDef with `requires_unlock = ivy_arrives` (a calendar unlock on
+  autumn day 3, day 59), so the board pins her up as coming soon, the morning summary
+  announces her and names her as having something to ask. She stands by the ruined
+  glasshouse behind the general store (a new town ObjectDef, `ruined_glasshouse`). Her
+  sprite is Mabel's recoloured (grey hair, green apron) until Pixellab.
+- *Not in this session:* the glasshouse restoration itself (timber, 1,500g, a fish → the
+  greenhouse) waits until timber (Stage 14), fish (Stage 15) and the greenhouse (Stage
+  17) exist, so that every request can be done the day it's asked; Ivy's thanks already
+  points at it. Brann's sprinkler and sickle lines and Wren's line wait the same way.
+  Deadlines, Rosa's market orders and the notice board's daily jobs are session 2: they
+  are the repeatable requests, and deadlines only matter for those.
+
+Options considered for gold: a box in the square you could put any amount into (closer to
+"into the town box", but a new kind of object and a saved running total for one request);
+or a goal that counts gold the moment it's accepted (then gold earned before wouldn't
+count, and nothing would stop the player spending it again). Carrying it and handing it
+over is how deliveries already work, so it needs nothing new to learn.
+
+**Why.** ROADMAP section 5 and rule 3: every line is `.tres` files on four small scripts,
+and finishing things opens things (the bridge, early catalogues, Hollis's rhubarb and
+chilli). The first year now has a request somewhere in every season.
+
+**Cost.** Rhubarb and chilli are unavailable until Hollis's line gives them (in a game
+already past spring, rhubarb waits for next spring's set). An unfinished set waits a
+whole year for its season to come round again. The bridge's unlock does nothing visible
+until Stage 14 builds the Woods. Placeholder art for Ivy and the glasshouse.

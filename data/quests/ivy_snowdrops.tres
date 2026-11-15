@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/produce/snowdrop.tres" id="3_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="4_r"]
+[ext_resource type="Resource" path="res://data/tools/tulip_seeds.tres" id="5_r"]
+[ext_resource type="Resource" path="res://data/quests/ivy_autumn_set.tres" id="6_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+amount = 5
+item = ExtResource("3_r")
+
+[resource]
+script = ExtResource("1_r")
+id = &"ivy_snowdrops"
+title = "Ivy's snowdrops"
+giver = &"ivy"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Winter's hard on an old gardener. Everything is asleep.", "Except snowdrops. Bring me five, would you? They're the first sign that it all comes back."])
+reminder_line = "Five snowdrops, dear. Hollis sells the bulbs in winter."
+thanks_lines = Array[String](["Aren't they brave, flowering in the snow?", "Here, tulip bulbs, for the spring. Plant them near your crops: flowers keep the aphids down."])
+reward_gold = 300
+reward_items = Dictionary[ExtResource("4_r"), int]({
+ExtResource("5_r"): 10
+})
+requires = ExtResource("6_r")
+first_day = 1
+seasons = Array[StringName]([&"winter"])

@@ -224,6 +224,7 @@ func harvest(cell: Vector2i, dice: RandomNumberGenerator = null) -> int:
 	if t.giant:
 		var giant_amount := maxi(1, crop.giant_harvest)
 		_remove_crop(cell)
+		EventBus.giant_harvested.emit(cell, crop.id)
 		EventBus.crop_harvested.emit(cell, crop.id, giant_amount)
 		return giant_amount
 	var amount := crop.roll_harvest(dice)

@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_each_goal.gd" id="2_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="3_r"]
+[ext_resource type="Resource" path="res://data/produce/beetroot.tres" id="4_r"]
+[ext_resource type="Resource" path="res://data/produce/cabbage.tres" id="5_r"]
+[ext_resource type="Resource" path="res://data/produce/pumpkin.tres" id="6_r"]
+[ext_resource type="Resource" path="res://data/produce/cranberry.tres" id="7_r"]
+[ext_resource type="Resource" path="res://data/tools/apple_sapling.tres" id="8_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+items = Array[ExtResource("3_r")]([ExtResource("4_r"), ExtResource("5_r"), ExtResource("6_r"), ExtResource("7_r")])
+
+[resource]
+script = ExtResource("1_r")
+id = &"ivy_autumn_set"
+title = "Ivy's autumn basket"
+giver = &"ivy"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Oh! I didn't hear you come up. I'm Ivy. I kept this glasshouse, a long time ago, when the old farm grew for the whole valley.", "I've come back to see what's left. Not much, as you can see.", "Would you bring me what the valley grows now? One each of beetroot, cabbage, pumpkin and cranberry. I'd like to taste the old soil again."])
+reminder_line = "Beetroot, cabbage, pumpkin and cranberry, dear. One of each."
+thanks_lines = Array[String](["Oh, that takes me back. The soil's still good, then.", "Take this apple sapling. I grew it from the old orchard's last tree. Plant it where it has room to spread, and it will feed you every year.", "One day I'd like this glasshouse whole again. It will need timber, and the Woods are the place for that. When that bridge is built, come and see me."])
+reward_gold = 200
+reward_items = Dictionary[ExtResource("3_r"), int]({
+ExtResource("8_r"): 1
+})
+first_day = 59
+seasons = Array[StringName]([&"autumn"])

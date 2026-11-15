@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"rhubarb_crowns"
+display_name = "rhubarb crowns at Hollis's"
+announcement = "Hollis has rhubarb crowns on his shelves now, for any spring."
+on_day = 0

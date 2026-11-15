@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_any_goal.gd" id="2_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="3_r"]
+[ext_resource type="Resource" path="res://data/produce/strawberry.tres" id="4_r"]
+[ext_resource type="Resource" path="res://data/produce/blueberry.tres" id="5_r"]
+[ext_resource type="Resource" path="res://data/quests/baker_potatoes.tres" id="6_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+amount = 6
+items = Array[ExtResource("3_r")]([ExtResource("4_r"), ExtResource("5_r")])
+
+[resource]
+script = ExtResource("1_r")
+id = &"baker_tarts"
+title = "Mabel's summer tarts"
+giver = &"baker"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Summer's here, and the whole town wants fruit tarts.", "Bring me six strawberries or blueberries, any mix you like. Strawberries kept from the spring will do lovely."])
+reminder_line = "Six berries for the tarts, love. Strawberries or blueberries, either will do."
+thanks_lines = Array[String](["Look at the colour on these! The tarts will be gone by noon.", "Here, and there's a tart wrapped up for you in the morning, if you're passing."])
+reward_gold = 450
+requires = ExtResource("6_r")
+first_day = 1
+seasons = Array[StringName]([&"summer"])

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/giant_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/crops/pumpkin.tres" id="3_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="4_r"]
+[ext_resource type="Resource" path="res://data/tools/melon_seeds.tres" id="5_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+amount = 1
+crop = ExtResource("3_r")
+
+[resource]
+script = ExtResource("1_r")
+id = &"child_giant_pumpkin"
+title = "Pip's giant pumpkin"
+giver = &"child"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["I read a book about a pumpkin SO big a pig could live inside it!", "The book says if you plant pumpkins in a square, three by three, and leave them ripe, they can join up into one giant one. Is that true? Can you grow one?", "If you do, I'll give you the melon seeds I won at the fair. I can't grow them. We haven't got a garden."])
+reminder_line = "Has it happened yet? Is it bigger than a pig?"
+thanks_lines = Array[String](["You did it! A real giant pumpkin! I knew the book was right!", "Here are my melon seeds, like I promised. Melons can go giant too, you know. It says so in the book."])
+reward_gold = 150
+reward_items = Dictionary[ExtResource("4_r"), int]({
+ExtResource("5_r"): 5
+})
+first_day = 70
+seasons = Array[StringName]([&"autumn"])

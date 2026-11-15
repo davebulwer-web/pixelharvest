@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"ivy_arrives"
+display_name = "Ivy the gardener arrives"
+announcement = "Someone has been seen at the old glasshouse behind the shops. Her name is Ivy."
+on_day = 59

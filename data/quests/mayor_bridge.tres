@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/donate_goal.gd" id="2_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="3_r"]
+[ext_resource type="Resource" path="res://data/unlocks/woods_bridge.tres" id="4_r"]
+[ext_resource type="Resource" path="res://data/quests/mayor_first_sale.tres" id="5_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+amount = 500
+cause = "the new bridge"
+
+[resource]
+script = ExtResource("1_r")
+id = &"mayor_bridge"
+title = "The old bridge"
+giver = &"mayor"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Farmer, a word. You've seen the river past the farm? There was a bridge over it once, to the Woods.", "The spring flood took it, years ago, and the town's never had the money to put it back. The Woods have been out of reach ever since.", "The builders want 500 gold. If you could find it, I'd have them start at once, and the bridge would be up by summer."])
+reminder_line = "Any closer to the 500 for the bridge? The builders are waiting on us."
+thanks_lines = Array[String](["Five hundred gold! I'll send for the builders this very afternoon.", "They say it will be ready by summer. Berries, mushrooms, a stream full of fish... the Woods will be open again, thanks to you."])
+reward_unlocks = Array[ExtResource("3_r")]([ExtResource("4_r")])
+requires = ExtResource("5_r")
+first_day = 20

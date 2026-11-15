@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 12 — crops with rules.** Session 1 (crop rules, storms, first eight crops) is tested and committed by Dave (2026-11-15); session 2 (aphids, the trowel, giants, the apple tree, the last nine crops) is built, waiting for Dave to try it. Then Stage 12 is complete apart from its Pixellab art. Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
+**Current stage: 13 — questlines.** Session 1 (new request kinds, the lines as data, Ivy, the mayor's bridge and Hollis's sets) is built, waiting for Dave to try it; session 2 is deadlines, Rosa's market orders and the notice board's daily jobs. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -611,7 +611,7 @@ ROADMAP section 6.
       odds and flowers over 400 tries, the trowel, giants and their covered tiles, the
       tree through a year, saves v1–v12, shops, a real autumn of nights), rendered farm
       with a giant, trees and aphids, the player stopped by the giant
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (tested, committed and pushed 2026-11-15)
 - [ ] Pixellab: crop strips, icons and seed packets for all 17 new crops; the apple tree
       (4 seasons); two giant sprites; aphids, trowel, pest spray
 
@@ -619,15 +619,36 @@ ROADMAP section 6.
 
 ROADMAP section 5.
 
-- [ ] New goal kinds: donate gold, deliver any of, ship variety, deadline, harvest giant
-      (forage and catch wired up in Stages 14–15)
-- [ ] Every person's line as data; Ivy (new character, the greenhouse line), arriving by
-      `requires_unlock` on her CharacterDef
-- [ ] From Stage 10: Hollis's line (ship one of every spring crop → summer catalogue early)
-      and the mayor's bridge request (500g into the box → the woods)
+**Session 1 — the lines and Ivy** (2026-11-15, DECISIONS 049, no save change)
+
+- [x] New goal kinds: give gold (`DonateGoal`), bring any of (`DeliverAnyGoal`), bring one
+      of each (`DeliverEachGoal`, in place of "ship variety"), grow a giant (`GiantGoal`,
+      new EventBus `giant_harvested`). Forage and catch are wired up in Stages 14–15
+- [x] Every line that can be done today, as data: the mayor's bridge (500g → `woods_bridge`,
+      before the pride of the valley); Hollis's spring, summer and autumn sets (early
+      catalogues, rhubarb crowns and chilli move to his shelves); Mabel's summer tarts and
+      winter leek pies; Pip's giant pumpkin; Ivy's autumn basket and snowdrops
+- [x] Ivy, arriving on autumn day 3 (`ivy_arrives` on her CharacterDef), by the ruined
+      glasshouse behind the general store; placeholder art for both
+- [x] Save version: unchanged (13)
+- [x] Verified in the sandbox: headless import and run clean, 65 harness checks (every new
+      request offered on its day, handed in and paid; the bridge's gold; one-of-each and
+      any-of hand-ins; a real giant pumpkin grown and picked; Ivy's arrival; Hollis's and
+      Fennel's shelves; a half-paid bridge through a save; saves v1–v12), rendered town with
+      Ivy, the glasshouse and the request log
+- [ ] Dave confirms it plays correctly on Windows
+
+**Session 2 — repeatable requests**
+
+- [ ] Deadlines (`deadline_days` on a request: it expires, no penalty but the lost reward)
 - [ ] Rosa's market orders and the notice board's daily jobs, from templates
-- [ ] Pixellab: Ivy
+- [ ] Pixellab: Ivy (and the ruined glasshouse)
 - [ ] Dave plays a full year
+
+Waiting for later stages: Ivy's glasshouse restoration (timber, 1,500g and a fish → the
+greenhouse; Stages 14, 15, 17), Brann's sprinkler and sickle lines (14, 17), Wren's line
+(15), Mabel's kitchen lessons (16), Pip's mushroom hunt, biggest fish and snowman (14, 15,
+18–19), the mayor's harvest fair and year review (18, 19).
 
 ## Stage 14 — The Woods and foraging · 2 sessions + art · Opus, then Sonnet
 

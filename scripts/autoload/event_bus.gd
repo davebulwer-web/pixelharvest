@@ -92,6 +92,11 @@ signal pests_cleared(cell: Vector2i)
 ## `cell` (its front-left corner; DECISIONS 048).
 signal giant_grew(cell: Vector2i, crop_id: StringName)
 
+## A giant was picked, at `cell` (its front-left corner). Announced just
+## before the crop_harvested that says what it gave (DECISIONS 049: Pip's
+## giant pumpkin request counts these).
+signal giant_harvested(cell: Vector2i, crop_id: StringName)
+
 # --- Player and economy -----------------------------------------------------
 
 signal energy_changed(current: float, maximum: float)

@@ -54,7 +54,13 @@ func _refresh() -> void:
 		var done := Quests.progress(quest)
 		var status := "Ready! Go and see %s" % who if Quests.is_ready(quest) else quest.goal.progress_text(done)
 		_add_line("%s  (%s)" % [quest.title, who], 9, UiStyle.TEXT)
-		_add_line("%s.  %s" % [quest.goal.describe(), status], 8, UiStyle.TEXT_DIM)
+		# Once some of a "one of each" request is found, say what's left
+		# rather than the whole list again (DECISIONS 049).
+		var what := quest.goal.describe()
+		var missing := "" if Quests.is_ready(quest) else quest.goal.still_needed(GameState.inventory)
+		if missing != "" and done > 0:
+			what = "Still to find: %s" % missing
+		_add_line("%s.  %s" % [what, status], 8, UiStyle.TEXT_DIM)
 	var finished := GameState.quests.done_count()
 	if finished > 0:
 		_add_line("Finished: %d" % finished, 8, UiStyle.TEXT_DIM)

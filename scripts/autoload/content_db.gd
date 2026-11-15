@@ -542,16 +542,23 @@ func _check_quests() -> void:
 		if each.goal == null:
 			push_error("ContentDB: '%s' has no goal, so it can never be done" % where)
 		else:
-			if each.goal.amount < 1:
-				push_error("ContentDB: '%s' asks for an amount below 1" % where)
+			if each.goal.needed() < 1:
+				push_error("ContentDB: '%s' asks for an amount below 1 (or an empty list)" % where)
+			var wanted_items: Array[ItemDef] = []
 			if each.goal is DeliverGoal:
-				var wanted: ItemDef = each.goal.item
+				wanted_items.append(each.goal.item)
+			elif each.goal is DeliverAnyGoal or each.goal is DeliverEachGoal:
+				wanted_items.assign(each.goal.items)
+			for wanted in wanted_items:
 				if wanted == null or item(wanted.id) != wanted:
 					push_error("ContentDB: '%s' asks for an item that isn't in data/produce/ or data/tools/" % where)
-			elif each.goal is HarvestGoal:
-				var wanted_crop: CropDef = each.goal.crop
-				if wanted_crop != null and crop(wanted_crop.id) != wanted_crop:
-					push_error("ContentDB: '%s' asks for a crop that isn't in %s" % [where, CROPS_DIR])
+			var wanted_crop: CropDef = null
+			if each.goal is HarvestGoal or each.goal is GiantGoal:
+				wanted_crop = each.goal.crop
+			if wanted_crop != null and crop(wanted_crop.id) != wanted_crop:
+				push_error("ContentDB: '%s' asks for a crop that isn't in %s" % [where, CROPS_DIR])
+			if each.goal is GiantGoal and wanted_crop != null and not wanted_crop.can_go_giant():
+				push_warning("ContentDB: '%s' asks for a giant %s, which never grows giant" % [where, wanted_crop.id])
 		for reward: ItemDef in each.reward_items:
 			if reward == null or item(reward.id) != reward:
 				push_error("ContentDB: '%s' gives a reward item that isn't in data/produce/ or data/tools/" % where)

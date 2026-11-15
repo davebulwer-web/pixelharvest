@@ -15,8 +15,12 @@ func describe() -> String:
 	return "Bring %d %s" % [amount, plural(item.display_name if item != null else "?", amount)]
 
 
-func progress(_recorded: int, bag: Inventory) -> int:
+func progress(_recorded: int, bag: Inventory, _gold: int) -> int:
 	return bag.count(item) if item != null and bag != null else 0
+
+
+func is_handed_over() -> bool:
+	return true
 
 
 func hand_in(bag: Inventory) -> void:

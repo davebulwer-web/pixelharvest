@@ -18,7 +18,15 @@ extends Resource
 ##
 
 ## How many are needed: items, harvests, or gold, depending on the goal.
+## (A goal that asks for one of each of a list works it out from the list:
+## see needed().)
 @export var amount: int = 1
+
+
+## How many of whatever this goal counts are needed to finish it. Usually
+## `amount`; DeliverEachGoal's is the length of its list.
+func needed() -> int:
+	return amount
 
 
 ## What the goal asks, in words, without the person: "Bring 5 parsnips".
@@ -33,21 +41,52 @@ func counts(_event: StringName, _args: Array) -> int:
 
 
 ## How far along the goal is, given `recorded` (everything counts() has added
-## up since the request was accepted) and the player's bag. Most goals are the
-## running total; a delivery is whatever is in the bag right now.
-func progress(recorded: int, _bag: Inventory) -> int:
+## up since the request was accepted), the player's bag and the gold they
+## carry. Most goals are the running total; a delivery is whatever is in the
+## bag right now, and a gift of gold is what's in the purse.
+func progress(recorded: int, _bag: Inventory, _gold: int) -> int:
 	return recorded
 
 
 ## "3 / 5": progress in words, for the request log and reminders.
 func progress_text(done: int) -> String:
-	return "%d / %d" % [mini(done, amount), amount]
+	return "%d / %d" % [mini(done, needed()), needed()]
+
+
+## What's still missing, in words, for a goal that asks for several
+## different things: "leek and cabbage". "" when there's nothing to name.
+func still_needed(_bag: Inventory) -> String:
+	return ""
+
+
+## True if the request is finished by handing something over to its giver
+## (items or gold), so the request's text says who to take it to.
+func is_handed_over() -> bool:
+	return false
 
 
 ## Called once, when the request is handed in: take whatever the goal asked
 ## for (a delivery takes its items out of the bag). Most goals take nothing.
 func hand_in(_bag: Inventory) -> void:
 	pass
+
+
+## Gold taken from the player when the request is handed in (a gift towards
+## the bridge). The Quests service takes it, since a goal touches no autoload.
+func gold_to_hand_in() -> int:
+	return 0
+
+
+## "parsnip, radish and potato": names joined for a sentence, lower case.
+static func list_names(items: Array[ItemDef]) -> String:
+	var names: Array[String] = []
+	for item in items:
+		names.append(item.display_name.to_lower() if item != null else "?")
+	if names.is_empty():
+		return ""
+	if names.size() == 1:
+		return names[0]
+	return ", ".join(names.slice(0, names.size() - 1)) + " and " + names[-1]
 
 
 ## "parsnip" -> "parsnips", "strawberry" -> "strawberries", "potato" ->

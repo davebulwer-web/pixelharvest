@@ -110,7 +110,8 @@ scripts/             Game code
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
                      and decorations, the trowel's digging, pest spray)
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
-  quests/            QuestGoal scripts (deliver, harvest, sell) and the saved QuestLog
+  quests/            QuestGoal scripts (deliver, deliver any of, deliver one of each,
+                     harvest, sell, give gold, grow a giant) and the saved QuestLog
 data/                Content resources (.tres), indexed by ContentDB
   game_rules.tres    Starting conditions and global numbers (GameRules)
   hazard_rules.tres  Thirst, weeds, crows and aphids: every number (HazardRules,

@@ -13,7 +13,7 @@ extends RefCounted
 ##
 ## The map, roughly (each character is about two cells):
 ##
-##        trees          trees        ~~pond~~
+##        trees  (glasshouse) trees  ~~pond~~
 ##                                    ~~~~~~~~  angler
 ##    *  [Seeds]  *  |  * [General] *   * [Smith] * ||  path to the pond
 ##   ==================== road ==========================  -> farm
@@ -81,6 +81,10 @@ const OBJECTS: Dictionary = {
 	Vector2i(4, 21): &"fence", Vector2i(5, 21): &"fence", Vector2i(6, 21): &"fence",
 	Vector2i(7, 21): &"fence", Vector2i(8, 21): &"fence", Vector2i(9, 21): &"fence",
 	Vector2i(10, 21): &"fence",
+
+	# Behind the general store: the old
+	# glasshouse, broken for years, where Ivy is found from autumn (DECISIONS 049).
+	Vector2i(20, 5): &"ruined_glasshouse",
 
 	# Trees: a band along the top, clumps round the south and east edges, kept
 	# off the road, the square and the paths.

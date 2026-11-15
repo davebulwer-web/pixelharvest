@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_each_goal.gd" id="2_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="3_r"]
+[ext_resource type="Resource" path="res://data/produce/beetroot.tres" id="4_r"]
+[ext_resource type="Resource" path="res://data/produce/cabbage.tres" id="5_r"]
+[ext_resource type="Resource" path="res://data/produce/leek.tres" id="6_r"]
+[ext_resource type="Resource" path="res://data/produce/brussels_sprouts.tres" id="7_r"]
+[ext_resource type="Resource" path="res://data/tools/garlic_seeds.tres" id="8_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="9_r"]
+[ext_resource type="Resource" path="res://data/unlocks/hollis_winter.tres" id="10_r"]
+[ext_resource type="Resource" path="res://data/quests/hollis_summer_set.tres" id="11_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+items = Array[ExtResource("3_r")]([ExtResource("4_r"), ExtResource("5_r"), ExtResource("6_r"), ExtResource("7_r")])
+
+[resource]
+script = ExtResource("1_r")
+id = &"hollis_autumn_set"
+title = "Hollis's autumn set"
+giver = &"seed_shop"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Autumn's the grower's season. The cold-hardy ones are the test.", "Beetroot, cabbage, leek and Brussels sprouts: one of each. Then you'll have my winter seeds early."])
+reminder_line = "The hardy ones, one of each. They'll stand a frost, those."
+thanks_lines = Array[String](["A full year of my seeds, and you've grown the lot. I've not seen that in a long while.", "My winter seeds are yours from today. And take this garlic: plant it now, and it sleeps through the winter and comes up in spring."])
+reward_gold = 400
+reward_items = Dictionary[ExtResource("3_r"), int]({
+ExtResource("8_r"): 5
+})
+reward_unlocks = Array[ExtResource("9_r")]([ExtResource("10_r")])
+requires = ExtResource("11_r")
+first_day = 1
+seasons = Array[StringName]([&"autumn"])

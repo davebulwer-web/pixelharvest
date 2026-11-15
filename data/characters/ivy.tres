@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CharacterDef" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/character_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/ivy.png" id="2_sprite"]
+[ext_resource type="Resource" path="res://data/unlocks/ivy_arrives.tres" id="3_unlock"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"ivy"
+display_name = "Ivy"
+sprite = ExtResource("2_sprite")
+location = &"town"
+spots = Array[Vector2i]([Vector2i(19, 7), Vector2i(22, 7), Vector2i(17, 6)])
+lines = Array[String](["This glasshouse grew oranges once. Oranges! In this valley.", "Perennials are the patient gardener's friend. Plant once, pick for years.", "The old farm fed the whole valley when I was young. It's good to see it working again.", "A flower among the vegetables keeps the aphids honest. My mother taught me that.", "Mind the frost at the end of autumn, dear. The tender ones won't forgive you."])
+requires_unlock = ExtResource("3_unlock")

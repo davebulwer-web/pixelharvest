@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/produce/leek.tres" id="3_r"]
+[ext_resource type="Resource" path="res://data/quests/baker_potatoes.tres" id="4_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+amount = 5
+item = ExtResource("3_r")
+
+[resource]
+script = ExtResource("1_r")
+id = &"baker_leek_pies"
+title = "Mabel's leek pies"
+giver = &"baker"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Brr! Winter's for pies, love, and nothing warms you like a leek pie.", "Five leeks, if you've any in the ground. They don't mind the cold."])
+reminder_line = "Five leeks for the winter pies, love."
+thanks_lines = Array[String](["Oh, lovely thick ones. The whole street will smell of pie tonight.", "There you are. Keep warm out on that farm."])
+reward_gold = 500
+requires = ExtResource("4_r")
+first_day = 1
+seasons = Array[StringName]([&"winter"])
