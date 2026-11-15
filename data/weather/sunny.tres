@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="WeatherDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weather_def.gd" id="1_weather"]
+
+[resource]
+script = ExtResource("1_weather")
+id = &"sunny"
+display_name = "Sunny"
+today_text = "Fine weather: the crops need watering as usual."

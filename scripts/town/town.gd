@@ -27,7 +27,7 @@ extends Node2D
 ##   ├── SpawnPoints (Marker2Ds, made here: one per door, one for the farm gate)
 ##   ├── Entities    (y-sorted: player, trees, decoration, shop fronts, people,
 ##   │                market stalls and their keepers)
-##   ├── Weather     (the season's overlay — winter's snow — as on the farm)
+##   ├── Weather     (the season's and the day's overlays — rain, snow — as on the farm)
 ##   ├── Daylight    (the time-of-day tint, as on the farm; lamp posts glow at night)
 ##   ├── Hud         (the same HUD scene as the farm)
 ##   ├── Dialogue    (the dialogue box, as in the shops)
@@ -83,6 +83,7 @@ func _ready() -> void:
 	_add_farm_gate()
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
+	EventBus.weather_changed.connect(func(_w: StringName) -> void: SeasonLook.apply_overlay(_weather))
 	_limit_camera()
 	_counter = ShopCounter.new(_dialogue, _menu)
 	EventBus.npc_talked_to.connect(_on_npc_talked_to)

@@ -21,8 +21,9 @@ extends Node2D
 ##   │               by their node origin, which for all of them sits at their base)
 ##   ├── Effects    (FarmEffects: bursts of dirt and water, the harvest popping
 ##   │               up, camera jolts — drawn over Entities; DECISIONS 042)
-##   ├── Weather    (holds the season's overlay, e.g. winter: snow falling on a
-##   │               CanvasLayer over the world, under the HUD)
+##   ├── Weather    (holds the season's overlay and today's weather's, e.g. rain
+##   │               or snow falling on a CanvasLayer over the world, under the
+##   │               HUD; DECISIONS 046)
 ##   ├── Daylight   (scenes/daylight.tscn: tints the world by the clock — dusk,
 ##   │               night — and by the season's light_tint; DECISIONS 036)
 ##   └── Hud        (scenes/hud.tscn, shared with the town — CanvasLayer 2, fixed to
@@ -122,8 +123,10 @@ func _ready() -> void:
 		_reskin_objects()
 		_apply_season_overlay()
 	)
+	# Rain, snow: today's weather's overlay goes with the season's (DECISIONS 046).
+	EventBus.weather_changed.connect(func(_w: StringName) -> void: _apply_season_overlay())
 
-	print("--- Pixel Harvest · Stage 11 ---")
+	print("--- Pixel Harvest · Stage 11 (weather) ---")
 	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
 	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
 	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler")
@@ -140,6 +143,8 @@ func _ready() -> void:
 	print("Crops left unwatered for two nights wilt, and on a third they die. From spring")
 	print("day 6 weeds come up (E pulls them, the hoe digs them out); from day 15 crows")
 	print("take unguarded crops. A scarecrow guards every crop within 8 tiles.")
+	print("Weather: rain and storms water the farm for you; a heatwave dries crops out")
+	print("twice as fast; autumn ends in frost. Tomorrow's is on the notice board.")
 	print("-------------------------------")
 
 
@@ -350,6 +355,7 @@ func _skin_object(node: Node, object_id: StringName) -> void:
 	SeasonLook.skin_object(node, object_id)
 
 
-## Replace the screen overlay (winter's snow) with this season's, or none.
+## Replace the screen overlays with this season's and today's weather's
+## (falling rain or snow), or none.
 func _apply_season_overlay() -> void:
 	SeasonLook.apply_overlay(_weather)

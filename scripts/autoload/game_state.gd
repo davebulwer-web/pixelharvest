@@ -78,10 +78,21 @@ var unlocks: Array[StringName] = []
 ## game opens in the right place.
 var location: StringName = &""
 
+## Today's weather and tomorrow's (DECISIONS 046), both saved. Tomorrow's is
+## chosen a day ahead so it can be forecast, and the forecast is never wrong:
+## tonight it simply becomes today's. Either can be null if a season has no
+## weather odds at all; everything that asks copes with that (no weather).
+var weather: WeatherDef
+var forecast: WeatherDef
+
+## The weather's own dice, so a test can set its seed and know what comes.
+var weather_rng := RandomNumberGenerator.new()
+
 
 func _ready() -> void:
 	# Pulled weeds give fibre, whether pulled by hand or hoed out.
 	EventBus.weeds_pulled.connect(_on_weeds_pulled)
+	weather_rng.randomize()
 	# Always start from a valid new game, so the farm scene can be run on its
 	# own with F6. When the game is launched properly, the boot scene then asks
 	# SaveSystem to replace this with the saved game, if there is one.
@@ -112,6 +123,7 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	# Anything the calendar opens on day 1 is there from the start.
 	open_due_unlocks()
 	location = RULES.starting_location
+	start_weather()
 	EventBus.new_game_started.emit()
 
 
@@ -430,6 +442,58 @@ func _on_weeds_pulled(_cell: Vector2i) -> void:
 		inventory.add(RULES.hazards.weed_item)
 
 
+# --- Weather (DECISIONS 046) -------------------------------------------------
+# What each kind of weather does is in data/weather/ (WeatherDef); the odds
+# are on each season (SeasonTheme.weather_odds). This keeps today's and
+# tomorrow's, and moves them on each night.
+
+## The season on day `number` (a day_number), or null if there are none.
+func season_theme_on(number: int) -> SeasonTheme:
+	if RULES.seasons.is_empty() or RULES.days_per_season < 1:
+		return null
+	return RULES.seasons[posmod(floori((number - 1) / float(RULES.days_per_season)), RULES.seasons.size())]
+
+
+## The weather for day `number`, freshly drawn from its season's odds (or
+## fixed by its date). Null if that season has no weather.
+func roll_weather(number: int) -> WeatherDef:
+	var theme := season_theme_on(number)
+	if theme == null:
+		return null
+	return theme.weather_on(posmod(number - 1, RULES.days_per_season) + 1, weather_rng)
+
+
+## A new game: today's weather and tomorrow's from scratch. (Spring's day 1
+## is fixed sunny, so a first morning is never a wet one.)
+func start_weather() -> void:
+	weather = roll_weather(day_number())
+	forecast = roll_weather(day_number() + 1)
+	EventBus.weather_changed.emit(weather_id())
+
+
+## Overnight, once the calendar has moved on (TimeSystem): yesterday's
+## forecast becomes today's weather, and tomorrow's is chosen.
+func advance_weather() -> void:
+	weather = forecast if forecast != null else roll_weather(day_number())
+	forecast = roll_weather(day_number() + 1)
+	EventBus.weather_changed.emit(weather_id())
+
+
+## Today's weather's id, or &"" for none.
+func weather_id() -> StringName:
+	return weather.id if weather != null else &""
+
+
+## How many nights' thirst an unwatered crop gains tonight: 2 in a heatwave.
+func thirst_per_dry_night() -> int:
+	return weather.thirst_per_dry_night if weather != null else 1
+
+
+## The season after this one's id: what frost checks crops against.
+func next_season_id() -> StringName:
+	return season_id_on(day_number() + RULES.days_per_season - day + 1)
+
+
 # --- Harvesting --------------------------------------------------------------
 
 ## Pick the crop at `cell` if it's ready, and put the produce in the bag.
@@ -470,6 +534,8 @@ func pick_up_object(cell: Vector2i) -> bool:
 #
 # Unlocks are saved as a list of names (save version 10).
 #
+# Today's weather and tomorrow's forecast are saved by id (save version 12).
+#
 # The difficulty is saved by id (save version 9); its multipliers are read
 # from data/difficulties/ on load, so retuning Hard reaches existing games.
 #
@@ -493,6 +559,8 @@ func to_save() -> Dictionary:
 		"farm": farm.to_save(),
 		"quests": quests.to_save(),
 		"unlocks": unlocks.map(func(id: StringName) -> String: return String(id)),
+		"weather": String(weather_id()),
+		"forecast": String(forecast.id) if forecast != null else "",
 	}
 
 
@@ -554,3 +622,13 @@ func load_from_save(data: Dictionary) -> void:
 	# Anything the calendar has opened since (a new unlock added to the game
 	# with a date already past) is caught up quietly.
 	open_due_unlocks()
+
+	# Weather by id (save version 12). A kind no longer in the game, or a
+	# forecast not made yet (an upgraded older save), is drawn afresh.
+	weather = ContentDB.weather(StringName(data["weather"]))
+	if weather == null:
+		weather = roll_weather(day_number())
+	forecast = ContentDB.weather(StringName(data["forecast"]))
+	if forecast == null:
+		forecast = roll_weather(day_number() + 1)
+	EventBus.weather_changed.emit(weather_id())

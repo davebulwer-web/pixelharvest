@@ -16,7 +16,8 @@ extends CanvasModulate
 ##
 ## Godot allows one CanvasModulate per scene, so the season's tint lives here
 ## too: the colour shown is the time's colour times SeasonTheme.light_tint
-## (winter's slight chill). Before this, winter's tint was its own
+## (winter's slight chill) times today's WeatherDef.light_tint (rain's grey,
+## a heatwave's warmth; DECISIONS 046). Before this, winter's tint was its own
 ## CanvasModulate in the snow overlay, which would have fought this one.
 ##
 ## Lamps: anything in the "night_lights" group is faded in as it gets dark
@@ -53,6 +54,7 @@ func _ready() -> void:
 	EventBus.time_changed.connect(func(_m: int) -> void: _apply(false))
 	EventBus.day_started.connect(func(_d: int, _s: int, _y: int) -> void: _apply(true))
 	EventBus.season_changed.connect(func(_s: int) -> void: _apply(true))
+	EventBus.weather_changed.connect(func(_w: StringName) -> void: _apply(true))
 	# Deferred: the location places its lamps in its own _ready, which runs
 	# after this one (children are ready before their parent).
 	_apply.call_deferred(true)
@@ -61,7 +63,7 @@ func _ready() -> void:
 ## Set the tint and the lamps for the current time: at once when a scene
 ## opens or a day starts, faded otherwise.
 func _apply(at_once: bool) -> void:
-	var target := tint_at(GameState.minutes) * _season_tint()
+	var target := tint_at(GameState.minutes) * _season_tint() * _weather_tint()
 	var glow := lamp_level(tint_at(GameState.minutes))
 	if _tween != null:
 		_tween.kill()
@@ -118,3 +120,7 @@ func _brightness(c: Color) -> float:
 func _season_tint() -> Color:
 	var theme := GameState.current_season_theme()
 	return theme.light_tint if theme != null else Color.WHITE
+
+
+func _weather_tint() -> Color:
+	return GameState.weather.light_tint if GameState.weather != null else Color.WHITE

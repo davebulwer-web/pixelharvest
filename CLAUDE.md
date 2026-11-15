@@ -120,7 +120,10 @@ data/                Content resources (.tres), indexed by ContentDB
   decorations/       ToolDef — decorations for the farm, placed like sprinklers (DECISIONS 039)
   objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers, decorations)
   upgrades/          UpgradeDef — bought once: tool tiers, energy, fields
-  seasons/           SeasonTheme — each season's name and look (crops list their own seasons)
+  seasons/           SeasonTheme — each season's name, look and weather odds (crops list
+                     their own seasons)
+  weather/           WeatherDef — sunny, rain, storm, heatwave, snow, frost: what each does,
+                     looks and sounds like (DECISIONS 046)
   locations/         LocationDef — the farm, the farmhouse, the town, each shop (and where its door is)
   shops/             ShopDef — a shopkeeper, their words, and what the counter offers
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers)
@@ -135,6 +138,7 @@ tests/saves/         Old-version save files, for proving save upgrades still wor
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
                      farm/ the farmhouse and its furniture, decorations/ the farm's decorations)
 assets/tilesets/     Ground and world tilesets
-assets/audio/        Sound effects (sfx/*.wav) and music (music/*.ogg), made by art/build_sounds.py
+assets/audio/        Sound effects (sfx/*.wav), music (music/*.ogg) and the weather's loops
+                     (ambience/*.ogg), made by art/build_sounds.py
 art/                 Art specification and generation log (not shipped art)
 ```

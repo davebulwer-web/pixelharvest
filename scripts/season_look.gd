@@ -2,7 +2,8 @@ class_name SeasonLook
 extends RefCounted
 ##
 ## SeasonLook — how the current season dresses an outdoor location: its ground
-## tileset, its seasonal pictures for objects, and its weather overlay.
+## tileset, its seasonal pictures for objects, and its overlays: the
+## season's, if it has one, and today's weather's (rain, snow; DECISIONS 046).
 ##
 ## The farm and the town both ask this, so each stays free of season rules.
 ## Everything here changes only how a place looks, never what is in it
@@ -33,11 +34,14 @@ static func skin_object(node: Node, object_id: StringName) -> void:
 	sprite.texture = seasonal if seasonal != null else sprite.get_meta(&"base_texture")
 
 
-## Replace whatever is under `weather` with this season's overlay, if any
-## (winter's cold tint and falling snow).
+## Replace whatever is under `weather` with this season's overlay, if any,
+## and today's weather's (falling rain, falling snow).
 static func apply_overlay(weather: Node) -> void:
 	for child in weather.get_children():
+		weather.remove_child(child)
 		child.queue_free()
 	var theme := GameState.current_season_theme()
 	if theme != null and theme.overlay != null:
 		weather.add_child(theme.overlay.instantiate())
+	if GameState.weather != null and GameState.weather.overlay != null:
+		weather.add_child(GameState.weather.overlay.instantiate())

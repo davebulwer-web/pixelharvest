@@ -26,7 +26,7 @@ var _message_tween: Tween
 ## before the morning starts, so it's gathered here and moved into the
 ## _morning_ copies when day breaks, for the morning message.
 var _overnight_sales: int = 0
-## Crops lost overnight, by cause (&"season", &"thirst", &"crows") -> count.
+## Crops lost overnight, by cause (&"season", &"thirst", &"crows", &"frost") -> count.
 var _overnight_deaths: Dictionary = {}
 var _overnight_new_season: bool = false
 var _overnight_too_late: bool = false
@@ -171,11 +171,15 @@ func _gold_text_end() -> float:
 	return font.get_string_size(before, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 
 
-## "Spring · Day 5 · Year 1", plus today's events: "· Market day".
+## "Spring · Day 5 · Year 1 · Rain", plus today's events: "· Market day".
+## The weather is today's (DECISIONS 046); tomorrow's is on the notice board
+## and in the morning summary.
 func _date() -> String:
 	var theme := GameState.current_season_theme()
 	var season_name := theme.display_name if theme != null else "Season %d" % (GameState.season + 1)
 	var text := "%s · Day %d · Year %d" % [season_name, GameState.day, GameState.year]
+	if GameState.weather != null:
+		text += " · %s" % GameState.weather.display_name
 	for event in GameState.events_today():
 		text += " · %s" % event.display_name
 	return text
@@ -193,6 +197,7 @@ func _morning_text() -> String:
 	text += _losses_text(&"season", "%d crop%s died out of season")
 	text += _losses_text(&"thirst", "%d crop%s died of thirst")
 	text += _losses_text(&"crows", "Crows took %d crop%s")
+	text += _losses_text(&"frost", "%d crop%s died in the frost")
 	if _morning_sales > 0:
 		text += "    The bin sold for %dg" % _morning_sales
 	for event in GameState.events_today():

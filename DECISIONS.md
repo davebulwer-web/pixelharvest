@@ -1550,3 +1550,70 @@ out of reach, so a scarecrow placed well makes them disappear entirely; if that 
 too easy, the safe number is the knob. Weeds, the crow and fibre are placeholder art
 until the Pixellab pass (weeds can take a seasonal look by `object_sprites[&"weeds"]` on
 a SeasonTheme, with no code).
+
+## 046 — Weather is a WeatherDef per kind, chosen a night ahead from each season's odds
+
+**Decision.** Stage 11 session 2 adds the weather from ROADMAP section 7, and autumn's
+frost.
+
+- *Each kind is a file*, `data/weather/*.tres` (`WeatherDef`): sunny, rain, storm,
+  heatwave, snow, frost. What it does is a few switches and numbers on the file —
+  `waters_farm` (rain, storm), `thirst_per_dry_night` (heatwave 2), `keeps_crows_away`
+  (storm), `kills_tender_crops` (frost) — and how it looks and sounds is there too: an
+  `overlay` scene, a `light_tint`, an `ambience` loop. A new kind (fog) is a new file.
+- *Each season has odds*, `SeasonTheme.weather_odds` (weights by WeatherDef), and can fix
+  the weather on a date, `fixed_weather` (spring day 1 is always sunny, so a new game never
+  opens wet; autumn day 28 is always frost). `SeasonTheme.weather_on(day, dice)` picks.
+- *Chosen a day ahead, never wrong.* `GameState.weather` is today's and
+  `GameState.forecast` tomorrow's; each night the forecast becomes today's and a new one
+  is drawn. The forecast is in the morning summary and on the notice board ("Rain all
+  day: … Tomorrow: sunny."), today's weather on the HUD's top line. A forecast that could
+  be wrong was considered (more like real weather) and left out: the player plans with it,
+  and a wrong one only feels unfair.
+- *Where it acts in the night* (TimeSystem): the day that's ending has its say during the
+  growing and the hazards (after a heatwave, unwatered crops gain two nights' thirst, so
+  they wilt by morning; after a storm, the crows stay away); the new day's weather arrives
+  last, as step 4c, after the calendar and unlocks. Rain then waters every tilled tile
+  (`FarmData.rain()`, as if by the can), so the morning is wet and those crops grow
+  tonight; frost kills every crop that can't grow next season (`FarmData.frost()`, cause
+  `&"frost"`). So a rainy day is a free day, as the roadmap asks, and it shows in the soil.
+- *Frost is weather fixed by date*, not a separate rule: `warn_days_ahead` 3 puts "Frost in
+  3 days (autumn day 28)" in the summary and on the board from day 25. It kills a night
+  before the season's turn would. "Tender" means "can't grow next season" for now, so
+  parsnips and cabbages (which list winter) survive it; Stage 12's hardy crops will too.
+- *Look and sound.* The farm and the town's `Weather` node holds the season's overlay and
+  now today's weather's too (`SeasonLook.apply_overlay`, redone on `weather_changed`): rain
+  and storm are falling drops (`scenes/weather/`), the storm with lightning flashes and
+  thunder (`scripts/weather_flash.gd`). Daylight multiplies in the weather's tint (grey for
+  rain, darker for a storm, warm for a heatwave). Audio plays the weather's loop
+  (`assets/audio/ambience/rain.ogg`) all day, 14 dB quieter indoors. Both are made by
+  `art/build_sounds.py`, with their own dice so the older sounds didn't change.
+- *Winter's snowfall moved* from the winter SeasonTheme's overlay to the snow weather, so
+  snow falls on snowy days (about half of winter) and the rest are clear. The snowy ground,
+  trees and roof stay all winter.
+- *The thunder goes through EventBus* (`thunder_rolled`, Audio plays it). The storm scene is
+  loaded along with game_rules.tres (seasons → weather → overlay), before any autoload
+  exists, so it mustn't name one: calling `Audio` from it stopped the game starting.
+- *Save version 12*: "weather" and "forecast" by id. An older save's today is "sunny"
+  (written into the upgrade step) and its forecast blank, so it's drawn on load. An unknown
+  id (a kind since removed) is drawn afresh too.
+
+Options considered: weather as a separate autoload (but its state belongs in the save,
+which is GameState, and its effects belong in TimeSystem's one ordered night); rain as a
+"sprinkler everywhere" at step 2 (but then the morning after a rainy *night* is wet, and
+the rainy day itself isn't); a per-crop frost flag now (but Stage 12's hardy rule is the
+place for it, and "grows next season" already says the same for today's crops).
+
+Left for Stage 12: pests (their counter, flowers nearby, is a Stage 12 crop rule) and the
+storm flattening tall unfenced crops (no tall crops exist yet; it'll be one more switch on
+WeatherDef).
+
+**Why.** Rain is relief (a day off watering), heatwave and frost are pressure announced
+ahead, the storm is both: ROADMAP section 2's introduce, pressure, relieve, in data that
+tunes without code.
+
+**Cost.** Rain makes watering less of a chore a third of spring, which Stage 20's balance
+pass may want to weigh against thirst. The forecast only looks one day ahead (plus the
+frost warning); a week's forecast would need nothing new but a wider draw ahead, if wanted.
+Placeholder look: the drops are plain lines and there's no wet-ground tint beyond the
+watered soil; a Pixellab pass could add puddles.

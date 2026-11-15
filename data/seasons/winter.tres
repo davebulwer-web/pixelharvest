@@ -1,12 +1,14 @@
-[gd_resource type="Resource" script_class="SeasonTheme" load_steps=8 format=3]
+[gd_resource type="Resource" script_class="SeasonTheme" load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/season_theme.gd" id="1_theme"]
 [ext_resource type="TileSet" path="res://assets/tilesets/ground_tileset_winter.tres" id="2_tiles"]
 [ext_resource type="Texture2D" path="res://assets/sprites/tree_winter.png" id="3_tree"]
-[ext_resource type="PackedScene" path="res://scenes/snowfall.tscn" id="4_snow"]
 [ext_resource type="Texture2D" path="res://assets/sprites/town/fountain_winter.png" id="5_fountain"]
 [ext_resource type="Texture2D" path="res://assets/sprites/town/flower_bed_winter.png" id="6_flowers"]
 [ext_resource type="Texture2D" path="res://assets/sprites/farm/farmhouse_winter.png" id="7_house"]
+[ext_resource type="Script" path="res://scripts/resources/weather_def.gd" id="w_def"]
+[ext_resource type="Resource" path="res://data/weather/sunny.tres" id="w_sunny"]
+[ext_resource type="Resource" path="res://data/weather/snow.tres" id="w_snow"]
 
 [resource]
 script = ExtResource("1_theme")
@@ -20,5 +22,8 @@ object_sprites = Dictionary[StringName, Texture2D]({
 &"garden_flower_bed": ExtResource("6_flowers"),
 &"farmhouse": ExtResource("7_house")
 })
-overlay = ExtResource("4_snow")
 light_tint = Color(0.82, 0.84, 0.92, 1)
+weather_odds = Dictionary[ExtResource("w_def"), int]({
+ExtResource("w_sunny"): 1,
+ExtResource("w_snow"): 1
+})

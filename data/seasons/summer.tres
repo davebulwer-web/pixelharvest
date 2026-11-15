@@ -1,10 +1,21 @@
-[gd_resource type="Resource" script_class="SeasonTheme" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="SeasonTheme" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/season_theme.gd" id="1_theme"]
 [ext_resource type="TileSet" path="res://assets/tilesets/ground_tileset_summer.tres" id="2_tiles"]
+[ext_resource type="Script" path="res://scripts/resources/weather_def.gd" id="w_def"]
+[ext_resource type="Resource" path="res://data/weather/sunny.tres" id="w_sunny"]
+[ext_resource type="Resource" path="res://data/weather/rain.tres" id="w_rain"]
+[ext_resource type="Resource" path="res://data/weather/storm.tres" id="w_storm"]
+[ext_resource type="Resource" path="res://data/weather/heatwave.tres" id="w_heatwave"]
 
 [resource]
 script = ExtResource("1_theme")
 id = &"summer"
 display_name = "Summer"
 ground_tileset = ExtResource("2_tiles")
+weather_odds = Dictionary[ExtResource("w_def"), int]({
+ExtResource("w_sunny"): 6,
+ExtResource("w_rain"): 1,
+ExtResource("w_storm"): 1,
+ExtResource("w_heatwave"): 2
+})

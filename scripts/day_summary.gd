@@ -4,8 +4,10 @@ extends CanvasLayer
 ## DaySummary — the screen at the end of each day: what you picked, planted
 ## and watered, what you sold and spent, and how the purse stands
 ## (DECISIONS 042). Below that, what's new this morning: what opened up and
-## who has something to ask (DECISIONS 043), and what the hazards did or are
-## about to do: crows in the night, crops wilting (DECISIONS 045).
+## who has something to ask (DECISIONS 043), what the hazards did or are
+## about to do: crows in the night, crops wilting (DECISIONS 045), and the
+## weather today and tomorrow, with a warning days ahead of autumn's frost
+## (DECISIONS 046).
 ##
 ## The HUD opens it on the morning after a night, on black, before the
 ## morning fades in, with the tally DayReport kept. It only shows what it's
@@ -86,6 +88,12 @@ static func rows_for(r: DayRecord) -> Array[PackedStringArray]:
 ## that it's ending. Separate from the drawing, like rows_for.
 static func news_for(r: DayRecord) -> Array[String]:
 	var news: Array[String] = []
+	var weather := Notices.weather_report()
+	if weather != "":
+		news.append(weather)
+	var coming := Notices.weather_warning()
+	if coming != "":
+		news.append(coming)
 	for id in r.unlocked:
 		var unlock_def := ContentDB.unlock(id)
 		if unlock_def != null and unlock_def.announcement != "":
@@ -110,9 +118,10 @@ static func news_for(r: DayRecord) -> Array[String]:
 
 ## "2 to thirst, 1 to crows": crops lost overnight, by cause, in a fixed order.
 static func lost_text(lost: Dictionary[StringName, int]) -> String:
-	var words := {&"thirst": "to thirst", &"crows": "to crows", &"season": "to the season"}
+	var words := {&"thirst": "to thirst", &"crows": "to crows", &"frost": "to frost",
+			&"season": "to the season"}
 	var parts: PackedStringArray = []
-	for cause: StringName in [&"thirst", &"crows", &"season"]:
+	for cause: StringName in [&"thirst", &"crows", &"frost", &"season"]:
 		if lost.get(cause, 0) > 0:
 			parts.append("%d %s" % [lost[cause], words[cause]])
 	for cause: StringName in lost:  # any cause added later still shows
@@ -135,7 +144,8 @@ static func crows_news(crop_ids: Array[StringName]) -> String:
 
 ## The warning about thirsty crops on the farm this morning, or "": how many
 ## will die tonight unless watered, or (where thirst doesn't kill, or not
-## yet) how many are wilting.
+## yet) how many are wilting. In a heatwave a crop gets thirstier faster
+## (DECISIONS 046), so a dry night counts double here too.
 static func thirst_warning() -> String:
 	var wilted := GameState.wilted_crops()
 	if wilted.is_empty():
@@ -143,7 +153,7 @@ static func thirst_warning() -> String:
 	var deadline := GameState.thirst_deadline()
 	var dying := 0
 	for cell in wilted:
-		if deadline > 0 and GameState.farm.tile(cell).dry_nights + 1 >= deadline:
+		if deadline > 0 and GameState.farm.tile(cell).dry_nights + GameState.thirst_per_dry_night() >= deadline:
 			dying += 1
 	if dying > 0:
 		return "%d crop%s will die of thirst tonight unless watered." % [dying, _s(dying)]

@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 11 — hazards and weather.** Session 1 (thirst, weeds, crows, the working scarecrow) is built, waiting for Dave to try it; session 2 is weather. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
+**Current stage: 11 — hazards and weather.** Session 1 (thirst, weeds, crows, the working scarecrow) is confirmed by Dave; session 2 (weather, frost) is built, waiting for Dave to try it. Then Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -542,11 +542,38 @@ ROADMAP section 7.
 - [x] Verified: 85 scripted checks (thirst on Standard and Relaxed, weeds before and after
       day 6, caps per difficulty, hoe and E, crows with and without a scarecrow, a full
       night through TimeSystem, save round trip, old saves v1–v10) and rendered shots
+- [x] Dave confirms it plays correctly on Windows (tested and committed 2026-11-15)
+
+**Session 2 (2026-11-15) — weather and frost (DECISIONS 046)**
+
+- [x] `WeatherDef` in `data/weather/`: sunny, rain, storm, heatwave, snow, frost. What each
+      does is switches on the file (waters the farm, thirst per dry night, keeps crows
+      away, kills tender crops) plus its overlay, tint and sound loop
+- [x] Odds per season on `SeasonTheme.weather_odds` (spring sunny 6 / rain 3; summer
+      sunny 6 / rain 1 / storm 1 / heatwave 2; autumn sunny 5 / rain 3 / storm 2; winter
+      sunny 1 / snow 1) and weather fixed by date on `fixed_weather` (spring day 1 sunny,
+      autumn day 28 frost)
+- [x] Tomorrow's weather is chosen a day ahead and is never wrong: in the morning summary
+      and on the notice board; today's is on the HUD's top line
+- [x] Rain and storm water every tilled tile in the morning; a heatwave makes an unwatered
+      crop wilt after one night; crows stay away after a storm
+- [x] Frost on autumn day 28 kills crops that can't grow in winter a night early, warned
+      from day 25 on the board and in the summary (parsnips and cabbages survive it)
+- [x] Rain and storm overlays (falling drops; lightning flashes and thunder in a storm),
+      grey or warm tints through Daylight, a rain loop (quieter indoors), `thunder` sound;
+      winter's snowfall now falls only on snowy days
+- [x] Save version 12 (today's weather and the forecast); `tests/saves/v11_example.json`
+- [x] Verified: 178 scripted checks (odds over 10,000 draws, fixed days, rain watering,
+      heatwave thirst on Standard and Relaxed, storm and crows, frost and its warnings,
+      save round trip, old saves v1–v11, overlays, the rain loop indoors and out, a whole
+      year of nights) and rendered shots
 - [ ] Dave confirms it plays correctly on Windows
-- [ ] Session 2: weather (sun, rain, storm, heatwave, snow) with odds per season, tomorrow's
-      forecast, rain overlay and sounds, autumn frost; pests if time allows
-- [x] Save version 11 (session 1)
+- [x] Save version 11 (session 1), 12 (session 2)
 - [ ] Pixellab: weeds (4 seasons), crow, aphids
+
+Moved to Stage 12, because each needs something it adds: pests (aphids, autumn day 1; the
+roadmap's counter is flowers nearby, and flowers are a Stage 12 crop rule) and the storm
+flattening tall unfenced crops (corn, sunflower and trellis crops are Stage 12's).
 
 ## Stage 12 — Crops with rules · 2 sessions + art · Opus, then Sonnet
 
@@ -554,6 +581,8 @@ ROADMAP section 6.
 
 - [ ] New CropDef rules: bunches, trellis, perennial, overwintering, hardy, water-loving,
       weather-loving, giant, seed-returning, flowers
+- [ ] From Stage 11: pests (aphids from autumn day 1, slowed by flowers nearby; pest spray
+      at Marlow's) and storms flattening tall unfenced crops (a `WeatherDef` switch)
 - [ ] First wave of 8 crops (spring onion, pea, rhubarb, garlic, sunflower, watercress, corn,
       kale); Hollis's catalogue by season and unlock
 - [ ] Perennials (apple tree), giant pumpkin and melon, the remaining crops as art allows

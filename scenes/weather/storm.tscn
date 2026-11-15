@@ -1,0 +1,39 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/weather_flash.gd" id="1_flash"]
+
+[sub_resource type="Gradient" id="Gradient_drop"]
+colors = PackedColorArray(0.78, 0.86, 1, 0, 0.78, 0.86, 1, 0.8)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_drop"]
+gradient = SubResource("Gradient_drop")
+width = 1
+height = 9
+fill_to = Vector2(0, 1)
+
+[node name="Storm" type="Node"]
+
+[node name="Sky" type="CanvasLayer" parent="."]
+layer = 1
+
+[node name="Drops" type="CPUParticles2D" parent="Sky"]
+position = Vector2(400, -12)
+amount = 320
+lifetime = 1.2
+preprocess = 2.0
+texture = SubResource("GradientTexture2D_drop")
+emission_shape = 3
+emission_rect_extents = Vector2(460, 1)
+particle_flag_align_y = true
+direction = Vector2(-0.4, 1)
+spread = 3.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 360.0
+initial_velocity_max = 440.0
+
+[node name="Flash" type="ColorRect" parent="Sky"]
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+script = ExtResource("1_flash")

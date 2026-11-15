@@ -260,8 +260,10 @@ func clear_thicket(area: Rect2i) -> int:
 ## are passed in so the farm's data never has to look up the game's:
 ##   `grow_scale` is the difficulty's grow_time_multiplier (DECISIONS 040);
 ##   `die_after_dry_nights` is how many nights in a row without water kill a
-##   crop (DECISIONS 045), or 0 if thirst never kills (Relaxed).
-func advance_day(grow_scale: float = 1.0, die_after_dry_nights: int = 0) -> void:
+##   crop (DECISIONS 045), or 0 if thirst never kills (Relaxed);
+##   `thirst_step` is how many nights' thirst an unwatered crop gains: 1, or
+##   2 after a heatwave (DECISIONS 046).
+func advance_day(grow_scale: float = 1.0, die_after_dry_nights: int = 0, thirst_step: int = 1) -> void:
 	crows_landed.clear()
 	for cell: Vector2i in _tiles:
 		var t: FarmTile = _tiles[cell]
@@ -273,7 +275,7 @@ func advance_day(grow_scale: float = 1.0, die_after_dry_nights: int = 0) -> void
 				if not t.weeds:
 					_grow(cell, t, grow_scale)
 			else:
-				t.dry_nights += 1
+				t.dry_nights += maxi(1, thirst_step)
 				if die_after_dry_nights > 0 and t.dry_nights >= die_after_dry_nights:
 					var crop_id := t.crop.id
 					t.clear_crop()
@@ -294,6 +296,34 @@ func run_sprinklers() -> void:
 			continue
 		for offset in object_def.water_offsets:
 			water(cell + offset)
+
+
+## Rain (DECISIONS 046): every tile of tilled soil is watered, as if by the
+## can. TimeSystem calls it in the night, once a rainy day has begun, so the
+## morning's soil is wet and every crop grows tonight. Returns how many
+## tiles it watered.
+func rain() -> int:
+	var watered := 0
+	for cell: Vector2i in _tiles:
+		if can_water(cell):
+			water(cell)
+			watered += 1
+	return watered
+
+
+## Frost (DECISIONS 046): every crop that can't grow in `next_season_id`
+## dies, a night before the season's turn would kill it anyway. Returns how
+## many died.
+func frost(next_season_id: StringName) -> int:
+	var died := 0
+	for cell: Vector2i in _tiles:
+		var t: FarmTile = _tiles[cell]
+		if t.has_crop() and not t.crop.grows_in(next_season_id):
+			var crop_id := t.crop.id
+			t.clear_crop()
+			died += 1
+			EventBus.crop_died.emit(cell, crop_id, &"frost")
+	return died
 
 
 ## The season has turned: every crop that can't grow in `season_id` dies and

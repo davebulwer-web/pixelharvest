@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WeatherDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weather_def.gd" id="1_weather"]
+
+[resource]
+script = ExtResource("1_weather")
+id = &"frost"
+display_name = "Frost"
+today_text = "Frost: anything that couldn't take winter died in the night."
+kills_tender_crops = true
+warn_days_ahead = 3
+warning_text = "Crops that can't take winter die in the frost the night before. Pick them first."
+light_tint = Color(0.88, 0.93, 1, 1)

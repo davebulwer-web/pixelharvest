@@ -25,6 +25,12 @@ extends Node
 ##      season_changed is announced — the farm repaints itself for the season.
 ##   4b. Whatever the calendar opens today opens (Brann's forge on day 8,
 ##      DECISIONS 043), so the morning's summary can say so.
+##   4c. Today's weather arrives — last night's forecast — and tomorrow's
+##      is chosen (DECISIONS 046). Rain waters every tilled tile now, so the
+##      morning is wet and those crops grow tonight; frost kills what can't
+##      take the next season. (The day that just ended had its say already:
+##      after a heatwave, step 2 made thirsty crops twice as thirsty; after a
+##      storm, the crows in step 2 stayed away.)
 ##   5. day_started is announced — the farm redraws, the HUD updates. Then
 ##      calendar_event_began for each of today's events (market day).
 ##   6. The game is saved. Last, so the save is the finished morning: crops
@@ -89,7 +95,8 @@ func end_day() -> void:
 		_out_too_late = false
 		EventBus.stayed_up_too_late.emit()
 	EventBus.day_ended.emit(GameState.day)
-	GameState.farm.advance_day(GameState.difficulty.grow_time_multiplier, GameState.thirst_deadline())
+	GameState.farm.advance_day(GameState.difficulty.grow_time_multiplier, GameState.thirst_deadline(),
+			GameState.thirst_per_dry_night())
 	_run_hazards()
 	GameState.farm.run_sprinklers()
 	var season_turned := GameState.advance_calendar()
@@ -98,6 +105,7 @@ func end_day() -> void:
 		GameState.farm.wither_out_of_season(GameState.season_id())
 		EventBus.season_changed.emit(GameState.season)
 	GameState.open_due_unlocks()
+	_bring_weather()
 	EventBus.day_started.emit(GameState.day, GameState.season, GameState.year)
 	for event in GameState.events_today():
 		EventBus.calendar_event_began.emit(event.id)
@@ -106,14 +114,28 @@ func end_day() -> void:
 
 
 ## Crows, weeds and soil going back to grass (FarmHazards), each only once
-## its unlock has opened, scaled by the difficulty. Part of step 2.
+## its unlock has opened, scaled by the difficulty. Part of step 2. After a
+## stormy day the crows stay away (DECISIONS 046).
 func _run_hazards() -> void:
 	var rules := GameState.RULES.hazards
 	if rules == null:
 		return
+	var storm := GameState.weather != null and GameState.weather.keeps_crows_away
 	FarmHazards.run_night(GameState.farm, rules, GameState.difficulty.hazard_multiplier,
 			GameState.season_id(), GameState.has_unlock(rules.weeds_start),
-			GameState.has_unlock(rules.crows_start), rng)
+			GameState.has_unlock(rules.crows_start) and not storm, rng)
+
+
+## Step 4c: the new day's weather, and what it does to the farm at once.
+func _bring_weather() -> void:
+	GameState.advance_weather()
+	var today := GameState.weather
+	if today == null:
+		return
+	if today.waters_farm:
+		GameState.farm.rain()
+	if today.kills_tender_crops:
+		GameState.farm.frost(GameState.next_season_id())
 
 
 ## True from the moment the night begins until the morning's save. The HUD

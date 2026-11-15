@@ -31,6 +31,8 @@ extends Node
 ##                   the reward (DECISIONS 038)
 ##   data/unlocks/   UnlockDef — things that open up as the game goes on, from
 ##                   a request's reward or the calendar (DECISIONS 043)
+##   data/weather/   WeatherDef — kinds of day: sunny, rain, storm… Each
+##                   season's odds (SeasonTheme) choose among them (DECISIONS 046)
 ##
 
 const CROPS_DIR := "res://data/crops/"
@@ -41,6 +43,7 @@ const CHARACTERS_DIR := "res://data/characters/"
 const EVENTS_DIR := "res://data/events/"
 const QUESTS_DIR := "res://data/quests/"
 const UNLOCKS_DIR := "res://data/unlocks/"
+const WEATHER_DIR := "res://data/weather/"
 
 ## For checking crops name real seasons. Read directly rather than through
 ## GameState, because ContentDB starts first.
@@ -54,6 +57,7 @@ var _characters: Dictionary = {}  # StringName -> CharacterDef
 var _events: Dictionary = {}  # StringName -> CalendarEvent
 var _quests: Dictionary = {}  # StringName -> QuestDef
 var _unlocks: Dictionary = {}  # StringName -> UnlockDef
+var _weathers: Dictionary = {}  # StringName -> WeatherDef
 
 
 func _ready() -> void:
@@ -66,12 +70,14 @@ func _ready() -> void:
 	_index(EVENTS_DIR, _events)
 	_index(QUESTS_DIR, _quests)
 	_index(UNLOCKS_DIR, _unlocks)
+	_index(WEATHER_DIR, _weathers)
 	_check()
 	_check_quests()
 	_check_unlocks()
-	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks"
+	_check_weather()
+	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers"
 			% [_crops.size(), _items.size(), _objects.size(), _upgrades.size(), _characters.size(),
-			_events.size(), _quests.size(), _unlocks.size()])
+			_events.size(), _quests.size(), _unlocks.size(), _weathers.size()])
 
 
 ## The crop with this id, or null if there isn't one (for example, a save from
@@ -177,6 +183,12 @@ func unlocks() -> Array[UnlockDef]:
 		return String(a.id) < String(b.id)
 	)
 	return result
+
+
+## The kind of weather with this id (&"rain"), or null: for a save made
+## before a kind was removed from the game, say.
+func weather(id: StringName) -> WeatherDef:
+	return _weathers.get(id)
 
 
 ## The packet of seeds that plants `crop`, or null if none does.
@@ -574,3 +586,19 @@ func _is_unknown_unlock(unlock_def: UnlockDef, where: String, verb: String) -> b
 		return false
 	push_error("ContentDB: '%s' %s an unlock that isn't in %s" % [where, verb, UNLOCKS_DIR])
 	return true
+
+
+## Weather (DECISIONS 046): every kind a season can have, by odds or by date,
+## must be one of data/weather/, so a save can find it again by id.
+func _check_weather() -> void:
+	for theme in RULES.seasons:
+		if theme == null:
+			continue
+		var named: Array = theme.weather_odds.keys() + theme.fixed_weather.values()
+		for each: WeatherDef in named:
+			if each == null or weather(each.id) != each:
+				push_error("ContentDB: '%s' has weather that isn't in %s" % [theme.resource_path, WEATHER_DIR])
+		for day_of_season: int in theme.fixed_weather:
+			if day_of_season < 1 or day_of_season > RULES.days_per_season:
+				push_error("ContentDB: '%s' fixes the weather on day %d, which its season doesn't have"
+						% [theme.resource_path, day_of_season])

@@ -10,7 +10,9 @@ extends Node
 ## summary, call play() directly.)
 ##
 ## What each sound is lives in data/audio/sound_bank.tres (SoundBank). Which
-## tune plays where lives on each LocationDef (its `music`).
+## tune plays where lives on each LocationDef (its `music`). The weather's
+## loop (rain on the leaves) is on its WeatherDef (`ambience`, DECISIONS
+## 046): it plays all day, and quieter indoors.
 ##
 ## Two buses, set up in default_bus_layout.tres: "Music" and "SFX", so the
 ## settings screen (Stage 9 session 2) can give each its own volume. Until
@@ -53,6 +55,11 @@ var _music_tweens: Dictionary = {}
 ## doesn't get a door sound.
 var _first_location: bool = true
 
+## The weather's loop (DECISIONS 046), and how much quieter it is indoors,
+## where the rain is on the roof rather than all around.
+var _ambience: AudioStreamPlayer
+const INDOORS_DB := -14.0
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -68,6 +75,9 @@ func _ready() -> void:
 	_music_a = _make_music_player()
 	_music_b = _make_music_player()
 	_music_now = _music_a
+	_ambience = AudioStreamPlayer.new()
+	_ambience.bus = SFX_BUS
+	add_child(_ambience)
 	_listen()
 
 
@@ -151,6 +161,8 @@ func _listen() -> void:
 	EventBus.day_ended.connect(func(_d: int) -> void: play(&"sleep"))
 	EventBus.day_started.connect(func(_d: int, _s: int, _y: int) -> void: play(&"morning"))
 	EventBus.location_changed.connect(_on_location_changed)
+	EventBus.weather_changed.connect(func(_w: StringName) -> void: _update_ambience())
+	EventBus.thunder_rolled.connect(func() -> void: play(&"thunder"))
 
 
 func _farm_sound(sound_name: StringName) -> void:
@@ -165,6 +177,33 @@ func _on_location_changed(location_id: StringName) -> void:
 	elif not TimeSystem.is_ending_day():
 		play(&"door")
 	_play_music(music_for(location_id))
+	_update_ambience()
+
+
+# --- The weather's loop (DECISIONS 046) ----------------------------------------
+
+## Start, stop or re-level the weather's loop for today's weather and where
+## the player is. The same loop carries on through a door, only quieter.
+func _update_ambience() -> void:
+	var weather := GameState.weather
+	if weather == null or weather.ambience == null:
+		_ambience.stop()
+		return
+	if _ambience.stream != weather.ambience:
+		_ambience.stream = weather.ambience
+		_ambience.stop()
+	_ambience.volume_db = weather.ambience_volume_db + (0.0 if _is_outdoors(GameState.location) else INDOORS_DB)
+	if not _ambience.playing:
+		_ambience.play()
+
+
+## True for a place with no `outside` (the farm, the town), false for a
+## room inside one (the farmhouse, a shop).
+func _is_outdoors(location_id: StringName) -> bool:
+	for location in LocationManager.all():
+		if location.id == location_id:
+			return location.outside == &""
+	return true
 
 
 # --- Music -------------------------------------------------------------------

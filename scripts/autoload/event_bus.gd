@@ -47,6 +47,16 @@ signal season_changed(season: int)
 ## is loaded: anything that needs to know asks GameState.events_today().
 signal calendar_event_began(event_id: StringName)
 
+## Today's weather has changed (DECISIONS 046): each night, as the day turns,
+## and when a game is started or loaded. GameState.weather has it, and
+## GameState.forecast has tomorrow's. The farm and town swap their overlay,
+## Daylight its tint, Audio the rain's loop.
+signal weather_changed(weather_id: StringName)
+
+## Lightning flashed in a storm and its thunder is due (only a look and a
+## sound: scripts/weather_flash.gd). Audio plays the thunder.
+signal thunder_rolled()
+
 # --- Farming ----------------------------------------------------------------
 
 signal tile_tilled(cell: Vector2i)
@@ -65,7 +75,8 @@ signal crop_harvested(cell: Vector2i, crop_id: StringName, amount: int)
 
 ## A crop was lost overnight. `cause` says why (DECISIONS 045):
 ## &"season" (the season turned and it can't grow in the new one),
-## &"thirst" (left unwatered too many nights) or &"crows" (taken by a crow).
+## &"thirst" (left unwatered too many nights), &"crows" (taken by a crow) or
+## &"frost" (couldn't take the cold, autumn's frost: DECISIONS 046).
 signal crop_died(cell: Vector2i, crop_id: StringName, cause: StringName)
 
 # --- Player and economy -----------------------------------------------------

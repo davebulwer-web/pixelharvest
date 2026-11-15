@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WeatherDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weather_def.gd" id="1_weather"]
+
+[resource]
+script = ExtResource("1_weather")
+id = &"heatwave"
+display_name = "Heatwave"
+today_text = "A heatwave: a crop left unwatered today wilts by morning."
+thirst_per_dry_night = 2
+light_tint = Color(1, 0.93, 0.8, 1)

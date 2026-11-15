@@ -7,7 +7,9 @@ extends RefCounted
 ## the content when the board is read, so a new crop shows up on the board
 ## the day it's added to data/crops/, with nothing edited here (rule 3).
 ## Calendar events (market day) get a page of their own, worked out the same
-## way from data/events/ (DECISIONS 037).
+## way from data/events/ (DECISIONS 037). So does the weather: today's and
+## tomorrow's, and a warning days ahead of weather fixed by date, like
+## autumn's frost (DECISIONS 046).
 ##
 
 ## How close to the end of a season the board starts warning that crops
@@ -23,6 +25,12 @@ const SOON_DAYS := 7
 static func today() -> Array[String]:
 	var notices: Array[String] = []
 	notices.append(_calendar())
+	var weather := weather_report()
+	var coming := weather_warning()
+	if coming != "":
+		weather = (weather + " " + coming).strip_edges()
+	if weather != "":
+		notices.append(weather)
 	for event in ContentDB.events():
 		var text := _event_notice(event)
 		if text != "":
@@ -66,6 +74,41 @@ static func season_end_warning() -> String:
 	if left <= WARN_DAYS:
 		return "%s ends in %d %s. Crops still growing then that can't take %s will die." \
 				% [season, left, "day" if left == 1 else "days", _next_season_name().to_lower()]
+	return ""
+
+
+## "Rain today: every tilled tile is watered, so no watering today. Tomorrow:
+## sunny." — today's weather and the forecast, or "" if there's no weather.
+## The morning summary says it too.
+static func weather_report() -> String:
+	var today := GameState.weather
+	var tomorrow := GameState.forecast
+	var text := ""
+	if today != null:
+		text = today.today_text if today.today_text != "" else "%s today." % today.display_name
+	if tomorrow != null:
+		text += " Tomorrow: %s." % tomorrow.display_name.to_lower()
+	return text.strip_edges()
+
+
+## "Frost in 3 days (autumn day 28). Crops that can't take winter …": the
+## nearest weather fixed by date that wants warning of (WeatherDef.
+## warn_days_ahead) and is that close, or "". Tomorrow counts: the forecast
+## alone doesn't say what frost will do.
+static func weather_warning() -> String:
+	var today := GameState.day_number()
+	var length := GameState.RULES.days_per_season
+	for ahead in range(1, length + 1):
+		var number := today + ahead
+		var theme := GameState.season_theme_on(number)
+		if theme == null:
+			return ""
+		var fixed: WeatherDef = theme.fixed_weather.get(posmod(number - 1, length) + 1)
+		if fixed == null or fixed.warn_days_ahead < ahead:
+			continue
+		var when := "tomorrow" if ahead == 1 else "in %d days" % ahead
+		return ("%s %s (%s day %d). %s" % [fixed.display_name, when, theme.display_name.to_lower(),
+				posmod(number - 1, length) + 1, fixed.warning_text]).strip_edges()
 	return ""
 
 

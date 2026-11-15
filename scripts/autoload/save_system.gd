@@ -21,7 +21,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 11, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 12, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -57,7 +57,9 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##  11 — hazards (DECISIONS 045): a farm tile can have weeds ("weeds") and a
 ##       crop a count of nights without water ("dry_nights"). Both are left
 ##       out when they're nothing, so older tiles already read correctly.
-const CURRENT_VERSION := 11
+##  12 — weather (DECISIONS 046): today's ("weather") and tomorrow's
+##       forecast ("forecast"), by id.
+const CURRENT_VERSION := 12
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -76,6 +78,8 @@ const REQUIRED_FIELDS: Dictionary = {
 	"farm": TYPE_DICTIONARY,
 	"quests": TYPE_DICTIONARY,
 	"unlocks": TYPE_ARRAY,
+	"weather": TYPE_STRING,
+	"forecast": TYPE_STRING,
 }
 
 ## Saving is switched on by load_or_new_game(), i.e. only when the game was
@@ -258,6 +262,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_9_to_10(data["game"])
 			10:
 				_upgrade_10_to_11(data["game"])
+			11:
+				_upgrade_11_to_12(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -468,3 +474,13 @@ func _upgrade_9_to_10(game: Dictionary) -> void:
 ## night.
 func _upgrade_10_to_11(_game: Dictionary) -> void:
 	pass
+
+
+## Version 11 -> 12: weather arrives (DECISIONS 046). An older game's days
+## were all fine weather, so today is "sunny" (written here, not looked up,
+## so this step means the same thing whatever data/weather/ holds later).
+## Tomorrow's is left blank: nobody forecast it, so it's drawn on load from
+## the season's odds, as any night would.
+func _upgrade_11_to_12(game: Dictionary) -> void:
+	game["weather"] = "sunny"
+	game["forecast"] = ""

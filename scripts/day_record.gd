@@ -27,7 +27,8 @@ var quests_done: Array[StringName] = []
 var unlocked: Array[StringName] = []
 ## Patches of weeds pulled or hoed out (DECISIONS 045).
 var weeds_pulled: int = 0
-## Crops lost overnight, by cause (&"season", &"thirst", &"crows") -> count.
+## Crops lost overnight, by cause (&"season", &"thirst", &"crows", &"frost")
+## -> count.
 var lost: Dictionary[StringName, int] = {}
 ## The crops crows took overnight, by crop id, for the morning's news.
 var taken_by_crows: Array[StringName] = []

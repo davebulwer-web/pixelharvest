@@ -10,6 +10,8 @@ Output:
                                  (the names are the keys in
                                  data/audio/sound_bank.tres)
   assets/audio/music/<name>.ogg  two loops: farm.ogg and town.ogg
+  assets/audio/ambience/rain.ogg the rain's loop, and sfx/thunder.wav, for
+                                 the weather (DECISIONS 046)
 
 The music is written out note by note below (melody, chords) and rendered
 "round the loop": a note that rings past the end of the tune wraps round to
@@ -457,6 +459,53 @@ def write_wav_raw(path: str, x: np.ndarray) -> None:
         w.writeframes(data)
 
 
+# --- Weather (DECISIONS 046) -------------------------------------------------
+# Its own dice, so adding these didn't change a single sample of the sounds
+# above (they share `rng`, and drawing from it here would shift theirs).
+weather_rng = np.random.default_rng(46)
+AMBIENCE_DIR = "assets/audio/ambience"
+
+
+def rain_loop(seconds: float = 8.0) -> np.ndarray:
+    """Steady rain: a soft hiss, a lower wash under it, and scattered drops
+    ticking on leaves. Made a second longer than the loop, and the extra
+    second faded into the start, so the loop's join can't be heard."""
+    total = seconds + 1.0
+    n = int(total * RATE)
+    hiss = highpass(smooth(weather_rng.uniform(-1, 1, n), 3), 40) * 0.5
+    wash = smooth(smooth(weather_rng.uniform(-1, 1, n), 60), 60) * 6.0
+    drops = np.zeros(n)
+    tick = highpass(weather_rng.uniform(-1, 1, int(0.012 * RATE)), 6) * env(int(0.012 * RATE), 0.0005, 0.004)
+    for start in weather_rng.integers(0, n - len(tick), int(total * 70)):
+        drops[start:start + len(tick)] += tick * weather_rng.uniform(0.15, 0.6)
+    x = hiss + wash + drops
+    loop = int(seconds * RATE)
+    fade = n - loop
+    ramp = np.linspace(0, 1, fade)
+    out = x[:loop].copy()
+    out[:fade] = out[:fade] * ramp + x[loop:] * (1 - ramp)
+    return out
+
+
+def sfx_thunder():
+    """A crack, then a long low rumble that rolls and dies away."""
+    seconds = 3.5
+    n = int(seconds * RATE)
+    rumble = smooth(smooth(weather_rng.uniform(-1, 1, n), 300), 300) * 40.0
+    roll = 0.6 + 0.4 * np.sin(2 * np.pi * np.cumsum(weather_rng.uniform(1.0, 3.0, n)) / RATE)
+    rumble *= roll * env(n, 0.08, 1.2, 0.15)
+    crack = highpass(weather_rng.uniform(-1, 1, int(0.25 * RATE)), 20) * env(int(0.25 * RATE), 0.002, 0.08)
+    return mix(rumble, crack * 0.5)
+
+
+def build_weather() -> None:
+    os.makedirs(AMBIENCE_DIR, exist_ok=True)
+    write_ogg(f"{AMBIENCE_DIR}/rain.ogg", rain_loop(), 0.5)
+    print("ambience rain")
+    write_wav(f"{SFX_DIR}/thunder.wav", sfx_thunder(), 0.7)
+    print("sfx thunder")
+
+
 def main() -> None:
     os.makedirs(SFX_DIR, exist_ok=True)
     os.makedirs(MUSIC_DIR, exist_ok=True)
@@ -467,6 +516,7 @@ def main() -> None:
     print("music farm")
     write_ogg(f"{MUSIC_DIR}/town.ogg", town_tune(), 0.6)
     print("music town")
+    build_weather()
 
 
 if __name__ == "__main__":

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeatherDef" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weather_def.gd" id="1_weather"]
+[ext_resource type="PackedScene" path="res://scenes/weather/rain.tscn" id="2_overlay"]
+[ext_resource type="AudioStream" path="res://assets/audio/ambience/rain.ogg" id="3_sound"]
+
+[resource]
+script = ExtResource("1_weather")
+id = &"rain"
+display_name = "Rain"
+today_text = "Rain all day: every tilled tile is watered, so no watering today."
+waters_farm = true
+overlay = ExtResource("2_overlay")
+light_tint = Color(0.8, 0.84, 0.92, 1)
+ambience = ExtResource("3_sound")
+ambience_volume_db = -6.0
