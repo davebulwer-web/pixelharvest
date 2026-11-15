@@ -118,10 +118,10 @@ static func news_for(r: DayRecord) -> Array[String]:
 
 ## "2 to thirst, 1 to crows": crops lost overnight, by cause, in a fixed order.
 static func lost_text(lost: Dictionary[StringName, int]) -> String:
-	var words := {&"thirst": "to thirst", &"crows": "to crows", &"frost": "to frost",
-			&"season": "to the season"}
+	var words := {&"thirst": "to thirst", &"crows": "to crows", &"storm": "to the storm",
+			&"frost": "to frost", &"season": "to the season"}
 	var parts: PackedStringArray = []
-	for cause: StringName in [&"thirst", &"crows", &"frost", &"season"]:
+	for cause: StringName in [&"thirst", &"crows", &"storm", &"frost", &"season"]:
 		if lost.get(cause, 0) > 0:
 			parts.append("%d %s" % [lost[cause], words[cause]])
 	for cause: StringName in lost:  # any cause added later still shows

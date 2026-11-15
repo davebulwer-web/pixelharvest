@@ -31,3 +31,8 @@ extends Resource
 ## this tile; DECISIONS 045). 0 for anything that doesn't scare them. The
 ## scarecrow's is 8.
 @export var protects_radius: int = 0
+
+## A storm can't flatten a tall crop within this many tiles (a square round
+## this tile, so 1 is the eight tiles touching it; DECISIONS 047). 0 for
+## anything that gives no shelter. The garden fence's is 1.
+@export var shelters_radius: int = 0

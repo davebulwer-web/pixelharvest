@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 11 — hazards and weather.** Session 1 (thirst, weeds, crows, the working scarecrow) is confirmed by Dave; session 2 (weather, frost) is built, waiting for Dave to try it. Then Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
+**Current stage: 12 — crops with rules.** Session 1 (crop rules, storms, first eight crops) is built, waiting for Dave to try it; session 2 is pests, giants, the apple tree and the rest of the crops. Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -567,7 +567,7 @@ ROADMAP section 7.
       heatwave thirst on Standard and Relaxed, storm and crows, frost and its warnings,
       save round trip, old saves v1–v11, overlays, the rain loop indoors and out, a whole
       year of nights) and rendered shots
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (tested and committed 2026-11-15)
 - [x] Save version 11 (session 1), 12 (session 2)
 - [ ] Pixellab: weeds (4 seasons), crow, aphids
 
@@ -579,14 +579,27 @@ flattening tall unfenced crops (corn, sunflower and trellis crops are Stage 12's
 
 ROADMAP section 6.
 
-- [ ] New CropDef rules: bunches, trellis, perennial, overwintering, hardy, water-loving,
-      weather-loving, giant, seed-returning, flowers
+**Session 1 — rules, storms, the first wave** (2026-11-15, DECISIONS 047, no save change)
+
+- [x] New CropDef rules: bunches (`harvest_max`), trellis (`solid`), perennial,
+      overwintering (`plant_seasons`, `rests_in`), hardy (`needs_water`), water-loving
+      (`near_water`), weather-loving (`loves_weather`), seed-returning (`seed_chance`),
+      tall; flowers as `ItemDef.tags`
+- [x] From Stage 11: storms flattening tall unfenced crops (`WeatherDef.flattens_tall_crops`,
+      `ObjectDef.shelters_radius` on the garden fence)
+- [x] First wave of 8 crops (spring onion, pea, rhubarb, garlic, sunflower, watercress, corn,
+      kale) on placeholder art; Hollis's catalogue by season and unlock (new `hollis_winter`)
+- [x] Save version: unchanged (12): nothing new is saved
+- [x] Verified in the sandbox: headless import and run clean, 385 harness checks, rendered
+      farm in summer and winter, the player stopped by a pea trellis
+- [ ] Dave confirms it plays correctly on Windows
+
+**Session 2 — pests, giants, the rest**
+
 - [ ] From Stage 11: pests (aphids from autumn day 1, slowed by flowers nearby; pest spray
-      at Marlow's) and storms flattening tall unfenced crops (a `WeatherDef` switch)
-- [ ] First wave of 8 crops (spring onion, pea, rhubarb, garlic, sunflower, watercress, corn,
-      kale); Hollis's catalogue by season and unlock
-- [ ] Perennials (apple tree), giant pumpkin and melon, the remaining crops as art allows
-- [ ] Save version 12
+      at Marlow's); digging up a crop on purpose
+- [ ] Giant pumpkin and melon; the apple tree (2 × 2 perennial); the remaining crops of
+      ROADMAP 6.2 (data, now the rules exist); weather-loving chilli
 - [ ] Pixellab: crop strips, icons and seed packets; two giant sprites
 
 ## Stage 13 — Questlines · 2 sessions · Sonnet (Haiku for bulk text)

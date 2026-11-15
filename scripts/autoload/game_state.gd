@@ -88,11 +88,16 @@ var forecast: WeatherDef
 ## The weather's own dice, so a test can set its seed and know what comes.
 var weather_rng := RandomNumberGenerator.new()
 
+## The harvest's dice: how many a bunch gives, and whether a crop gives its
+## seeds back (DECISIONS 047). Its own, so a test can fix them.
+var harvest_rng := RandomNumberGenerator.new()
+
 
 func _ready() -> void:
 	# Pulled weeds give fibre, whether pulled by hand or hoed out.
 	EventBus.weeds_pulled.connect(_on_weeds_pulled)
 	weather_rng.randomize()
+	harvest_rng.randomize()
 	# Always start from a valid new game, so the farm scene can be run on its
 	# own with F6. When the game is launched properly, the boot scene then asks
 	# SaveSystem to replace this with the saved game, if there is one.
@@ -497,13 +502,20 @@ func next_season_id() -> StringName:
 # --- Harvesting --------------------------------------------------------------
 
 ## Pick the crop at `cell` if it's ready, and put the produce in the bag.
-## Returns false if there was nothing to pick.
+## Returns false if there was nothing to pick. A crop that comes in bunches
+## gives a roll of the dice; one that returns seeds (CropDef.seed_chance)
+## sometimes puts a packet in the bag too (DECISIONS 047).
 func harvest(cell: Vector2i) -> bool:
 	if not farm.can_harvest(cell):
 		return false
 	var crop: CropDef = farm.tile(cell).crop
-	var amount := farm.harvest(cell)
+	var amount := farm.harvest(cell, harvest_rng)
 	inventory.add(crop.produce, amount)
+	if crop.seed_chance > 0.0 and harvest_rng.randf() < crop.seed_chance:
+		var seeds := ContentDB.seeds_for(crop)
+		if seeds != null:
+			inventory.add(seeds)
+			EventBus.message_posted.emit("%s gave back some seeds" % crop.display_name)
 	return true
 
 

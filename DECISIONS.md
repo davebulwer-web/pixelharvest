@@ -1617,3 +1617,66 @@ pass may want to weigh against thirst. The forecast only looks one day ahead (pl
 frost warning); a week's forecast would need nothing new but a wider draw ahead, if wanted.
 Placeholder look: the drops are plain lines and there's no wet-ground tint beyond the
 watered soil; a Pixellab pass could add puddles.
+
+## 047 — Crop rules are switches on CropDef; storms flatten tall crops nobody fenced
+
+**Decision.** Stage 12 session 1 adds ROADMAP section 6's crop rules, the storm's other
+half from Stage 11, and the first wave of eight crops that use them.
+
+- *Each rule is a field on `CropDef`, off by default*, so the eight crops that existed
+  didn't change: `harvest_max` (bunches: 1 to 3 spring onions a time), `solid` (a trellis:
+  peas and corn block the player once they've come up, with a body on the crop's sprite),
+  `perennial` (rhubarb sleeps out of season and comes back next spring), `plant_seasons`
+  and `rests_in` (garlic is planted in autumn only, sleeps through winter and finishes in
+  spring), `needs_water` off (hardy: the sunflower grows unwatered and never thirsts),
+  `near_water` (watercress only goes in on one of the eight tiles round the pond),
+  `loves_weather` (corn grows twice on a heatwave day), `seed_chance` (a sunflower gives
+  its seeds back about a third of the time), `tall` (what a storm can flatten).
+- *Flowers are a tag on the produce*, `ItemDef.tags` (`&"flower"` on the sunflower), not a
+  crop rule: bees (Stage 17), the flower show (Stage 18) and the pests (session 2: they
+  spread slower near flowers) care about the flower, and a tag is the general shape for
+  "a kind of item" that later stages will want again.
+- *Asleep is worked out, not saved.* `CropDef.rests_during(season)` is true when the crop
+  doesn't grow in the season but is perennial or lists it in `rests_in`; `survives()` is
+  "grows or rests". The season's turn and frost now kill what can't *survive* the next
+  season (so garlic lives through autumn's frost), and `advance_day` (which now gets the
+  day's season and weather) neither grows nor dries a resting crop. A regrowing perennial
+  that goes to sleep ripe loses that crop and wakes waiting to regrow. Nothing new is
+  saved, so **the save version stays 12**.
+- *Seeds ask the crop's rules.* `PlantAction` asks `FarmData.can_plant_crop()` (the spot)
+  and `CropDef.can_plant_in()` (the season, `plant_seasons` first). The shop's detail line
+  adds `CropDef.rules_text()` ("Grows on a trellis: you can't walk through it…"), and the
+  notice board's "in season" lists what can be *planted* now (garlic in autumn, not spring).
+- *Storms* (from Stage 11, DECISIONS 046): `WeatherDef.flattens_tall_crops` (storm 0.25) is
+  the chance each tall crop past the seed is flattened in the night after a stormy day,
+  scaled by the difficulty's `hazard_multiplier`, unless something with
+  `ObjectDef.shelters_radius` stands within reach (the garden fence, 1: the eight tiles
+  round it). `FarmHazards.flatten_tall_crops`, run first in the night's hazards; the crop
+  dies with cause `&"storm"`, which the morning line and summary report.
+- *The catalogue*: spring onion (Hollis, from the start), pea (Hollis, with potatoes once the
+  mayor's first request is done), rhubarb (Fennel's cart for now; ROADMAP has it as Hollis's
+  questline reward, Stage 13), garlic (Hollis's autumn seeds), sunflower, watercress and corn
+  (Hollis's summer seeds), kale (Hollis's winter seeds: a new calendar unlock,
+  `hollis_winter`, winter day 1). Numbers are ROADMAP 6.2's first guesses, rounded to fit
+  whole stages (pea 8 days not 7, rhubarb 12 not 14, garlic 20); Stage 20 balances.
+- Placeholder art for all eight (growth strips, icons, seed packets) is drawn by a script
+  in the Harvest palette; Pixellab replaces it at the same paths. The palette has no
+  yellow, so sunflower and corn are orange for now.
+
+Options considered: one `rule` enum per crop (but sunflower has three rules and corn three;
+fields combine freely); a saved "dormant" flag on FarmTile (but it would only ever repeat
+what the season and the crop already say); the storm flattening in FarmData like frost
+(but it needs dice and the objects' shelter, which is FarmHazards' shape, like crows).
+
+Left for session 2: pests (aphids from autumn day 1, slowed by flowers, Marlow's spray),
+giant crops (melon, pumpkin), the apple tree (a 2 × 2 perennial), the remaining crops of
+ROADMAP 6.2 (data now the rules exist), and a way to dig up a crop on purpose (pests'
+"pull the plant", and clearing a perennial).
+
+**Why.** ROADMAP section 6: crops that ask for planning (trellis paths, autumn garlic,
+the pond), weather that is sometimes good news (corn in a heatwave), and fences that
+finally do something.
+
+**Cost.** A trellis can wall the player in if planted carelessly; the night (energy or
+2 AM) still carries them home, so it costs a day, not the game. Hardy crops and seed-return
+make sunflowers very cheap to keep going; the balance pass should watch them.

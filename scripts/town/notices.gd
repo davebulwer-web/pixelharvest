@@ -149,7 +149,7 @@ static func _in_season() -> String:
 	var everyday: Array[String] = []
 	var special: Dictionary = {}  # where they're sold -> Array of crop names
 	for crop in ContentDB.crops():
-		if not crop.grows_in(season_id):
+		if not crop.can_plant_in(season_id):
 			continue
 		var seeds := ContentDB.seeds_for(crop)
 		# Seeds no shop has in yet (DECISIONS 043) aren't advertised.
@@ -197,7 +197,7 @@ static func _coming_up() -> String:
 static func _crops_in(season_id: StringName) -> Array[String]:
 	var names: Array[String] = []
 	for crop in ContentDB.crops():
-		if crop.grows_in(season_id):
+		if crop.can_plant_in(season_id):
 			names.append(crop.display_name)
 	return names
 

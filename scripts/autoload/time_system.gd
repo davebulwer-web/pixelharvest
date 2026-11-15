@@ -96,7 +96,7 @@ func end_day() -> void:
 		EventBus.stayed_up_too_late.emit()
 	EventBus.day_ended.emit(GameState.day)
 	GameState.farm.advance_day(GameState.difficulty.grow_time_multiplier, GameState.thirst_deadline(),
-			GameState.thirst_per_dry_night())
+			GameState.thirst_per_dry_night(), GameState.season_id(), GameState.weather_id())
 	_run_hazards()
 	GameState.farm.run_sprinklers()
 	var season_turned := GameState.advance_calendar()
@@ -115,15 +115,18 @@ func end_day() -> void:
 
 ## Crows, weeds and soil going back to grass (FarmHazards), each only once
 ## its unlock has opened, scaled by the difficulty. Part of step 2. After a
-## stormy day the crows stay away (DECISIONS 046).
+## stormy day the crows stay away (DECISIONS 046), and tall crops with no
+## fence near may have been flattened (DECISIONS 047).
 func _run_hazards() -> void:
 	var rules := GameState.RULES.hazards
 	if rules == null:
 		return
-	var storm := GameState.weather != null and GameState.weather.keeps_crows_away
+	var today := GameState.weather
+	var storm := today != null and today.keeps_crows_away
 	FarmHazards.run_night(GameState.farm, rules, GameState.difficulty.hazard_multiplier,
 			GameState.season_id(), GameState.has_unlock(rules.weeds_start),
-			GameState.has_unlock(rules.crows_start) and not storm, rng)
+			GameState.has_unlock(rules.crows_start) and not storm, rng,
+			today.flattens_tall_crops if today != null else 0.0)
 
 
 ## Step 4c: the new day's weather, and what it does to the farm at once.

@@ -64,7 +64,7 @@ func is_crop_ready() -> bool:
 ## more, and not watered yet today. Watering it perks it up at once (the dry
 ## count itself only resets overnight, when the water has done its work).
 func is_wilted(wilt_after: int) -> bool:
-	return has_crop() and not is_crop_ready() and not watered \
+	return has_crop() and crop.needs_water and not is_crop_ready() and not watered \
 			and wilt_after > 0 and dry_nights >= wilt_after
 
 

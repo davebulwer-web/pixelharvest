@@ -77,6 +77,14 @@ func can_plant(cell: Vector2i) -> bool:
 	return t != null and t.tilled and not t.has_crop() and not t.weeds
 
 
+## can_plant(), and whatever `crop`'s own rules ask of the spot: a
+## water-loving crop (watercress) needs water beside it (DECISIONS 047).
+func can_plant_crop(cell: Vector2i, crop: CropDef) -> bool:
+	if crop == null or not can_plant(cell):
+		return false
+	return not crop.near_water or is_next_to_water(cell)
+
+
 func can_harvest(cell: Vector2i) -> bool:
 	var t := tile(cell)
 	return t != null and t.is_crop_ready()
@@ -106,6 +114,16 @@ func is_next_to_crop(cell: Vector2i) -> bool:
 		var t := tile(cell + step)
 		if t != null and t.has_crop():
 			return true
+	return false
+
+
+## True if any of the eight tiles around `cell` is water (the pond).
+func is_next_to_water(cell: Vector2i) -> bool:
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var t := tile(cell + Vector2i(dx, dy))
+			if t != null and t.terrain == FarmTile.Terrain.WATER:
+				return true
 	return false
 
 
@@ -150,13 +168,14 @@ func plant(cell: Vector2i, crop: CropDef) -> void:
 
 ## Pick a ready crop. Single-harvest crops leave the soil tilled but empty;
 ## regrowing ones drop back a stage and start again. Returns how many items
-## were picked (0 if nothing was ready).
-func harvest(cell: Vector2i) -> int:
+## were picked (0 if nothing was ready). `dice` rolls a crop that comes in
+## bunches (CropDef.harvest_max); without dice it gives the least.
+func harvest(cell: Vector2i, dice: RandomNumberGenerator = null) -> int:
 	if not can_harvest(cell):
 		return 0
 	var t := tile(cell)
 	var crop := t.crop
-	var amount := crop.harvest_amount
+	var amount := crop.roll_harvest(dice)
 	if crop.regrow_days > 0:
 		t.crop_stage = crop.growth_stages - 1
 		t.crop_days = 0
@@ -221,6 +240,17 @@ func lose_to_crows(cell: Vector2i) -> void:
 	EventBus.crop_died.emit(cell, crop_id, &"crows")
 
 
+## A storm flattened the tall crop on `cell` (DECISIONS 047): it's gone,
+## the soil stays.
+func flatten(cell: Vector2i) -> void:
+	var t := tile(cell)
+	if t == null or not t.has_crop():
+		return
+	var crop_id := t.crop.id
+	t.clear_crop()
+	EventBus.crop_died.emit(cell, crop_id, &"storm")
+
+
 func remove_object(cell: Vector2i) -> void:
 	var t := tile(cell)
 	if t == null or t.object_id == &"":
@@ -262,18 +292,26 @@ func clear_thicket(area: Rect2i) -> int:
 ##   `die_after_dry_nights` is how many nights in a row without water kill a
 ##   crop (DECISIONS 045), or 0 if thirst never kills (Relaxed);
 ##   `thirst_step` is how many nights' thirst an unwatered crop gains: 1, or
-##   2 after a heatwave (DECISIONS 046).
-func advance_day(grow_scale: float = 1.0, die_after_dry_nights: int = 0, thirst_step: int = 1) -> void:
+##   2 after a heatwave (DECISIONS 046);
+##   `season_id` is the season the day belonged to: a crop resting in it
+##   (garlic in winter, a perennial out of season) neither grows nor thirsts;
+##   `weather_id` is the day's weather: a crop that loves it (CropDef.loves_weather)
+##   grows twice tonight (DECISIONS 047).
+## A hardy crop (needs_water off) grows as though it had been watered.
+func advance_day(grow_scale: float = 1.0, die_after_dry_nights: int = 0, thirst_step: int = 1,
+		season_id: StringName = &"", weather_id: StringName = &"") -> void:
 	crows_landed.clear()
 	for cell: Vector2i in _tiles:
 		var t: FarmTile = _tiles[cell]
 		if t.has_crop():
-			if t.is_crop_ready():
+			if t.is_crop_ready() or (season_id != &"" and t.crop.rests_during(season_id)):
 				t.dry_nights = 0
-			elif t.watered:
+			elif t.watered or not t.crop.needs_water:
 				t.dry_nights = 0
 				if not t.weeds:
 					_grow(cell, t, grow_scale)
+					if weather_id != &"" and weather_id in t.crop.loves_weather and not t.is_crop_ready():
+						_grow(cell, t, grow_scale)
 			else:
 				t.dry_nights += maxi(1, thirst_step)
 				if die_after_dry_nights > 0 and t.dry_nights >= die_after_dry_nights:
@@ -311,14 +349,14 @@ func rain() -> int:
 	return watered
 
 
-## Frost (DECISIONS 046): every crop that can't grow in `next_season_id`
-## dies, a night before the season's turn would kill it anyway. Returns how
-## many died.
+## Frost (DECISIONS 046): every crop that can't live through `next_season_id`
+## (grow in it, or rest through it: DECISIONS 047) dies, a night before the
+## season's turn would kill it anyway. Returns how many died.
 func frost(next_season_id: StringName) -> int:
 	var died := 0
 	for cell: Vector2i in _tiles:
 		var t: FarmTile = _tiles[cell]
-		if t.has_crop() and not t.crop.grows_in(next_season_id):
+		if t.has_crop() and not t.crop.survives(next_season_id):
 			var crop_id := t.crop.id
 			t.clear_crop()
 			died += 1
@@ -326,14 +364,27 @@ func frost(next_season_id: StringName) -> int:
 	return died
 
 
-## The season has turned: every crop that can't grow in `season_id` dies and
+## The season has turned: every crop that can't live in `season_id` dies and
 ## its tile is left as empty tilled soil. Called by TimeSystem, once, on the
 ## night a season changes. Returns how many died.
+##
+## A crop that rests in the new season (DECISIONS 047) goes to sleep instead.
+## If it's a regrowing one waiting ripe, that crop is lost: it sleeps as a
+## plant waiting to regrow, so next year it starts with a regrow, not a
+## harvest that sat out the winter.
 func wither_out_of_season(season_id: StringName) -> int:
 	var died := 0
 	for cell: Vector2i in _tiles:
 		var t: FarmTile = _tiles[cell]
-		if t.has_crop() and not t.crop.grows_in(season_id):
+		if not t.has_crop():
+			continue
+		if t.crop.rests_during(season_id):
+			if t.crop.regrow_days > 0 and t.is_crop_ready():
+				t.crop_stage = t.crop.growth_stages - 1
+				t.crop_days = 0
+				t.crop_regrowing = true
+			continue
+		if not t.crop.grows_in(season_id):
 			var crop_id := t.crop.id
 			t.clear_crop()
 			died += 1

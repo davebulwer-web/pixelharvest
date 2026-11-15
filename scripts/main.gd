@@ -51,6 +51,14 @@ const WEEDS_SKIN_ID := &"weeds"
 ## FarmTile.is_wilted() is the truth.
 const WILTED_TINT := Color(0.9, 0.62, 0.32)
 
+## A crop asleep out of its season (garlic in winter, a perennial; DECISIONS
+## 047): greyed, so it reads as alive but resting.
+const RESTING_TINT := Color(0.66, 0.68, 0.74)
+
+## What a trellis crop (CropDef.solid) blocks: about the width of a tile and
+## most of its depth, so the player can't stand half inside the trellis.
+const SOLID_CROP_SIZE := Vector2(14, 10)
+
 ## Where the town is, and which spawn point in the town the farm gate leads to.
 const TOWN_ID := &"town"
 const TOWN_ARRIVAL := &"from_farm"
@@ -126,7 +134,7 @@ func _ready() -> void:
 	# Rain, snow: today's weather's overlay goes with the season's (DECISIONS 046).
 	EventBus.weather_changed.connect(func(_w: StringName) -> void: _apply_season_overlay())
 
-	print("--- Pixel Harvest · Stage 11 (weather) ---")
+	print("--- Pixel Harvest · Stage 12 (crops with rules) ---")
 	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
 	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
 	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler")
@@ -145,6 +153,10 @@ func _ready() -> void:
 	print("take unguarded crops. A scarecrow guards every crop within 8 tiles.")
 	print("Weather: rain and storms water the farm for you; a heatwave dries crops out")
 	print("twice as fast; autumn ends in frost. Tomorrow's is on the notice board.")
+	print("New crops have rules (the seed shop says which): bunches, trellises you can't")
+	print("walk through, hardy crops that need no water, watercress beside the pond,")
+	print("garlic that sleeps through winter, rhubarb that comes back every year.")
+	print("Storms can flatten tall crops (corn, peas, sunflowers) unless a fence is beside them.")
 	print("-------------------------------")
 
 
@@ -227,7 +239,32 @@ func _redraw_crop(cell: Vector2i) -> void:
 	# Lift the sprite so its bottom edge sits on the bottom of the tile.
 	sprite.offset = Vector2(0, -sheet.get_height() / 2.0)
 	sprite.frame = t.crop_stage
-	sprite.modulate = WILTED_TINT if t.is_wilted(GameState.wilt_after()) else Color.WHITE
+	if t.is_wilted(GameState.wilt_after()):
+		sprite.modulate = WILTED_TINT
+	elif t.crop.rests_during(GameState.season_id()):
+		sprite.modulate = RESTING_TINT
+	else:
+		sprite.modulate = Color.WHITE
+	_set_crop_solid(sprite, t.crop.is_solid_at(t.crop_stage))
+
+
+## Give the crop sprite a body the player bumps into, or take it away: a
+## trellis crop blocks the way once it's come up (DECISIONS 047). The body
+## is a child of the sprite, so it goes when the crop does.
+func _set_crop_solid(sprite: Sprite2D, solid: bool) -> void:
+	var body := sprite.get_node_or_null(^"Solid")
+	if solid and body == null:
+		body = StaticBody2D.new()
+		body.name = "Solid"
+		var shape := CollisionShape2D.new()
+		var rect := RectangleShape2D.new()
+		rect.size = SOLID_CROP_SIZE
+		shape.shape = rect
+		shape.position = Vector2(0, -SOLID_CROP_SIZE.y / 2.0)
+		body.add_child(shape)
+		sprite.add_child(body)
+	elif not solid and body != null:
+		body.queue_free()
 
 
 ## Make the weeds at `cell` match FarmData: show them, or take them away.

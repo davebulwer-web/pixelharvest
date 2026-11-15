@@ -2,7 +2,8 @@ class_name FarmHazards
 extends RefCounted
 ##
 ## FarmHazards — what goes wrong on the farm overnight: crows taking crops,
-## weeds coming up, bare soil going back to grass (Stage 11, DECISIONS 045).
+## weeds coming up, bare soil going back to grass (Stage 11, DECISIONS 045),
+## and a storm flattening tall crops (Stage 12, DECISIONS 047).
 ##
 ## Thirst isn't here: it's part of growing (a crop that wasn't watered gets a
 ## night thirstier instead of a night older), so it lives with the growing in
@@ -23,14 +24,19 @@ extends RefCounted
 ##
 
 
-## One night's hazards, in order: crows first (so a tile they empty can't
-## also sprout weeds the same night), then weeds, then bare soil reverting.
-## Returns the cells crows took crops from (also in farm.crows_landed).
+## One night's hazards, in order: the storm first (if today was one,
+## `flatten_chance` is its WeatherDef.flattens_tall_crops), then crows (so a
+## tile they empty can't also sprout weeds the same night), then weeds, then
+## bare soil reverting. Returns the cells crows took crops from (also in
+## farm.crows_landed).
 static func run_night(farm: FarmData, rules: HazardRules, multiplier: float, season_id: StringName,
-		weeds_started: bool, crows_started: bool, rng: RandomNumberGenerator) -> Array[Vector2i]:
+		weeds_started: bool, crows_started: bool, rng: RandomNumberGenerator,
+		flatten_chance: float = 0.0) -> Array[Vector2i]:
 	var taken: Array[Vector2i] = []
 	if rules == null or multiplier <= 0.0:
 		return taken
+	if flatten_chance > 0.0:
+		flatten_tall_crops(farm, flatten_chance * multiplier, rng)
 	if crows_started:
 		taken = send_crows(farm, rules, multiplier, rng)
 	if weeds_started and rules.weeds_grow_in(season_id):
@@ -94,6 +100,49 @@ static func _guards(farm: FarmData) -> Array:
 		if object_def != null and object_def.protects_radius > 0:
 			guards.append([cell, object_def.protects_radius])
 	return guards
+
+
+# --- Storms ------------------------------------------------------------------
+
+## Each tall crop that has come up (CropDef.tall, past the seed) and has no
+## shelter close by is flattened with chance `chance`. Returns the cells.
+static func flatten_tall_crops(farm: FarmData, chance: float,
+		rng: RandomNumberGenerator) -> Array[Vector2i]:
+	var flattened: Array[Vector2i] = []
+	var shelters := _shelters(farm)
+	var cells: Array = farm.cells()
+	cells.sort()
+	for cell: Vector2i in cells:
+		var t := farm.tile(cell)
+		if not t.has_crop() or not t.crop.tall or t.crop_stage < 1 or is_sheltered(cell, shelters):
+			continue
+		if rng.randf() < chance:
+			farm.flatten(cell)
+			flattened.append(cell)
+	return flattened
+
+
+## True if a shelter (a fence) is within its reach of `cell`. Reach is a
+## square: a fence with shelters_radius 1 shelters the eight tiles round it.
+static func is_sheltered(cell: Vector2i, shelters: Array) -> bool:
+	for shelter: Array in shelters:
+		var gap: Vector2i = (cell - (shelter[0] as Vector2i)).abs()
+		if maxi(gap.x, gap.y) <= int(shelter[1]):
+			return true
+	return false
+
+
+## [cell, radius] for every object on the farm that shelters crops from storms.
+static func _shelters(farm: FarmData) -> Array:
+	var shelters: Array = []
+	for cell: Vector2i in farm.cells():
+		var object_id := farm.tile(cell).object_id
+		if object_id == &"":
+			continue
+		var object_def := ContentDB.object(object_id)
+		if object_def != null and object_def.shelters_radius > 0:
+			shelters.append([cell, object_def.shelters_radius])
+	return shelters
 
 
 # --- Weeds -------------------------------------------------------------------

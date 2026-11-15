@@ -327,6 +327,20 @@ func _check() -> void:
 			if not season_ids.has(season_id):
 				push_error("ContentDB: '%s' grows in a season '%s' that isn't in game_rules.tres"
 						% [where, season_id])
+		# The Stage 12 rules (DECISIONS 047) name seasons and weathers too.
+		for season_id in each.plant_seasons + each.rests_in:
+			if not season_ids.has(season_id):
+				push_error("ContentDB: '%s' names a season '%s' that isn't in game_rules.tres"
+						% [where, season_id])
+		for season_id in each.plant_seasons:
+			if not each.grows_in(season_id):
+				push_warning("ContentDB: '%s' is planted in %s but doesn't grow then" % [where, season_id])
+		for weather_id in each.loves_weather:
+			if weather(weather_id) == null:
+				push_error("ContentDB: '%s' loves a weather '%s' that isn't in data/weather/"
+						% [where, weather_id])
+		if each.harvest_max > 0 and each.harvest_max < each.harvest_amount:
+			push_warning("ContentDB: '%s' has harvest_max below harvest_amount" % where)
 
 	# A season nothing grows in is allowed (a winter rest, say), but it's worth
 	# knowing about, in case it's a typo in a crop file.

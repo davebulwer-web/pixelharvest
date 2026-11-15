@@ -40,6 +40,11 @@ extends Resource
 ## A storm: crows stay away tonight.
 @export var keeps_crows_away: bool = false
 
+## A storm: tonight, each tall crop (CropDef.tall) with no shelter close by
+## (ObjectDef.shelters_radius: a fence) is flattened with this chance, 0 to 1,
+## scaled by the difficulty's hazard_multiplier (DECISIONS 047).
+@export_range(0.0, 1.0, 0.05) var flattens_tall_crops: float = 0.0
+
 ## Frost: on the morning it arrives, every crop that can't grow in the next
 ## season dies (they'd die at the season's turn anyway; frost is a night
 ## sooner). Crops that list the next season (Stage 12's hardy ones) live.

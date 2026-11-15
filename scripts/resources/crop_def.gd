@@ -10,6 +10,14 @@ extends Resource
 ##
 ## Kept deliberately small. Fields get added when a stage needs them, not before.
 ##
+## Stage 12 (DECISIONS 047) added the crop *rules*: each is a field or two
+## here, off by default, so the first eight crops didn't change. Bunches
+## (harvest_max), trellis (solid), perennial, overwintering (plant_seasons and
+## rests_in), hardy (needs_water), water-loving (near_water), weather-loving
+## (loves_weather), seed-returning (seed_chance), tall (for storms). Flowers
+## are a tag on the produce (ItemDef.tags), since bees and the flower show
+## care about the flower, not the plant.
+##
 
 @export var id: StringName
 @export var display_name: String
@@ -34,6 +42,15 @@ extends Resource
 @export var produce: ItemDef
 @export var harvest_amount: int = 1
 
+## Bunches (Stage 12): above harvest_amount, each harvest gives a random number
+## from harvest_amount to this. 0 (or anything not above harvest_amount) means
+## always exactly harvest_amount.
+@export var harvest_max: int = 0
+
+## Seed-returning (Stage 12): the chance, 0 to 1, that a harvest also gives
+## back a packet of this crop's seeds (whichever seeds plant it, ContentDB.seeds_for).
+@export_range(0.0, 1.0, 0.05) var seed_chance: float = 0.0
+
 ## One row of equal-width frames: frame 0 is the planted seed, then one frame
 ## per growth stage, the last being "ready to harvest". So the sheet must have
 ## growth_stages + 1 frames. Each frame's bottom edge sits on the tile's
@@ -46,10 +63,76 @@ extends Resource
 ## year round.
 @export var seasons: Array[StringName] = []
 
+# --- Rules (Stage 12, DECISIONS 047) ------------------------------------------
 
-## True if this crop can be planted, and keeps growing, in the season `season_id`.
+## Overwintering: the seasons seeds can go in, if not every season in
+## `seasons`. Garlic grows in autumn and spring but is planted only in autumn.
+@export var plant_seasons: Array[StringName] = []
+
+## Seasons the crop lives through without growing, asleep: no growth, no
+## thirst, and the season's turn doesn't kill it. Garlic rests in winter.
+@export var rests_in: Array[StringName] = []
+
+## Perennial: rests through every season it doesn't grow in, so it never dies
+## at a season's turn and comes back each year. A regrowing perennial that
+## goes to sleep ripe loses that crop: it wakes ready to regrow, not ripe.
+@export var perennial: bool = false
+
+## Hardy: grows every night whether watered or not, and is never thirsty.
+@export var needs_water: bool = true
+
+## Water-loving: can only be planted on a tile beside water (the pond), the
+## eight around it.
+@export var near_water: bool = false
+
+## Weather-loving: on a day with one of these weathers (WeatherDef ids, e.g.
+## &"heatwave"), a crop that grew that night grows a second day's worth.
+@export var loves_weather: Array[StringName] = []
+
+## Trellis: once it's past the seed, the player can't walk through it, so the
+## layout of a field matters (leave paths).
+@export var solid: bool = false
+
+## Tall: a storm may flatten it unless something that shelters (a fence,
+## ObjectDef.shelters_radius) stands close by (WeatherDef.flattens_tall_crops).
+@export var tall: bool = false
+
+
+## True if this crop keeps growing in the season `season_id`.
 func grows_in(season_id: StringName) -> bool:
 	return seasons.is_empty() or season_id in seasons
+
+
+## True if seeds of this crop can go in during `season_id`: its plant_seasons
+## if it has any, otherwise every season it grows in.
+func can_plant_in(season_id: StringName) -> bool:
+	if not plant_seasons.is_empty():
+		return season_id in plant_seasons
+	return grows_in(season_id)
+
+
+## True if the crop is asleep in `season_id`: alive, but not growing.
+func rests_during(season_id: StringName) -> bool:
+	return not grows_in(season_id) and (perennial or season_id in rests_in)
+
+
+## True if the crop lives through `season_id`, growing or asleep. A season's
+## turn (and frost) kills every crop that doesn't.
+func survives(season_id: StringName) -> bool:
+	return grows_in(season_id) or rests_during(season_id)
+
+
+## How many to pick this time: harvest_amount, or for bunches a roll from
+## harvest_amount to harvest_max on `dice`.
+func roll_harvest(dice: RandomNumberGenerator) -> int:
+	if harvest_max > harvest_amount and dice != null:
+		return dice.randi_range(harvest_amount, harvest_max)
+	return harvest_amount
+
+
+## True if `stage` blocks the way: a trellis crop that has come up.
+func is_solid_at(stage: int) -> bool:
+	return solid and stage >= 1
 
 
 ## True if `stage` is the final, harvestable one.
@@ -75,6 +158,32 @@ func days_to_grow_from(stage: int, regrowing: bool, scale: float = 1.0) -> int:
 ## Watered days for a regrowing crop to be ready again after a harvest.
 func days_to_regrow(scale: float = 1.0) -> int:
 	return maxi(1, roundi(regrow_days * scale))
+
+
+## The rules this crop has, in a few words each, for the seed shop's detail
+## line: "Gives 1–3 a time. Grows on a trellis: you can't walk through it."
+## Empty for a crop with none.
+func rules_text() -> String:
+	var parts: PackedStringArray = []
+	if harvest_max > harvest_amount:
+		parts.append("Gives %d–%d a time." % [harvest_amount, harvest_max])
+	if not needs_water:
+		parts.append("Hardy: grows without watering.")
+	if near_water:
+		parts.append("Must be planted beside water.")
+	if solid:
+		parts.append("Grows on a trellis: you can't walk through it.")
+	if perennial:
+		parts.append("Comes back every year.")
+	elif not rests_in.is_empty():
+		parts.append("Sleeps through %s." % " and ".join(rests_in))
+	if not loves_weather.is_empty():
+		parts.append("Loves %s: grows twice as fast." % " and ".join(loves_weather))
+	if seed_chance > 0.0:
+		parts.append("Sometimes gives seeds back.")
+	if tall:
+		parts.append("Tall: a storm can flatten it unless a fence is close.")
+	return " ".join(parts)
 
 
 ## Total watered days from planting to the first harvest, at `scale`. Handy

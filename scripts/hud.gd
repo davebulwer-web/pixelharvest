@@ -197,6 +197,7 @@ func _morning_text() -> String:
 	text += _losses_text(&"season", "%d crop%s died out of season")
 	text += _losses_text(&"thirst", "%d crop%s died of thirst")
 	text += _losses_text(&"crows", "Crows took %d crop%s")
+	text += _losses_text(&"storm", "The storm flattened %d crop%s")
 	text += _losses_text(&"frost", "%d crop%s died in the frost")
 	if _morning_sales > 0:
 		text += "    The bin sold for %dg" % _morning_sales

@@ -38,3 +38,14 @@ extends Resource
 ## potato seeds wait for the mayor's first request. Null: on sale from the
 ## start. Only the shops look at it; an item given as a reward is still given.
 @export var requires_unlock: UnlockDef
+
+## Words that say what kind of thing this is, for rules that care about a
+## kind rather than one item (DECISIONS 047): &"flower" for the sunflower,
+## which bees (Stage 17), the flower show (Stage 18) and the pests (they
+## spread slower near flowers) look for. Empty for most items.
+@export var tags: Array[StringName] = []
+
+
+## True if this item has the tag `tag` (&"flower").
+func has_tag(tag: StringName) -> bool:
+	return tag in tags

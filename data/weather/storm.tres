@@ -8,9 +8,10 @@
 script = ExtResource("1_weather")
 id = &"storm"
 display_name = "Storm"
-today_text = "A storm: the rain waters every tilled tile, and the crows stay away tonight."
+today_text = "A storm: the rain waters every tilled tile and the crows stay away tonight, but tall crops with no fence beside them may be flattened."
 waters_farm = true
 keeps_crows_away = true
+flattens_tall_crops = 0.25
 overlay = ExtResource("2_overlay")
 light_tint = Color(0.64, 0.68, 0.8, 1)
 ambience = ExtResource("3_sound")

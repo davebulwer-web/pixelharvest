@@ -114,7 +114,8 @@ scripts/             Game code
 data/                Content resources (.tres), indexed by ContentDB
   game_rules.tres    Starting conditions and global numbers (GameRules)
   hazard_rules.tres  Thirst, weeds and crows: every number (HazardRules, DECISIONS 045)
-  crops/             CropDef — how each plant grows and looks
+  crops/             CropDef — how each plant grows and looks, and its rules (trellis,
+                     perennial, hardy…; DECISIONS 047)
   produce/           ItemDef — what a harvest gives, and its sell price
   tools/             ToolDef — tools, seeds and sprinklers (all things you use)
   decorations/       ToolDef — decorations for the farm, placed like sprinklers (DECISIONS 039)
