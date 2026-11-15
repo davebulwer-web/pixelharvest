@@ -10,6 +10,10 @@ extends RefCounted
 ## The layout itself is placeholder and will be replaced when the farm gets a
 ## designed map. Only this file will change when it does.
 ##
+## Buildings on the farm (the farmhouse, Stage 7) aren't written here either:
+## each is a LocationDef whose door is on the farm, and the ground under its
+## picture becomes BUILDING terrain, which no tool can work.
+##
 ## Fields the player can buy (Stage 5) start as thicket. Where they are isn't
 ## written here: each field's upgrade .tres knows its own area, and this
 ## overgrows whatever those areas say. Adding a field is one data file.
@@ -50,8 +54,28 @@ static func build_default() -> FarmData:
 	for cell in TREE_CELLS:
 		farm.tile(cell).object_id = &"tree"
 	farm.tile(SHIPPING_BIN).object_id = &"shipping_bin"
+	_place_buildings(farm)
 	_overgrow_fields(farm)
 	return farm
+
+
+## Clear the ground under every building whose door is on the farm, and make
+## sure the cell in front of its door is path. Anything standing there (a tree
+## in the old layout) gives way to the building.
+static func _place_buildings(farm: FarmData) -> void:
+	for def: LocationDef in GameState.RULES.locations:
+		if def.outside != LocationManager.FARM_ID or def.exterior == null:
+			continue
+		var area := Building.footprint(def)
+		for y in range(area.position.y, area.end.y):
+			for x in range(area.position.x, area.end.x):
+				var t := farm.tile(Vector2i(x, y))
+				if t != null:
+					t.terrain = FarmTile.Terrain.BUILDING
+					t.object_id = &""
+		var doorstep := farm.tile(def.door_cell + Vector2i.DOWN)
+		if doorstep != null and doorstep.terrain == FarmTile.Terrain.GRASS:
+			doorstep.terrain = FarmTile.Terrain.PATH
 
 
 ## Turn the grass in every buyable field into thicket. Ponds, paths and trees

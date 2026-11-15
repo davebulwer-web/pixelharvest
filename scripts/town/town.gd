@@ -37,7 +37,7 @@ const FARM_ID := &"farm"
 
 func _ready() -> void:
 	_player.can_farm = false
-	var doors: Array[LocationDef] = _buildings()
+	var doors: Array[LocationDef] = LocationManager.buildings_on(TOWN_ID)
 	var door_cells: Array[Vector2i] = []
 	for def in doors:
 		door_cells.append(def.door_cell)
@@ -60,15 +60,6 @@ func _ready() -> void:
 	_limit_camera()
 	EventBus.npc_talked_to.connect(_on_npc_talked_to)
 	EventBus.notice_board_read.connect(_on_notice_board_read)
-
-
-## Every location with its door on this map.
-func _buildings() -> Array[LocationDef]:
-	var result: Array[LocationDef] = []
-	for def in LocationManager.all():
-		if def.outside == TOWN_ID and def.exterior != null:
-			result.append(def)
-	return result
 
 
 func _base_of(cell: Vector2i) -> Vector2:

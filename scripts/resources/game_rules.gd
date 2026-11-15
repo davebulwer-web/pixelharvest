@@ -21,6 +21,11 @@ extends Resource
 @export var locations: Array[LocationDef] = []
 @export var starting_location: StringName = &"farm"
 
+## Where the bed is: the location the player wakes up in every morning. Going
+## to bed there ends the day; running out of energy anywhere else ends it too,
+## and the player wakes up here (DECISIONS 033).
+@export var home_location: StringName = &"farmhouse"
+
 ## The seasons in calendar order. GameState.season is an index into this;
 ## after the last one the year rolls over and the first comes round again.
 @export var seasons: Array[SeasonTheme] = []

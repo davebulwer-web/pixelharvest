@@ -14,7 +14,8 @@ extends Node2D
 ##   Farm
 ##   ├── Ground     (TileMapLayer, z_index -1, NOT y-sorted — always underfoot)
 ##   ├── SpawnPoints (Marker2Ds where LocationManager can put an arriving player:
-##   │               "default", and "from_town" just inside the gate)
+##   │               "default", "from_town" just inside the gate, and one
+##   │               "from_<id>" in front of each building's door, made here)
 ##   ├── TileCursor (outline on the tile the player is facing; drawn under entities)
 ##   ├── Entities   (y-sorted — player, trees and crops sort against each other
 ##   │               by their node origin, which for all of them sits at their base)
@@ -25,6 +26,11 @@ extends Node2D
 ##
 ## The way to the town is the gap at the west end of the path (FarmLayout.TOWN_GATE):
 ## an ExitZone is added there, and walking into it goes to the town.
+##
+## The farmhouse (Stage 7) is a Building like the town's shops: a LocationDef
+## whose door is on the farm. Walking into its door goes inside, where the bed
+## is. The ground under it is BUILDING terrain in FarmData (FarmLayout), so no
+## tool can reach it.
 ##
 
 const TILE_PX := 16
@@ -51,6 +57,7 @@ var _object_nodes: Dictionary = {}
 
 
 func _ready() -> void:
+	_add_buildings()
 	_place_player()
 	_add_town_gate()
 	_apply_season_theme()
@@ -89,7 +96,8 @@ func _ready() -> void:
 	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler.")
 	print("Walk out of the gate at the west end of the path to reach the town: seeds,")
 	print("supplies and upgrades are bought from the shopkeepers there. E talks to them.")
-	print("Enter sleeps; the bin sells overnight and sprinklers water at dawn.")
+	print("Go to bed in the farmhouse (E at the bed) to end the day; the bin sells")
+	print("overnight and sprinklers water at dawn. You wake up at home.")
 	print("Seasons last %d days. Seeds only go in during their own seasons, and crops"
 			% GameState.RULES.days_per_season)
 	print("still in the ground when their season ends die overnight.")
@@ -101,6 +109,17 @@ func _process(_delta: float) -> void:
 	# The cursor follows wherever the player is facing, so it's always clear
 	# which tiles Space will act on — three or nine with an upgraded tool.
 	_cursor.set_cells(_player.target_cells())
+
+
+## Every building with its door on the farm (the farmhouse), and a spawn point
+## in front of each door for coming back out.
+func _add_buildings() -> void:
+	for def in LocationManager.buildings_on(LocationManager.FARM_ID):
+		_entities.add_child(Building.create(def))
+		var marker := Marker2D.new()
+		marker.name = "from_%s" % def.id
+		marker.position = Vector2(def.door_cell.x * TILE_PX + TILE_PX / 2.0, (def.door_cell.y + 2) * TILE_PX - 2)
+		$SpawnPoints.add_child(marker)
 
 
 ## The way out to the town: the gate cells at the west end of the path.
@@ -186,6 +205,7 @@ func _atlas_for(cell: Vector2i) -> Vector2i:
 			return GroundTiles.path_for(cell)
 		FarmTile.Terrain.THICKET:
 			return GroundTiles.THICKET
+	# GRASS, and BUILDING: grass shows round the edges of a building's picture.
 	return GroundTiles.grass_for(cell)
 
 

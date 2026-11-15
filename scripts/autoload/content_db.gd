@@ -224,6 +224,11 @@ func _check() -> void:
 		if each.item != null and item(each.item.id) != each.item:
 			push_error("ContentDB: '%s' gives back an item that isn't in data/tools/" % where)
 
+	# The bed's location must exist, or nights have nowhere to happen.
+	if not RULES.locations.any(func(l: LocationDef) -> bool: return l != null and l.id == RULES.home_location):
+		push_error("ContentDB: game_rules.tres home_location '%s' isn't one of its locations"
+				% RULES.home_location)
+
 	# Every kind of upgrade should be sold somewhere, or it can never be bought.
 	var sold_categories: Array[StringName] = []
 	var shop_ids: Array[StringName] = []

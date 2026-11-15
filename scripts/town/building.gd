@@ -1,7 +1,8 @@
 class_name Building
 extends StaticBody2D
 ##
-## Building — a shop's front on the town map: its picture, solid walls, and a
+## Building — a building's front on a map (a shop in town, the farmhouse on
+## the farm): its picture, solid walls, and a
 ## door you walk into.
 ##
 ## Made entirely from a LocationDef (its exterior picture and door cell), so
@@ -41,6 +42,15 @@ static func create(def: LocationDef) -> Building:
 	building.add_child(ExitZone.create(
 			Rect2(-half_door, -TILE_PX, half_door * 2.0, TILE_PX), def.id, &"door"))
 	return building
+
+
+## The cells the building's picture covers, on the map it stands on: centred on
+## the door cell, with the door in the bottom row. The farm uses this to keep
+## those cells out of the hoe's reach (FarmLayout); nothing is saved from it.
+static func footprint(def: LocationDef) -> Rect2i:
+	var cells_wide := ceili(def.exterior.get_width() / float(TILE_PX))
+	var cells_tall := ceili(def.exterior.get_height() / float(TILE_PX))
+	return Rect2i(def.door_cell.x - cells_wide / 2, def.door_cell.y - cells_tall + 1, cells_wide, cells_tall)
 
 
 func _add_wall(rect: Rect2) -> void:

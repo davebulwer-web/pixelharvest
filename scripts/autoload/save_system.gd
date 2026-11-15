@@ -19,7 +19,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 6, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 7, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -44,7 +44,9 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       count of days since the game began.
 ##   6 — the town: the cliff at the west end of the farm's path opens into a
 ##       gate (two farm tiles change from CLIFF to PATH). No new fields.
-const CURRENT_VERSION := 6
+##   7 — the farmhouse: the cells it stands on become BUILDING terrain, and
+##       whatever was on them is cleared (sprinklers go back in the bag).
+const CURRENT_VERSION := 7
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -213,6 +215,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_4_to_5(data["game"])
 			5:
 				_upgrade_5_to_6(data["game"])
+			6:
+				_upgrade_6_to_7(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -318,3 +322,42 @@ func _upgrade_5_to_6(game: Dictionary) -> void:
 		var cell := Vector2i(int(entry.get("x", -999)), int(entry.get("y", -999)))
 		if cell in V6_TOWN_GATE:
 			entry["terrain"] = "PATH"
+
+
+## Version 6 -> 7: the farmhouse. It stands north of the path, on cells an old
+## farm may have tilled, planted or put sprinklers on. Those cells become
+## BUILDING terrain and are cleared: a crop there is lost (the house was built
+## on it), a sprinkler goes back into the bag, and a tree is felled. The cells,
+## and which object gives back which item, are frozen here (not read from the
+## farmhouse's .tres or ContentDB), so this step means the same thing however
+## the house or the items change later. The player wakes up in the farmhouse.
+const V7_FARMHOUSE := Rect2i(6, 8, 5, 4)
+const V7_OBJECT_ITEMS: Dictionary = {"sprinkler": "sprinkler", "big_sprinkler": "big_sprinkler"}
+
+
+func _upgrade_6_to_7(game: Dictionary) -> void:
+	var farm: Dictionary = game.get("farm", {})
+	var tiles: Array = farm.get("tiles", [])
+	var returned: Array[String] = []
+	for entry: Dictionary in tiles:
+		var cell := Vector2i(int(entry.get("x", -999)), int(entry.get("y", -999)))
+		if not V7_FARMHOUSE.has_point(cell):
+			continue
+		var object_id: String = entry.get("object", "")
+		if V7_OBJECT_ITEMS.has(object_id):
+			returned.append(V7_OBJECT_ITEMS[object_id])
+		for key in ["object", "tilled", "watered", "crop", "crop_stage", "crop_days", "crop_regrowing"]:
+			entry.erase(key)
+		entry["terrain"] = "BUILDING"
+	var inventory: Array = game.get("inventory", [])
+	for item_id in returned:
+		var found := false
+		for stack: Variant in inventory:
+			if typeof(stack) == TYPE_DICTIONARY and stack.get("id", "") == item_id:
+				stack["count"] = float(int(stack.get("count", 0)) + 1)
+				found = true
+				break
+		if not found:
+			inventory.append({"id": item_id, "count": 1.0})
+	game["inventory"] = inventory
+	game["location"] = "farmhouse"

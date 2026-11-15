@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/farm/farmhouse.gd" id="1_house"]
+[ext_resource type="TileSet" path="res://assets/tilesets/interior_tileset.tres" id="2_tileset"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="4_hud"]
+
+[node name="Farmhouse" type="Node2D"]
+script = ExtResource("1_house")
+
+[node name="Backdrop" type="CanvasLayer" parent="."]
+layer = -5
+
+[node name="Dark" type="ColorRect" parent="Backdrop"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.133333, 0.133333, 0.168627, 1)
+
+[node name="Ground" type="TileMapLayer" parent="."]
+z_index = -1
+tile_set = ExtResource("2_tileset")
+
+[node name="Entities" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Player" parent="Entities" instance=ExtResource("3_player")]
+position = Vector2(40, 62)
+
+[node name="Hud" parent="." instance=ExtResource("4_hud")]

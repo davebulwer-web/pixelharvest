@@ -11,8 +11,10 @@ extends RefCounted
 
 ## What the ground fundamentally is. Fixed for the life of the farm, except
 ## that THICKET (a field not yet bought) becomes GRASS when it's bought.
+## BUILDING is ground a building stands on (the farmhouse, Stage 7): drawn as
+## grass, in case the picture has gaps at its edges, but never tilled or built on.
 ## New values go on the end; saves store the name, never the number.
-enum Terrain { GRASS, PATH, WATER, CLIFF, THICKET }
+enum Terrain { GRASS, PATH, WATER, CLIFF, THICKET, BUILDING }
 
 var terrain: Terrain = Terrain.GRASS
 

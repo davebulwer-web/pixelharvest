@@ -17,7 +17,7 @@ prestige loop.
 1. Wake with full energy.
 2. Water yesterday's crops, harvest what's ready, till and plant new ground.
 3. Drop produce in the shipping bin.
-4. Sleep. Crops advance one growth stage. Bin is sold overnight; gold arrives at dawn.
+4. Sleep (in the farmhouse bed). Crops advance one growth stage. Bin is sold overnight; gold arrives at dawn.
 5. Spend gold on seeds, tools, upgrades and plots.
 
 Energy is the brake. Every meaningful action costs some, and when it's gone the day ends

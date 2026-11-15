@@ -2,10 +2,10 @@ class_name Player
 extends CharacterBody2D
 ##
 ## Player — movement, four-direction animation, and the player's actions:
-## using the held tool, interacting (harvest, shipping bin), and going to sleep.
+## using the held tool, and interacting (harvest, shipping bin, the bed).
 ##
-## Away from the farm (the town, a shop) `can_farm` is switched off by the
-## scene: tools, harvesting and sleeping are about the farm's tiles, which
+## Away from the farm (the town, a shop, the farmhouse) `can_farm` is switched
+## off by the scene: tools and harvesting are about the farm's tiles, which
 ## aren't there.
 ##
 ## The node origin sits at the character's FEET, not the centre of the sprite.
@@ -64,12 +64,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed(&"interact"):
 		_interact()
 	elif event.is_action_pressed(&"sleep"):
-		# No bed yet: sleep is a key press anywhere on the farm. When the
-		# farmhouse exists this moves to interacting with the bed.
-		if can_farm:
-			TimeSystem.end_day()
-		else:
-			EventBus.message_posted.emit("You sleep at the farm. Walk home first")
+		# Enter used to sleep anywhere on the farm. Since the farmhouse (Stage 7)
+		# the day ends at the bed; the key stays so it can say where that is.
+		EventBus.message_posted.emit("To sleep, go to bed: E at the bed in the farmhouse")
 	elif event.is_action_pressed(&"next_tool"):
 		GameState.cycle_tool(1)
 	elif event.is_action_pressed(&"prev_tool"):
@@ -127,7 +124,7 @@ func _use_tool() -> void:
 
 
 ## E: harvest a ready crop by hand, or use whatever stands on the tile ahead
-## (the shipping bin, a sprinkler to pick it up, a shopkeeper to talk to). Harvesting is free — the work was in growing it.
+## (the shipping bin, a sprinkler to pick it up, a shopkeeper to talk to, the bed). Harvesting is free — the work was in growing it.
 ##
 ## Anything usable joins the "interactable" group and offers occupies(cell)
 ## and interact(), so this never grows a list of things it knows about.

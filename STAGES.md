@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 7 — the town.** Session 1 and its real art confirmed 2026-11-14. Session 2 (designed map, townsfolk, notice board) built 2026-11-14 on placeholder art, waiting for Dave's test.
+**Current stage: 7 — the town.** Sessions 1 and 2 and their real art confirmed. Session 3 (farmhouse and bed) built 2026-11-15 on placeholder art, waiting for Dave's test.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -243,21 +243,43 @@ Session 2 (2026-11-14) — a designed town, townsfolk and a notice board, on pla
       both townsfolk can be walked up to, talking and paging, notices in all four seasons
       and at the season's end, spots change by day, shop doors and keepers unchanged, farm
       gate both ways, a version 5 save still upgrades) and rendered in spring and winter
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-14)
 
 - [x] Real art from Pixellab for every session 2 piece (2026-11-14, DECISIONS 030): fountain
       and frozen fountain, bench, lamp post, flower bed and snowed bed, fence, notice board,
       Mayor Bramble and Wren. Drop-in replacements, same sizes, feet/base on the bottom row.
 
-**Not done / for a later session:** a farmhouse and bed on the farm, shop opening hours
-(needs a clock, which the game doesn't have), townsfolk who walk about.
+**Not done / for a later session:** shop opening hours (needs a clock, which the game
+doesn't have), townsfolk who walk about.
 
 **Grass variety (2026-11-15, DECISIONS 031):** grass tiles turned and mirrored per cell to
 hide the repeat, plus eight small seasonal details per season (tufts, flowers, leaves, snow
 pieces) in row 1 of each ground image. Then (DECISIONS 032) a calmer dirt path with its own
 details, a cobbled town square, and a snow-covered winter thicket. Cosmetic only, no save change.
 
-- [ ] Dave confirms it looks right on Windows
+- [x] Dave confirms it looks right on Windows (2026-11-15)
+
+Session 3 (2026-11-15) — the farmhouse and bed, on placeholder art. See DECISIONS 033.
+
+- [x] Farmhouse on the farm, north of the path: a `LocationDef` with its door on the farm,
+      built as a `Building` like the shops (`LocationManager.buildings_on`)
+- [x] Inside: bed, table, rug, door back out (`farmhouse.tscn`, `scripts/farm/farmhouse.gd`)
+- [x] E at the bed ends the day (`Bed`); Enter no longer sleeps, it says where the bed is
+- [x] Every morning starts at home: running out of energy elsewhere takes you home first
+      (`home_location` in game_rules.tres); a new game starts beside the bed
+- [x] The house's ground is `BUILDING` terrain in FarmData: no hoeing, planting or sprinklers
+- [x] Save version 7 (house cells cleared on old farms, sprinklers there back in the bag);
+      `tests/saves/v6_example.json`
+- [x] Verified headless (42 checks: new game in the house, footprint can't be worked, Enter
+      does nothing, out the door and back, walls solid, bed ends the day and saves v7 at
+      home, collapsing in the field wakes you at home with the bin's sale shown, town and
+      shops unchanged, v6 and v5 saves upgrade and open in the house) and rendered
+      (house in spring and winter, inside, going to bed)
+- [ ] Dave confirms it plays correctly on Windows
+
+**Placeholder art for a Pixellab session:** `assets/sprites/farm/farmhouse.png` (80×64,
+door in the middle of the bottom row, plus a winter version with a snowy roof),
+`bed.png` (16×32, head at the top), `table.png` (16×16).
 
 ## Stage 8 — Events and quests · 2–3 sessions · Sonnet, Haiku for bulk
 

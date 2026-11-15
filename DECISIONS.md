@@ -858,3 +858,48 @@ Dave asked for.
 
 **Cost.** 2 generations and about 2 cents of the USD credit (dirt, three cobble attempts, one failed snowy-thicket tileset).
 No save change: which tile a cell shows is still only drawing.
+
+---
+
+## 033 — The farmhouse: a Building on the farm, the bed ends the day, every morning starts at home
+
+**Decision.** Stage 7's farmhouse and bed, on placeholder art.
+
+- *The farmhouse is a location like a shop* (`data/locations/farmhouse.tres`): its door is
+  on the farm (`outside = farm`, `door_cell = (8, 11)`, north of the path), and it has an
+  exterior picture. The farm builds a `Building` for every location whose door is on it,
+  exactly as the town does for its shops; `LocationManager.buildings_on(id)` answers both.
+  Inside is its own small scene (`farmhouse.tscn`, `scripts/farm/farmhouse.gd`) using the
+  shops' interior tiles: a bed, a table, a rug and the door. Not the shared shop interior,
+  because that room is built round a counter and a keeper.
+- *The ground under the house is saved as BUILDING terrain.* `FarmData` is the truth about
+  the farm (rule 1), so the hoe, seeds and sprinklers must learn from it that the house is
+  there, not from the picture. `BUILDING` is a new `Terrain` on the end of the enum: drawn
+  as grass (so gaps at the edge of a future picture show grass), never tilled or built on.
+  `FarmLayout` works the cells out from the building's picture size and door
+  (`Building.footprint`), so moving the house is a data change for new games.
+- *The bed is an interactable* (`Bed`, like the shipping bin): face it, press E,
+  `TimeSystem.end_day()`. Enter no longer sleeps anywhere; it now says where the bed is.
+  Considered keeping Enter as a shortcut, but the point of a bed is that ending the day is
+  a place you walk to.
+- *Every morning starts at home.* `game_rules.tres` names `home_location`. If the day ends
+  while the player is elsewhere (energy ran out in the field), `TimeSystem` first takes
+  them home and waits for the farmhouse to open, then runs the night. The night happens in
+  the scene the morning is seen in, so the HUD that collects the bin's sale and the season's
+  losses is the one that shows them. The HUD starts dark when it opens mid-night.
+- *A new game starts in the farmhouse* (`starting_location`), beside the bed.
+- *Save version 7.* Old farms need the house: the 6 → 7 step turns the frozen cells
+  (6,8)–(10,11) into BUILDING, clears anything on them (crops there are lost, sprinklers go
+  back into the bag, the farm never had a tree there), and moves the player home.
+  `tests/saves/v6_example.json` is a real version 6 save from the Stage 7 build, with crops,
+  a tilled cell and both sprinklers on the house's ground.
+
+**Why.** It's the seam doing its job again: a building on the farm is the shop pattern
+pointed at a different map, with no new kind of thing. Making the bed the only way to end
+the day by choice gives the farmhouse a reason to exist, and waking at home is the
+convention the genre has taught players.
+
+**Cost.** One more file each for the house and its room. Ending the day from the field
+now takes a walk home (a few seconds). Collapsing from exhaustion has no penalty beyond
+the day ending, as before. The house has no winter roof yet, and all three pictures
+(farmhouse, bed, table) are placeholders for a Pixellab session.

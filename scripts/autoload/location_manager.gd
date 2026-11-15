@@ -5,7 +5,7 @@ extends Node
 ## The farm, the town and every shop are locations. The seam was built in
 ## Stage 2, well before the town, because the hard part of locations isn't the
 ## town, it's making sure nothing important lives in a scene that gets thrown
-## away on the way out. It paid off: Stage 7 changed nothing here but two
+## away on the way out. It paid off: Stage 7 changed nothing here but three
 ## small lookups.
 ##
 ## How a trip works:
@@ -16,6 +16,9 @@ extends Node
 ##      the player — the name of a Marker2D under its SpawnPoints node.
 ##   5. location_changed is announced.
 ##
+
+## The farm's id. Named here because the farm and the farmhouse both need it.
+const FARM_ID := &"farm"
 
 var _locations: Dictionary = {}  # StringName -> LocationDef
 var _arrival_point: StringName = &""
@@ -54,6 +57,17 @@ func all() -> Array[LocationDef]:
 	var result: Array[LocationDef] = []
 	for location: LocationDef in _locations.values():
 		result.append(location)
+	return result
+
+
+## Every location whose door is on `location_id`'s map (the town's shops, the
+## farm's farmhouse), in game_rules.tres order. The map builds a Building for
+## each, so a new building is data, never an edit to the map's code.
+func buildings_on(location_id: StringName) -> Array[LocationDef]:
+	var result: Array[LocationDef] = []
+	for location: LocationDef in _locations.values():
+		if location.outside == location_id and location.exterior != null:
+			result.append(location)
 	return result
 
 

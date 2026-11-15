@@ -22,7 +22,7 @@ extends Resource
 
 ## --- Buildings -----------------------------------------------------------------
 ## A location that is a room entered through a door on another location's map
-## (a shop, in Stage 7) says where that door is. The outside location builds
+## (a shop or the farmhouse, in Stage 7) says where that door is. The outside location builds
 ## the building from these, so adding a shop never edits the town's code.
 
 ## The location whose map has this room's door; empty for a location that

@@ -48,7 +48,9 @@ func _ready() -> void:
 	EventBus.object_placed.connect(_on_object_placed)
 	EventBus.object_removed.connect(_on_object_removed)
 	EventBus.game_saved.connect(_on_game_saved)
-	_fade.modulate.a = 0.0
+	# Carried home mid-night (out of energy in the field): start dark, so the
+	# room doesn't flash up before the morning fades in.
+	_fade.modulate.a = 1.0 if TimeSystem.is_ending_day() else 0.0
 	_message.text = ""
 	_refresh()
 
