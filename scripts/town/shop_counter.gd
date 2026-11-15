@@ -12,6 +12,10 @@ extends RefCounted
 ## Made by the scene that has a dialogue box and a shop menu, which then hands
 ## it every shopkeeper conversation with serve().
 ##
+## Orders (DECISIONS 050): a keeper with orders to choose from (Rosa, on
+## market day) asks which you'll take, with "Not this week" last. Whatever
+## you pick, the menu opens after, as it always does.
+##
 
 var _dialogue
 var _menu
@@ -20,11 +24,16 @@ var _menu
 ## the conversation shouldn't lead to a menu (they've just said they're shut).
 var _opens_after: ShopDef = null
 
+## The keeper whose orders are being chosen between, and those orders.
+var _asking: ShopDef = null
+var _offers: Array[QuestDef] = []
+
 
 func _init(dialogue, menu) -> void:
 	_dialogue = dialogue
 	_menu = menu
 	_dialogue.finished.connect(_on_dialogue_finished)
+	_dialogue.chosen.connect(_on_order_chosen)
 
 
 ## The player spoke to `shop`'s keeper.
@@ -45,12 +54,40 @@ func serve(shop: ShopDef) -> void:
 		_opens_after = shop
 		_dialogue.say(shop.keeper_name, about_requests)
 		return
+	var offers := Quests.orders_on_offer(shop.id)
+	if not offers.is_empty():
+		_opens_after = null
+		_asking = shop
+		_offers = offers
+		var answers: Array[String] = []
+		for order in offers:
+			answers.append(Quests.order_choice_text(order))
+		answers.append("Not this time")
+		_dialogue.ask(shop.keeper_name, Quests.choice_line(shop.id), answers)
+		return
 	if shop.greetings.is_empty():
 		_menu.open(shop)
 		return
 	# One greeting a day: the same line all day, a new one tomorrow.
 	_opens_after = shop
 	var lines: Array[String] = [shop.greetings[GameState.day % shop.greetings.size()]]
+	_dialogue.say(shop.keeper_name, lines)
+
+
+## The player picked one of the keeper's orders, or none (the last answer).
+func _on_order_chosen(index: int) -> void:
+	if _asking == null:
+		return  # someone else's question
+	var shop := _asking
+	var offers := _offers
+	_asking = null
+	_offers = []
+	_opens_after = shop
+	if index < offers.size():
+		_dialogue.say(shop.keeper_name, Quests.take(offers[index]))
+		return
+	Quests.decline(shop.id)
+	var lines: Array[String] = ["Another time, then."]
 	_dialogue.say(shop.keeper_name, lines)
 
 

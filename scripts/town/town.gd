@@ -59,6 +59,11 @@ var _stall_nodes: Dictionary = {}  # StringName -> Array[Node]
 ## each market keeper's, by shop id.
 var _markers: Dictionary = {}  # StringName -> Label
 
+## The board's job, waiting to be offered once its notices have been read,
+## and while the player is choosing whether to take it (DECISIONS 050).
+var _board_offers: Array[QuestDef] = []
+var _asking_at_board: Array[QuestDef] = []
+
 
 func _ready() -> void:
 	_player.can_farm = false
@@ -78,6 +83,7 @@ func _ready() -> void:
 				def.door_cell.x * TILE_PX + TILE_PX / 2.0, (def.door_cell.y + 2) * TILE_PX - 2))
 	_add_spawn(&"from_farm", TownLayout.ARRIVAL_FROM_FARM)
 	_place_objects()
+	_mark_notice_board()
 	_place_townsfolk()
 	_place_stalls()
 	_add_farm_gate()
@@ -88,6 +94,10 @@ func _ready() -> void:
 	_counter = ShopCounter.new(_dialogue, _menu)
 	EventBus.npc_talked_to.connect(_on_npc_talked_to)
 	EventBus.notice_board_read.connect(_on_notice_board_read)
+	_dialogue.finished.connect(func() -> void: _offer_board_job())
+	_dialogue.chosen.connect(_on_board_job_chosen)
+	# Turning orders down takes the "!" away (Rosa's or the board's).
+	_dialogue.chosen.connect(func(_i: int) -> void: _refresh_markers.call_deferred())
 	EventBus.time_changed.connect(func(_m: int) -> void: _pack_up_closed_stalls())
 	for signal_ref: Signal in [EventBus.quest_started, EventBus.quest_completed, EventBus.item_added,
 			EventBus.item_removed]:
@@ -136,6 +146,13 @@ func _place_townsfolk() -> void:
 		var npc := Npc.create(person.id, person.sprite, person.spot_on(GameState.day))
 		_entities.add_child(npc)
 		_markers[person.id] = npc.add_quest_marker()
+
+
+## The board's daily job (DECISIONS 050) gets a "!" or "?" like a person's.
+func _mark_notice_board() -> void:
+	for board in get_tree().get_nodes_in_group(&"notice_board"):
+		if is_ancestor_of(board):
+			_markers[Quests.BOARD] = Npc.quest_marker_on(board, board.MARKER_HEIGHT)
 
 
 ## Ask the Quests service what each townsperson's marker should say now.
@@ -234,5 +251,43 @@ func _on_npc_talked_to(npc_id: StringName) -> void:
 	_dialogue.say(person.display_name, lines)
 
 
+## Reading the board: first the day's job, if one is in hand (handed in at
+## the board if it's ready, or a reminder), then the notices, then, if
+## today's job hasn't been taken, whether to take it (DECISIONS 050).
 func _on_notice_board_read() -> void:
-	_dialogue.say("Notice board", Notices.today())
+	var lines := Quests.talk(Quests.BOARD)
+	lines.append_array(Notices.today())
+	_board_offers = Quests.orders_on_offer(Quests.BOARD)
+	_dialogue.say("Notice board", lines)
+
+
+## After the notices: the job, if there's one to take.
+func _offer_board_job() -> void:
+	var offers := _board_offers
+	_board_offers = []
+	if offers.is_empty():
+		return
+	_asking_at_board = offers
+	var answers: Array[String] = []
+	for order in offers:
+		answers.append("Take it: " + Quests.order_choice_text(order))
+	answers.append("Leave it")
+	var question := Quests.choice_line(Quests.BOARD)
+	if offers.size() == 1:
+		question = offers[0].offer_lines[0] if not offers[0].offer_lines.is_empty() else question
+	_dialogue.ask("Help wanted", question, answers)
+
+
+func _on_board_job_chosen(index: int) -> void:
+	var offers := _asking_at_board
+	_asking_at_board = []
+	if offers.is_empty():
+		return  # a shopkeeper's question, answered by the ShopCounter
+	if index >= offers.size():
+		Quests.decline(Quests.BOARD)
+		return
+	var lines := Quests.take(offers[index])
+	# The offer line was the question; the rest says it's taken.
+	if lines.size() > 1:
+		lines = lines.slice(1)
+	_dialogue.say("Notice board", lines)

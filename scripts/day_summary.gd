@@ -110,6 +110,10 @@ static func news_for(r: DayRecord) -> Array[String]:
 	var pests := pests_warning()
 	if pests != "":
 		news.append(pests)
+	# Requests that ran out in the night, and today's orders (DECISIONS 050).
+	for title in r.quests_expired:
+		news.append("Out of time: %s. That request has gone." % title)
+	news.append_array(Quests.order_news_today())
 	var names: Array[String] = []
 	for giver in Quests.givers_new_today():
 		names.append(Quests.giver_name(giver))

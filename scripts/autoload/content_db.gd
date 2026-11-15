@@ -33,6 +33,8 @@ extends Node
 ##                   a request's reward or the calendar (DECISIONS 043)
 ##   data/weather/   WeatherDef — kinds of day: sunny, rain, storm… Each
 ##                   season's odds (SeasonTheme) choose among them (DECISIONS 046)
+##   data/orders/    OrderTemplate — patterns for requests made fresh each day:
+##                   Rosa's market orders, the notice board's jobs (DECISIONS 050)
 ##
 
 const CROPS_DIR := "res://data/crops/"
@@ -44,6 +46,7 @@ const EVENTS_DIR := "res://data/events/"
 const QUESTS_DIR := "res://data/quests/"
 const UNLOCKS_DIR := "res://data/unlocks/"
 const WEATHER_DIR := "res://data/weather/"
+const ORDERS_DIR := "res://data/orders/"
 
 ## For checking crops name real seasons. Read directly rather than through
 ## GameState, because ContentDB starts first.
@@ -58,6 +61,7 @@ var _events: Dictionary = {}  # StringName -> CalendarEvent
 var _quests: Dictionary = {}  # StringName -> QuestDef
 var _unlocks: Dictionary = {}  # StringName -> UnlockDef
 var _weathers: Dictionary = {}  # StringName -> WeatherDef
+var _orders: Dictionary = {}  # StringName -> OrderTemplate
 
 
 func _ready() -> void:
@@ -71,13 +75,15 @@ func _ready() -> void:
 	_index(QUESTS_DIR, _quests)
 	_index(UNLOCKS_DIR, _unlocks)
 	_index(WEATHER_DIR, _weathers)
+	_index(ORDERS_DIR, _orders)
 	_check()
 	_check_quests()
 	_check_unlocks()
 	_check_weather()
-	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers"
+	_check_orders()
+	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers, %d order patterns"
 			% [_crops.size(), _items.size(), _objects.size(), _upgrades.size(), _characters.size(),
-			_events.size(), _quests.size(), _unlocks.size(), _weathers.size()])
+			_events.size(), _quests.size(), _unlocks.size(), _weathers.size(), _orders.size()])
 
 
 ## The crop with this id, or null if there isn't one (for example, a save from
@@ -162,6 +168,29 @@ func quests() -> Array[QuestDef]:
 		return String(a.id) < String(b.id)
 	)
 	return result
+
+
+## The order pattern with this id, or null.
+func order_template(id: StringName) -> OrderTemplate:
+	return _orders.get(id)
+
+
+## Every order pattern, by id (as Strings, so the order never changes between
+## runs): the dice that pick between them must see them in the same order.
+func order_templates() -> Array[OrderTemplate]:
+	var result: Array[OrderTemplate] = []
+	for each: OrderTemplate in _orders.values():
+		result.append(each)
+	result.sort_custom(func(a: OrderTemplate, b: OrderTemplate) -> bool: return String(a.id) < String(b.id))
+	return result
+
+
+## The crop whose harvest is `item`, or null if nothing grows it (fibre).
+func crop_giving(item: ItemDef) -> CropDef:
+	for each: CropDef in _crops.values():
+		if each.produce == item:
+			return each
+	return null
 
 
 ## The unlock with this id, or null.
@@ -635,3 +664,33 @@ func _check_weather() -> void:
 			if day_of_season < 1 or day_of_season > RULES.days_per_season:
 				push_error("ContentDB: '%s' fixes the weather on day %d, which its season doesn't have"
 						% [theme.resource_path, day_of_season])
+
+
+## Order patterns (DECISIONS 050): each must be posted somewhere that can
+## take it in, ask for real items, and ask for at least one of something.
+func _check_orders() -> void:
+	for each: OrderTemplate in _orders.values():
+		var where := each.resource_path
+		if each.posted_at != &"notice_board" and character(each.posted_at) == null \
+				and shop(each.posted_at) == null:
+			push_error("ContentDB: '%s' is posted at '%s', which isn't &\"notice_board\", a townsperson or a shop"
+					% [where, each.posted_at])
+		if each.items.is_empty():
+			push_error("ContentDB: '%s' has no items, so it never asks for anything" % where)
+		for wanted in each.items:
+			if wanted == null or item(wanted.id) != wanted:
+				push_error("ContentDB: '%s' asks for an item that isn't in data/produce/ or data/tools/" % where)
+			elif wanted.sell_price <= 0 and each.bonus_gold <= 0:
+				push_warning("ContentDB: '%s' asks for %s, which sells for nothing, so the order pays nothing"
+						% [where, wanted.id])
+		if each.count_min < 1 or each.count_max < each.count_min:
+			push_error("ContentDB: '%s' needs 1 <= count_min <= count_max" % where)
+		if each.choices < 1:
+			push_error("ContentDB: '%s' offers fewer than one choice, so it's never offered" % where)
+		if each.deadline_days < 1:
+			push_warning("ContentDB: '%s' has no deadline, so an order never runs out" % where)
+		if each.title == "" or each.offer_line == "":
+			push_warning("ContentDB: '%s' has no title or offer_line" % where)
+		if each.on_event != &"" and event(each.on_event) == null:
+			push_error("ContentDB: '%s' is offered on '%s', which isn't in %s" % [where, each.on_event, EVENTS_DIR])
+		_is_unknown_unlock(each.requires_unlock, where, "waits for")

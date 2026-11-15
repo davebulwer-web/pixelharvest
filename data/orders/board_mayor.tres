@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="OrderTemplate" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/order_template.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_t"]
+[ext_resource type="Resource" path="res://data/unlocks/board_jobs.tres" id="3_t"]
+[ext_resource type="Resource" path="res://data/produce/tulip.tres" id="4_i"]
+[ext_resource type="Resource" path="res://data/produce/sunflower.tres" id="5_i"]
+[ext_resource type="Resource" path="res://data/produce/snowdrop.tres" id="6_i"]
+
+[resource]
+script = ExtResource("1_t")
+id = &"board_mayor"
+posted_at = &"notice_board"
+client = "the mayor"
+title = "Help wanted: {count} {item} for the mayor"
+choice_line = ""
+offer_line = "The mayor wants {count} {item} for the town hall today. Leave them in the crate under the board: {gold}g."
+reminder_line = "The mayor's {count} {item}, by tonight."
+thanks_line = "You leave the flowers in the crate under the board. The mayor's {gold}g is pinned up waiting."
+news_line = "There's a job on the notice board today."
+items = Array[ExtResource("2_t")]([ExtResource("4_i"), ExtResource("5_i"), ExtResource("6_i")])
+count_min = 2
+count_max = 4
+max_value = 300
+pay_rate = 1.4
+bonus_gold = 10
+deadline_days = 1
+choices = 1
+weight = 1
+first_day = 1
+on_event = &""
+requires_unlock = ExtResource("3_t")

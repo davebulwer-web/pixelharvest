@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_any_goal.gd" id="2_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="3_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="4_r"]
+[ext_resource type="Resource" path="res://data/unlocks/rosa_orders.tres" id="5_r"]
+[ext_resource type="Resource" path="res://data/produce/parsnip.tres" id="6_i"]
+[ext_resource type="Resource" path="res://data/produce/radish.tres" id="7_i"]
+[ext_resource type="Resource" path="res://data/produce/potato.tres" id="8_i"]
+[ext_resource type="Resource" path="res://data/produce/spring_onion.tres" id="9_i"]
+[ext_resource type="Resource" path="res://data/produce/pea.tres" id="10_i"]
+[ext_resource type="Resource" path="res://data/produce/garlic.tres" id="11_i"]
+[ext_resource type="Resource" path="res://data/produce/kale.tres" id="12_i"]
+[ext_resource type="Resource" path="res://data/produce/tomato.tres" id="13_i"]
+[ext_resource type="Resource" path="res://data/produce/green_bean.tres" id="14_i"]
+[ext_resource type="Resource" path="res://data/produce/corn.tres" id="15_i"]
+[ext_resource type="Resource" path="res://data/produce/watercress.tres" id="16_i"]
+[ext_resource type="Resource" path="res://data/produce/chilli.tres" id="17_i"]
+[ext_resource type="Resource" path="res://data/produce/cabbage.tres" id="18_i"]
+[ext_resource type="Resource" path="res://data/produce/beetroot.tres" id="19_i"]
+[ext_resource type="Resource" path="res://data/produce/leek.tres" id="20_i"]
+[ext_resource type="Resource" path="res://data/produce/brussels_sprouts.tres" id="21_i"]
+[ext_resource type="Resource" path="res://data/produce/pumpkin.tres" id="22_i"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+amount = 8
+items = Array[ExtResource("3_r")]([ExtResource("6_i"), ExtResource("7_i"), ExtResource("8_i"), ExtResource("9_i"), ExtResource("10_i"), ExtResource("11_i"), ExtResource("12_i"), ExtResource("13_i"), ExtResource("14_i"), ExtResource("15_i"), ExtResource("16_i"), ExtResource("17_i"), ExtResource("18_i"), ExtResource("19_i"), ExtResource("20_i"), ExtResource("21_i"), ExtResource("22_i")])
+what = "vegetables"
+
+[resource]
+script = ExtResource("1_r")
+id = &"rosa_first_crate"
+title = "Rosa's first crate"
+giver = &"market_grocer"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["You're the one who took on the old farm! I've a buyer in the city who wants country vegetables, and I want to know if yours are up to it.", "Bring me a crate: eight vegetables, any mix. If the city likes them, I'll take orders from you every market day."])
+reminder_line = "Eight vegetables for my crate, any mix you like."
+thanks_lines = Array[String](["Now that's a crate. The city will take every one.", "From next market day, come and see what they're asking for. I'll pay you well for it."])
+reward_gold = 60
+reward_unlocks = Array[ExtResource("4_r")]([ExtResource("5_r")])
+first_day = 10
+on_event = &"market_day"

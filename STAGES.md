@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 13 — questlines.** Session 1 (new request kinds, the lines as data, Ivy, the mayor's bridge and Hollis's sets) is built, waiting for Dave to try it; session 2 is deadlines, Rosa's market orders and the notice board's daily jobs. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
+**Current stage: 13 — questlines.** Session 1 (new request kinds, the lines as data, Ivy, the mayor's bridge and Hollis's sets) is tested and committed by Dave (2026-11-15). Session 2 (deadlines, Rosa's market orders, the notice board's daily jobs; save version 14) is built, waiting for Dave to try it. After that: Ivy's Pixellab art, and Dave plays a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -636,12 +636,29 @@ ROADMAP section 5.
       any-of hand-ins; a real giant pumpkin grown and picked; Ivy's arrival; Hollis's and
       Fennel's shelves; a half-paid bridge through a save; saves v1–v12), rendered town with
       Ivy, the glasshouse and the request log
+- [x] Dave confirms it plays correctly on Windows (tested and committed 2026-11-15)
+
+**Session 2 — repeatable requests** (2026-11-15, DECISIONS 050, save version 14)
+
+- [x] Deadlines (`deadline_days` on a request: it runs out overnight, no penalty but the
+      lost reward; the request log, reminders and the morning summary say when, and what ran out)
+- [x] Order patterns (`OrderTemplate`, `data/orders/`): requests made fresh each day from a
+      list of items, picking only what's in season and on sale, paying a multiple of the bin
+- [x] Rosa: her first crate (8 vegetables, any mix, market day from spring day 10) opens her
+      market orders (`rosa_orders`): three to choose from each market day, 150% of the bin,
+      due by the next market day
+- [x] The notice board's daily job from spring day 8 (`board_jobs`): one a day for Marlow,
+      Mabel, Brann (fibre) or the mayor (flowers), due that night, handed in at the board,
+      which wears a "!" or "?" like a person
+- [x] The dialogue box can ask a question with answers to pick (W/S, E; Esc says no)
+- [x] Save version 14 (deadlines, orders, orders handed in); `tests/saves/v13_example.json`
+- [x] Verified in the sandbox: headless import and run clean, 539 harness checks (a board job
+      every day for a year, in season and under its caps; the same offers however often asked;
+      taking, reminding, handing in, turning down, running out through real nights; Rosa's
+      crate and orders in every season; an order through a save and load; a written request
+      with a deadline; the question box's keys; saves v1–v13), rendered Rosa's choice, the new
+      request, her menu after, the board's job and the request log with due days
 - [ ] Dave confirms it plays correctly on Windows
-
-**Session 2 — repeatable requests**
-
-- [ ] Deadlines (`deadline_days` on a request: it expires, no penalty but the lost reward)
-- [ ] Rosa's market orders and the notice board's daily jobs, from templates
 - [ ] Pixellab: Ivy (and the ruined glasshouse)
 - [ ] Dave plays a full year
 

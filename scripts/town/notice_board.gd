@@ -8,12 +8,19 @@ extends StaticBody2D
 ## announces that it was read (EventBus.notice_board_read), so Stage 8's
 ## quests and market days can add their own notices without touching it.
 ##
+## Since DECISIONS 050 it also posts a small job each day, and takes it in:
+## the town hangs a "!" or "?" over it like over a person (Quests.BOARD).
+##
 
 const TILE_PX := 16
+
+## How high its request marker floats above its base: just over the board.
+const MARKER_HEIGHT := 46
 
 
 func _ready() -> void:
 	add_to_group(&"interactable")
+	add_to_group(&"notice_board")
 
 
 ## The board is two tiles wide, so facing its own cell or either neighbour

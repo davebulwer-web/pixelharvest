@@ -12,6 +12,11 @@ extends Resource
 ## Accepting is just listening: the giver says their piece, the request goes
 ## in the log (J), and they remind you of it until it's done.
 ##
+## Not every QuestDef is a file: Rosa's market orders and the notice board's
+## daily jobs are made fresh each day from an OrderTemplate (DECISIONS 050),
+## as QuestDefs like these, so everything that shows or counts requests
+## treats them the same.
+##
 ## What's saved is only which requests have been taken and finished, and a
 ## running count for each (GameState.quests); this file can change freely.
 ##
@@ -66,6 +71,14 @@ extends Resource
 
 ## Not offered until this is earned (DECISIONS 043). Null: no wait.
 @export var requires_unlock: UnlockDef
+
+## How many days the player has to do it once it's taken, counting the day
+## it's taken (DECISIONS 050): 1 means "by tonight", 8 "by the end of next
+## week's market day". 0: no deadline. When it runs out the request is
+## simply gone overnight: no penalty, only the reward missed. A request that
+## ran out isn't asked again (Rosa's orders and the board's jobs are new
+## requests each time, so they keep coming).
+@export var deadline_days: int = 0
 
 
 ## "150g, 5 potato seeds and Hollis's spring seeds", or "" for no reward.

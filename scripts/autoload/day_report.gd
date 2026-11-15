@@ -42,6 +42,8 @@ func _ready() -> void:
 	EventBus.shipment_sold.connect(func(gold: int) -> void: today.bin_sales += gold)
 	EventBus.items_sold_to_shop.connect(func(_id: StringName, _n: int, gold: int) -> void: today.shop_sales += gold)
 	EventBus.quest_completed.connect(func(id: StringName) -> void: today.quests_done.append(id))
+	# Requests run out in the night (DECISIONS 050), before day_started.
+	EventBus.quest_expired.connect(func(_id: StringName, title: String) -> void: today.quests_expired.append(title))
 	# Overnight ones arrive before day_started closes the record, so the
 	# morning's summary includes what the calendar opened.
 	EventBus.unlocked.connect(func(id: StringName) -> void: today.unlocked.append(id))

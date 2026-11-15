@@ -160,6 +160,11 @@ signal quest_progressed(quest_id: StringName, progress: int, needed: int)
 ## A request was handed in and its reward given.
 signal quest_completed(quest_id: StringName)
 
+## A request with a deadline ran out overnight, untouched but for the reward
+## missed (DECISIONS 050). `title` is its name in the log, because an order's
+## QuestDef is cleared away by the morning and couldn't be looked up then.
+signal quest_expired(quest_id: StringName, title: String)
+
 ## Something opened up (an UnlockDef id), from a request's reward or the
 ## calendar overnight (DECISIONS 043). The day's summary lists it.
 signal unlocked(unlock_id: StringName)

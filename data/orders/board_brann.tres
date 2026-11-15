@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="OrderTemplate" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/order_template.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_t"]
+[ext_resource type="Resource" path="res://data/unlocks/board_jobs.tres" id="3_t"]
+[ext_resource type="Resource" path="res://data/produce/fibre.tres" id="4_i"]
+
+[resource]
+script = ExtResource("1_t")
+id = &"board_brann"
+posted_at = &"notice_board"
+client = "Brann"
+title = "Help wanted: {count} fibre for Brann"
+choice_line = ""
+offer_line = "Brann wants {count} fibre for rope at the forge, today. Weeds pulled on the farm give it. Leave it in the crate under the board: {gold}g."
+reminder_line = "Brann's {count} fibre for rope, by tonight."
+thanks_line = "You leave the fibre in the crate under the board. Brann's {gold}g is pinned up waiting."
+news_line = "There's a job on the notice board today."
+items = Array[ExtResource("2_t")]([ExtResource("4_i")])
+count_min = 8
+count_max = 16
+max_value = 0
+pay_rate = 3.0
+bonus_gold = 25
+deadline_days = 1
+choices = 1
+weight = 1
+first_day = 1
+on_event = &""
+requires_unlock = ExtResource("3_t")

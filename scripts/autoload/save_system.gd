@@ -21,7 +21,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 13, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 14, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -62,7 +62,11 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##  13 — crops with rules, session 2 (DECISIONS 048): a crop can have aphids
 ##       ("pests") and be a giant ("giant"), both left out when false; and
 ##       every farmer has a trowel, so older games are given one.
-const CURRENT_VERSION := 13
+##  14 — repeatable requests (DECISIONS 050): a request may have a day it's
+##       due by ("due") and run out ("expired"); orders made from patterns
+##       (Rosa's, the board's) keep what they were made of ("order"); and
+##       "orders_done" counts the orders handed in. Older games have none.
+const CURRENT_VERSION := 14
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -269,6 +273,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_11_to_12(data["game"])
 			12:
 				_upgrade_12_to_13(data["game"])
+			13:
+				_upgrade_13_to_14(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -514,3 +520,10 @@ func _upgrade_12_to_13(game: Dictionary) -> void:
 		if typeof(inventory[i]) == TYPE_DICTIONARY and inventory[i].get("id") == V13_AFTER:
 			at = i + 1
 	inventory.insert(at, {"id": V13_TROWEL, "count": 1})
+
+
+## Version 13 -> 14: deadlines and orders (DECISIONS 050). An older game's
+## requests had no deadlines, so its entries already read correctly; it has
+## handed in no orders yet.
+func _upgrade_13_to_14(game: Dictionary) -> void:
+	game["orders_done"] = 0

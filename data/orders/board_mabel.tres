@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="OrderTemplate" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/order_template.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_t"]
+[ext_resource type="Resource" path="res://data/unlocks/board_jobs.tres" id="3_t"]
+[ext_resource type="Resource" path="res://data/produce/strawberry.tres" id="4_i"]
+[ext_resource type="Resource" path="res://data/produce/blueberry.tres" id="5_i"]
+[ext_resource type="Resource" path="res://data/produce/rhubarb.tres" id="6_i"]
+[ext_resource type="Resource" path="res://data/produce/cranberry.tres" id="7_i"]
+[ext_resource type="Resource" path="res://data/produce/pumpkin.tres" id="8_i"]
+[ext_resource type="Resource" path="res://data/produce/potato.tres" id="9_i"]
+[ext_resource type="Resource" path="res://data/produce/parsnip.tres" id="10_i"]
+[ext_resource type="Resource" path="res://data/produce/leek.tres" id="11_i"]
+
+[resource]
+script = ExtResource("1_t")
+id = &"board_mabel"
+posted_at = &"notice_board"
+client = "Mabel"
+title = "Help wanted: {count} {item} for Mabel"
+choice_line = ""
+offer_line = "Mabel's baking for a wedding and has run short: {count} {item}, today please. Leave them in the crate under the board: {gold}g."
+reminder_line = "Mabel's {count} {item} for the wedding baking, by tonight."
+thanks_line = "You leave the {item} in the crate under the board. {client}'s {gold}g is pinned up waiting."
+news_line = "There's a job on the notice board today."
+items = Array[ExtResource("2_t")]([ExtResource("4_i"), ExtResource("5_i"), ExtResource("6_i"), ExtResource("7_i"), ExtResource("8_i"), ExtResource("9_i"), ExtResource("10_i"), ExtResource("11_i")])
+count_min = 2
+count_max = 5
+max_value = 400
+pay_rate = 1.4
+bonus_gold = 15
+deadline_days = 1
+choices = 1
+weight = 2
+first_day = 1
+on_event = &""
+requires_unlock = ExtResource("3_t")

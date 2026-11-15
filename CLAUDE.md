@@ -137,6 +137,8 @@ data/                Content resources (.tres), indexed by ContentDB
   audio/             SoundBank — what each sound the game plays sounds like (DECISIONS 042)
   unlocks/           UnlockDef — things that open up over time, from a request or a date
                      (DECISIONS 043); content waits for one with `requires_unlock`
+  orders/            OrderTemplate — patterns for requests made fresh each day: Rosa's
+                     market orders, the notice board's daily jobs (DECISIONS 050)
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
                      farm/ the farmhouse and its furniture, decorations/ the farm's decorations)

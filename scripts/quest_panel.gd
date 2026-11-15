@@ -60,6 +60,10 @@ func _refresh() -> void:
 		var missing := "" if Quests.is_ready(quest) else quest.goal.still_needed(GameState.inventory)
 		if missing != "" and done > 0:
 			what = "Still to find: %s" % missing
+		# A deadline (DECISIONS 050): "Due today", "Due in 5 days (…)".
+		var due := Quests.due_text(quest)
+		if due != "":
+			status += ".  Due %s" % due
 		_add_line("%s.  %s" % [what, status], 8, UiStyle.TEXT_DIM)
 	var finished := GameState.quests.done_count()
 	if finished > 0:

@@ -1831,3 +1831,67 @@ chilli). The first year now has a request somewhere in every season.
 already past spring, rhubarb waits for next spring's set). An unfinished set waits a
 whole year for its season to come round again. The bridge's unlock does nothing visible
 until Stage 14 builds the Woods. Placeholder art for Ivy and the glasshouse.
+
+## 050 — Repeatable requests: deadlines, order patterns, Rosa's orders and the board's jobs
+
+**Decision.** Stage 13 session 2 adds the requests that come round again: Rosa's market
+orders and a small job a day on the notice board, with deadlines.
+
+- *Deadlines* are one field, `QuestDef.deadline_days`: how many days the player has,
+  counting the day it's taken (1 = by tonight). Taking it records the day it's due in the
+  log (`QuestLog` entry `"due"`). At step 1 of the night (`day_ended`) anything due today
+  and still in hand runs out (`EXPIRED`, EventBus `quest_expired`): no penalty, only the
+  reward missed, and a written request that ran out isn't asked again. The request log,
+  the giver's reminder and the "New request" line say when it's due; the morning summary
+  says what ran out ("Out of time: …").
+- *Order patterns* (`OrderTemplate`, `data/orders/`, indexed by ContentDB): who posts
+  them (`posted_at`: a shop id, or `&"notice_board"`), the words with {count} {item}
+  {gold} {client} filled in, a list of items, a count range capped by bin value
+  (`max_value`, so nobody asks for six pumpkins), what they pay (`pay_rate` × the bin
+  price at the game's difficulty, + `bonus_gold`), the deadline, how many to choose
+  between (`choices`), a `weight`, and when (`first_day`, `on_event`, `requires_unlock`).
+  Of the items, only those in season are asked for: produce of a crop growing this season
+  whose seeds the player can buy (unlocked, priced), and anything nobody grows (fibre).
+- *Each day each place picks one of its patterns* (by weight) and puts up `choices`
+  orders for different items. The Quests service builds each as an ordinary `QuestDef`
+  (a `DeliverGoal`) with an id like `rosa_orders@17#2`, so the log, the markers, handing
+  in, rewards and the summary need nothing new. What's on offer is drawn with dice seeded
+  by the place and the date: the same however often you ask, and loading the morning's
+  save changes nothing. Taking one takes the others off the table for the day.
+- *Saving an order*: there's no file to look it up by, so its log entry also keeps what
+  it was made of (`"order"`: pattern, item, count, gold, day) and the Quests service
+  builds it again on load (`Quests.find`). Finished and expired orders are cleared away
+  each morning, so the save doesn't grow by a line a day; `orders_done` counts them.
+  **Save version 14**; older saves need nothing but `orders_done = 0`.
+- *Rosa*: her first crate (8 vegetables, any mix: `DeliverAnyGoal` gains `what`, a word
+  for a list too long to read out), market day from spring day 10 → 60g and the unlock
+  `rosa_orders`. Then each market day she offers three orders: 4–10 of something (at most
+  700g at the bin), at 150% of the bin, due by the end of next market day (8 days). Her
+  stall pays 125% for anything, today; an order pays more for planning a week ahead.
+- *The notice board*, from spring day 8 (`board_jobs`): one job a day, due that night,
+  from Marlow (vegetables), Mabel (fruit and baking vegetables), Brann (8–16 fibre, at
+  3× the bin + 25g, since fibre is near worthless) or the mayor (flowers). It's taken and
+  handed in at the board itself ("leave them in the crate under the board"), so the
+  board wears the same "!" and "?" as a person (`Npc.quest_marker_on`).
+- *Choosing* needed a question: `DialogueBox.ask(speaker, question, answers)` and its
+  `chosen` signal. W/S or the arrows move, E/Space/Enter picks, Esc picks the last answer
+  (always "Not this time" / "Leave it"). Turning orders down hides them for the rest of
+  the day (not saved), so Rosa doesn't ask every time you want to sell her something.
+
+Options considered: handing a board job to the person it's for (Marlow in his shop):
+one giver would then have two requests open at once (his own and the job), which breaks
+"one at a time" and needs a choice of which to hand in; shops also close in the evening,
+and a job is due that night. The board as the giver keeps both simple. For orders:
+writing every order as a `.tres` (dozens of files, and nothing in season-picking);
+or saving today's offers (a bigger save, and a reload could be rerolled anyway unless
+saved) instead of seeding by date. Seeding by date means every game sees the same
+orders on the same day; that's acceptable for now and easy to change (add a saved seed).
+
+**Why.** ROADMAP 5.7 and 5.9: once the story lines wait on growth, every market day and
+every morning still has something worth a trip to town. Rule 3 holds: a new kind of job
+(Wren wants worms, once there are worms) is one `.tres` in `data/orders/`.
+
+**Cost.** Orders are deliveries only (no "catch" or "forage" yet; Stages 14–15 can add
+patterns with other goals). The board's job can't be planned for: it asks for what you
+might have in hand, which is the point. Brann's fibre job depends on weeds, so a very
+tidy farm can't do it.

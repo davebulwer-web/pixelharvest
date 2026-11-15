@@ -12,8 +12,15 @@ extends QuestGoal
 ## The items that will do. Any mix of them counts.
 @export var items: Array[ItemDef] = []
 
+## What to call them all, when the list is too long to read out: "vegetables"
+## gives "Bring 8 vegetables, any mix" (Rosa's first crate, DECISIONS 050).
+## Empty: the items are named.
+@export var what: String = ""
+
 
 func describe() -> String:
+	if what != "":
+		return "Bring %d %s (any mix)" % [amount, what]
 	var names: Array[String] = []
 	for item in items:
 		names.append(plural(item.display_name if item != null else "?", amount))

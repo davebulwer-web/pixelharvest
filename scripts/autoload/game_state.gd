@@ -594,6 +594,7 @@ func to_save() -> Dictionary:
 		"location": String(location),
 		"farm": farm.to_save(),
 		"quests": quests.to_save(),
+		"orders_done": quests.orders_done,
 		"unlocks": unlocks.map(func(id: StringName) -> String: return String(id)),
 		"weather": String(weather_id()),
 		"forecast": String(forecast.id) if forecast != null else "",
@@ -648,6 +649,9 @@ func load_from_save(data: Dictionary) -> void:
 
 	farm = FarmData.from_save(data["farm"])
 	quests = QuestLog.from_save(data["quests"])
+	# Orders handed in (save version 14, DECISIONS 050): their entries are
+	# cleared away each morning, so the count is kept on its own.
+	quests.orders_done = int(data.get("orders_done", 0))
 
 	# Unlocks are kept by name even if no UnlockDef has it any more: it does
 	# nothing then, and it's there again if the file comes back.

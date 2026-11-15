@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="OrderTemplate" load_steps=21 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/order_template.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_t"]
+[ext_resource type="Resource" path="res://data/unlocks/board_jobs.tres" id="3_t"]
+[ext_resource type="Resource" path="res://data/produce/parsnip.tres" id="4_i"]
+[ext_resource type="Resource" path="res://data/produce/radish.tres" id="5_i"]
+[ext_resource type="Resource" path="res://data/produce/potato.tres" id="6_i"]
+[ext_resource type="Resource" path="res://data/produce/spring_onion.tres" id="7_i"]
+[ext_resource type="Resource" path="res://data/produce/pea.tres" id="8_i"]
+[ext_resource type="Resource" path="res://data/produce/garlic.tres" id="9_i"]
+[ext_resource type="Resource" path="res://data/produce/kale.tres" id="10_i"]
+[ext_resource type="Resource" path="res://data/produce/tomato.tres" id="11_i"]
+[ext_resource type="Resource" path="res://data/produce/green_bean.tres" id="12_i"]
+[ext_resource type="Resource" path="res://data/produce/corn.tres" id="13_i"]
+[ext_resource type="Resource" path="res://data/produce/watercress.tres" id="14_i"]
+[ext_resource type="Resource" path="res://data/produce/chilli.tres" id="15_i"]
+[ext_resource type="Resource" path="res://data/produce/cabbage.tres" id="16_i"]
+[ext_resource type="Resource" path="res://data/produce/beetroot.tres" id="17_i"]
+[ext_resource type="Resource" path="res://data/produce/leek.tres" id="18_i"]
+[ext_resource type="Resource" path="res://data/produce/brussels_sprouts.tres" id="19_i"]
+[ext_resource type="Resource" path="res://data/produce/pumpkin.tres" id="20_i"]
+
+[resource]
+script = ExtResource("1_t")
+id = &"board_marlow"
+posted_at = &"notice_board"
+client = "Marlow"
+title = "Help wanted: {count} {item} for Marlow"
+choice_line = ""
+offer_line = "Marlow at the general store needs {count} {item} today. Leave them in the crate under the board by tonight: {gold}g."
+reminder_line = "Marlow's {count} {item}, in the crate under the board by tonight."
+thanks_line = "You leave the {item} in the crate under the board. {client}'s {gold}g is pinned up waiting."
+news_line = "There's a job on the notice board today."
+items = Array[ExtResource("2_t")]([ExtResource("4_i"), ExtResource("5_i"), ExtResource("6_i"), ExtResource("7_i"), ExtResource("8_i"), ExtResource("9_i"), ExtResource("10_i"), ExtResource("11_i"), ExtResource("12_i"), ExtResource("13_i"), ExtResource("14_i"), ExtResource("15_i"), ExtResource("16_i"), ExtResource("17_i"), ExtResource("18_i"), ExtResource("19_i"), ExtResource("20_i")])
+count_min = 3
+count_max = 6
+max_value = 360
+pay_rate = 1.4
+bonus_gold = 10
+deadline_days = 1
+choices = 1
+weight = 3
+first_day = 1
+on_event = &""
+requires_unlock = ExtResource("3_t")

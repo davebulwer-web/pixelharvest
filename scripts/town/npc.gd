@@ -58,16 +58,22 @@ func _ready() -> void:
 ## scene sets its text from Quests.marker_for(). Townsfolk in town and
 ## shopkeepers behind a counter or stall wear the same one (DECISIONS 044).
 func add_quest_marker() -> Label:
+	return quest_marker_on(self, MARKER_HEIGHT)
+
+
+## The same marker on anything standing on a map, floating `height` pixels
+## above its base: the notice board wears one for its daily job (DECISIONS 050).
+static func quest_marker_on(node: Node2D, height: int) -> Label:
 	var marker := Label.new()
 	marker.name = "QuestMarker"
 	marker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	marker.size = Vector2(16, 14)
-	marker.position = Vector2(-8, -MARKER_HEIGHT)
+	marker.position = Vector2(-8, -height)
 	UiStyle.style_label(marker, 12, UiStyle.HIGHLIGHT)
-	add_child(marker)
+	node.add_child(marker)
 	var bob := marker.create_tween().set_loops()
-	bob.tween_property(marker, ^"position:y", -MARKER_HEIGHT - 2.0, 0.5).set_trans(Tween.TRANS_SINE)
-	bob.tween_property(marker, ^"position:y", float(-MARKER_HEIGHT), 0.5).set_trans(Tween.TRANS_SINE)
+	bob.tween_property(marker, ^"position:y", -height - 2.0, 0.5).set_trans(Tween.TRANS_SINE)
+	bob.tween_property(marker, ^"position:y", float(-height), 0.5).set_trans(Tween.TRANS_SINE)
 	return marker
 
 
