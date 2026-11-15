@@ -31,6 +31,11 @@ extends Resource
 ## picture its scene was built with.
 @export var object_sprites: Dictionary[StringName, Texture2D] = {}
 
-## Optional scene added to the farm while this season lasts, such as winter's
-## cold tint and falling snow (scenes/snowfall.tscn). Empty for none.
+## Optional scene added to the farm and town while this season lasts, such as
+## winter's falling snow (scenes/snowfall.tscn). Empty for none.
 @export var overlay: PackedScene
+
+## A colour the whole outdoor world is multiplied by this season — white for
+## none, a pale blue for winter's chill. Daylight combines it with the time
+## of day's colour (DECISIONS 036), since a scene can only have one tint.
+@export var light_tint: Color = Color.WHITE

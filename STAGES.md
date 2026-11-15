@@ -314,8 +314,18 @@ Session 4 (2026-11-15) — the clock and shop opening hours. See DECISIONS 035.
 - [x] Dave confirms it plays correctly on Windows (2026-11-15, committed)
 - [x] Dave confirms the closed-door snag fix (2026-11-15)
 
-**For later:** no evening light yet (midnight looks like noon); a tint listening for
-`time_changed` would do it. Townsfolk still stand in one spot all day.
+Evening light (2026-11-15) — see DECISIONS 036.
+
+- [x] Farm and town darken with the clock (golden at 6:30 PM, dusk at 8, night from 11);
+      interiors stay lit; colours editable on `scenes/daylight.tscn`
+- [x] Winter's chill moved into `SeasonTheme.light_tint` (one tint per scene)
+- [x] Town lamp posts glow at night (`night_lights` group)
+- [x] Verified headless (21 checks: tint by time, fades, lamps off by day and on at night,
+      interiors untinted, winter tint, dawn after the night) and rendered through the
+      evening in spring and winter
+- [ ] Dave confirms it looks right on Windows
+
+**For later:** windows that glow at night. Townsfolk still stand in one spot all day.
 
 ## Stage 8 — Events and quests · 2–3 sessions · Sonnet, Haiku for bulk
 

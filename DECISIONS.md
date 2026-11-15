@@ -992,3 +992,48 @@ still normally runs out first, so the upgrade curve of 003 mostly holds.
 game may find the clock is what ends their day. Dawdling now costs something, which is the
 point but changes the feel. There is no evening light yet, so midnight looks like noon; a
 time-of-day tint is the obvious next step and can listen for `time_changed`.
+
+---
+
+## 036 — Evening and night light: one tint from the clock, lamps that glow
+
+**Decision.** Outdoor locations (the farm and the town) darken through the evening, from
+the clock. A `Daylight` node (`scenes/daylight.tscn`, `scripts/daylight.gd`) is a
+`CanvasModulate`: it multiplies the colour of everything in the world, but not the HUD,
+which is on its own CanvasLayer. It listens for `time_changed` and fades to the new colour
+over 2 seconds, so the 10-minute steps of the clock (035) don't show as jumps.
+
+- *The colours are data* on the scene's `sky` property: minutes after midnight (as the
+  clock counts) → colour, blended between neighbours. White until 5 PM, golden by 6:30,
+  rose at 8, blue twilight at 9:30, night from 11 PM until 2 AM; a slightly warm dawn at
+  6 AM that clears by 8. Change them in the inspector on `daylight.tscn`, no code.
+- *Interiors stay lit* simply by not having a Daylight: the farmhouse and the shops look
+  the same at any hour.
+- *One tint per scene.* Godot only honours one CanvasModulate per canvas, and winter's
+  chill was already one (in `snowfall.tscn`). So the chill moved to
+  `SeasonTheme.light_tint` (winter: pale blue; others: white) and Daylight shows
+  time colour × season colour. The snow overlay is now just the falling snow.
+- *Lamps glow.* Anything in the `night_lights` group is faded in as it gets dark (by its
+  alpha), fully on at the darkest colour in `sky`. The town's lamp posts have a `Glow`: a
+  soft warm circle drawn with additive blending above the lamp head. Because it's worked
+  out from the colours, moving dusk in the inspector moves the lamps with it.
+
+Options considered:
+
+1. *CanvasModulate + glow sprites* — chosen. Cheap, the same on every renderer, and one
+   node per location.
+2. *Godot's 2D lights (PointLight2D) on the lamps.* Tried first: in testing they drew with
+   hard straight edges. A sprite is simpler and predictable.
+3. *A full-screen colour rectangle over the world.* Would darken but can't be lit by
+   lamps without shaders, and would also cover things that should sit above it.
+
+Gotcha found on the way: an additive sprite at the same z as the lamp was partly drawn
+*under* the ground (cut off in straight lines along tile blocks), so the glow sits at
+`z_index` 1. It draws over the player when you stand right by a lamp, which reads as being
+lit by it.
+
+**Not done:** shop and house windows don't glow (each building picture has its windows in
+different places, so it would need a glow position per `LocationDef`, or a "lit windows"
+version of each picture). Easy to add later with the same `night_lights` group. No save
+change (still 7): the time isn't saved and the light follows it.
+

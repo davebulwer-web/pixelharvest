@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/daylight.gd" id="1_daylight"]
+
+[node name="Daylight" type="CanvasModulate"]
+script = ExtResource("1_daylight")
+sky = Dictionary[int, Color]({
+360: Color(1, 0.92, 0.85, 1),
+480: Color(1, 1, 1, 1),
+1020: Color(1, 1, 1, 1),
+1110: Color(1, 0.88, 0.74, 1),
+1200: Color(0.86, 0.66, 0.66, 1),
+1290: Color(0.52, 0.52, 0.74, 1),
+1380: Color(0.38, 0.42, 0.64, 1),
+1560: Color(0.38, 0.42, 0.64, 1)
+})

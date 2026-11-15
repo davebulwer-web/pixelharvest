@@ -20,3 +20,4 @@ object_sprites = Dictionary[StringName, Texture2D]({
 &"farmhouse": ExtResource("7_house")
 })
 overlay = ExtResource("4_snow")
+light_tint = Color(0.82, 0.84, 0.92, 1)

@@ -19,8 +19,10 @@ extends Node2D
 ##   ├── TileCursor (outline on the tile the player is facing; drawn under entities)
 ##   ├── Entities   (y-sorted — player, trees and crops sort against each other
 ##   │               by their node origin, which for all of them sits at their base)
-##   ├── Weather    (holds the season's overlay, e.g. winter: a cold tint on the
-##   │               world, and snow falling on a CanvasLayer over it, under the HUD)
+##   ├── Weather    (holds the season's overlay, e.g. winter: snow falling on a
+##   │               CanvasLayer over the world, under the HUD)
+##   ├── Daylight   (scenes/daylight.tscn: tints the world by the clock — dusk,
+##   │               night — and by the season's light_tint; DECISIONS 036)
 ##   └── Hud        (scenes/hud.tscn, shared with the town — CanvasLayer 2, fixed to
 ##                   the screen, not the world)
 ##

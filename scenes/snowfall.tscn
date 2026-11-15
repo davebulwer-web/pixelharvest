@@ -6,9 +6,6 @@ colors = PackedColorArray(1, 0.905882, 0.847059, 0, 1, 0.905882, 0.847059, 1, 1,
 
 [node name="Snowfall" type="Node"]
 
-[node name="Chill" type="CanvasModulate" parent="."]
-color = Color(0.82, 0.84, 0.92, 1)
-
 [node name="Sky" type="CanvasLayer" parent="."]
 layer = 1
 
