@@ -275,11 +275,20 @@ Session 3 (2026-11-15) — the farmhouse and bed, on placeholder art. See DECISI
       home, collapsing in the field wakes you at home with the bin's sale shown, town and
       shops unchanged, v6 and v5 saves upgrade and open in the house) and rendered
       (house in spring and winter, inside, going to bed)
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-15)
 
-**Placeholder art for a Pixellab session:** `assets/sprites/farm/farmhouse.png` (80×64,
-door in the middle of the bottom row, plus a winter version with a snowy roof),
-`bed.png` (16×32, head at the top), `table.png` (16×16).
+Session 3 art (2026-11-15) — real farmhouse art and the animated fountain. See DECISIONS 034.
+
+- [x] Farmhouse exterior (80×64, door centred at the bottom), bed (16×32) and table (16×16)
+      redrawn with Pixellab (pixflux, the placeholder as init image, palette as colour image)
+- [x] Winter farmhouse with a snowy roof (`farmhouse_winter.png`, recoloured by script),
+      worn in winter through `SeasonTheme.object_sprites` like the tree and fountain
+- [x] The town fountain bubbles: Dave's 9-frame Pixellab animation, played by
+      `SheetAnimation`; winter's frozen fountain stays still
+- [x] Verified headless and rendered (house in spring and winter, inside, fountain in both)
+- [ ] Dave confirms the look on Windows and merges it
+
+Still to do for Stage 7: shop opening hours (needs a clock).
 
 ## Stage 8 — Events and quests · 2–3 sessions · Sonnet, Haiku for bulk
 
