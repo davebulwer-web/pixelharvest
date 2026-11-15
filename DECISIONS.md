@@ -790,3 +790,41 @@ winter is the same rule as 005 (seasons derived from one base) applied to single
 
 **Cost.** 12 generations including the look test and its two rejects (about 27 left).
 
+
+---
+
+## 031 — Grass variety: each grass tile turned at random, plus a row of small details
+
+**Decision.** Dave found the grass plain and visibly repeating (a diagonal lattice, because one
+16 px tile was laid the same way everywhere). Two changes, both cosmetic, nothing saved:
+
+- *Every grass tile is laid down turned or mirrored*, one of the eight ways a square can lie,
+  chosen from its cell position. Godot does this from the one tile in the image: the
+  transform flags (`TileSetAtlasSource.TRANSFORM_FLIP_H` and friends) go in `set_cell()`'s
+  alternative-tile argument, so no extra pictures and no tileset changes. The grass is noisy
+  enough that turned tiles still meet without a visible seam. This alone removes the lattice.
+- *Row 1 of each season's ground image holds eight "detail" tiles*: plain grass with
+  something small drawn in the middle. Spring has tufts, clover, daisies, pink flowers and a
+  pebble; summer poppies, cornflowers and a wild rose; autumn fallen leaves, mushrooms, a
+  toadstool, a twig and acorns; winter grass through snow, a snow-capped stone, holly, a pine
+  cone and an ice puddle. About 9% of grass cells show one (15% the old flowery tile), and a
+  detail is only mirrored left-right so things still grow upwards.
+- *The edges of a detail tile are plain grass*, which is what keeps it seamless. The script
+  `art/build_grass_details.py` draws `art/grass_details/<season>.png` (a 128×16 strip) over
+  that season's grass and writes row 1; row 0 is never touched.
+- `GroundTiles` owns all of it: `grass_for()` picks the tile, `transform_for()` the turn, and
+  `draw()` is what the farm and the town both call. Which cell gets what comes from `hash()`
+  of the cell, so it is the same every run and never stored. Paths, water, cliffs and thicket
+  are not turned: they have a direction or a collision shape.
+
+**Why.** Turning tiles is free and fixes the repeat everywhere at once; details give the
+"organic" scatter Dave asked for at a fixed, small cost. Keeping details inside one tile (not
+a separate decoration layer or objects) means no new nodes, no save change, and the season
+swap carries them for free because every season shares the same atlas layout (026).
+
+**Cost.** 24 generations including the look test, mostly redos: pixflux kept drawing a little island of soil under
+every detail. What worked was giving it an `init_image` of earlier soil-free details
+(strength 200–250). Asking it for "no soil" made it worse. A pebble and the autumn dry tuft
+are recolours of other details; a dark blob under the toadstool was removed by script.
+To change a detail, edit its strip and re-run the script. Not done: the path, winter path
+and thicket still repeat visibly (could be fixed the same way).

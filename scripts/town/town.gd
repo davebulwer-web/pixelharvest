@@ -45,7 +45,7 @@ func _ready() -> void:
 	SeasonLook.apply_ground(_ground)
 	var tiles := TownLayout.build(door_cells)
 	for cell: Vector2i in tiles:
-		_ground.set_cell(cell, GroundTiles.SOURCE_ID, tiles[cell])
+		GroundTiles.draw(_ground, cell, tiles[cell])
 
 	for def in doors:
 		_entities.add_child(Building.create(def))

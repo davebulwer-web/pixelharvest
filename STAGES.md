@@ -252,6 +252,12 @@ Session 2 (2026-11-14) — a designed town, townsfolk and a notice board, on pla
 **Not done / for a later session:** a farmhouse and bed on the farm, shop opening hours
 (needs a clock, which the game doesn't have), townsfolk who walk about.
 
+**Grass variety (2026-11-15, DECISIONS 031):** grass tiles turned and mirrored per cell to
+hide the repeat, plus eight small seasonal details per season (tufts, flowers, leaves, snow
+pieces) in row 1 of each ground image. Cosmetic only, no save change.
+
+- [ ] Dave confirms it looks right on Windows
+
 ## Stage 8 — Events and quests · 2–3 sessions · Sonnet, Haiku for bulk
 
 - [ ] `CalendarEvent` resource; market day every N days
