@@ -903,3 +903,36 @@ convention the genre has taught players.
 now takes a walk home (a few seconds). Collapsing from exhaustion has no penalty beyond
 the day ending, as before. The house has no winter roof yet, and all three pictures
 (farmhouse, bed, table) are placeholders for a Pixellab session.
+
+## 034 — Real farmhouse art, a winter roof by season, and an animated fountain
+
+**Decision.** The farmhouse, bed and table placeholders from 033 are replaced with Pixellab
+art, and the town fountain plays Dave's own Pixellab animation.
+
+- *How the art was made.* `create-image-pixflux` with the placeholder as init image and
+  `art/palette.png` as colour image, as for the town (030). Dave picked the house from
+  three look tests (init strength 90, the cottage with grey trim and window boxes). The
+  bed and table were drawn centred on a 32×32 canvas (pixflux needs at least 1024 px of
+  area) and cropped back to 16×32 and 16×16. Every picture sits on the palette.
+- *The winter roof is a season picture, not a second building.* Pixflux won't paint snow
+  (030), so `farmhouse_winter.png` is the same house with the roof, chimney top and window
+  boxes recoloured to the palette's snow whites by a short script. `Building.create` now
+  asks `SeasonLook.skin_object` for the building's location id, so a season can give any
+  building its own picture with one line in its `object_sprites` (winter.tres:
+  `&"farmhouse"`). The seasonal picture must be the same size, because the walls and the
+  farm's BUILDING footprint come from the picture's size.
+- *The fountain animates through a sprite sheet.* Dave's animation is nine 48×40 frames in a
+  3×3 grid, saved over `fountain.png`, so the fountain's ObjectDef and the town map are
+  unchanged. `SheetAnimation` (a Sprite2D script) works out the grid from the picture's size
+  each frame and loops it at 8 fps. Considered an AnimatedSprite2D, but SeasonLook swaps
+  the `texture` of a Sprite2D called "Sprite", and winter's frozen fountain is one still
+  frame: with a sheet-reading Sprite2D the swap just works, and frozen water stands still.
+  Six of the sheet's colours were a shade off the palette (19 pixels) and were snapped to
+  the nearest palette colour.
+
+**Why.** It keeps seasons as pure looks (005, 025) and reuses the one mechanism already
+used for trees and the fountain, instead of teaching the farm about roofs.
+
+**Cost.** One small script and one extra picture. Any future animated object needs its
+sheet laid out in frames of the size set on its `SheetAnimation`.
+

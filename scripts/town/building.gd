@@ -32,6 +32,9 @@ static func create(def: LocationDef) -> Building:
 	sprite.texture = texture
 	sprite.offset = Vector2(0, -height / 2.0)
 	building.add_child(sprite)
+	# The season may have its own picture for this building, by location id
+	# (winter's farmhouse has a snowy roof). Same size, so the walls below fit.
+	SeasonLook.skin_object(building, def.id)
 
 	var half_door := float(TILE_PX)  # half the 32px doorway
 	# Left of the doorway, right of it, and the wall above it.

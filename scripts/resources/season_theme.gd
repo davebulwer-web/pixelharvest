@@ -23,8 +23,10 @@ extends Resource
 
 @export var ground_tileset: TileSet
 
-## Different pictures for farm objects this season, by object id — for
-## example &"tree" -> a bare or snowy tree. The object's scene must have a
+## Different pictures for objects this season, by object id — for
+## example &"tree" -> a bare or snowy tree. Buildings are looked up by their
+## location id the same way (&"farmhouse" -> the snowy-roofed house), and their
+## seasonal picture must be the same size as the normal one. The object's scene must have a
 ## Sprite2D called "Sprite" (they all do). Anything not listed keeps the
 ## picture its scene was built with.
 @export var object_sprites: Dictionary[StringName, Texture2D] = {}
