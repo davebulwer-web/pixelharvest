@@ -424,8 +424,11 @@ Session 4 (2026-11-15) — difficulty, chosen at new game, on placeholder UI. Se
       rendered (the menu at first launch, and over the farm)
 - [ ] Dave confirms it plays correctly on Windows
 
-**Left over:** real Pixellab art for Stage 8's content (stalls, Rosa, Fennel, Mabel, Pip,
-the three crops, the decorations). The difficulty menu is placeholder UI until Stage 9's
+**Stage 8 art (2026-11-15, DECISIONS 041):** real Pixellab art for the stalls, Rosa, Fennel,
+Mabel, Pip, the three crops with their icons and seed packets, and the decorations.
+- [ ] Dave confirms the look in game
+
+**Left over:** the difficulty menu is placeholder UI until Stage 9's
 title screen. The numbers are first guesses for Stage 9's balance pass.
 
 **The architecture's exam.** If quests need changes to the farming code, something went

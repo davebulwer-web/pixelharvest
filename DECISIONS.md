@@ -1275,3 +1275,26 @@ for display. The game doesn't show which difficulty you're playing, except in th
 on load; Stage 9's title screen and settings are the place for that. Ctrl+N still has no
 "are you sure?", but the menu is a chance to change your mind. Grow-time rounding means
 the shortest crops (radish, parsnip) can't get faster than a day a stage.
+
+## 041 — Stage 8's placeholders replaced with Pixellab art, drop-in at the same paths
+
+**Decision.** Every Stage 8 placeholder picture is now real Pixellab art saved over the
+same file, so no data, scene or script changed: the produce stall and seed cart, Rosa,
+Fennel, Mabel and Pip, the strawberry, melon and pumpkin growth strips, their three
+produce icons and three seed packets, and the scarecrow, hay bale, sundial, scarecrow
+icon and lamp post icon. Dave chose the look from a test of the produce stall and Rosa
+(2026-11-15). The fence, flower bed and lamp post already used the real town art.
+
+**How.** pixflux, palette-forced (`color_image` = `art/palette.png`), `init_image` = the
+placeholder, as for the town (DECISIONS 028, 030). Every picture lands on the 41
+colours; the palette did not grow. People were moved down a few pixels so their feet sit
+on the same row as the placeholder's. Prompts and strengths are in `art/STYLE.md`.
+
+**One size change.** The scarecrow is 32×32 instead of 16×32 so its arms can reach out
+past its cell. Its scene centres the sprite with `offset = (0, -16)`, which still puts
+its foot on the cell's bottom edge, and its collision is unchanged, so nothing else
+needed to change.
+
+**Cost.** About 45 generations including look tests and retakes, under 40 cents of
+credit. The hay bale is the weakest piece: the palette has no bright straw yellow, so it
+comes out a pale tan block; three retakes didn't do better.
