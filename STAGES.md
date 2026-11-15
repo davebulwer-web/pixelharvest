@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 10 — pacing and unlocks (both sessions built; next, Dave plays one spring).** Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
+**Current stage: 11 — hazards and weather.** Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -516,8 +516,8 @@ ROADMAP sections 3 and 4.
 - [x] Verified: a scripted run through spring days 1–9 (66 checks: who's in town, who
       asks, the summary's news, the forge's markers, the unlocks, a gated test event,
       old saves v1–v9) and rendered shots of Brann's "!", his request and the menu after
-- [ ] Dave confirms it plays correctly on Windows
-- [ ] Dave plays one spring to judge the pacing
+- [x] Dave confirms it plays correctly on Windows (2026-11-15)
+- [x] Dave plays one spring to judge the pacing: "Pacing looks good" (2026-11-15)
 
 Moved to Stage 13 (they need its new goal kinds): Hollis's line ("one of every spring
 crop" is a ship-variety goal) and the mayor's bridge request (a donate-gold goal).
