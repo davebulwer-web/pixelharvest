@@ -15,8 +15,22 @@ extends StaticBody2D
 ## door cell and half of each neighbour): wide enough that the player doesn't
 ## have to line up to the pixel. That gap is the ExitZone into the shop.
 ##
+## A shop with opening hours (DECISIONS 035) also has a closed door: a solid
+## block across the top of the doorway, switched on whenever the shop is
+## shut. It stops the player short of the doorway so they stay in front of
+## the building instead of vanishing behind its front. It covers only the top
+## of the door cell, so the player still touches the ExitZone below it and
+## is told the opening hours.
+##
 
 const TILE_PX := 16
+
+## How much of the door cell, from the top, the closed door fills. The rest
+## is left so the player's feet can reach the ExitZone and hear it's shut.
+const CLOSED_DOOR_DEPTH := 10.0
+
+var _location_id: StringName = &""
+var _closed_door: CollisionShape2D
 
 
 static func create(def: LocationDef) -> Building:
@@ -44,7 +58,27 @@ static func create(def: LocationDef) -> Building:
 
 	building.add_child(ExitZone.create(
 			Rect2(-half_door, -TILE_PX, half_door * 2.0, TILE_PX), def.id, &"door"))
+
+	building._location_id = def.id
+	building._closed_door = building._add_wall(
+			Rect2(-half_door, -TILE_PX, half_door * 2.0, CLOSED_DOOR_DEPTH))
+	building._closed_door.name = "ClosedDoor"
+	building._closed_door.disabled = true
 	return building
+
+
+func _ready() -> void:
+	_update_closed_door()
+	EventBus.time_changed.connect(func(_minutes: int) -> void: _update_closed_door())
+
+
+## Shut the doorway while the shop is closed, open it while it's open. A
+## building that isn't a shop (the farmhouse) is never closed.
+func _update_closed_door() -> void:
+	if _closed_door == null:
+		return
+	var closed := LocationManager.closed_message(_location_id) != ""
+	_closed_door.set_deferred(&"disabled", not closed)
 
 
 ## The cells the building's picture covers, on the map it stands on: centred on
@@ -56,10 +90,11 @@ static func footprint(def: LocationDef) -> Rect2i:
 	return Rect2i(def.door_cell.x - cells_wide / 2, def.door_cell.y - cells_tall + 1, cells_wide, cells_tall)
 
 
-func _add_wall(rect: Rect2) -> void:
+func _add_wall(rect: Rect2) -> CollisionShape2D:
 	var shape := CollisionShape2D.new()
 	var box := RectangleShape2D.new()
 	box.size = rect.size
 	shape.shape = box
 	shape.position = rect.get_center()
 	add_child(shape)
+	return shape

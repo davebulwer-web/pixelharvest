@@ -977,6 +977,10 @@ How it works:
   shut, it says "Hollis's Seeds is closed. Open 9 AM – 5 PM" and you stay outside. If the
   shop shuts while you're in it, you can stay and walk out, but the keeper turns you away
   instead of opening the menu. The notice board's last page lists every shop's hours.
+  The closed shop's doorway also turns solid (`Building`'s `ClosedDoor`, top 10px of the
+  door cell), so the player stops in front of the building instead of walking up into
+  the doorway and vanishing behind its front (Dave's snag, 2026-11-15). The bottom 6px
+  stay open so the player still touches the door and is told the hours.
 - *`Clock`* (`scripts/clock.gd`) is the one place minutes become "9:30 AM", so the HUD,
   shops and notice board agree. It touches no autoload, so ShopDef can use it (021).
 

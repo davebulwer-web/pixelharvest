@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 7 — the town.** Sessions 1–3 and their real art confirmed. Session 4 (the clock and shop opening hours) built 2026-11-15, waiting for Dave's test. That is the last Stage 7 item.
+**Current stage: 8 — events and quests.** Stage 7 (the town) is complete: sessions 1–4 and their real art confirmed by Dave on 2026-11-15.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -300,6 +300,8 @@ Session 4 (2026-11-15) — the clock and shop opening hours. See DECISIONS 035.
 - [x] Shop opening hours on `ShopDef` (`opens_at`, `closes_at`): seeds 9–5, general store
       8–8, blacksmith 10–4. A closed shop's door won't open and says when it does; after
       closing the keeper turns you away but you can walk out
+- [x] Snag (Dave, 2026-11-15): at a closed shop the player walked into the doorway and
+      vanished behind the building. The closed doorway is now solid; you stop in front
 - [x] Notice board lists the opening hours; `Clock` formats times everywhere
 - [x] No save change (version stays 7): the game saves at dawn, so loading starts at 6 AM
 - [x] Verified headless (45 checks: clock ticks in tens and stops when paused, every shop's
@@ -309,7 +311,8 @@ Session 4 (2026-11-15) — the clock and shop opening hours. See DECISIONS 035.
       message and a save, bed and no-energy still end the day and reset the clock, save
       still v7, load and a v6 save start at 6 AM) and rendered (closed door, closed keeper,
       midnight warning, waking at home)
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-15, committed)
+- [x] Dave confirms the closed-door snag fix (2026-11-15)
 
 **For later:** no evening light yet (midnight looks like noon); a tint listening for
 `time_changed` would do it. Townsfolk still stand in one spot all day.
