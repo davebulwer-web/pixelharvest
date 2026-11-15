@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 9 — feel, balance and release.** Stage 8 (events and quests) is complete: sessions 1–4 and their real art confirmed by Dave on 2026-11-15.
+**Current stage: 10 — pacing and unlocks.** Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -434,17 +434,15 @@ title screen. The numbers are first guesses for Stage 9's balance pass.
 **The architecture's exam.** If quests need changes to the farming code, something went
 wrong earlier.
 
-## Stage 9 — Feel, balance and release · 2 sessions · Sonnet 5.5
+## Stage 9 — Feel · 1 session · Sonnet 5.5
 
-Split: session 1 is the feel (sound, juice, the day's summary); session 2 is the release
-(title screen, settings, save slots, the balance pass, export and itch.io).
+Was "feel, balance and release". On 2026-11-15 Dave agreed the content roadmap
+(`ROADMAP.md`): the game needs its content before balancing is worth doing, so the release
+half (title screen, settings, save slots, balance pass, export) moved to Stage 20.
 
 - [x] Sound effects and music
 - [x] Particles, screen shake, harvest pops — the juice
-- [ ] Title screen, settings, save slots
 - [x] Day-end summary screen
-- [ ] Full balance pass across a simulated year
-- [ ] Windows export, itch.io page
 
 Session 1 (2026-11-15) — sound, music, juice and the day's summary. See DECISIONS 042.
 
@@ -474,3 +472,109 @@ Session 1 (2026-11-15) — sound, music, juice and the day's summary. See DECISI
       town tune and the shop carrying it, a clean quit) and rendered (dirt and water
       bursts, the harvest pop, the gold float, the summary, a quiet day)
 - [ ] Dave confirms it plays (and sounds) right on Windows
+
+---
+
+## Stages 10–20 — the game on top of the engine
+
+Agreed by Dave on 2026-11-15. The detail (the year's arc, every questline, the crop list,
+hazards, what art each needs) is in `ROADMAP.md`; each stage below names its sections.
+Playtest checkpoints: Dave plays one spring after Stage 10, and a full year after Stage 13.
+Stages 14–19 can be reordered.
+
+## Stage 10 — Pacing and unlocks · 2 sessions · Opus
+
+ROADMAP sections 3 and 4.
+
+- [ ] Unlocks: a saved list of names (`GameState.unlocks`); `QuestDef.reward_unlocks`;
+      `requires_unlock` on items, upgrades, requests, locations, characters and events
+- [ ] Shops show only unlocked stock; the forge opens on spring day 8
+- [ ] The first week rewritten: the mayor's "first pull" opener, everyone else's first
+      request staggered with `first_day`, Hollis's stock opened by the mayor
+- [ ] The morning summary announces what's new
+- [ ] Save version 10; old saves get the unlocks their progress implies
+- [ ] Verified: a scripted run through spring days 1–15, checking what's offered each morning
+- [ ] Dave plays one spring to judge the pacing
+
+## Stage 11 — Hazards and weather · 2 sessions · Opus, then Sonnet
+
+ROADMAP section 7.
+
+- [ ] Session 1: thirst (wilt after 2 dry nights, die after 3), weeds (and fibre), crows and
+      a scarecrow that protects, `hazard_multiplier` on DifficultyDef (Relaxed switches off)
+- [ ] Session 2: weather (sun, rain, storm, heatwave, snow) with odds per season, tomorrow's
+      forecast, rain overlay and sounds, autumn frost; pests if time allows
+- [ ] Save version 11
+- [ ] Pixellab: weeds (4 seasons), crow, aphids
+
+## Stage 12 — Crops with rules · 2 sessions + art · Opus, then Sonnet
+
+ROADMAP section 6.
+
+- [ ] New CropDef rules: bunches, trellis, perennial, overwintering, hardy, water-loving,
+      weather-loving, giant, seed-returning, flowers
+- [ ] First wave of 8 crops (spring onion, pea, rhubarb, garlic, sunflower, watercress, corn,
+      kale); Hollis's catalogue by season and unlock
+- [ ] Perennials (apple tree), giant pumpkin and melon, the remaining crops as art allows
+- [ ] Save version 12
+- [ ] Pixellab: crop strips, icons and seed packets; two giant sprites
+
+## Stage 13 — Questlines · 2 sessions · Sonnet (Haiku for bulk text)
+
+ROADMAP section 5.
+
+- [ ] New goal kinds: donate gold, deliver any of, ship variety, deadline, harvest giant
+      (forage and catch wired up in Stages 14–15)
+- [ ] Every person's line as data; Ivy (new character, the greenhouse line)
+- [ ] Rosa's market orders and the notice board's daily jobs, from templates
+- [ ] Pixellab: Ivy
+- [ ] Dave plays a full year
+
+## Stage 14 — The Woods and foraging · 2 sessions + art · Opus, then Sonnet
+
+ROADMAP sections 8 and 9. Reverses DESIGN.md's "no foraging" (updated 2026-11-15).
+
+- [ ] The bridge (the mayor's request opens it), the Woods location, forage spots per season
+- [ ] The axe and timber (chopping thicket and fallen logs)
+- [ ] Pixellab: woods tileset (4 seasons), bridge, forage icons, axe, timber
+
+## Stage 15 — Fishing with Wren · 1–2 sessions + art · Opus
+
+- [ ] Rod, a cast-and-timing minigame, fish as data (place, season, time, weather, size)
+- [ ] Wren's line wired up; ice fishing in winter
+- [ ] Pixellab: fish icons, rods, bobber, ice hole
+
+## Stage 16 — Kitchen and cooking · 1 session + art · Sonnet
+
+Energy food only (narrows DECISIONS 006; no selling chains).
+
+- [ ] Recipes as resources; cook at the farmhouse; eat from the hotbar to restore energy
+- [ ] Mabel's lessons give recipes
+- [ ] Pixellab: stove, dish icons
+
+## Stage 17 — Greenhouse, bees and late tools · 2 sessions + art · Sonnet
+
+- [ ] Greenhouse building with an indoor plot that ignores seasons (Ivy's line)
+- [ ] Bee hives and honey; fertilisers; the sickle's tiers; the brass sprinkler
+- [ ] Pixellab: greenhouse (outside, winter, inside), hive, honey, sickle, fertiliser, sprinkler
+
+## Stage 18 — Festivals · 1–2 sessions · Sonnet
+
+- [ ] Spring flower show, summer fishing contest, autumn harvest fair, winter lantern night
+- [ ] Pixellab: festival decorations, trophy
+
+## Stage 19 — Almanac, year review, life in town · 1–2 sessions · Sonnet
+
+- [ ] The collections book (crops, fish, forage, recipes)
+- [ ] The mayor's year review and title at lantern night; year-2 content
+- [ ] Optional: townsfolk walk between spots on a schedule (Pixellab walk cycles)
+
+## Stage 20 — Balance and release · 2 sessions · Opus for balance
+
+Stage 9's second half, moved here.
+
+- [ ] Title screen, settings (with volume), save slots
+- [ ] Full balance pass across a simulated year. Includes the clock: Dave finds it seems
+      slow (2026-11-15). Check its pace (`seconds_per_ten_minutes`, 7 now) against a real
+      day's work, and that it ticks steadily through the day
+- [ ] Windows export, itch.io page

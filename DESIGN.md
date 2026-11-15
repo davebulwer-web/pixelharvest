@@ -83,8 +83,22 @@ farm, so the full loop is playable from Stage 4 onward.
 A `DifficultyDef` resource chosen at new game: multipliers on sale prices, seed costs,
 energy costs and grow times. Not separate code paths — difficulty is data.
 
+## The content plan
+
+`ROADMAP.md` (agreed 2026-11-15) is the plan for the game on top of this engine: unlocks
+that drip-feed the first year, questlines for every townsperson, crops with their own
+rules, hazards (thirst, weeds, crows, pests, weather, frost), and these additions to the
+original scope:
+
+- **Foraging** in the Woods across the bridge.
+- **Fishing** with Wren.
+- **Cooking**, as food that restores energy only (no processing chains for profit).
+- **Bees** and a **greenhouse**.
+- **Festivals** and an almanac of collections.
+
 ## Explicitly out of scope
 
-Animals. Combat. Mining or foraging areas. Fishing. Marriage or relationship systems.
-Multiplayer. Prestige or reset loops. Any of these could be added later on top of the
-existing architecture; none should shape it now.
+Animals (bees aside; revisit after release). Combat. Mining. Marriage, relationship or
+gift systems (the questlines are the relationships). Quality tiers. Multiplayer. Prestige
+or reset loops. Any of these could be added later on top of the existing architecture;
+none should shape it now.
