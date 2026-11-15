@@ -167,7 +167,7 @@ func _redraw_crop(cell: Vector2i) -> void:
 
 
 func _redraw_cell(cell: Vector2i) -> void:
-	_ground.set_cell(cell, SOURCE_ID, _atlas_for(cell))
+	GroundTiles.draw(_ground, cell, _atlas_for(cell))
 
 
 ## The one place that decides what a FarmTile looks like. The season decides
@@ -183,7 +183,7 @@ func _atlas_for(cell: Vector2i) -> Vector2i:
 		FarmTile.Terrain.WATER:
 			return GroundTiles.WATER
 		FarmTile.Terrain.PATH:
-			return GroundTiles.PATH
+			return GroundTiles.path_for(cell)
 		FarmTile.Terrain.THICKET:
 			return GroundTiles.THICKET
 	return GroundTiles.grass_for(cell)

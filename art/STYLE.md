@@ -179,3 +179,22 @@ fetch them as a zip from `api.pixellab.ai/mcp/tiles-pro/<id>/download`.
 | `town/mayor.png` (56×56, Bramble) | 150 | slim elderly village mayor, full body, front view facing the viewer, standing still, arms at sides, white beard, navy blue flat cap, navy blue coat over a white shirt, brown trousers, brown boots |
 | `town/angler.png` (56×56, Wren) | 150 | slim village angler fisherman, full body, front view …, wide brimmed tan hat, green checked shirt, olive green waders with braces, brown boots |
 
+
+**Grass details, 2026-11-15 (DECISIONS 031).** pixflux, palette-forced, 64×16 strips of four, `no_background`, view "high top-down". Without an `init_image` most came with a patch of soil underneath; the keepers were then used as `init_image` (strength 200–250) for the rest. Sources are `art/ground_sources/grass_details/<season>.png`; run `python3 art/build_ground.py` to rebuild rows 1–3 of the ground images.
+
+| Season | Details (left to right) |
+|---|---|
+| spring | grass tuft, clover, white daisies, pink blossoms, pink flower clump, green leaf clump, weed sprig, grey pebble (recoloured) |
+| summer | grass tuft, orange wildflower, blue cornflower, red poppies, wild rose, clover, weed sprig, grey pebble |
+| autumn | fallen orange leaves, red/brown leaves, mushrooms, acorns, red toadstool, twig, dry tuft (recoloured), grey pebble |
+| winter | grass through snow, snow-capped stone, twig in snow, holly, pine cone, buried pebble, snow mound, ice puddle |
+
+**Path, plaza and thicket, 2026-11-15 (DECISIONS 032).** `/create-tileset` standard, 16 px, lower = grass (chained to the grass base); plain upper tile kept and mapped onto palette shades by brightness.
+
+| Tile | Upper terrain prompt | Palette mapping |
+|---|---|---|
+| `ground_sources/dirt_path.png` (path, col 2) | smooth packed light brown dirt footpath, fine even texture with a few tiny pebbles | #6b4a2f / #8a6340; winter #abdcef / #d4e7f5 |
+| `ground_sources/cobbles.png` (paving, row 3) | old village square paved with many small irregular cobblestones of different sizes and shapes, warm light grey and pale tan stones, thin dark mortar lines | #785853 / #ab816c / #c8997b / #ffe7d8; winter onto snow shades |
+| winter thicket | — (spring thicket recoloured: leaves and berries onto snow and ice shades) | |
+
+Path details (`ground_sources/path_details/<season>.png`, 64×16) reuse cut-outs from the grass detail generations. A plain "rounded grey cobblestones" prompt gave one big stone per tile (a grid); asking for many small irregular stones fixed it.
