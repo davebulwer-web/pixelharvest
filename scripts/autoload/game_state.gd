@@ -26,6 +26,12 @@ var day: int = 1
 var season: int = 0
 var year: int = 1
 
+## The time of day, in minutes after midnight (6 AM is 360). Past midnight
+## it keeps counting (1 AM is 1500), because it's still the same day until
+## the player sleeps. TimeSystem moves it on; it's never saved, because the
+## game only saves at dawn (DECISIONS 035).
+var minutes: int = 0
+
 var energy: float = 0.0
 
 ## Today's maximum: the starting amount in game_rules.tres plus whatever the
@@ -73,6 +79,7 @@ func new_game() -> void:
 	day = 1
 	season = 0
 	year = 1
+	minutes = RULES.day_start_minutes
 	upgrades = []
 	max_energy = _work_out_max_energy()
 	energy = max_energy
@@ -100,6 +107,7 @@ func _give_starting_kit() -> void:
 ## once everything overnight is done.
 func advance_calendar() -> bool:
 	energy = max_energy
+	minutes = RULES.day_start_minutes
 	day += 1
 	if day <= RULES.days_per_season:
 		return false
@@ -145,6 +153,15 @@ func describe_seasons(ids: Array[StringName]) -> String:
 	if names.size() > 1:
 		text = ", ".join(names.slice(0, names.size() - 1)) + " and " + names[-1]
 	return text.left(1).to_upper() + text.substr(1)
+
+
+# --- The clock ---------------------------------------------------------------
+
+## Move the clock on by `step` minutes and announce the new time. Called by
+## TimeSystem as the day goes by; it doesn't end the day itself.
+func advance_clock(step: int) -> void:
+	minutes += step
+	EventBus.time_changed.emit(minutes)
 
 
 # --- Energy ------------------------------------------------------------------
@@ -339,6 +356,8 @@ func load_from_save(data: Dictionary) -> void:
 	day = clampi(int(data["day"]), 1, maxi(1, RULES.days_per_season))
 	season = posmod(int(data["season"]), maxi(1, RULES.seasons.size()))
 	year = maxi(1, int(data["year"]))
+	# Saves are made at dawn, so a loaded game always starts the day afresh.
+	minutes = RULES.day_start_minutes
 
 	upgrades = []
 	for id: Variant in data["upgrades"]:

@@ -13,3 +13,5 @@ greetings = Array[String](["Welcome in! I'll buy your produce, and sell you a bi
 upgrade_categories = Array[StringName]([&"energy", &"land"])
 buys_produce = true
 produce_pay_rate = 0.8
+opens_at = 480
+closes_at = 1200

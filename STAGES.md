@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 7 — the town.** Sessions 1 and 2 and their real art confirmed. Session 3 (farmhouse and bed) built 2026-11-15 on placeholder art, waiting for Dave's test.
+**Current stage: 7 — the town.** Sessions 1–3 and their real art confirmed. Session 4 (the clock and shop opening hours) built 2026-11-15, waiting for Dave's test. That is the last Stage 7 item.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -249,8 +249,8 @@ Session 2 (2026-11-14) — a designed town, townsfolk and a notice board, on pla
       and frozen fountain, bench, lamp post, flower bed and snowed bed, fence, notice board,
       Mayor Bramble and Wren. Drop-in replacements, same sizes, feet/base on the bottom row.
 
-**Not done / for a later session:** shop opening hours (needs a clock, which the game
-doesn't have), townsfolk who walk about.
+**Not done / for a later session:** shop opening hours (done in session 4), townsfolk who
+walk about.
 
 **Grass variety (2026-11-15, DECISIONS 031):** grass tiles turned and mirrored per cell to
 hide the repeat, plus eight small seasonal details per season (tufts, flowers, leaves, snow
@@ -286,9 +286,33 @@ Session 3 art (2026-11-15) — real farmhouse art and the animated fountain. See
 - [x] The town fountain bubbles: Dave's 9-frame Pixellab animation, played by
       `SheetAnimation`; winter's frozen fountain stays still
 - [x] Verified headless and rendered (house in spring and winter, inside, fountain in both)
-- [ ] Dave confirms the look on Windows and merges it
+- [x] Dave confirms the look on Windows and merges it (PR #8, 2026-11-15)
 
-Still to do for Stage 7: shop opening hours (needs a clock).
+Session 4 (2026-11-15) — the clock and shop opening hours. See DECISIONS 035.
+
+- [x] Dave chose a ticking clock (of three options): 6 AM to 2 AM, 10 minutes per 7 real
+      seconds, stopped while the game is paused (shop menu, dialogue)
+- [x] `GameState.minutes`; `TimeSystem` runs the clock and announces `time_changed`;
+      numbers in game_rules.tres (`day_start_minutes`, `day_end_minutes`,
+      `seconds_per_ten_minutes`, `late_warning_minutes`)
+- [x] HUD shows the time after the date; a warning at midnight; at 2 AM you collapse and
+      wake at home ("You stayed out too late"), the same night as the bed or no energy
+- [x] Shop opening hours on `ShopDef` (`opens_at`, `closes_at`): seeds 9–5, general store
+      8–8, blacksmith 10–4. A closed shop's door won't open and says when it does; after
+      closing the keeper turns you away but you can walk out
+- [x] Notice board lists the opening hours; `Clock` formats times everywhere
+- [x] No save change (version stays 7): the game saves at dawn, so loading starts at 6 AM
+- [x] Verified headless (45 checks: clock ticks in tens and stops when paused, every shop's
+      hours at the edges, closed door keeps you out and says why, open door lets you in,
+      keeper greets then menu when open, turns you away after closing, leaving a closed
+      shop, notice board hours, midnight warning, 2 AM ends the day at home with the
+      message and a save, bed and no-energy still end the day and reset the clock, save
+      still v7, load and a v6 save start at 6 AM) and rendered (closed door, closed keeper,
+      midnight warning, waking at home)
+- [ ] Dave confirms it plays correctly on Windows
+
+**For later:** no evening light yet (midnight looks like noon); a tint listening for
+`time_changed` would do it. Townsfolk still stand in one spot all day.
 
 ## Stage 8 — Events and quests · 2–3 sessions · Sonnet, Haiku for bulk
 

@@ -12,3 +12,5 @@ keeper_sprite = ExtResource("2_keeper")
 greetings = Array[String](["Hmph. A good tool does half the work. Let's see what I can do for yours.", "Sprinklers and sharper steel. That's what I make.", "Wider hoe, wider can. Fewer swings, fewer sore arms."])
 sells_supplies = true
 upgrade_categories = Array[StringName]([&"tools"])
+opens_at = 600
+closes_at = 960

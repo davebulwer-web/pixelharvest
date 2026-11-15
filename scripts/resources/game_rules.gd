@@ -34,3 +34,24 @@ extends Resource
 ## season turns and crops that can't grow in the new one die (DECISIONS 025).
 ## Lower it (to 3, say) to try out the seasons quickly — and put it back.
 @export var days_per_season: int = 28
+
+## --- The clock (DECISIONS 035) ---------------------------------------------
+## Times are minutes after midnight, so 6 AM is 360. A day that runs past
+## midnight keeps counting: 2 AM the next morning is 26 × 60 = 1560.
+
+## When every day starts: the time you wake up.
+@export var day_start_minutes: int = 360
+
+## When the day ends if you're still up. You collapse, like running out of
+## energy, and wake at home. Energy is meant to run out first on a busy day;
+## this is what stops a day with energy to spare lasting for ever.
+@export var day_end_minutes: int = 1560
+
+## The clock moves in 10-minute steps; this is how many real seconds each one
+## takes while the game is running (it stops in menus and conversations).
+## At 7 seconds, 6 AM to 2 AM takes 14 real minutes.
+@export var seconds_per_ten_minutes: float = 7.0
+
+## From this time on, the HUD warns that it's late (a message once, and the
+## clock turns red-ish). Midnight.
+@export var late_warning_minutes: int = 1440

@@ -254,6 +254,9 @@ func _check() -> void:
 			shop_ids.append(shop.id)
 			if shop.keeper_sprite == null:
 				push_warning("ContentDB: shop '%s' has no keeper_sprite, so the counter is empty" % shop.id)
+			if (shop.opens_at != 0 or shop.closes_at != 0) and not shop.keeps_hours():
+				push_warning("ContentDB: shop '%s' closes (closes_at %d) before it opens (opens_at %d), so it's treated as always open"
+						% [shop.id, shop.closes_at, shop.opens_at])
 			if shop.greetings.is_empty():
 				push_warning("ContentDB: shop '%s' has no greetings; the menu will open without a word" % shop.id)
 			for category in shop.upgrade_categories:

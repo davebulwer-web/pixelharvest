@@ -14,7 +14,7 @@ prestige loop.
 
 ## The core loop
 
-1. Wake with full energy.
+1. Wake at 6 AM with full energy.
 2. Water yesterday's crops, harvest what's ready, till and plant new ground.
 3. Drop produce in the shipping bin.
 4. Sleep (in the farmhouse bed). Crops advance one growth stage. Bin is sold overnight; gold arrives at dawn.
@@ -48,8 +48,10 @@ The design intent at every step: **the chore you used to do by hand becomes auto
 
 ## Time and calendar
 
-- A day ends on sleep, or when energy hits zero.
-- No in-game clock within a day. Actions cost energy, not time.
+- A day ends on sleep, when energy hits zero, or at 2 AM.
+- A clock runs from 6 AM to 2 AM while you play (about 14 real minutes; it stops in menus).
+  Actions cost energy; walking and waiting cost time. At 2 AM you collapse and wake at
+  home. Shops keep opening hours (`DECISIONS.md` 035).
 - Seasons of a fixed number of days (length to be set in Stage 6), then the year rolls over.
 - Out-of-season crops die at the season change — that's the planning pressure seasons exist
   to create.

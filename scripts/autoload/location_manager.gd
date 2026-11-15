@@ -71,6 +71,19 @@ func buildings_on(location_id: StringName) -> Array[LocationDef]:
 	return result
 
 
+## Why the player can't go into `location_id` right now, in words for the
+## HUD, or "" if they can. Today the only reason is a shop outside its opening
+## hours (DECISIONS 035); a door asks this before it takes the player through.
+func closed_message(location_id: StringName) -> String:
+	var location: LocationDef = _locations.get(location_id)
+	if location == null or location.shop == null:
+		return ""
+	var shop := location.shop
+	if shop.is_open_at(GameState.minutes):
+		return ""
+	return "%s is closed. Open %s" % [shop.display_name, shop.hours_text()]
+
+
 ## Called once by a location scene as it opens. Returns the arrival point and
 ## clears it, so a later reload doesn't reuse a stale one.
 func take_arrival_point() -> StringName:

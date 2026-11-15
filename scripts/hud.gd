@@ -1,6 +1,6 @@
 extends CanvasLayer
 ##
-## Hud — the always-on readout: the date, gold, energy, what's waiting in
+## Hud — the always-on readout: the date, the time, gold, energy, what's waiting in
 ## the shipping bin, a short message line, the hotbar (hotbar.gd), and the fade
 ## between days.
 ##
@@ -26,9 +26,14 @@ var _message_tween: Tween
 var _overnight_sales: int = 0
 var _overnight_deaths: int = 0
 var _overnight_new_season: bool = false
+var _overnight_too_late: bool = false
 var _morning_sales: int = 0
 var _morning_deaths: int = 0
 var _morning_new_season: bool = false
+var _morning_too_late: bool = false
+
+## The late warning is given once a day, the first time the clock passes it.
+var _warned_late: bool = false
 
 
 func _ready() -> void:
@@ -41,6 +46,8 @@ func _ready() -> void:
 	EventBus.shipment_sold.connect(func(gold: int) -> void: _overnight_sales = gold)
 	EventBus.crop_died.connect(func(_cell: Vector2i, _id: StringName) -> void: _overnight_deaths += 1)
 	EventBus.season_changed.connect(func(_s: int) -> void: _overnight_new_season = true)
+	EventBus.stayed_up_too_late.connect(func() -> void: _overnight_too_late = true)
+	EventBus.time_changed.connect(_on_time_changed)
 	EventBus.item_bought.connect(_on_item_bought)
 	EventBus.items_sold_to_shop.connect(_on_items_sold_to_shop)
 	EventBus.message_posted.connect(_show_message)
@@ -52,12 +59,14 @@ func _ready() -> void:
 	# room doesn't flash up before the morning fades in.
 	_fade.modulate.a = 1.0 if TimeSystem.is_ending_day() else 0.0
 	_message.text = ""
+	# A HUD made mid-evening (walking into a shop at 11 PM) has already warned.
+	_warned_late = GameState.minutes >= GameState.RULES.late_warning_minutes
 	_refresh()
 
 
 func _refresh() -> void:
-	var text := "%s    %dg    Energy %d / %d" % [
-		_date(), GameState.gold, roundi(GameState.energy), roundi(GameState.max_energy),
+	var text := "%s    %s    %dg    Energy %d / %d" % [
+		_date(), Clock.format(GameState.minutes), GameState.gold, roundi(GameState.energy), roundi(GameState.max_energy),
 	]
 	var in_bin := Economy.bin_value()
 	if in_bin > 0:
@@ -71,13 +80,26 @@ func _on_day_started(_day: int, _season: int, _year: int) -> void:
 	_morning_sales = _overnight_sales
 	_morning_deaths = _overnight_deaths
 	_morning_new_season = _overnight_new_season
+	_morning_too_late = _overnight_too_late
 	_overnight_sales = 0
 	_overnight_deaths = 0
 	_overnight_new_season = false
+	_overnight_too_late = false
+	_warned_late = false
 	_refresh()
 	_fade.modulate.a = 1.0
 	create_tween().tween_property(_fade, ^"modulate:a", 0.0, FADE_SECONDS)
 	_show_message(_morning_text())
+
+
+## Every 10 minutes of game time. Late in the evening, one warning that the
+## day ends at day_end_minutes whether the player has gone to bed or not.
+func _on_time_changed(minutes: int) -> void:
+	_refresh()
+	if not _warned_late and minutes >= GameState.RULES.late_warning_minutes:
+		_warned_late = true
+		_show_message("It's getting late. Get to bed before %s or you'll collapse"
+				% Clock.format_short(GameState.RULES.day_end_minutes))
 
 
 ## The save lands just after the morning message, so it extends it rather
@@ -100,6 +122,8 @@ func _morning_text() -> String:
 		text = "%s has come" % (theme.display_name if theme != null else "A new season")
 		if GameState.season == 0:
 			text += " — year %d" % GameState.year
+	if _morning_too_late:
+		text += "    You stayed out too late and woke up at home"
 	if _morning_deaths > 0:
 		text += "    %d crop%s died out of season" % [_morning_deaths, "" if _morning_deaths == 1 else "s"]
 	if _morning_sales > 0:

@@ -11,3 +11,5 @@ keeper_name = "Hollis"
 keeper_sprite = ExtResource("2_keeper")
 greetings = Array[String](["Morning! Seeds are best bought a season ahead, I always say.", "Plenty in stock today. Mind what's in season, mind.", "Good soil makes a good crop. Good seed makes a better one."])
 sells_seeds = true
+opens_at = 540
+closes_at = 1020

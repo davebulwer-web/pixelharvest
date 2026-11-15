@@ -48,6 +48,9 @@ resource is much easier than balancing energy and time together.
 **Cost.** Loses the texture of a day with morning and evening. Shop opening hours and
 time-of-day lighting aren't available without revisiting this.
 
+*Revisited in 035 (2026-11-15):* the day now has a ticking clock, 6 AM to 2 AM. Energy
+is still meant to be what ends a busy day; the clock ends an idle one.
+
 ---
 
 ## 004 — Farm plus town, with the seam built early and the town built late
@@ -936,3 +939,52 @@ used for trees and the fountain, instead of teaching the farm about roofs.
 **Cost.** One small script and one extra picture. Any future animated object needs its
 sheet laid out in frames of the size set on its `SheetAnimation`.
 
+
+---
+
+## 035 — A ticking clock, 6 AM to 2 AM; shops keep hours; energy stays the main brake
+
+**Decision.** The day now has a clock (this revisits 003, which had none). Dave chose it
+from three options on 2026-11-15:
+
+1. *A ticking clock* — chosen. Time passes while the game runs, 10 minutes per 7 real
+   seconds, so 6 AM to 2 AM takes about 14 minutes of play.
+2. *A clock that moves only when you act* (each action or door costs minutes). Rejected:
+   two things to budget per action, and standing still would freeze the world.
+3. *The clock as a picture of energy spent* (full = 6 AM, empty = midnight). Rejected:
+   nothing new to balance, but walking and waiting would never cost time, so opening hours
+   would mean "shop before you farm", not a time of day.
+
+How it works:
+
+- *Where time lives.* `GameState.minutes`, minutes after midnight (6 AM = 360). Past
+  midnight it keeps counting (1 AM = 1500) because it's still the same day until you sleep.
+  `TimeSystem._process` moves it on in 10-minute steps and announces `time_changed`.
+  Because TimeSystem pauses with the game, the clock stops in the shop menu and in
+  conversations, which already pause the tree.
+- *The numbers are data* (rule 6): `day_start_minutes`, `day_end_minutes`,
+  `seconds_per_ten_minutes` and `late_warning_minutes` in `game_rules.tres`. Setting
+  `seconds_per_ten_minutes` to 0 stops the clock, for trying things out.
+- *2 AM is the third way a day ends*, alongside the bed and running out of energy. It runs
+  the same night (`TimeSystem.end_day`): taken home, the night happens, and the morning says
+  "You stayed out too late and woke up at home". There's no penalty beyond that, the same as
+  running out of energy. At midnight the HUD warns once.
+- *Not saved.* The game only saves at dawn, so a save is always 6 AM; loading sets the clock
+  to the start of the day. No save version change (still 7).
+- *Opening hours are on the ShopDef* (`opens_at`, `closes_at`, in minutes like the rules;
+  both 0 means never closes). Seeds 9 AM – 5 PM, general store 8 AM – 8 PM, blacksmith
+  10 AM – 4 PM. A shop's door asks `LocationManager.closed_message()` before taking you in;
+  shut, it says "Hollis's Seeds is closed. Open 9 AM – 5 PM" and you stay outside. If the
+  shop shuts while you're in it, you can stay and walk out, but the keeper turns you away
+  instead of opening the menu. The notice board's last page lists every shop's hours.
+- *`Clock`* (`scripts/clock.gd`) is the one place minutes become "9:30 AM", so the HUD,
+  shops and notice board agree. It touches no autoload, so ShopDef can use it (021).
+
+**Why.** It's what players expect from a farming game's day, it gives the town a reason to
+be visited at particular times (the cost noted in 027), and with a 20-hour day energy
+still normally runs out first, so the upgrade curve of 003 mostly holds.
+
+**Cost.** Two resources to balance now, if lightly: a player with lots of energy late in the
+game may find the clock is what ends their day. Dawdling now costs something, which is the
+point but changes the feel. There is no evening light yet, so midnight looks like noon; a
+time-of-day tint is the obvious next step and can listen for `time_changed`.

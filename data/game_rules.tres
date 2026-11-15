@@ -32,3 +32,7 @@ starting_location = &"farmhouse"
 home_location = &"farmhouse"
 seasons = Array[ExtResource("8_theme")]([ExtResource("9_spring"), ExtResource("10_summer"), ExtResource("11_autumn"), ExtResource("12_winter")])
 days_per_season = 28
+day_start_minutes = 360
+day_end_minutes = 1560
+seconds_per_ten_minutes = 7.0
+late_warning_minutes = 1440

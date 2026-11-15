@@ -14,7 +14,9 @@ extends Node2D
 ##       door ──────────  ▒▒ ──────────            y 8 (x 5-6)
 ##
 ## Talking is E at the counter (Npc announces it on EventBus; this listens for
-## its own keeper). The dialogue box runs first, then the shop menu. The door
+## its own keeper). The dialogue box runs first, then the shop menu. After
+## closing time (ShopDef.closes_at) the keeper says so instead, and the menu
+## stays shut; the door still lets you out (DECISIONS 035). The door
 ## is a walk-in ExitZone back to the town, appearing in front of that shop's
 ## door. Nothing here is saved: leave and the room is rebuilt from data.
 ##
@@ -44,6 +46,10 @@ const SHELF_TEXTURE := preload("res://assets/sprites/town/shelf.png")
 
 var _location: LocationDef
 var _shop: ShopDef
+
+## True while the keeper is saying "we're closed", so the menu doesn't open
+## when that conversation ends.
+var _turning_away: bool = false
 
 
 func _ready() -> void:
@@ -151,6 +157,12 @@ func _fit_camera() -> void:
 # --- Talking -----------------------------------------------------------------
 
 func _on_npc_talked_to(npc_id: StringName) -> void:
+	if npc_id == _shop.id and not _shop.is_open_at(GameState.minutes):
+		_turning_away = true
+		var closed_lines: Array[String] = [
+			"Sorry, we're closed for today. Come back tomorrow — I'm open %s." % _shop.hours_text()]
+		_dialogue.say(_shop.keeper_name, closed_lines)
+		return
 	if npc_id != _shop.id or _shop.greetings.is_empty():
 		if npc_id == _shop.id:
 			_menu.open(_shop)
@@ -162,4 +174,7 @@ func _on_npc_talked_to(npc_id: StringName) -> void:
 
 
 func _on_dialogue_finished() -> void:
+	if _turning_away:
+		_turning_away = false
+		return
 	_menu.open(_shop)

@@ -21,6 +21,9 @@ static func today() -> Array[String]:
 	notices.append(_calendar())
 	notices.append(_in_season())
 	notices.append(_coming_up())
+	var hours := _opening_hours()
+	if hours != "":
+		notices.append(hours)
 	return notices
 
 
@@ -80,6 +83,18 @@ static func _next_season_id() -> StringName:
 
 static func _next_season_name() -> String:
 	return GameState.season_name(_next_season_id())
+
+
+## "Opening hours: Hollis's Seeds 9 AM – 5 PM, …" for every shop that keeps
+## hours, in game_rules.tres order (DECISIONS 035). "" if none does.
+static func _opening_hours() -> String:
+	var parts: Array[String] = []
+	for location in LocationManager.all():
+		if location.shop != null and location.shop.keeps_hours():
+			parts.append("%s %s" % [location.shop.display_name, location.shop.hours_text()])
+	if parts.is_empty():
+		return ""
+	return "Opening hours: %s." % ", ".join(parts)
 
 
 ## The name of the first shop that sells seeds, or "" if none does.

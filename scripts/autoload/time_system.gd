@@ -2,13 +2,18 @@ extends Node
 ##
 ## TimeSystem — decides when a day ends, and runs the overnight sequence.
 ##
-## A day ends in one of two ways (DECISIONS 002, 003): the player goes to bed
-## in the farmhouse, or their energy runs out. Either way the same thing
-## happens, in a fixed order:
+## It also runs the clock (DECISIONS 035). Time passes while the game runs,
+## 10 minutes at a time, and stops whenever the game is paused (the shop menu
+## and the dialogue box pause it) — this node pauses with the rest of the game.
+##
+## A day ends in one of three ways (DECISIONS 002, 003, 035): the player goes
+## to bed in the farmhouse, their energy runs out, or the clock reaches 2 AM.
+## Whichever it is, the same thing happens, in a fixed order:
 ##
 ##   0. If the player isn't at home (they ran out of energy in the field),
 ##      they're taken home first, so the night and the morning happen in the
 ##      farmhouse, beside the bed (DECISIONS 033).
+##      If it was the clock, stayed_up_too_late is announced once home.
 ##   1. day_ended is announced — anything that needs to settle up against
 ##      *today* does it now. Economy sells the shipping bin here.
 ##   2. The farm grows: watered crops advance, soil dries, sprinklers water.
@@ -29,6 +34,16 @@ extends Node
 ## spent on the same frame the player presses sleep.
 var _ending_day: bool = false
 
+## Real seconds gathered towards the next 10-minute step of the clock.
+var _clock_seconds: float = 0.0
+
+## True once the clock has run out tonight, so the morning can say so.
+var _out_too_late: bool = false
+
+## The clock's step: it moves in tens, like most farming-game clocks, so the
+## HUD doesn't flicker every second.
+const CLOCK_STEP_MINUTES := 10
+
 
 func _ready() -> void:
 	# Deferred so the action that spent the last energy finishes first —
@@ -36,11 +51,33 @@ func _ready() -> void:
 	EventBus.energy_exhausted.connect(end_day, CONNECT_DEFERRED)
 
 
+## Runs the clock. Stops while the night is happening, and while paused
+## (process_mode is the default, so a paused tree stops this too).
+func _process(delta: float) -> void:
+	if _ending_day:
+		return
+	var rules: GameRules = GameState.RULES
+	var step_seconds := rules.seconds_per_ten_minutes
+	if step_seconds <= 0.0:
+		return  # a clock that never moves: set it to 0 in game_rules.tres to try the game without one
+	_clock_seconds += delta
+	while _clock_seconds >= step_seconds and not _ending_day:
+		_clock_seconds -= step_seconds
+		GameState.advance_clock(CLOCK_STEP_MINUTES)
+		if GameState.minutes >= rules.day_end_minutes:
+			_out_too_late = true
+			end_day()
+
+
 func end_day() -> void:
 	if _ending_day:
 		return
 	_ending_day = true
+	_clock_seconds = 0.0
 	await _go_home()
+	if _out_too_late:
+		_out_too_late = false
+		EventBus.stayed_up_too_late.emit()
 	EventBus.day_ended.emit(GameState.day)
 	GameState.farm.advance_day()
 	var season_turned := GameState.advance_calendar()

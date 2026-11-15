@@ -29,6 +29,16 @@ signal day_started(day: int, season: int, year: int)
 ## day actually advances, so systems can settle up first.
 signal day_ended(day: int)
 
+## The clock moved on. `minutes` is the time of day in minutes after midnight
+## (past midnight it keeps counting: 1 AM is 1500). Emitted every 10 minutes
+## of game time (DECISIONS 035).
+signal time_changed(minutes: int)
+
+## The clock reached game_rules.tres day_end_minutes (2 AM) with the player
+## still up. Emitted during the night, after they've been taken home, so the
+## morning can say why they woke up there.
+signal stayed_up_too_late()
+
 ## The season rolled over. Listeners re-theme tilesets and re-check crops.
 signal season_changed(season: int)
 
