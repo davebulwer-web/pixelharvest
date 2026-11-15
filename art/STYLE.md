@@ -198,3 +198,20 @@ fetch them as a zip from `api.pixellab.ai/mcp/tiles-pro/<id>/download`.
 | winter thicket | — (spring thicket recoloured: leaves and berries onto snow and ice shades) | |
 
 Path details (`ground_sources/path_details/<season>.png`, 64×16) reuse cut-outs from the grass detail generations. A plain "rounded grey cobblestones" prompt gave one big stone per tile (a grid); asking for many small irregular stones fixed it.
+
+**Stage 8 content, 2026-11-15 (DECISIONS 041).** pixflux, palette-forced, `init_image` = the placeholder. People shifted down so their feet match the placeholder's (y = 46 of 56).
+
+| Asset | Strength | Prompt subject |
+|---|---|---|
+| `town/market_stall_produce.png` (48×64) | 90 | front view of a wooden village market stall, red and cream striped canvas awning on two wooden poles, a wooden counter with plank front, four wicker baskets of fresh vegetables and fruit on the counter: carrots, cabbages, tomatoes and apples |
+| `town/market_stall_seeds.png` (48×64) | 80 | same stall, navy blue and cream awning, a row of five small paper seed packets with pictures of plants standing on the counter |
+| `town/keeper_grocer.png` (Rosa) | 120 | cheerful young woman market grocer, full body, front view facing the viewer, standing still, arms at sides, red hair in a ponytail, green headscarf, rust orange blouse, brown apron, dark green skirt, brown boots |
+| `town/keeper_seed_merchant.png` (Fennel) | 110 | wiry old travelling seed merchant, … grey moustache, wide brimmed navy blue hat, navy blue waistcoat over a cream shirt, a brown satchel strap across the chest, grey trousers, brown boots |
+| `town/baker.png` (Mabel) | 110 | plump middle-aged woman village baker, … brown hair in a bun, white baker's cap, white apron dusted with flour over a pink dress, brown shoes |
+| `town/child.png` (Pip) | 110 | small village child, a young boy, … messy brown hair, red and white striped shirt, blue shorts with braces, brown shoes |
+| `crops/{strawberry,melon,pumpkin}.png` (80×16) | 150 | five growth stages of a <crop> in a row, left to right: tiny cluster of three pale seeds, small sprout, small leafy plant/vine, … with white/yellow flowers, ripe crop. No soil, no dirt mound |
+| `items/{strawberry,melon,pumpkin}.png` | 150 | strip of four icons (init = the placeholders + the real potato), fourth thrown away |
+| `items/*_seeds.png` (3) | 150 | strip of four cream seed packets (init = the placeholders + the real parsnip packet), fourth thrown away |
+| `decorations/sundial.png`, `scarecrow_icon.png`, `lamp_post_icon.png` | 120 | strip of four decoration icons: hay bale, stone sundial on a pedestal, small scarecrow, iron garden lamp post |
+| `decorations/scarecrow.png` (now 32×32) | 100 | front view of a farm scarecrow on a wooden post, straw hat, sack cloth face, red checked shirt stuffed with straw, arms out on a crossbar (32×32 canvas) |
+| `decorations/hay_bale.png` | 150 | front view of a square golden hay bale tied with two strings (32×32 canvas, cut back to 16×16) |
