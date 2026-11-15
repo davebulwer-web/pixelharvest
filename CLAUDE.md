@@ -122,6 +122,7 @@ data/                Content resources (.tres), indexed by ContentDB
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers)
   events/            CalendarEvent — what happens on which days (market day) and its stalls
   quests/            QuestDef — townsfolk's requests: who asks, for what, and the reward
+  difficulties/      DifficultyDef — chosen at new game: multipliers on prices, energy, growing
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
                      farm/ the farmhouse and its furniture, decorations/ the farm's decorations)

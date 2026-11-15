@@ -279,9 +279,10 @@ func _item_detail(item: ItemDef) -> String:
 				else "Grows in %s.  " % GameState.describe_seasons(crop.seasons).to_lower()
 		if not crop.grows_in(GameState.season_id()):
 			text += "Can't be planted in %s.  " % GameState.season_name(GameState.season_id()).to_lower()
-		text += "Ready in %d watered days" % crop.days_to_mature()
+		var grow_scale := GameState.difficulty.grow_time_multiplier
+		text += "Ready in %d watered days" % crop.days_to_mature(grow_scale)
 		if crop.regrow_days > 0:
-			text += ", then again every %d" % crop.regrow_days
+			text += ", then again every %d" % crop.days_to_regrow(grow_scale)
 		if crop.produce != null:
 			text += ".  Sells for %dg each." % Economy.sell_price(crop.produce)
 		return text

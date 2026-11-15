@@ -1217,3 +1217,61 @@ each kind carried. Marlow's list is now seven rows; much more stock would need t
 menu to scroll. A lamp put down after dark lights at the next tick of the clock (a few
 seconds), not at once. New art is placeholder: scarecrow, hay bale, sundial, and icons for
 the two tall ones.
+
+## 040 — Difficulty is a set of multipliers chosen once, at new game, and saved by id
+
+**Decision.** Stage 8 session 4 adds the difficulty choice DESIGN.md asked for.
+
+- *A difficulty is a `DifficultyDef`* (`data/difficulties/`): an id, a name, a sentence for
+  the menu, and five multipliers: starting gold, sell prices, shop prices, energy per
+  swing and grow times. 1.0 changes nothing. `game_rules.tres` lists them in menu order
+  (`difficulties`, like `seasons`) and names the default (`default_difficulty`).
+- *Three to start* (first guesses, to be tuned in Stage 9's balance pass):
+  Relaxed (200g, sells at 125%, shops at 80%, 75% energy, 75% grow time), Standard
+  (all 1.0: exactly the game as it was) and Hard (50g, 80%, 125%, 125%, 125%).
+- *Each multiplier is applied in one place,* the place that already owned that number:
+  `Economy.buy_price()`, `sell_price()` and `upgrade_price()` (so the bin, the counters,
+  the market stall and the shop menu all follow; the stall's 125% goes on top),
+  `GameState.new_game()` for the gold, the player's tool swing for energy, and
+  `CropDef.days_to_grow_from()` for growing (`FarmData.advance_day()` is passed the
+  multiplier by TimeSystem, so the farm's data doesn't look up the game's settings).
+  Nothing anywhere asks "is this Hard?". Shop prices cover everything bought (seeds,
+  supplies, decorations and upgrades); request rewards are left as written.
+- *Prices round to whole gold and never become free:* anything with a price costs at least
+  1g; 0 still means "not for sale".
+- *Grow times are rounded along the way, not stage by stage.* Days are whole, so at 1.25 a
+  4-day parsnip takes 5 days (stages of 1, 2, 1, 1). Rounding each stage would have made
+  it 8 (or left it at 4), because 1.25 days rounds the same way every time. No stage is
+  ever shorter than a day, which is why Relaxed doesn't speed up parsnips or radishes.
+  The shop's "Ready in N watered days" shows the scaled number.
+- *The choice:* a small menu (`DifficultyMenu`, made in code) asks "how would you like to
+  play?" at first launch with no save, and on Ctrl+N. It starts on Standard and says in
+  words what each one changes. At first launch there's no way out of it; from Ctrl+N, Esc
+  goes back to the game in hand untouched, which is safer than Ctrl+N's old instant
+  restart. `SaveSystem.load_or_new_game()` now says whether it loaded, so the boot scene
+  knows when to ask.
+- *Saved by id* (save version 9: `"difficulty": "hard"`), and its numbers read from the
+  `.tres` on load, so retuning Hard reaches games already being played. Saves from
+  before (v1–v8) were all played at what is now Standard, so the 8 → 9 step writes
+  `"standard"` (frozen in the step). An id the game doesn't know loads as the default,
+  with a warning. `tests/saves/v8_example.json` is a real v8 save, with requests in it.
+- *Chosen once.* There's no changing difficulty mid-game: the starting gold has already
+  been given, and a switch would be a way round it. It can be added later as one setter.
+
+Options considered: separate code paths per difficulty (what DESIGN.md rules out), or
+difficulty fields on every item and crop (`hard_price`...), which multiplies the data by
+three. Or applying the multipliers once, at new game, by copying altered resources: then
+the save would have to hold every price, and retuning wouldn't reach existing games. Or a
+single "difficulty level" number with the scaling worked out in code: fewer fields, but
+then the balance lives in a script (rule 6).
+
+**Why.** DESIGN.md: "Not separate code paths — difficulty is data." Rule 3 and rule 6: a
+fourth difficulty, or a gentler Hard, is a `.tres` edit. And it's the architecture's exam
+the stage plan set: prices already went through Economy and growing through one CropDef
+function, so the farming code took one extra argument and nothing else.
+
+**Cost.** Energy costs are fractions now (a Hard hoe swing is 2.5), which the HUD rounds
+for display. The game doesn't show which difficulty you're playing, except in the console
+on load; Stage 9's title screen and settings are the place for that. Ctrl+N still has no
+"are you sure?", but the menu is a chance to change your mind. Grow-time rounding means
+the shortest crops (radish, parsnip) can't get faster than a day a stage.

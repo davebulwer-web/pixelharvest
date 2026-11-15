@@ -5,8 +5,9 @@ extends Node
 ## GameState holds the gold and the items; this file holds the rules for
 ## turning one into the other. Every price in the game is read through
 ## buy_price() and sell_price() below, never straight off an item, so that
-## Stage 8's market days and difficulty settings have exactly one place to
-## adjust prices.
+## market days and the difficulty have exactly one place to adjust prices.
+## The difficulty (DECISIONS 040) scales them here; a market stall's own rate
+## goes on top, in store_price().
 ##
 ## The shipping bin works like this (DESIGN.md, the core loop):
 ##   - During the day, interacting with the bin moves every sellable item from
@@ -26,15 +27,15 @@ func _ready() -> void:
 
 
 func buy_price(item: ItemDef) -> int:
-	return item.buy_price
+	return DifficultyDef.scale_price(item.buy_price, GameState.difficulty.buy_price_multiplier)
 
 
 func sell_price(item: ItemDef) -> int:
-	return item.sell_price
+	return DifficultyDef.scale_price(item.sell_price, GameState.difficulty.sell_price_multiplier)
 
 
 func upgrade_price(upgrade: UpgradeDef) -> int:
-	return upgrade.price
+	return DifficultyDef.scale_price(upgrade.price, GameState.difficulty.buy_price_multiplier)
 
 
 ## What `shop` has on its shelves: seed packets and supplies, per its switches

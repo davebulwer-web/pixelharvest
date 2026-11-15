@@ -18,6 +18,11 @@ extends Node
 
 const RULES: GameRules = preload("res://data/game_rules.tres")
 
+## How hard this game is (DECISIONS 040): chosen at new game, saved, and never
+## changed after. Economy, the player's tools and the farm's growing read its
+## multipliers; it's never null.
+var difficulty: DifficultyDef
+
 var gold: int = 0
 
 ## The calendar. `day` is the day of the season, 1 to RULES.days_per_season;
@@ -76,10 +81,12 @@ func _ready() -> void:
 	new_game()
 
 
-## Reset everything to the starting state in GameRules. The other way in is
-## load_from_save().
-func new_game() -> void:
-	gold = RULES.starting_gold
+## Reset everything to the starting state in GameRules, played at
+## `chosen_difficulty` (the default one if none is given: running a scene on
+## its own with F6, or a test). The other way in is load_from_save().
+func new_game(chosen_difficulty: DifficultyDef = null) -> void:
+	difficulty = chosen_difficulty if chosen_difficulty != null else RULES.standard_difficulty()
+	gold = difficulty.starting_gold(RULES.starting_gold)
 	day = 1
 	season = 0
 	year = 1
@@ -362,6 +369,9 @@ func pick_up_object(cell: Vector2i) -> bool:
 # Requests (quests) are saved by id with how far each has got (save version
 # 8); what each one asks is in data/quests/, not in the save.
 #
+# The difficulty is saved by id (save version 9); its multipliers are read
+# from data/difficulties/ on load, so retuning Hard reaches existing games.
+#
 # Upgrades are saved as a list of ids (save version 4). Maximum energy isn't
 # saved at all: it's worked out from the upgrades on load, so a rebalanced
 # energy upgrade reaches existing games too.
@@ -369,6 +379,7 @@ func pick_up_object(cell: Vector2i) -> bool:
 func to_save() -> Dictionary:
 	var selected := selected_tool()
 	return {
+		"difficulty": String(difficulty.id),
 		"gold": gold,
 		"day": day,
 		"season": season,
@@ -389,6 +400,12 @@ func to_save() -> Dictionary:
 ## item nobody defines any more is dropped, and if that leaves the player with
 ## nothing to use at all, the starting kit is handed out again.
 func load_from_save(data: Dictionary) -> void:
+	difficulty = RULES.find_difficulty(StringName(data["difficulty"]))
+	if difficulty == null:
+		push_warning("Save is at a difficulty '%s' the game doesn't know; playing it at %s"
+				% [data["difficulty"], RULES.standard_difficulty().display_name])
+		difficulty = RULES.standard_difficulty()
+
 	# JSON keeps every number as a float, hence the int() calls.
 	gold = int(data["gold"])
 	# Kept inside the calendar, in case game_rules.tres has been changed since

@@ -396,12 +396,37 @@ Session 3 (2026-11-15) — decorations for the farm, on placeholder art. See DEC
       spring, nothing watered overnight, save round trip, the mayor's chain and the
       sundial reward, v5–v7 saves still load) and rendered (farm by day, at night, in
       winter, Marlow's menu)
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-15, committed)
 
 **Left over:** real Pixellab art for the scarecrow, hay bale and sundial, and the icons for
 the scarecrow and lamp post (placeholders now; fence, flower bed and lamp reuse town art).
 
-- [ ] `DifficultyDef` resources and a new-game difficulty choice
+Session 4 (2026-11-15) — difficulty, chosen at new game, on placeholder UI. See DECISIONS 040.
+
+- [x] `DifficultyDef` resources (`data/difficulties/`): starting gold, sell prices, shop
+      prices, energy per swing and grow times, each a multiplier. Relaxed, Standard (all
+      1.0, the game as it was) and Hard, listed in `game_rules.tres`
+- [x] Each multiplier applied in the one place that owned the number: Economy's prices
+      (bin, counters, stall, upgrades), the starting gold, the tool swing, crop growth
+      (rounded along the way, never under a day a stage; the shop shows the scaled days)
+- [x] "How would you like to play?" menu at first launch (no save) and on Ctrl+N; starts
+      on Standard, says what each one changes; Esc from Ctrl+N goes back to the game
+- [x] Save version 9 (difficulty by id); v1–v8 saves load as Standard;
+      `tests/saves/v8_example.json` added
+- [x] Verified headless (133 checks: the three in order and the default, the boot menu
+      appears with no save, pauses, starts on Standard, can't be escaped, arrows and
+      Enter pick Hard, 50g, hard prices for seeds, produce, upgrades, the stall's rate on
+      top, the bin overnight, buying, relaxed and standard prices, every crop's standard
+      times unchanged and hard totals right, real growing at three speeds, a real hoe
+      swing in the farm scene costs 125%, save round trip, unknown id, v1–v8 saves,
+      writes v9, Ctrl+N opens over the farm paused, doesn't stack, Esc keeps the game,
+      Ctrl+N to Relaxed gives 200g and wakes at home, shop shows the hard days) and
+      rendered (the menu at first launch, and over the farm)
+- [ ] Dave confirms it plays correctly on Windows
+
+**Left over:** real Pixellab art for Stage 8's content (stalls, Rosa, Fennel, Mabel, Pip,
+the three crops, the decorations). The difficulty menu is placeholder UI until Stage 9's
+title screen. The numbers are first guesses for Stage 9's balance pass.
 
 **The architecture's exam.** If quests need changes to the farming code, something went
 wrong earlier.

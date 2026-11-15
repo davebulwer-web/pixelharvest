@@ -80,7 +80,7 @@ func end_day() -> void:
 		_out_too_late = false
 		EventBus.stayed_up_too_late.emit()
 	EventBus.day_ended.emit(GameState.day)
-	GameState.farm.advance_day()
+	GameState.farm.advance_day(GameState.difficulty.grow_time_multiplier)
 	var season_turned := GameState.advance_calendar()
 	EventBus.energy_changed.emit(GameState.energy, GameState.max_energy)
 	if season_turned:

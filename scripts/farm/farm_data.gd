@@ -189,11 +189,13 @@ func clear_thicket(area: Rect2i) -> int:
 ##
 ## Called by TimeSystem once per day. It deliberately knows nothing about
 ## *when* days end — only what a day's passing does to the farm.
-func advance_day() -> void:
+## `grow_scale` is the difficulty's grow_time_multiplier (DECISIONS 040),
+## passed in so the farm's data never has to look up the game's settings.
+func advance_day(grow_scale: float = 1.0) -> void:
 	for cell: Vector2i in _tiles:
 		var t: FarmTile = _tiles[cell]
 		if t.has_crop() and t.watered and not t.is_crop_ready():
-			_grow(cell, t)
+			_grow(cell, t, grow_scale)
 		t.watered = false
 	_run_sprinklers()
 
@@ -227,9 +229,9 @@ func wither_out_of_season(season_id: StringName) -> int:
 	return died
 
 
-func _grow(cell: Vector2i, t: FarmTile) -> void:
+func _grow(cell: Vector2i, t: FarmTile, grow_scale: float) -> void:
 	t.crop_days += 1
-	if t.crop_days < t.crop.days_to_grow_from(t.crop_stage, t.crop_regrowing):
+	if t.crop_days < t.crop.days_to_grow_from(t.crop_stage, t.crop_regrowing, grow_scale):
 		return
 	t.crop_stage += 1
 	t.crop_days = 0

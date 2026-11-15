@@ -13,13 +13,15 @@ extends Node
 ##     in most farming games. That's deliberate: a save is always a clean
 ##     morning, never half an action.
 ##   - Loading happens once, at launch, from the boot scene.
+##   - With no save (or one that can't be read), the boot scene asks which
+##     difficulty to play at before the new game starts (DECISIONS 040).
 ##
 ## Where: user://save.json. On Windows that's
 ##   %APPDATA%\Godot\app_userdata\Pixel Harvest\save.json
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 8, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 9, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -48,12 +50,15 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       whatever was on them is cleared (sprinklers go back in the bag).
 ##   8 — requests (quests): which have been taken and finished, and a count
 ##       for each. Older games have taken none.
-const CURRENT_VERSION := 8
+##   9 — the difficulty chosen at new game, by id. Older games were all
+##       played at what is now "standard".
+const CURRENT_VERSION := 9
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
 ## the game half-loaded.
 const REQUIRED_FIELDS: Dictionary = {
+	"difficulty": TYPE_STRING,
 	"gold": TYPE_FLOAT,
 	"day": TYPE_FLOAT,
 	"season": TYPE_FLOAT,
@@ -75,37 +80,53 @@ var _active: bool = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# A stopgap until Stage 9's title screen has a "New game" button.
+	# A stopgap until Stage 9's title screen has a "New game" button. Nothing
+	# here runs while the game is paused (in a shop, a conversation, or this
+	# menu itself), so Ctrl+N only works out in the world.
 	if event.is_action_pressed(&"new_game"):
-		start_new_game()
+		get_viewport().set_input_as_handled()
+		ask_for_new_game()
+
+
+## Show the difficulty menu over the game; picking one starts a new game at
+## it, and Esc goes back to the game in hand untouched (DECISIONS 040).
+func ask_for_new_game() -> void:
+	var menu := DifficultyMenu.new()
+	menu.can_cancel = true
+	menu.chosen.connect(start_new_game)
+	get_tree().root.add_child(menu)
 
 
 func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
 
 
-## Called once by the boot scene. Loads the save if there is one; otherwise,
-## or if it can't be read, the game carries on as a new game.
-func load_or_new_game() -> void:
+## Called once by the boot scene. Loads the save if there is one and returns
+## true. Otherwise, or if it can't be read, GameState is left as a fresh new
+## game at the default difficulty and it returns false: the boot scene then
+## asks which difficulty to play at.
+func load_or_new_game() -> bool:
 	_active = true
 	if not has_save():
 		GameState.new_game()
-		return
+		return false
 	var problem := _load()
 	if problem != "":
 		push_error("Couldn't load the save (%s). Starting a new game; the old file has been kept as %s"
 				% [problem, ProjectSettings.globalize_path(SET_ASIDE_PATH)])
 		DirAccess.rename_absolute(SAVE_PATH, SET_ASIDE_PATH)
 		GameState.new_game()
-		return
-	print("Loaded save: day %d" % GameState.day)
+		return false
+	print("Loaded save: day %d, %s" % [GameState.day, GameState.difficulty.display_name])
 	EventBus.game_loaded.emit()
+	return true
 
 
-## Throw away the game in memory and start again. The save file isn't touched
-## until the next night, so quitting before then gets the old game back.
-func start_new_game() -> void:
-	GameState.new_game()
+## Throw away the game in memory and start again at `difficulty`. The save
+## file isn't touched until the next night, so quitting before then gets the
+## old game back.
+func start_new_game(difficulty: DifficultyDef = null) -> void:
+	GameState.new_game(difficulty)
 	LocationManager.go_to(GameState.location)
 
 
@@ -222,6 +243,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_6_to_7(data["game"])
 			7:
 				_upgrade_7_to_8(data["game"])
+			8:
+				_upgrade_8_to_9(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -372,3 +395,14 @@ func _upgrade_6_to_7(game: Dictionary) -> void:
 ## none, so its log starts empty and the townsfolk ask as if for the first time.
 func _upgrade_7_to_8(game: Dictionary) -> void:
 	game["quests"] = {}
+
+
+## Version 8 -> 9: difficulty arrives (DECISIONS 040). Every older game was
+## played with the prices, energy and growing that are now "standard", so it
+## carries on at that. The id is frozen here, not read from game_rules.tres,
+## so this step means the same thing however the default changes later.
+const V9_DIFFICULTY := "standard"
+
+
+func _upgrade_8_to_9(game: Dictionary) -> void:
+	game["difficulty"] = V9_DIFFICULTY

@@ -113,6 +113,8 @@ func _use_tool() -> void:
 		return
 	var tier_cost := tool.energy_cost_at(GameState.tool_tier(tool))
 	var cost := minf(tier_cost, tool.energy_cost * usable.size())
+	# The difficulty makes every swing lighter or heavier (DECISIONS 040).
+	cost *= GameState.difficulty.energy_cost_multiplier
 	if not GameState.try_spend_energy(cost):
 		return
 	for cell in usable:

@@ -5,8 +5,9 @@ extends Resource
 ##
 ## Rule 6 says no balance numbers in scripts, and that includes "how much gold
 ## do you start with". They live in data/game_rules.tres, where they can be
-## changed in the inspector without touching code. In Stage 8 a DifficultyDef
-## will scale these; it will not replace them.
+## changed in the inspector without touching code. The difficulty chosen at
+## new game (DifficultyDef, DECISIONS 040) scales some of them; it never
+## replaces them.
 ##
 
 @export var starting_gold: int = 0
@@ -55,3 +56,35 @@ extends Resource
 ## From this time on, the HUD warns that it's late (a message once, and the
 ## clock turns red-ish). Midnight.
 @export var late_warning_minutes: int = 1440
+
+## --- Difficulty (DECISIONS 040) -------------------------------------------
+
+## The difficulties offered at new game, in the order the menu lists them.
+@export var difficulties: Array[DifficultyDef] = []
+
+## The one the menu starts on, and what older saves (from before difficulty
+## existed) and anything else that doesn't say are played at.
+@export var default_difficulty: StringName = &"standard"
+
+
+## The difficulty with id `id`, or null if there's no such one here.
+func find_difficulty(id: StringName) -> DifficultyDef:
+	for each in difficulties:
+		if each.id == id:
+			return each
+	return null
+
+
+## default_difficulty, or the first listed if that id isn't listed. With none
+## listed at all, a plain DifficultyDef (every multiplier 1.0) so the game
+## still works, exactly as it did before difficulty existed.
+func standard_difficulty() -> DifficultyDef:
+	var found := find_difficulty(default_difficulty)
+	if found != null:
+		return found
+	if not difficulties.is_empty():
+		return difficulties[0]
+	var plain := DifficultyDef.new()
+	plain.id = default_difficulty
+	plain.display_name = "Standard"
+	return plain

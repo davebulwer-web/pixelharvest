@@ -58,13 +58,28 @@ func is_ready_stage(stage: int) -> bool:
 
 ## Watered days needed to leave `stage`. A regrowing crop that has already been
 ## harvested waits regrow_days for its last step instead of days_per_stage.
-func days_to_grow_from(stage: int, regrowing: bool) -> int:
+##
+## `scale` is the difficulty's grow_time_multiplier (DECISIONS 040). Days are
+## whole, so the scaled time is rounded along the way rather than stage by
+## stage: at 1.25 a 4-day parsnip takes 5 days (stages of 1, 2, 1, 1), where
+## rounding each stage would have made it 4 or 8. No stage takes under a day.
+func days_to_grow_from(stage: int, regrowing: bool, scale: float = 1.0) -> int:
 	if regrowing and stage == growth_stages - 1:
-		return regrow_days
-	return days_per_stage
+		return days_to_regrow(scale)
+	var before := roundi(stage * days_per_stage * scale)
+	var after := roundi((stage + 1) * days_per_stage * scale)
+	return maxi(1, after - before)
 
 
-## Total watered days from planting to the first harvest. Handy for the shop
-## and for balancing; nothing in the growing code uses it.
-func days_to_mature() -> int:
-	return growth_stages * days_per_stage
+## Watered days for a regrowing crop to be ready again after a harvest.
+func days_to_regrow(scale: float = 1.0) -> int:
+	return maxi(1, roundi(regrow_days * scale))
+
+
+## Total watered days from planting to the first harvest, at `scale`. Handy
+## for the shop and for balancing; nothing in the growing code uses it.
+func days_to_mature(scale: float = 1.0) -> int:
+	var total := 0
+	for stage in growth_stages:
+		total += days_to_grow_from(stage, false, scale)
+	return total
