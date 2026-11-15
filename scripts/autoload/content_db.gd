@@ -19,8 +19,10 @@ extends Node
 ##   data/crops/     CropDef — how a plant grows and looks
 ##   data/produce/   ItemDef — what a harvest gives you, and its sell price
 ##   data/tools/     ToolDef — tools, seeds and sprinklers (all things you use)
+##   data/decorations/ ToolDef — decorations for the farm, bought or given as
+##                   rewards and placed like sprinklers (DECISIONS 039)
 ##   data/objects/   ObjectDef — things standing on the farm: trees, the bin,
-##                   sprinklers
+##                   sprinklers, decorations; and the town's fountain and benches
 ##   data/upgrades/  UpgradeDef — bought once: tool tiers, energy, fields
 ##   data/characters/ CharacterDef — townsfolk you can talk to (not shopkeepers)
 ##   data/events/    CalendarEvent — what happens on which days (market day),
@@ -30,7 +32,7 @@ extends Node
 ##
 
 const CROPS_DIR := "res://data/crops/"
-const ITEM_DIRS: Array[String] = ["res://data/tools/", "res://data/produce/"]
+const ITEM_DIRS: Array[String] = ["res://data/tools/", "res://data/produce/", "res://data/decorations/"]
 const OBJECTS_DIR := "res://data/objects/"
 const UPGRADES_DIR := "res://data/upgrades/"
 const CHARACTERS_DIR := "res://data/characters/"
@@ -296,7 +298,7 @@ func _check() -> void:
 		if each.scene == null:
 			push_error("ContentDB: '%s' has no scene, so it can't be shown" % where)
 		if each.item != null and item(each.item.id) != each.item:
-			push_error("ContentDB: '%s' gives back an item that isn't in data/tools/" % where)
+			push_error("ContentDB: '%s' gives back an item that isn't in data/tools/ or data/decorations/" % where)
 
 	# The bed's location must exist, or nights have nowhere to happen.
 	if not RULES.locations.any(func(l: LocationDef) -> bool: return l != null and l.id == RULES.home_location):
@@ -380,6 +382,26 @@ func _check() -> void:
 		if not each.sold_only_by.is_empty() and each.buy_price <= 0:
 			push_warning("ContentDB: '%s' names shops to sell it but has no buy_price, so none of them will"
 					% each.resource_path)
+
+	# Decorations for sale need a shop that sells decorations, or they can
+	# never be bought. (Ones with no price are rewards, which is fine.)
+	var decor_shop := false
+	for location in RULES.locations:
+		if location != null and location.shop != null and location.shop.sells_decorations:
+			decor_shop = true
+	for each: CalendarEvent in _events.values():
+		for stall in each.stalls:
+			if stall != null and stall.shop != null and stall.shop.sells_decorations:
+				decor_shop = true
+	for each: ItemDef in _items.values():
+		if each is ToolDef and each.action is PlaceDecorationAction:
+			if each.buy_price > 0 and each.sold_only_by.is_empty() and not decor_shop:
+				push_warning("ContentDB: '%s' is a decoration with a price, but no shop has sells_decorations switched on"
+						% each.resource_path)
+			var placed := object(each.action.object_id)
+			if placed != null and placed.item != each:
+				push_warning("ContentDB: '%s' places '%s', whose ObjectDef doesn't give it back when picked up"
+						% [each.resource_path, each.action.object_id])
 
 	# Townsfolk and shopkeepers share one set of names on EventBus.npc_talked_to,
 	# so a character can't use a shop's id.

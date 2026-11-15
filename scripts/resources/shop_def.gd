@@ -33,8 +33,12 @@ extends Resource
 ## Seed packets (any item whose action plants a crop).
 @export var sells_seeds: bool = false
 
-## Everything else with a shop price: sprinklers, for now.
+## Everything else with a shop price that does a job: sprinklers, for now.
 @export var sells_supplies: bool = false
+
+## Decorations for the farm (any item whose action is a PlaceDecorationAction):
+## a scarecrow, a lamp post. They do nothing but look nice (DECISIONS 039).
+@export var sells_decorations: bool = false
 
 ## Which kinds of upgrade are sold here: &"tools", &"energy", &"land".
 ## Each UpgradeEffect names its own kind (UpgradeEffect.category).

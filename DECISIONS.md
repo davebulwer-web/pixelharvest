@@ -1162,3 +1162,58 @@ listens to yet (one line). A delivery counts what's in the bag, so selling the p
 before handing them in undoes it. Rewards are gold and items; cosmetics come next session.
 Art for Mabel and Pip is placeholder (recoloured from Marlow and Wren; Pip squashed
 shorter).
+
+## 039 — Decorations are placeable items that do nothing; a shop switch decides who sells them
+
+**Decision.** Stage 8 session 3 adds cosmetic purchases: decorations for the farm.
+
+- *A decoration is placed exactly like a sprinkler.* It's a `ToolDef` whose action puts an
+  object on the tile in front of you (Space, open grass only, never the path, a crop or
+  another object), and its `ObjectDef` names the item back, so E picks it up again. The
+  object's scene uses `placed_object.gd` like the sprinklers. Nothing new on the farm: it
+  already knew how to hold, draw, save and pick up objects by id. Placing costs no energy
+  (`energy_cost` 0): it isn't work.
+- *`PlaceDecorationAction` is how a decoration is recognised.* It extends
+  `PlaceObjectAction` and changes nothing about placing; it exists so that
+  `Economy.is_decoration()` can tell a scarecrow from a sprinkler the way
+  `Economy.is_seed()` tells seeds by `PlantAction`. A decoration's `ObjectDef` has no
+  `water_offsets`, so it does nothing overnight.
+- *Who sells them is a shop switch*, `ShopDef.sells_decorations`, beside `sells_seeds` and
+  `sells_supplies`. Marlow's general store has it on. Decorations no longer count as
+  "supplies", so the blacksmith keeps selling only sprinklers. ContentDB warns if a
+  decoration has a price but no shop sells decorations, or if its object doesn't give it
+  back when picked up.
+- *Their own folder:* `data/decorations/` (the items; ContentDB reads it with tools and
+  produce), `data/objects/` (what stands on the tile), `scenes/decorations/` and
+  `assets/sprites/decorations/`. A new decoration is those three files and a picture.
+- *The first six* (first guesses at prices): fence 15g, hay bale 40g, flower bed 60g,
+  scarecrow 150g, lamp post 250g, and a sundial that isn't sold anywhere. The fence, flower
+  bed and lamp post reuse the town's art under their own ids (`garden_fence` and so on),
+  because the town's pieces must not be pick-up-able. The farm's flower bed snows over in
+  winter by one line in `winter.tres`; the farm's lamp post has the town lamp's glow in the
+  `night_lights` group, so the farm's Daylight lights it at dusk with no code.
+- *A cosmetic as a reward.* The mayor's second request (`mayor_town_pride`: sell 1000g of
+  produce, after his first) pays 100g and the sundial. Request rewards were already items,
+  so this is one `.tres`, which is what DESIGN.md meant by quests giving "cosmetics".
+- *No save change* (still version 8): a placed decoration is a farm object id, and one in
+  the bag is an item id, both of which the save already held.
+
+Options considered: decorations as a separate system (a "decor" layer on the farm with its
+own save list): more freedom later, such as things you can walk over, but a second way of
+standing on a tile beside objects, for no gain today. Or a "decoration" flag on `ItemDef`:
+simpler, but a flag can be set on something that isn't placeable at all, while the action
+class can't. Or reusing `sold_only_by` to send them to Marlow: no code, but it means "rare"
+and every new decoration would have to name the shop.
+
+**Why.** Rule 3: a decoration, its price, its winter look or a decoration as a reward is
+data. The endgame (DESIGN.md) is playing for the look of the farm, and this gives gold
+somewhere to go once the upgrades are bought.
+
+**Cost.** Every decoration is one tile. The town's bench (two tiles wide) isn't offered,
+because a one-tile object with a two-tile picture would let another object sit on its
+other half. Everything is solid, so a ring of fences can shut a field (E still picks them
+up again). The hotbar grows with
+each kind carried. Marlow's list is now seven rows; much more stock would need the shop
+menu to scroll. A lamp put down after dark lights at the next tick of the clock (a few
+seconds), not at once. New art is placeholder: scarecrow, hay bale, sundial, and icons for
+the two tall ones.

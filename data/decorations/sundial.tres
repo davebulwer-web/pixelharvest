@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ToolDef" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/tools/place_decoration_action.gd" id="2_action"]
+[ext_resource type="Texture2D" path="res://assets/sprites/decorations/sundial.png" id="3_icon"]
+
+[sub_resource type="Resource" id="Resource_action"]
+script = ExtResource("2_action")
+object_id = &"sundial"
+
+[resource]
+script = ExtResource("1_def")
+id = &"sundial"
+display_name = "Sundial"
+description = "A stone sundial from the mayor, for a farm that pays its way. Not sold anywhere."
+icon = ExtResource("3_icon")
+action = SubResource("Resource_action")
+consumed_on_use = true

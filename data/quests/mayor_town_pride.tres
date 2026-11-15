@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/quests/sell_goal.gd" id="2_goal"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="5_itemdef"]
+[ext_resource type="Resource" path="res://data/decorations/sundial.tres" id="6_reward0"]
+[ext_resource type="Resource" path="res://data/quests/mayor_first_sale.tres" id="7_requires"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_goal")
+amount = 1000
+
+[resource]
+script = ExtResource("1_def")
+id = &"mayor_town_pride"
+title = "The pride of the valley"
+giver = &"mayor"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Word of your vegetables is getting about. I'd like the old farm to be the pride of the valley again.", "Sell a thousand gold's worth of produce and I'll give you something to show for it. Something for the garden."])
+reminder_line = "A thousand gold, farmer. The valley's watching!"
+thanks_lines = Array[String](["A thousand gold! The pride of the valley, just as I said.", "This sundial stood in my garden for thirty years. Put it somewhere it catches the sun. Space to set it down, E to pick it up again."])
+reward_gold = 100
+reward_items = Dictionary[ExtResource("5_itemdef"), int]({
+ExtResource("6_reward0"): 1
+})
+requires = ExtResource("7_requires")
+first_day = 1

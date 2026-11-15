@@ -105,14 +105,16 @@ scripts/             Game code
   farm/              The farm's data and layout, the farmhouse and its bed
   town/              The town, its map, shop interiors and fronts, people, notice board (Stage 7)
   items/             Inventory
-  tools/             ToolAction scripts (hoe, watering can, planting, placing objects)
+  tools/             ToolAction scripts (hoe, watering can, planting, placing objects
+                     and decorations)
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
   quests/            QuestGoal scripts (deliver, harvest, sell) and the saved QuestLog
 data/                Content resources (.tres), indexed by ContentDB
   crops/             CropDef — how each plant grows and looks
   produce/           ItemDef — what a harvest gives, and its sell price
   tools/             ToolDef — tools, seeds and sprinklers (all things you use)
-  objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers)
+  decorations/       ToolDef — decorations for the farm, placed like sprinklers (DECISIONS 039)
+  objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers, decorations)
   upgrades/          UpgradeDef — bought once: tool tiers, energy, fields
   seasons/           SeasonTheme — each season's name and look (crops list their own seasons)
   locations/         LocationDef — the farm, the farmhouse, the town, each shop (and where its door is)
@@ -122,7 +124,7 @@ data/                Content resources (.tres), indexed by ContentDB
   quests/            QuestDef — townsfolk's requests: who asks, for what, and the reward
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
-                     farm/ the farmhouse and its furniture)
+                     farm/ the farmhouse and its furniture, decorations/ the farm's decorations)
 assets/tilesets/     Ground and world tilesets
 art/                 Art specification and generation log (not shipped art)
 ```

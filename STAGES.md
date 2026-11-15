@@ -371,11 +371,36 @@ Session 2 (2026-11-15) — requests (quests), on placeholder art. See DECISIONS 
       harvest and real bin and shop sales counted, the notice board, the town's talk,
       markers and log, save round trip, v1–v7 saves) and rendered (markers, Mabel
       asking, the log, "?" over Mabel, the hand-in, the notice)
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (2026-11-15, committed)
 
 **Left over:** real Pixellab art for Mabel and Pip (recoloured placeholders now).
 
-- [ ] Cosmetic purchases and farm decoration
+Session 3 (2026-11-15) — decorations for the farm, on placeholder art. See DECISIONS 039.
+
+- [x] Decorations are items you place like sprinklers: Space puts one on open grass, E
+      picks it back up. They do nothing but look nice and cost no energy to place
+- [x] `PlaceDecorationAction` marks an item as a decoration; `ShopDef.sells_decorations`
+      decides who sells them. Marlow's general store does, cheapest first
+- [x] Six decorations (`data/decorations/` + `data/objects/` + `scenes/decorations/`):
+      fence 15g, hay bale 40g, flower bed 60g (snowed over in winter), scarecrow 150g,
+      lamp post 250g (lights up at night like the town's), and a sundial that isn't sold
+- [x] The sundial is a request reward: the mayor's second request, "The pride of the
+      valley" (sell 1000g of produce, after his first), gives 100g and the sundial
+- [x] No save change (version stays 8): placed decorations are farm objects by id, and
+      carried ones are items, both of which the save already holds
+- [x] Verified headless (114 checks: every decoration is an item that gives itself back,
+      who sells what, buying and refusing, placing with Space at no energy cost, refused on
+      the path, the doorstep, a crop or another object, placed on bare tilled soil, picked
+      up with E and put down again, solid to walk into, fences in a row, the lamp dark by
+      day and lit at night and on coming back at night, the flower bed in winter and
+      spring, nothing watered overnight, save round trip, the mayor's chain and the
+      sundial reward, v5–v7 saves still load) and rendered (farm by day, at night, in
+      winter, Marlow's menu)
+- [ ] Dave confirms it plays correctly on Windows
+
+**Left over:** real Pixellab art for the scarecrow, hay bale and sundial, and the icons for
+the scarecrow and lamp post (placeholders now; fence, flower bed and lamp reuse town art).
+
 - [ ] `DifficultyDef` resources and a new-game difficulty choice
 
 **The architecture's exam.** If quests need changes to the farming code, something went

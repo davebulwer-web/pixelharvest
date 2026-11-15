@@ -337,7 +337,7 @@ func harvest(cell: Vector2i) -> bool:
 	return true
 
 
-## E on a placed object (a sprinkler): take it back into the bag. Returns
+## E on a placed object (a sprinkler, a decoration): take it back into the bag. Returns
 ## false for things that can't be picked up, like trees and the bin.
 func pick_up_object(cell: Vector2i) -> bool:
 	var t := farm.tile(cell)

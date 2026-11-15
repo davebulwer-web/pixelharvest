@@ -1,7 +1,7 @@
 extends StaticBody2D
 ##
 ## PlacedObject — something the player put down and can pick back up with E:
-## a sprinkler, for now.
+## a sprinkler, or a decoration (a scarecrow, a lamp post; DECISIONS 039).
 ##
 ## Like the shipping bin, this node is only the object's presence on the farm
 ## (picture, collision, answering E). Where it stands is in FarmData, and what

@@ -49,10 +49,25 @@ func shop_stock(shop: ShopDef) -> Array[ItemDef]:
 			if shop.id in item.sold_only_by:
 				stock.append(item)
 			continue
-		var is_seed := item is ToolDef and item.action is PlantAction
-		if (is_seed and shop.sells_seeds) or (not is_seed and shop.sells_supplies):
+		if is_seed(item):
+			if shop.sells_seeds:
+				stock.append(item)
+		elif is_decoration(item):
+			if shop.sells_decorations:
+				stock.append(item)
+		elif shop.sells_supplies:
 			stock.append(item)
 	return stock
+
+
+## True for a packet of seeds: anything whose action plants a crop.
+func is_seed(item: ItemDef) -> bool:
+	return item is ToolDef and item.action is PlantAction
+
+
+## True for something put on the farm just for the look of it (DECISIONS 039).
+func is_decoration(item: ItemDef) -> bool:
+	return item is ToolDef and item.action is PlaceDecorationAction
 
 
 ## The upgrades on offer right now, cheapest first: not yet owned, whatever

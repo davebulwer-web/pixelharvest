@@ -92,10 +92,11 @@ func _ready() -> void:
 		_apply_season_overlay()
 	)
 
-	print("--- Pixel Harvest · Stage 7 ---")
+	print("--- Pixel Harvest · Stage 8 ---")
 	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
 	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
-	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler.")
+	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler")
+	print("or a decoration. Decorations (Marlow's store) go down with Space, like sprinklers.")
 	print("Walk out of the gate at the west end of the path to reach the town: seeds,")
 	print("supplies and upgrades are bought from the shopkeepers there. E talks to them.")
 	print("Go to bed in the farmhouse (E at the bed) to end the day; the bin sells")
