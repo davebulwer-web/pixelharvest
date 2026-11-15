@@ -28,4 +28,7 @@ extends Resource
 ## great hoe. Empty means it's on offer from the start.
 @export var requires: UpgradeDef
 
+## Not offered until this is earned (DECISIONS 043). Null: no wait.
+@export var requires_unlock: UnlockDef
+
 @export var effect: UpgradeEffect

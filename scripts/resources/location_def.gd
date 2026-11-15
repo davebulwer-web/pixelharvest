@@ -43,3 +43,12 @@ extends Resource
 
 ## Set for a shop interior: who runs it and what it offers.
 @export var shop: ShopDef
+
+## --- Opening up (DECISIONS 043) -------------------------------------------------
+## A building whose door stays locked until this is earned: Brann's forge, shut
+## until he's back from the city. Null: open from the start (opening hours
+## still apply). The building stands on the map either way.
+@export var requires_unlock: UnlockDef
+
+## What the player is told at the locked door. Empty: "<name> is shut."
+@export var locked_message: String = ""

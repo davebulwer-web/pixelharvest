@@ -21,7 +21,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 9, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 10, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -52,7 +52,9 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       for each. Older games have taken none.
 ##   9 — the difficulty chosen at new game, by id. Older games were all
 ##       played at what is now "standard".
-const CURRENT_VERSION := 9
+##  10 — unlocks: what has opened up so far, by name (DECISIONS 043). Older
+##       games had everything open, so they're given every unlock there was.
+const CURRENT_VERSION := 10
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -70,6 +72,7 @@ const REQUIRED_FIELDS: Dictionary = {
 	"location": TYPE_STRING,
 	"farm": TYPE_DICTIONARY,
 	"quests": TYPE_DICTIONARY,
+	"unlocks": TYPE_ARRAY,
 }
 
 ## Saving is switched on by load_or_new_game(), i.e. only when the game was
@@ -203,6 +206,9 @@ func _check_fields(game: Dictionary) -> String:
 	for entry: Variant in game["upgrades"]:
 		if typeof(entry) != TYPE_STRING:
 			return "the upgrades list has something that isn't an upgrade id"
+	for entry: Variant in game["unlocks"]:
+		if typeof(entry) != TYPE_STRING:
+			return "the unlocks list has something that isn't an unlock name"
 	for entry: Variant in farm["tiles"]:
 		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("x")) != TYPE_FLOAT \
 				or typeof(entry.get("y")) != TYPE_FLOAT:
@@ -245,6 +251,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_7_to_8(data["game"])
 			8:
 				_upgrade_8_to_9(data["game"])
+			9:
+				_upgrade_9_to_10(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -406,3 +414,25 @@ const V9_DIFFICULTY := "standard"
 
 func _upgrade_8_to_9(game: Dictionary) -> void:
 	game["difficulty"] = V9_DIFFICULTY
+
+
+## Version 9 -> 10: unlocks arrive (DECISIONS 043). Before them every seed,
+## upgrade and shop was open from day 1, so an older game is given every
+## unlock that existed when they arrived: nobody loses something they had.
+## The list is frozen here (V10_UNLOCKS), not read from data/unlocks/, so this
+## step means the same thing however many unlocks are added later; ones that
+## come after it are earned in the usual way.
+##
+## The mayor's new opener (bring the first five parsnips) is ticked off as
+## done for a game that has already started his welcome request, so he
+## doesn't go back a step.
+const V10_UNLOCKS: Array[String] = ["hollis_spring", "forge_open", "hollis_summer", "hollis_autumn"]
+const V10_OPENER := "mayor_first_pull"
+const V10_AFTER_OPENER := "mayor_first_sale"
+
+
+func _upgrade_9_to_10(game: Dictionary) -> void:
+	game["unlocks"] = V10_UNLOCKS.duplicate()
+	var quests: Variant = game.get("quests", {})
+	if typeof(quests) == TYPE_DICTIONARY and quests.has(V10_AFTER_OPENER) and not quests.has(V10_OPENER):
+		quests[V10_OPENER] = {"state": "done", "progress": 0.0}

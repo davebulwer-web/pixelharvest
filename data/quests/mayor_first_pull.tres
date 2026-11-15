@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="2_goal"]
+[ext_resource type="Resource" path="res://data/produce/parsnip.tres" id="3_item"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="4_unlockdef"]
+[ext_resource type="Resource" path="res://data/unlocks/hollis_spring.tres" id="5_unlock"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_goal")
+amount = 5
+item = ExtResource("3_item")
+
+[resource]
+script = ExtResource("1_def")
+id = &"mayor_first_pull"
+title = "The first pull"
+giver = &"mayor"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Ah, our new farmer! Mayor Bramble. Welcome to the valley.", "That old farm hasn't grown a thing in years. Plant those parsnip seeds, water them every day, and bring me the first five you pull.", "Do that, and I'll have a word with Hollis at the seed shop. He keeps his best seeds for farmers who've proved themselves."])
+reminder_line = "Five parsnips, farmer. Then I'll talk to Hollis."
+thanks_lines = Array[String](["Real parsnips, from the old farm! I'd almost forgotten.", "I'll tell Hollis you're the real thing. He'll have the rest of his spring seeds out for you from now on."])
+reward_gold = 50
+reward_unlocks = Array[ExtResource("4_unlockdef")]([ExtResource("5_unlock")])
+first_day = 1

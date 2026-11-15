@@ -29,6 +29,8 @@ extends Node
 ##                   with its stalls (DECISIONS 037)
 ##   data/quests/    QuestDef — townsfolk's requests: who asks, for what, and
 ##                   the reward (DECISIONS 038)
+##   data/unlocks/   UnlockDef — things that open up as the game goes on, from
+##                   a request's reward or the calendar (DECISIONS 043)
 ##
 
 const CROPS_DIR := "res://data/crops/"
@@ -38,6 +40,7 @@ const UPGRADES_DIR := "res://data/upgrades/"
 const CHARACTERS_DIR := "res://data/characters/"
 const EVENTS_DIR := "res://data/events/"
 const QUESTS_DIR := "res://data/quests/"
+const UNLOCKS_DIR := "res://data/unlocks/"
 
 ## For checking crops name real seasons. Read directly rather than through
 ## GameState, because ContentDB starts first.
@@ -50,6 +53,7 @@ var _upgrades: Dictionary = {}  # StringName -> UpgradeDef
 var _characters: Dictionary = {}  # StringName -> CharacterDef
 var _events: Dictionary = {}  # StringName -> CalendarEvent
 var _quests: Dictionary = {}  # StringName -> QuestDef
+var _unlocks: Dictionary = {}  # StringName -> UnlockDef
 
 
 func _ready() -> void:
@@ -61,11 +65,13 @@ func _ready() -> void:
 	_index(CHARACTERS_DIR, _characters)
 	_index(EVENTS_DIR, _events)
 	_index(QUESTS_DIR, _quests)
+	_index(UNLOCKS_DIR, _unlocks)
 	_check()
 	_check_quests()
-	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters, %d events, %d quests"
+	_check_unlocks()
+	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks"
 			% [_crops.size(), _items.size(), _objects.size(), _upgrades.size(), _characters.size(),
-			_events.size(), _quests.size()])
+			_events.size(), _quests.size(), _unlocks.size()])
 
 
 ## The crop with this id, or null if there isn't one (for example, a save from
@@ -145,6 +151,27 @@ func quests() -> Array[QuestDef]:
 			return a.first_day < b.first_day
 		# As Strings: two StringNames compare by where they sit in memory,
 		# not alphabetically, which would make the order change between runs.
+		return String(a.id) < String(b.id)
+	)
+	return result
+
+
+## The unlock with this id, or null.
+func unlock(id: StringName) -> UnlockDef:
+	return _unlocks.get(id)
+
+
+## Every unlock, earliest date first (request-only ones, with no date, last),
+## then by id, so they always open and are listed in the same order.
+func unlocks() -> Array[UnlockDef]:
+	var result: Array[UnlockDef] = []
+	for each: UnlockDef in _unlocks.values():
+		result.append(each)
+	result.sort_custom(func(a: UnlockDef, b: UnlockDef) -> bool:
+		var a_day := a.on_day if a.opens_by_date() else 1 << 30
+		var b_day := b.on_day if b.opens_by_date() else 1 << 30
+		if a_day != b_day:
+			return a_day < b_day
 		return String(a.id) < String(b.id)
 	)
 	return result
@@ -481,3 +508,42 @@ func _check_quests() -> void:
 						% [where, season_id])
 		if each.on_event != &"" and event(each.on_event) == null:
 			push_error("ContentDB: '%s' is offered on '%s', which isn't in %s" % [where, each.on_event, EVENTS_DIR])
+
+
+## Unlocks (DECISIONS 043): everything that waits for one must name an unlock
+## in data/unlocks/, and every unlock must be earnable (by a date or a
+## request) and say something when it opens.
+func _check_unlocks() -> void:
+	var given: Dictionary = {}  # unlock id -> true, for ones a request gives
+	for each: QuestDef in _quests.values():
+		for reward in each.reward_unlocks:
+			if _is_unknown_unlock(reward, each.resource_path, "gives"):
+				continue
+			given[reward.id] = true
+		_is_unknown_unlock(each.requires_unlock, each.resource_path, "waits for")
+	for each: ItemDef in _items.values():
+		_is_unknown_unlock(each.requires_unlock, each.resource_path, "waits for")
+	for each: UpgradeDef in _upgrades.values():
+		_is_unknown_unlock(each.requires_unlock, each.resource_path, "waits for")
+	for location in RULES.locations:
+		if location != null:
+			_is_unknown_unlock(location.requires_unlock, location.resource_path, "waits for")
+	for each: UnlockDef in _unlocks.values():
+		var where := each.resource_path
+		if not each.opens_by_date() and not given.has(each.id):
+			push_warning("ContentDB: '%s' has no on_day and no request gives it, so it never opens" % where)
+		if each.announcement == "":
+			push_warning("ContentDB: '%s' has no announcement, so it opens without a word" % where)
+		if each.display_name == "":
+			push_warning("ContentDB: '%s' has no display_name, so a request giving it doesn't say so" % where)
+
+
+## True (and reported) if `unlock_def`, named by the file at `where`, isn't
+## one of data/unlocks/. Null is fine: it means nothing to wait for.
+func _is_unknown_unlock(unlock_def: UnlockDef, where: String, verb: String) -> bool:
+	if unlock_def == null:
+		return false
+	if unlock(unlock_def.id) == unlock_def:
+		return false
+	push_error("ContentDB: '%s' %s an unlock that isn't in %s" % [where, verb, UNLOCKS_DIR])
+	return true

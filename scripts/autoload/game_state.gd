@@ -69,6 +69,11 @@ var farm: FarmData
 ## requests themselves are data; this is only where the player has got to.
 var quests: QuestLog
 
+## What has opened up so far (DECISIONS 043), by UnlockDef id, in the order
+## earned. Only the names are kept; what each one opens is in the content
+## that points at it (requires_unlock), so it can change freely.
+var unlocks: Array[StringName] = []
+
 ## Where the player is. LocationManager changes it; it's saved, so a loaded
 ## game opens in the right place.
 var location: StringName = &""
@@ -101,6 +106,9 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	_selected_slot = 0
 	farm = FarmLayout.build_default()
 	quests = QuestLog.new()
+	unlocks = []
+	# Anything the calendar opens on day 1 is there from the start.
+	open_due_unlocks()
 	location = RULES.starting_location
 	EventBus.new_game_started.emit()
 
@@ -332,6 +340,33 @@ func cycle_tool(step: int) -> void:
 	EventBus.tool_selected.emit(_selected_tool_id)
 
 
+# --- Unlocks (DECISIONS 043) -------------------------------------------------
+# Requests and the calendar open things up; shops, doors and townsfolk ask
+# has_unlock() before offering anything that waits for one.
+
+## True if `unlock_def` has been earned. Null means "nothing to wait for", so
+## content with no requires_unlock can pass its field straight in.
+func has_unlock(unlock_def: UnlockDef) -> bool:
+	return unlock_def == null or unlock_def.id in unlocks
+
+
+## Earn `unlock_def`. Announces unlocked the first time; earning it again does
+## nothing, so a request and the calendar can both give the same one.
+func unlock(unlock_def: UnlockDef) -> void:
+	if unlock_def == null or unlock_def.id in unlocks:
+		return
+	unlocks.append(unlock_def.id)
+	EventBus.unlocked.emit(unlock_def.id)
+
+
+## Earn every unlock the calendar has reached by today. TimeSystem calls this
+## overnight, once the date has moved on; a new game calls it for day 1.
+func open_due_unlocks() -> void:
+	for each in ContentDB.unlocks():
+		if each.opens_by_date() and each.on_day <= day_number():
+			unlock(each)
+
+
 # --- Harvesting --------------------------------------------------------------
 
 ## Pick the crop at `cell` if it's ready, and put the produce in the bag.
@@ -370,6 +405,8 @@ func pick_up_object(cell: Vector2i) -> bool:
 # Requests (quests) are saved by id with how far each has got (save version
 # 8); what each one asks is in data/quests/, not in the save.
 #
+# Unlocks are saved as a list of names (save version 10).
+#
 # The difficulty is saved by id (save version 9); its multipliers are read
 # from data/difficulties/ on load, so retuning Hard reaches existing games.
 #
@@ -392,6 +429,7 @@ func to_save() -> Dictionary:
 		"location": String(location),
 		"farm": farm.to_save(),
 		"quests": quests.to_save(),
+		"unlocks": unlocks.map(func(id: StringName) -> String: return String(id)),
 	}
 
 
@@ -443,3 +481,13 @@ func load_from_save(data: Dictionary) -> void:
 
 	farm = FarmData.from_save(data["farm"])
 	quests = QuestLog.from_save(data["quests"])
+
+	# Unlocks are kept by name even if no UnlockDef has it any more: it does
+	# nothing then, and it's there again if the file comes back.
+	unlocks = []
+	for id: Variant in data["unlocks"]:
+		if StringName(id) not in unlocks:
+			unlocks.append(StringName(id))
+	# Anything the calendar has opened since (a new unlock added to the game
+	# with a date already past) is caught up quietly.
+	open_due_unlocks()

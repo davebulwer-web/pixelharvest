@@ -19,5 +19,5 @@ offer_lines = Array[String](["Oh, you're the new farmer? I'm Mabel. I bake for h
 reminder_line = "Any luck with those parsnips, love?"
 thanks_lines = Array[String](["Lovely, fresh as anything! The cakes will be the talk of the town.", "Here, for your trouble."])
 reward_gold = 250
-first_day = 1
+first_day = 5
 seasons = Array[StringName]([&"spring"])

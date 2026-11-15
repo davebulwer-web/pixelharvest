@@ -4,7 +4,8 @@ extends Node
 ## (DECISIONS 042).
 ##
 ## It only listens on EventBus: what was harvested, planted and watered, what
-## was sold where, what was spent, which requests were finished. When the day
+## was sold where, what was spent, which requests were finished, and what
+## opened up (DECISIONS 043). When the day
 ## ends it closes the tally, and the next morning's HUD takes it and shows the
 ## summary screen (day_summary.gd) before the morning fades in.
 ##
@@ -36,6 +37,9 @@ func _ready() -> void:
 	EventBus.shipment_sold.connect(func(gold: int) -> void: today.bin_sales += gold)
 	EventBus.items_sold_to_shop.connect(func(_id: StringName, _n: int, gold: int) -> void: today.shop_sales += gold)
 	EventBus.quest_completed.connect(func(id: StringName) -> void: today.quests_done.append(id))
+	# Overnight ones arrive before day_started closes the record, so the
+	# morning's summary includes what the calendar opened.
+	EventBus.unlocked.connect(func(id: StringName) -> void: today.unlocked.append(id))
 	EventBus.day_ended.connect(func(_d: int) -> void: _night = true)
 	EventBus.day_started.connect(_on_day_started)
 	# A different game: forget this one's day.

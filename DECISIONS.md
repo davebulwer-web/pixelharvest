@@ -1363,3 +1363,64 @@ a better one at the same name later. The `Audio` autoload is an exception to "sy
 don't call each other" in one direction: UI that isn't a game event (closing the
 summary) calls `Audio.play()` directly. `build_sounds.py` needs numpy and ffmpeg to run
 again; the game itself needs neither.
+
+## 043 — Unlocks are named files that content points at; requests and the calendar open them
+
+**Decision.** Stage 10 session 1 adds the one system the roadmap's pacing hangs on
+(ROADMAP section 4): things open up over time instead of all being there on day 1.
+
+- *An unlock is an `UnlockDef`* in `data/unlocks/`: an id, a short name for request
+  rewards and the notice board ("Hollis's full spring stock"), an `announcement` for the
+  morning summary, and an optional `on_day` (a `day_number`, like `QuestDef.first_day`)
+  on which the calendar opens it by itself. 0 means only a request can give it.
+- *The game remembers only the names* earned, in `GameState.unlocks` (saved, version 10).
+  `GameState.has_unlock()` answers yes for null, so content that waits for nothing passes
+  its empty field straight in.
+- *Content points at the unlock it waits for* with one field, `requires_unlock`, on
+  `ItemDef` (kept off every shop's shelves), `UpgradeDef` (not offered), `QuestDef` (not
+  asked) and `LocationDef` (the door is shut, with the location's own `locked_message`;
+  the building still stands on the map). Characters and calendar events get the same
+  field in session 2, when something first needs it.
+- *Requests give unlocks* with `QuestDef.reward_unlocks`; the reward text names them
+  ("Reward: 50g and Hollis's full spring stock"), so a request always says what it opens.
+- *The calendar's unlocks open overnight* (TimeSystem step 4b, after the date moves on and
+  before `day_started`), and at new game for anything due on day 1. Loading a save also
+  catches up quietly on any whose date has passed, so a new unlock added later with a past
+  date reaches existing games.
+- *Never silently* (the roadmap's rule): EventBus gains `unlocked`. `DayReport` records it,
+  and the morning summary lists each one's announcement, then who has something new to ask
+  today ("Mabel has something to ask you."), worked out from the requests' dates by
+  `Quests.givers_new_today()`. The notice board pins up calendar unlocks due within a week
+  ("Coming soon: Brann's forge reopens, in 5 days (spring day 8)"), and no longer lists a
+  crop as in season while its seeds aren't in any shop yet.
+- *The first week, rewritten:* the mayor opens with "The first pull" (bring five parsnips;
+  50g and Hollis's full spring stock), and his welcome request (sell 200g) now follows it.
+  Hollis sells only parsnip and radish seeds until then. Potato seeds wait for the mayor,
+  green beans for summer day 1, cabbage for autumn day 1. Brann's forge is shut until
+  spring day 8 ("Gone to the city for steel"). Mabel's first request waits until day 5;
+  Pip still asks on market days (the first is day 3).
+- *Old saves* (version 9 and before) had everything open, so the upgrade step gives them
+  every unlock that existed in this version, frozen as a list in the step, and ticks off the
+  mayor's new opener if they've already started his welcome request, so he doesn't go back
+  a step. `tests/saves/v9_example.json` was made by the version 9 game.
+- *ContentDB checks* that every `requires_unlock` and `reward_unlocks` names a file in
+  `data/unlocks/`, and warns about an unlock nothing can open (no date, no request gives it)
+  or one with no announcement.
+
+Options considered: unlocks as plain names typed into each field (`&"forge_open"`), as
+the roadmap first sketched: simpler, but a typo would silently hide something for ever,
+and the reward text couldn't name what opens without asking ContentDB from inside a data
+file. Resource references are checked by the editor and give the name for free; the save
+still keeps only the id. A separate "stock list per shop per week" table: one place to
+read the pacing, but it would undo rule 3 (shops are filters, so a new crop needs no shop
+edit). Gating whole shops by hours of the clock alone: can't express "after the mayor's
+request".
+
+**Why.** Rule 3: what opens when is data. A new thing to drip-feed is an UnlockDef and one
+field set on whatever it opens; no code. Every later stage (the woods, Ivy, fishing, the
+greenhouse) plugs into it.
+
+**Cost.** `on_day` counts days from the start of the game, so it assumes 28-day seasons
+like `first_day` does; changing `days_per_season` means revisiting those numbers. A player
+who never does the mayor's first request never sees Hollis's potatoes; that's intended
+(it's the tutorial), and the mayor's "!" and the notice board keep pointing at it.

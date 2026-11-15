@@ -20,6 +20,8 @@ extends Node
 ##   3. The calendar moves on and energy refills.
 ##   4. If that started a new season: crops that can't grow in it die, and
 ##      season_changed is announced — the farm repaints itself for the season.
+##   4b. Whatever the calendar opens today opens (Brann's forge on day 8,
+##      DECISIONS 043), so the morning's summary can say so.
 ##   5. day_started is announced — the farm redraws, the HUD updates. Then
 ##      calendar_event_began for each of today's events (market day).
 ##   6. The game is saved. Last, so the save is the finished morning: crops
@@ -86,6 +88,7 @@ func end_day() -> void:
 	if season_turned:
 		GameState.farm.wither_out_of_season(GameState.season_id())
 		EventBus.season_changed.emit(GameState.season)
+	GameState.open_due_unlocks()
 	EventBus.day_started.emit(GameState.day, GameState.season, GameState.year)
 	for event in GameState.events_today():
 		EventBus.calendar_event_began.emit(event.id)

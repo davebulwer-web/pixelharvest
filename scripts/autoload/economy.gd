@@ -40,10 +40,13 @@ func upgrade_price(upgrade: UpgradeDef) -> int:
 
 ## What `shop` has on its shelves: seed packets and supplies, per its switches
 ## (ShopDef), cheapest first. Decided from ContentDB's whole stock, so new
-## crops and tools appear in the right shop with no file here edited.
+## crops and tools appear in the right shop with no file here edited. Things
+## waiting for an unlock stay off the shelves until it's earned (DECISIONS 043).
 func shop_stock(shop: ShopDef) -> Array[ItemDef]:
 	var stock: Array[ItemDef] = []
 	for item in ContentDB.shop_stock():
+		if not GameState.has_unlock(item.requires_unlock):
+			continue
 		# Some things are sold only by particular shops (a market stall's
 		# rare seeds); they skip the switches below entirely.
 		if not item.sold_only_by.is_empty():
@@ -72,7 +75,8 @@ func is_decoration(item: ItemDef) -> bool:
 
 
 ## The upgrades on offer right now, cheapest first: not yet owned, whatever
-## they require already owned, and they'd actually do something. So the great
+## they require already owned, any unlock they wait for earned, and they'd
+## actually do something. So the great
 ## hoe appears only once the wide hoe is bought, and each upgrade line shows
 ## one step at a time. With a `shop`, only the kinds that shop sells; with
 ## none (tests, tools), every kind.
@@ -82,6 +86,8 @@ func upgrades_on_offer(shop: ShopDef = null) -> Array[UpgradeDef]:
 		if GameState.has_upgrade(upgrade):
 			continue
 		if upgrade.requires != null and not GameState.has_upgrade(upgrade.requires):
+			continue
+		if not GameState.has_unlock(upgrade.requires_unlock):
 			continue
 		if upgrade.effect == null or not upgrade.effect.is_useful():
 			continue

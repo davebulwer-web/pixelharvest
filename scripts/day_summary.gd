@@ -3,7 +3,8 @@ extends CanvasLayer
 ##
 ## DaySummary — the screen at the end of each day: what you picked, planted
 ## and watered, what you sold and spent, and how the purse stands
-## (DECISIONS 042).
+## (DECISIONS 042). Below that, what's new this morning: what opened up and
+## who has something to ask (DECISIONS 043).
 ##
 ## The HUD opens it on the morning after a night, on black, before the
 ## morning fades in, with the tally DayReport kept. It only shows what it's
@@ -72,6 +73,31 @@ static func rows_for(r: DayRecord) -> Array[PackedStringArray]:
 	if r.spent > 0:
 		rows.append(PackedStringArray(["Spent", "-%dg" % r.spent]))
 	return rows
+
+
+## What's new this morning, one line each (DECISIONS 043): what opened up
+## (from a request handed in yesterday, or the calendar overnight), then who
+## has something new to ask today. Separate from the drawing, like rows_for.
+static func news_for(r: DayRecord) -> Array[String]:
+	var news: Array[String] = []
+	for id in r.unlocked:
+		var unlock_def := ContentDB.unlock(id)
+		if unlock_def != null and unlock_def.announcement != "":
+			news.append(unlock_def.announcement)
+	var names: Array[String] = []
+	for giver in Quests.givers_new_today():
+		var person := ContentDB.character(giver)
+		names.append(person.display_name if person != null else String(giver))
+	if not names.is_empty():
+		news.append("%s %s something to ask you." % [_and_list(names), "has" if names.size() == 1 else "have"])
+	return news
+
+
+## "A", "A and B", "A, B and C".
+static func _and_list(names: Array[String]) -> String:
+	if names.size() == 1:
+		return names[0]
+	return ", ".join(names.slice(0, names.size() - 1)) + " and " + names[-1]
 
 
 ## "6 Parsnip, 2 Potato", most first.
@@ -150,6 +176,17 @@ func _build() -> void:
 		done.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		UiStyle.style_label(done, 10, UiStyle.GOLD)
 		column.add_child(done)
+
+	var news := news_for(record)
+	if not news.is_empty():
+		column.add_child(HSeparator.new())
+		for line in news:
+			var item := Label.new()
+			item.text = line
+			item.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			item.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			UiStyle.style_label(item, 10, UiStyle.TEXT)
+			column.add_child(item)
 
 	var hint := Label.new()
 	hint.text = "Space to start day %d" % GameState.day

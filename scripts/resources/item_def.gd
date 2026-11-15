@@ -33,3 +33,8 @@ extends Resource
 ## market stall's rare seeds (DECISIONS 037). Empty, the usual rule applies:
 ## any shop whose switches cover it (seeds at the seed shop, and so on).
 @export var sold_only_by: Array[StringName] = []
+
+## Hidden from every shop until this is earned (DECISIONS 043): Hollis's
+## potato seeds wait for the mayor's first request. Null: on sale from the
+## start. Only the shops look at it; an item given as a reward is still given.
+@export var requires_unlock: UnlockDef

@@ -123,6 +123,10 @@ signal quest_progressed(quest_id: StringName, progress: int, needed: int)
 ## A request was handed in and its reward given.
 signal quest_completed(quest_id: StringName)
 
+## Something opened up (an UnlockDef id), from a request's reward or the
+## calendar overnight (DECISIONS 043). The day's summary lists it.
+signal unlocked(unlock_id: StringName)
+
 ## Something the player should be told, in the HUD's message line.
 signal message_posted(text: String)
 

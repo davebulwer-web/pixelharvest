@@ -22,6 +22,9 @@ var shop_sales: int = 0
 var spent: int = 0
 ## Requests handed in today, by QuestDef id.
 var quests_done: Array[StringName] = []
+## What opened up, by UnlockDef id: from requests handed in during the day,
+## and from the calendar overnight (DECISIONS 043).
+var unlocked: Array[StringName] = []
 ## Gold in the purse when the night's sales were done.
 var gold_at_end: int = 0
 
@@ -43,4 +46,4 @@ func net() -> int:
 ## True if nothing at all happened worth listing.
 func is_quiet() -> bool:
 	return harvested.is_empty() and planted == 0 and watered == 0 \
-			and income() == 0 and spent == 0 and quests_done.is_empty()
+			and income() == 0 and spent == 0 and quests_done.is_empty() and unlocked.is_empty()

@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="LocationDef" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="LocationDef" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
 [ext_resource type="Resource" path="res://data/shops/blacksmith.tres" id="2_shop"]
 [ext_resource type="Texture2D" path="res://assets/sprites/town/blacksmith.png" id="3_ext"]
+[ext_resource type="Resource" path="res://data/unlocks/forge_open.tres" id="9_unlock"]
 
 [resource]
 script = ExtResource("1_def")
@@ -13,3 +14,5 @@ outside = &"town"
 door_cell = Vector2i(31, 12)
 exterior = ExtResource("3_ext")
 shop = ExtResource("2_shop")
+requires_unlock = ExtResource("9_unlock")
+locked_message = "Brann's Forge is shut. A note on the door: \"Gone to the city for steel. Back spring day 8. B.\""

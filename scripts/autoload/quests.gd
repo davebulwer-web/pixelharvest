@@ -96,14 +96,39 @@ func is_offered_today(quest: QuestDef) -> bool:
 		return false
 	if quest.requires != null and not GameState.quests.is_done(quest.requires.id):
 		return false
-	if GameState.day_number() < quest.first_day:
+	if not GameState.has_unlock(quest.requires_unlock):
 		return false
-	if not quest.seasons.is_empty() and GameState.season_id() not in quest.seasons:
+	return _date_allows(quest, GameState.day_number())
+
+
+## True if the calendar lets `quest` be asked on day `number`
+## (GameState.day_number): on or after its first day, in one of its seasons,
+## on its event's day. Only the date: whether it's been taken is asked above.
+func _date_allows(quest: QuestDef, number: int) -> bool:
+	if number < quest.first_day:
 		return false
-	if quest.on_event != &"" and not GameState.events_today().any(
+	var season_id := GameState.season_id_on(number)
+	if not quest.seasons.is_empty() and season_id not in quest.seasons:
+		return false
+	if quest.on_event != &"" and not ContentDB.events_on(number, season_id).any(
 			func(e: CalendarEvent) -> bool: return e.id == quest.on_event):
 		return false
 	return true
+
+
+## Everyone who has something new to ask today, by CharacterDef id: a request
+## on offer today that the calendar didn't allow yesterday (Mabel arriving on
+## day 5, Pip on a market day). The day's summary says who (DECISIONS 043).
+## A request that opened because another was finished isn't counted: its
+## giver has only just said thanks, and the "!" over them says the rest.
+func givers_new_today() -> Array[StringName]:
+	var ids: Array[StringName] = []
+	var yesterday := GameState.day_number() - 1
+	for giver in givers_with_offers():
+		var quest := offer_for(giver)
+		if quest != null and (yesterday < 1 or not _date_allows(quest, yesterday)):
+			ids.append(giver)
+	return ids
 
 
 ## What to show over `npc_id`'s head: "?" if they're waiting to be handed
@@ -168,7 +193,11 @@ func _complete(quest: QuestDef) -> Array[String]:
 	GameState.add_gold(quest.reward_gold)
 	for item: ItemDef in quest.reward_items:
 		GameState.inventory.add(item, quest.reward_items[item])
+	# After quest_completed, so the day's summary lists the request before
+	# what it opened.
 	EventBus.quest_completed.emit(quest.id)
+	for unlock_def in quest.reward_unlocks:
+		GameState.unlock(unlock_def)
 	var lines: Array[String] = quest.thanks_lines.duplicate()
 	var reward := quest.reward_text()
 	lines.append("Request done: %s.%s" % [quest.title, " You got %s." % reward if reward != "" else ""])

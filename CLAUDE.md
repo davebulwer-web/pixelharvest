@@ -125,6 +125,8 @@ data/                Content resources (.tres), indexed by ContentDB
   quests/            QuestDef — townsfolk's requests: who asks, for what, and the reward
   difficulties/      DifficultyDef — chosen at new game: multipliers on prices, energy, growing
   audio/             SoundBank — what each sound the game plays sounds like (DECISIONS 042)
+  unlocks/           UnlockDef — things that open up over time, from a request or a date
+                     (DECISIONS 043); content waits for one with `requires_unlock`
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
                      farm/ the farmhouse and its furniture, decorations/ the farm's decorations)

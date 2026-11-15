@@ -70,10 +70,13 @@ static func create(def: LocationDef) -> Building:
 func _ready() -> void:
 	_update_closed_door()
 	EventBus.time_changed.connect(func(_minutes: int) -> void: _update_closed_door())
+	# A building can also open up mid-day, when a request is handed in (DECISIONS 043).
+	EventBus.unlocked.connect(func(_id: StringName) -> void: _update_closed_door())
 
 
 ## Shut the doorway while the shop is closed, open it while it's open. A
-## building that isn't a shop (the farmhouse) is never closed.
+## building waiting for an unlock (DECISIONS 043) is shut until it's earned.
+## The farmhouse is never closed.
 func _update_closed_door() -> void:
 	if _closed_door == null:
 		return

@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 10 — pacing and unlocks.** Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
+**Current stage: 10 — pacing and unlocks (session 1 built, session 2 next).** Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -486,14 +486,30 @@ Stages 14–19 can be reordered.
 
 ROADMAP sections 3 and 4.
 
-- [ ] Unlocks: a saved list of names (`GameState.unlocks`); `QuestDef.reward_unlocks`;
-      `requires_unlock` on items, upgrades, requests, locations, characters and events
-- [ ] Shops show only unlocked stock; the forge opens on spring day 8
-- [ ] The first week rewritten: the mayor's "first pull" opener, everyone else's first
-      request staggered with `first_day`, Hollis's stock opened by the mayor
-- [ ] The morning summary announces what's new
-- [ ] Save version 10; old saves get the unlocks their progress implies
-- [ ] Verified: a scripted run through spring days 1–15, checking what's offered each morning
+**Session 1 (2026-11-15) — unlocks, shop stock and the first week (DECISIONS 043)**
+
+- [x] Unlocks: `UnlockDef` in `data/unlocks/`, a saved list of names (`GameState.unlocks`);
+      `QuestDef.reward_unlocks`; `requires_unlock` on items, upgrades, requests and locations
+- [x] Calendar unlocks (`UnlockDef.on_day`) open overnight; the forge opens on spring day 8
+- [x] Shops show only unlocked stock: Hollis starts with parsnip and radish; potatoes after
+      the mayor's first request, green beans on summer day 1, cabbage on autumn day 1
+- [x] The first week rewritten: the mayor's "first pull" opener (then his 200g welcome),
+      Mabel from day 5, Pip on market days
+- [x] The morning summary announces what opened and who has something new to ask; the
+      notice board pins up what opens in the coming week
+- [x] Save version 10; old saves get every unlock (they had everything open)
+- [x] Verified: a scripted run through spring days 1–15, checking what's offered each
+      morning (61 checks), old saves v1–v9, and rendered shots of the shut forge, the
+      mayor's request, the summary and Hollis's shelves
+- [ ] Dave confirms it plays correctly on Windows
+
+**Session 2 — still to do**
+
+- [ ] `requires_unlock` on characters (someone appears) and calendar events
+- [ ] Brann's first request (shopkeepers as request givers): sell 300g → great tools and
+      Marlow's land deeds (the north field)
+- [ ] The rest of section 3's spring that needs no new systems (Hollis's line, the mayor's
+      bridge request as a stub, the season-end warnings)
 - [ ] Dave plays one spring to judge the pacing
 
 ## Stage 11 — Hazards and weather · 2 sessions · Opus, then Sonnet

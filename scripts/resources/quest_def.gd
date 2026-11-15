@@ -42,6 +42,11 @@ extends Resource
 ## Items given as a reward, and how many of each.
 @export var reward_items: Dictionary[ItemDef, int] = {}
 
+## What finishing it opens up (DECISIONS 043): the mayor's first request opens
+## Hollis's spring seeds. Each is named in the reward text, so the player is
+## told what they've opened.
+@export var reward_unlocks: Array[UnlockDef] = []
+
 # --- When it's offered ---------------------------------------------------------
 
 ## Another request that must be finished first, or null.
@@ -59,8 +64,11 @@ extends Resource
 ## any day. &"market_day": only asked on market day.
 @export var on_event: StringName = &""
 
+## Not offered until this is earned (DECISIONS 043). Null: no wait.
+@export var requires_unlock: UnlockDef
 
-## "150g and 5 potato seeds", or "" for no reward.
+
+## "150g, 5 potato seeds and Hollis's spring seeds", or "" for no reward.
 func reward_text() -> String:
 	var parts: Array[String] = []
 	if reward_gold > 0:
@@ -72,6 +80,9 @@ func reward_text() -> String:
 			parts.append(("an " if "aeiou".contains(word.left(1)) else "a ") + word)
 		else:
 			parts.append("%d %s" % [count, QuestGoal.plural(item.display_name, count)])
+	for unlock in reward_unlocks:
+		if unlock != null and unlock.display_name != "":
+			parts.append(unlock.display_name)
 	if parts.is_empty():
 		return ""
 	if parts.size() == 1:

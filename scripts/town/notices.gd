@@ -14,6 +14,10 @@ extends RefCounted
 ## still in the ground will die (DECISIONS 025).
 const WARN_DAYS := 3
 
+## How far ahead the board pins up what the calendar will open (DECISIONS
+## 043): "Coming soon: Brann's forge reopens, in 5 days".
+const SOON_DAYS := 7
+
 
 ## Today's notices, one per page of the dialogue box.
 static func today() -> Array[String]:
@@ -26,6 +30,9 @@ static func today() -> Array[String]:
 	var requests := _requests()
 	if requests != "":
 		notices.append(requests)
+	var soon := _opening_soon()
+	if soon != "":
+		notices.append(soon)
 	notices.append(_in_season())
 	notices.append(_coming_up())
 	var hours := _opening_hours()
@@ -90,6 +97,9 @@ static func _in_season() -> String:
 		if not crop.grows_in(season_id):
 			continue
 		var seeds := ContentDB.seeds_for(crop)
+		# Seeds no shop has in yet (DECISIONS 043) aren't advertised.
+		if seeds != null and not GameState.has_unlock(seeds.requires_unlock):
+			continue
 		if seeds == null or seeds.sold_only_by.is_empty():
 			everyday.append(crop.display_name)
 			continue
@@ -179,6 +189,28 @@ static func _requests() -> String:
 		return ""
 	return "Wanted: a hand for %s. Look for the ! over %s." % [_list(names),
 			"their heads" if names.size() > 1 else "their head"]
+
+
+## "Coming soon: Brann's forge reopens, in 3 days (spring day 8)." Every
+## unlock the calendar opens within SOON_DAYS that isn't open yet, or "".
+static func _opening_soon() -> String:
+	var parts: Array[String] = []
+	var today := GameState.day_number()
+	var length := GameState.RULES.days_per_season
+	for each in ContentDB.unlocks():
+		if not each.opens_by_date() or GameState.has_unlock(each):
+			continue
+		var ahead := each.on_day - today
+		if ahead < 1 or ahead > SOON_DAYS:
+			continue
+		var when := "tomorrow" if ahead == 1 else "in %d days" % ahead
+		parts.append("%s, %s (%s day %d)" % [each.display_name, when,
+				GameState.season_name(GameState.season_id_on(each.on_day)).to_lower(),
+				posmod(each.on_day - 1, length) + 1])
+	if parts.is_empty():
+		return ""
+	var text := "; ".join(parts)
+	return "Coming soon: %s." % (text.left(1).to_upper() + text.substr(1))
 
 
 ## "A", "A and B", "A, B and C".
