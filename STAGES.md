@@ -426,7 +426,7 @@ Session 4 (2026-11-15) — difficulty, chosen at new game, on placeholder UI. Se
 
 **Stage 8 art (2026-11-15, DECISIONS 041):** real Pixellab art for the stalls, Rosa, Fennel,
 Mabel, Pip, the three crops with their icons and seed packets, and the decorations.
-- [ ] Dave confirms the look in game
+- [x] Dave confirms the look in game (2026-11-15)
 
 **Left over:** the difficulty menu is placeholder UI until Stage 9's
 title screen. The numbers are first guesses for Stage 9's balance pass.
