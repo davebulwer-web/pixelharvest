@@ -254,7 +254,8 @@ Session 2 (2026-11-14) — a designed town, townsfolk and a notice board, on pla
 
 **Grass variety (2026-11-15, DECISIONS 031):** grass tiles turned and mirrored per cell to
 hide the repeat, plus eight small seasonal details per season (tufts, flowers, leaves, snow
-pieces) in row 1 of each ground image. Cosmetic only, no save change.
+pieces) in row 1 of each ground image. Then (DECISIONS 032) a calmer dirt path with its own
+details, a cobbled town square, and a snow-covered winter thicket. Cosmetic only, no save change.
 
 - [ ] Dave confirms it looks right on Windows
 

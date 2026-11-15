@@ -104,7 +104,7 @@ static func build(door_cells: Array[Vector2i]) -> Dictionary:
 			var cell := Vector2i(x, y)
 			tiles[cell] = _tile_for(cell, door_cells)
 	for cell in FARM_GATE:
-		tiles[cell] = GroundTiles.PATH
+		tiles[cell] = GroundTiles.path_for(cell)
 	return tiles
 
 
@@ -114,7 +114,9 @@ static func _tile_for(cell: Vector2i, door_cells: Array[Vector2i]) -> Vector2i:
 	if POND.has_point(cell):
 		return GroundTiles.WATER
 	if cell.y in ROAD_ROWS or cell in door_cells:
-		return GroundTiles.PATH
-	if SQUARE.has_point(cell) or POND_PATH.has_point(cell):
-		return GroundTiles.PATH
+		return GroundTiles.path_for(cell)
+	if SQUARE.has_point(cell):
+		return GroundTiles.PAVING
+	if POND_PATH.has_point(cell):
+		return GroundTiles.path_for(cell)
 	return GroundTiles.grass_for(cell)

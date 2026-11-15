@@ -810,12 +810,11 @@ winter is the same rule as 005 (seasons derived from one base) applied to single
   cone and an ice puddle. About 9% of grass cells show one (15% the old flowery tile), and a
   detail is only mirrored left-right so things still grow upwards.
 - *The edges of a detail tile are plain grass*, which is what keeps it seamless. The script
-  `art/build_grass_details.py` draws `art/grass_details/<season>.png` (a 128×16 strip) over
-  that season's grass and writes row 1; row 0 is never touched.
+  `art/build_ground.py` draws `art/ground_sources/grass_details/<season>.png` (a 128×16
+  strip) over that season's grass and writes row 1.
 - `GroundTiles` owns all of it: `grass_for()` picks the tile, `transform_for()` the turn, and
   `draw()` is what the farm and the town both call. Which cell gets what comes from `hash()`
-  of the cell, so it is the same every run and never stored. Paths, water, cliffs and thicket
-  are not turned: they have a direction or a collision shape.
+  of the cell, so it is the same every run and never stored.
 
 **Why.** Turning tiles is free and fixes the repeat everywhere at once; details give the
 "organic" scatter Dave asked for at a fixed, small cost. Keeping details inside one tile (not
@@ -826,5 +825,36 @@ swap carries them for free because every season shares the same atlas layout (02
 every detail. What worked was giving it an `init_image` of earlier soil-free details
 (strength 200–250). Asking it for "no soil" made it worse. A pebble and the autumn dry tuft
 are recolours of other details; a dark blob under the toadstool was removed by script.
-To change a detail, edit its strip and re-run the script. Not done: the path, winter path
-and thicket still repeat visibly (could be fixed the same way).
+To change a detail, edit its strip and re-run the script. The path and thicket followed
+in 032.
+
+---
+
+## 032 — A calmer dirt path with details, a cobbled town square, a snowy winter thicket
+
+**Decision.** After 031 Dave found the path jarring: the old path tile had dark marks
+along two of its edges, so a road of them drew a grid. Same session, same approach:
+
+- *New dirt path* from the terrain tool (`/create-tileset`, chained to the grass base): a
+  smooth packed-earth tile, mapped onto two palette browns by brightness. Spring, summer
+  and autumn share it. Winter's path is the same grain recoloured to trodden snow (ice
+  blues), which also replaces the old winter path whose brown cracks drew a grid.
+- *Path details* in row 2 (four per season: pebbles, a twig, a weed, fallen leaves in
+  autumn, snow pieces in winter), on about 12% of path cells, like the grass details.
+- *Path and thicket are now turned at random* like grass. The thicket's collision box is the
+  whole square, so turning it changes nothing.
+- *Winter thicket* is now spring's bushes recoloured into snow and its shadow. The old one
+  was a field of black twigs that read as a pattern.
+- *The town square is cobbled.* A new tile, `GroundTiles.PAVING`, at row 3, column 0, made by
+  the terrain tool (small irregular cobblestones, mapped onto warm palette shades; winter is
+  snow-dusted by recolour). `TownLayout` uses it for `SQUARE` only; the road and the pond
+  path stay dirt. Paving is not turned, because its stones only line up one way round.
+- Everything in rows 1–3 and the path in row 0 is rebuilt by `art/build_ground.py` from
+  `art/ground_sources/` (the raw Pixellab tiles and the detail strips).
+
+**Why.** The path's problem was the tile itself, so turning it alone wasn't enough (tried
+first). A plaza paving that differs from the road makes the square a place, which is what
+Dave asked for.
+
+**Cost.** 2 generations and about 2 cents of the USD credit (dirt, three cobble attempts, one failed snowy-thicket tileset).
+No save change: which tile a cell shows is still only drawing.

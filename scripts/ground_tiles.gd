@@ -3,12 +3,16 @@ extends RefCounted
 ##
 ## GroundTiles — where each kind of ground sits in the seasonal ground tilesets
 ## (assets/tilesets/ground_<season>.png). Every season shares this layout
-## (DECISIONS 021, 026, 031), so the farm and the town draw with the same numbers.
+## (DECISIONS 021, 026, 031, 032), so the farm and the town draw with the same
+## numbers.
 ##
 ## Row 0 holds one tile per kind of ground. Row 1 holds the grass "details":
 ## the plain grass tile with something small drawn in its middle (a tuft, a
 ## flower, a pebble...). The middle only, never the edges, so a detail tile
-## still joins its neighbours without a seam.
+## still joins its neighbours without a seam. Row 2 does the same for the dirt
+## path, and row 3 holds the paving of the town square.
+##
+## art/build_ground.py makes rows 1 to 3 from the sources in art/ground_sources/.
 ##
 
 const SOURCE_ID := 0
@@ -20,17 +24,21 @@ const TILLED_WET := Vector2i(4, 0)
 const WATER := Vector2i(5, 0)
 const CLIFF := Vector2i(7, 0)
 const THICKET := Vector2i(8, 0)
+const PAVING := Vector2i(0, 3)
 
 ## How many detail tiles row 1 holds, left to right from column 0. Every
 ## season's ground image must have this many.
 const GRASS_DETAIL_COUNT := 8
 const GRASS_DETAIL_ROW := 1
+const PATH_DETAIL_COUNT := 4
+const PATH_DETAIL_ROW := 2
 
 ## Roughly how much of the grass uses the flowery tile, and how much shows a
 ## detail. Purely cosmetic: which grass tile a cell shows is a drawing
 ## decision, not a fact about the world, so it is never saved.
 const GRASS_VARIATION := 0.15
 const GRASS_DETAIL_CHANCE := 0.09
+const PATH_DETAIL_CHANCE := 0.12
 
 ## Godot can draw any atlas tile mirrored or turned without a second copy in
 ## the image: these flags go in set_cell()'s alternative_tile argument.
@@ -60,16 +68,25 @@ static func grass_for(cell: Vector2i) -> Vector2i:
 	return GRASS
 
 
-## How to lay down the tile `coords` at `cell` (0 = as drawn). Grass is turned
-## and mirrored at random, which hides the repeat of a single 16 px tile —
-## without it the grass shows a diagonal lattice. A detail is only mirrored
-## left-right, so tufts and flowers still grow upwards. Everything else is
-## drawn as is: paths, water and cliffs have a direction (or a collision
-## shape) that turning would spoil.
+## Plain path or one of the path details (a pebble, a twig, a leaf...) for
+## `cell`, chosen the same way as grass_for().
+static func path_for(cell: Vector2i) -> Vector2i:
+	if _roll(cell, 6) < PATH_DETAIL_CHANCE:
+		return Vector2i(_pick(cell, 7, PATH_DETAIL_COUNT), PATH_DETAIL_ROW)
+	return PATH
+
+
+## How to lay down the tile `coords` at `cell` (0 = as drawn). Grass, path and
+## thicket are turned and mirrored at random, which hides the repeat of a
+## single 16 px tile — without it they show a lattice. (The thicket's
+## collision box is the whole square, so turning it changes nothing.) A detail
+## is only mirrored left-right, so tufts and flowers still grow upwards.
+## Everything else is drawn as is: the paving's stones only line up one way
+## round, and water and cliffs look wrong turned.
 static func transform_for(cell: Vector2i, coords: Vector2i) -> int:
-	if coords == GRASS or coords == GRASS_ALT:
+	if coords in [GRASS, GRASS_ALT, PATH, THICKET]:
 		return _ALL_TRANSFORMS[_pick(cell, 4, _ALL_TRANSFORMS.size())]
-	if coords.y == GRASS_DETAIL_ROW:
+	if coords.y == GRASS_DETAIL_ROW or coords.y == PATH_DETAIL_ROW:
 		return TileSetAtlasSource.TRANSFORM_FLIP_H if _pick(cell, 5, 2) == 1 else 0
 	return 0
 

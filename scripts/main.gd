@@ -183,7 +183,7 @@ func _atlas_for(cell: Vector2i) -> Vector2i:
 		FarmTile.Terrain.WATER:
 			return GroundTiles.WATER
 		FarmTile.Terrain.PATH:
-			return GroundTiles.PATH
+			return GroundTiles.path_for(cell)
 		FarmTile.Terrain.THICKET:
 			return GroundTiles.THICKET
 	return GroundTiles.grass_for(cell)
