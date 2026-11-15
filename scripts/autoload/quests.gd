@@ -13,7 +13,12 @@ extends Node
 ## What's saved lives in GameState.quests (a QuestLog). The requests
 ## themselves are data (QuestDef, data/quests/), so a new request is a file.
 ##
-## Talking: the town asks talk(npc_id) when someone is spoken to. If they have
+## Givers (DECISIONS 044): a request's giver is a townsperson (CharacterDef
+## id) or a shopkeeper (their ShopDef id: &"blacksmith" is Brann). Either way
+## they only ask while they're about: a townsperson waiting for an unlock
+## isn't in town yet, and a shopkeeper whose shop is still shut isn't either.
+##
+## Talking: the town (or a shop counter) asks talk(npc_id) when someone is spoken to. If they have
 ## a request to make, to remind you of, or to take in, the lines come back and
 ## the town says them; otherwise it's an empty list and they say their usual
 ## line for the day. A question asked directly, like ContentDB's, because the
@@ -80,14 +85,40 @@ func active_for(npc_id: StringName) -> QuestDef:
 
 
 ## The request `npc_id` would ask today if spoken to, or null. One at a time:
-## nobody asks a second thing while the first is still open.
+## nobody asks a second thing while the first is still open, and nobody asks
+## anything before they've arrived.
 func offer_for(npc_id: StringName) -> QuestDef:
-	if active_for(npc_id) != null:
+	if active_for(npc_id) != null or not is_about(npc_id):
 		return null
 	for quest in ContentDB.quests():
 		if quest.giver == npc_id and is_offered_today(quest):
 			return quest
 	return null
+
+
+## True if giver `npc_id` is in the world: a townsperson whose unlock (if
+## they wait for one) is earned, or a shopkeeper whose shop's door is open
+## to the player (Brann, once the forge reopens). A market stall's keeper
+## counts as about; their requests say which day with `on_event`.
+func is_about(npc_id: StringName) -> bool:
+	var person := ContentDB.character(npc_id)
+	if person != null:
+		return GameState.has_unlock(person.requires_unlock)
+	for location in LocationManager.all():
+		if location.shop != null and location.shop.id == npc_id:
+			return GameState.has_unlock(location.requires_unlock)
+	return true
+
+
+## What to call giver `npc_id`: "Mabel", or a shopkeeper's name, "Brann".
+func giver_name(npc_id: StringName) -> String:
+	var person := ContentDB.character(npc_id)
+	if person != null:
+		return person.display_name
+	var shop := ContentDB.shop(npc_id)
+	if shop != null:
+		return shop.keeper_name
+	return String(npc_id)
 
 
 ## True if `quest` hasn't been taken and today it can be offered.
@@ -110,7 +141,7 @@ func _date_allows(quest: QuestDef, number: int) -> bool:
 	var season_id := GameState.season_id_on(number)
 	if not quest.seasons.is_empty() and season_id not in quest.seasons:
 		return false
-	if quest.on_event != &"" and not ContentDB.events_on(number, season_id).any(
+	if quest.on_event != &"" and not GameState.events_on(number).any(
 			func(e: CalendarEvent) -> bool: return e.id == quest.on_event):
 		return false
 	return true
@@ -172,10 +203,9 @@ func _start(quest: QuestDef) -> Array[String]:
 	GameState.quests.start(quest.id)
 	EventBus.quest_started.emit(quest.id)
 	var lines: Array[String] = quest.offer_lines.duplicate()
-	var giver := ContentDB.character(quest.giver)
 	var text := "New request: %s. %s" % [quest.title, quest.goal.describe()]
-	if giver != null and quest.goal is DeliverGoal:
-		text += " to %s" % giver.display_name
+	if quest.goal is DeliverGoal:
+		text += " to %s" % giver_name(quest.giver)
 	text += "."
 	var reward := quest.reward_text()
 	if reward != "":
@@ -226,6 +256,4 @@ func _check_ready() -> void:
 		if _told_ready.has(quest.id) or not is_ready(quest):
 			continue
 		_told_ready[quest.id] = true
-		var giver := ContentDB.character(quest.giver)
-		EventBus.message_posted.emit("%s: done! Go and see %s" % [quest.title,
-				giver.display_name if giver != null else "whoever asked"])
+		EventBus.message_posted.emit("%s: done! Go and see %s" % [quest.title, giver_name(quest.giver)])

@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 10 — pacing and unlocks (session 1 built, session 2 next).** Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
+**Current stage: 10 — pacing and unlocks (both sessions built; next, Dave plays one spring).** Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -501,16 +501,26 @@ ROADMAP sections 3 and 4.
 - [x] Verified: a scripted run through spring days 1–15, checking what's offered each
       morning (61 checks), old saves v1–v9, and rendered shots of the shut forge, the
       mayor's request, the summary and Hollis's shelves
+- [x] Dave confirms it plays correctly on Windows (tested and committed 2026-11-15)
+
+**Session 2 (2026-11-15) — people who arrive, and Brann's test (DECISIONS 044)**
+
+- [x] `requires_unlock` on characters (someone appears) and calendar events; Mabel now
+      arrives on spring day 5 (`mabel_arrives`) and isn't in town before
+- [x] Shopkeepers as request givers (`giver` = a shop id), with the "!" and "?" over them;
+      a shopkeeper only asks once their shop is open to you
+- [x] Brann's first request, "Brann's test" (sell 300g, from day 8) → `great_tools` (great
+      hoe and can) and `north_field_deed` (Marlow's north field, and so the fields after it)
+- [x] Season-end warning in the morning summary as well as on the notice board; the mayor
+      mentions the old bridge (a line only)
+- [x] Verified: a scripted run through spring days 1–9 (66 checks: who's in town, who
+      asks, the summary's news, the forge's markers, the unlocks, a gated test event,
+      old saves v1–v9) and rendered shots of Brann's "!", his request and the menu after
 - [ ] Dave confirms it plays correctly on Windows
-
-**Session 2 — still to do**
-
-- [ ] `requires_unlock` on characters (someone appears) and calendar events
-- [ ] Brann's first request (shopkeepers as request givers): sell 300g → great tools and
-      Marlow's land deeds (the north field)
-- [ ] The rest of section 3's spring that needs no new systems (Hollis's line, the mayor's
-      bridge request as a stub, the season-end warnings)
 - [ ] Dave plays one spring to judge the pacing
+
+Moved to Stage 13 (they need its new goal kinds): Hollis's line ("one of every spring
+crop" is a ship-variety goal) and the mayor's bridge request (a donate-gold goal).
 
 ## Stage 11 — Hazards and weather · 2 sessions · Opus, then Sonnet
 
@@ -541,7 +551,10 @@ ROADMAP section 5.
 
 - [ ] New goal kinds: donate gold, deliver any of, ship variety, deadline, harvest giant
       (forage and catch wired up in Stages 14–15)
-- [ ] Every person's line as data; Ivy (new character, the greenhouse line)
+- [ ] Every person's line as data; Ivy (new character, the greenhouse line), arriving by
+      `requires_unlock` on her CharacterDef
+- [ ] From Stage 10: Hollis's line (ship one of every spring crop → summer catalogue early)
+      and the mayor's bridge request (500g into the box → the woods)
 - [ ] Rosa's market orders and the notice board's daily jobs, from templates
 - [ ] Pixellab: Ivy
 - [ ] Dave plays a full year

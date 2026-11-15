@@ -77,7 +77,8 @@ static func rows_for(r: DayRecord) -> Array[PackedStringArray]:
 
 ## What's new this morning, one line each (DECISIONS 043): what opened up
 ## (from a request handed in yesterday, or the calendar overnight), then who
-## has something new to ask today. Separate from the drawing, like rows_for.
+## has something new to ask today, and in a season's last days the warning
+## that it's ending. Separate from the drawing, like rows_for.
 static func news_for(r: DayRecord) -> Array[String]:
 	var news: Array[String] = []
 	for id in r.unlocked:
@@ -86,10 +87,13 @@ static func news_for(r: DayRecord) -> Array[String]:
 			news.append(unlock_def.announcement)
 	var names: Array[String] = []
 	for giver in Quests.givers_new_today():
-		var person := ContentDB.character(giver)
-		names.append(person.display_name if person != null else String(giver))
+		names.append(Quests.giver_name(giver))
 	if not names.is_empty():
 		news.append("%s %s something to ask you." % [_and_list(names), "has" if names.size() == 1 else "have"])
+	# The notice board's end-of-season warning, here too (DECISIONS 044).
+	var warning := Notices.season_end_warning()
+	if warning != "":
+		news.append(warning)
 	return news
 
 

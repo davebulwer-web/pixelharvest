@@ -20,6 +20,7 @@ extends Node2D
 ## of or take in says that instead of their line for the day — the Quests
 ## service decides, this scene only says it. A "!" over someone's head means
 ## they have something to ask, a "?" that you have what they asked for.
+## Shopkeepers can ask too (DECISIONS 044): their ShopCounter asks Quests.
 ##
 ##   Town
 ##   ├── Ground      (TileMapLayer, same seasonal tilesets as the farm)
@@ -54,11 +55,9 @@ var _stall_shops: Dictionary = {}  # StringName -> ShopDef
 ## packed away when the market closes.
 var _stall_nodes: Dictionary = {}  # StringName -> Array[Node]
 
-## The "!" or "?" over each townsperson's head, by character id.
+## The "!" or "?" over each townsperson's head, by character id, and over
+## each market keeper's, by shop id.
 var _markers: Dictionary = {}  # StringName -> Label
-
-## How high the marker floats above a townsperson's feet, in pixels.
-const MARKER_HEIGHT := 54
 
 
 func _ready() -> void:
@@ -123,30 +122,17 @@ func _place_objects() -> void:
 		SeasonLook.skin_object(node, id)
 
 
-## An Npc for everyone who lives in town, at today's spot.
+## An Npc for everyone who lives in town, at today's spot. Anyone waiting
+## for an unlock (Mabel, before spring day 5) isn't here yet (DECISIONS 044).
 func _place_townsfolk() -> void:
 	for person in ContentDB.characters_in(TOWN_ID):
 		if person.spots.is_empty():
 			continue  # ContentDB has already said so
+		if not GameState.has_unlock(person.requires_unlock):
+			continue
 		var npc := Npc.create(person.id, person.sprite, person.spot_on(GameState.day))
 		_entities.add_child(npc)
-		_markers[person.id] = _add_marker(npc)
-
-
-## A small "!" or "?" floating over someone's head, bobbing gently. Empty
-## (and so invisible) until they have something to do with a request.
-func _add_marker(npc: Npc) -> Label:
-	var marker := Label.new()
-	marker.name = "QuestMarker"
-	marker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	marker.size = Vector2(16, 14)
-	marker.position = Vector2(-8, -MARKER_HEIGHT)
-	UiStyle.style_label(marker, 12, UiStyle.HIGHLIGHT)
-	npc.add_child(marker)
-	var bob := marker.create_tween().set_loops()
-	bob.tween_property(marker, ^"position:y", -MARKER_HEIGHT - 2.0, 0.5).set_trans(Tween.TRANS_SINE)
-	bob.tween_property(marker, ^"position:y", float(-MARKER_HEIGHT), 0.5).set_trans(Tween.TRANS_SINE)
-	return marker
+		_markers[person.id] = npc.add_quest_marker()
 
 
 ## Ask the Quests service what each townsperson's marker should say now.
@@ -169,9 +155,11 @@ func _place_stalls() -> void:
 				continue  # ContentDB has already said so
 			if _packed_up(stall.shop):
 				continue
-			var nodes: Array[Node] = [Stall.create(stall), Stall.keeper_for(stall)]
+			var keeper := Stall.keeper_for(stall)
+			var nodes: Array[Node] = [Stall.create(stall), keeper]
 			for node in nodes:
 				_entities.add_child(node)
+			_markers[stall.shop.id] = keeper.add_quest_marker()
 			_stall_shops[stall.shop.id] = stall.shop
 			_stall_nodes[stall.shop.id] = nodes
 
@@ -188,6 +176,7 @@ func _pack_up_closed_stalls() -> void:
 			continue
 		for node: Node in _stall_nodes[shop_id]:
 			node.queue_free()
+		_markers.erase(shop_id)
 		_stall_shops.erase(shop_id)
 		_stall_nodes.erase(shop_id)
 

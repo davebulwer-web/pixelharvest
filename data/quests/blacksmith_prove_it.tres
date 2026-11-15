@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/quests/sell_goal.gd" id="2_goal"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="3_unlockdef"]
+[ext_resource type="Resource" path="res://data/unlocks/great_tools.tres" id="4_unlock"]
+[ext_resource type="Resource" path="res://data/unlocks/north_field_deed.tres" id="5_unlock"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_goal")
+amount = 300
+
+[resource]
+script = ExtResource("1_def")
+id = &"blacksmith_prove_it"
+title = "Brann's test"
+giver = &"blacksmith"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["So you're the one working the old farm. Everyone who moves out here talks about farming. Most of them are gone by summer.", "Sell me on it. Show me 300 gold's worth of produce sold, and I'll take you seriously.", "Do that and I'll make you the great tools, the real thing. And I'll tell Marlow you're good for the north field."])
+reminder_line = "Talk's cheap. Selling isn't. Come back when it's 300."
+thanks_lines = Array[String](["Three hundred gold out of that old patch. Hmph. Not bad at all.", "Get the wide hoe and can first, then I'll forge you the great ones. And Marlow's got the deed to the north field out for you. Don't make me look foolish."])
+reward_unlocks = Array[ExtResource("3_unlockdef")]([ExtResource("4_unlock"), ExtResource("5_unlock")])
+first_day = 8

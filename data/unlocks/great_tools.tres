@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"great_tools"
+display_name = "Brann's great tools"
+announcement = "Brann will forge the great hoe and the great watering can for you now, once you have the wide ones."
+on_day = 0

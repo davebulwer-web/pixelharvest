@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="UpgradeDef" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="UpgradeDef" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/upgrade_def.gd" id="1_def"]
 [ext_resource type="Script" path="res://scripts/upgrades/plot_effect.gd" id="2_effect"]
 [ext_resource type="Texture2D" path="res://assets/sprites/upgrades/field_placeholder.png" id="3_icon"]
+[ext_resource type="Resource" path="res://data/unlocks/north_field_deed.tres" id="9_unlock"]
 
 [sub_resource type="Resource" id="Resource_effect"]
 script = ExtResource("2_effect")
@@ -16,3 +17,4 @@ description = "Clears the thicket along the north of the farm: about 120 more ti
 icon = ExtResource("3_icon")
 price = 500
 effect = SubResource("Resource_effect")
+requires_unlock = ExtResource("9_unlock")

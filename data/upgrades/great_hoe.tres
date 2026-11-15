@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="UpgradeDef" load_steps=7 format=3]
+[gd_resource type="Resource" script_class="UpgradeDef" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/upgrade_def.gd" id="1_def"]
 [ext_resource type="Script" path="res://scripts/upgrades/tool_tier_effect.gd" id="2_effect"]
 [ext_resource type="Texture2D" path="res://assets/sprites/items/hoe.png" id="3_icon"]
 [ext_resource type="Resource" path="res://data/upgrades/wide_hoe.tres" id="4_requires"]
 [ext_resource type="Resource" path="res://data/tools/hoe.tres" id="5_tool"]
+[ext_resource type="Resource" path="res://data/unlocks/great_tools.tres" id="9_unlock"]
 
 [sub_resource type="Resource" id="Resource_effect"]
 script = ExtResource("2_effect")
@@ -20,3 +21,4 @@ icon = ExtResource("3_icon")
 price = 1000
 requires = ExtResource("4_requires")
 effect = SubResource("Resource_effect")
+requires_unlock = ExtResource("9_unlock")

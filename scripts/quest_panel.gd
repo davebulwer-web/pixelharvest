@@ -50,8 +50,7 @@ func _refresh() -> void:
 		_add_line("Nothing asked of you just now. Townsfolk with a ! over their heads have something to ask.",
 				8, UiStyle.TEXT_DIM)
 	for quest in quests:
-		var giver := ContentDB.character(quest.giver)
-		var who := giver.display_name if giver != null else String(quest.giver)
+		var who := Quests.giver_name(quest.giver)
 		var done := Quests.progress(quest)
 		var status := "Ready! Go and see %s" % who if Quests.is_ready(quest) else quest.goal.progress_text(done)
 		_add_line("%s  (%s)" % [quest.title, who], 9, UiStyle.TEXT)

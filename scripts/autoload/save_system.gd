@@ -426,13 +426,26 @@ func _upgrade_8_to_9(game: Dictionary) -> void:
 ## The mayor's new opener (bring the first five parsnips) is ticked off as
 ## done for a game that has already started his welcome request, so he
 ## doesn't go back a step.
-const V10_UNLOCKS: Array[String] = ["hollis_spring", "forge_open", "hollis_summer", "hollis_autumn"]
+##
+## Stage 10 session 2 (DECISIONS 044) added three more unlocks for things a
+## version 9 game also had from day 1 (Mabel, the great tools, the north
+## field), so they join the list. Version 10 itself didn't change shape, so
+## no new save version: a version 10 game earns them in the usual way. Brann's
+## request, whose whole point is opening those, is ticked off as done for an
+## old game, as the mayor's opener is.
+const V10_UNLOCKS: Array[String] = ["hollis_spring", "forge_open", "hollis_summer", "hollis_autumn",
+		"mabel_arrives", "great_tools", "north_field_deed"]
 const V10_OPENER := "mayor_first_pull"
 const V10_AFTER_OPENER := "mayor_first_sale"
+const V10_ALREADY_DONE := "blacksmith_prove_it"
 
 
 func _upgrade_9_to_10(game: Dictionary) -> void:
 	game["unlocks"] = V10_UNLOCKS.duplicate()
 	var quests: Variant = game.get("quests", {})
-	if typeof(quests) == TYPE_DICTIONARY and quests.has(V10_AFTER_OPENER) and not quests.has(V10_OPENER):
+	if typeof(quests) != TYPE_DICTIONARY:
+		return
+	if quests.has(V10_AFTER_OPENER) and not quests.has(V10_OPENER):
 		quests[V10_OPENER] = {"state": "done", "progress": 0.0}
+	if not quests.has(V10_ALREADY_DONE):
+		quests[V10_ALREADY_DONE] = {"state": "done", "progress": 0.0}

@@ -122,7 +122,8 @@ data/                Content resources (.tres), indexed by ContentDB
   shops/             ShopDef — a shopkeeper, their words, and what the counter offers
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers)
   events/            CalendarEvent — what happens on which days (market day) and its stalls
-  quests/            QuestDef — townsfolk's requests: who asks, for what, and the reward
+  quests/            QuestDef — requests from townsfolk or shopkeepers: who asks, for what,
+                     and the reward
   difficulties/      DifficultyDef — chosen at new game: multipliers on prices, energy, growing
   audio/             SoundBank — what each sound the game plays sounds like (DECISIONS 042)
   unlocks/           UnlockDef — things that open up over time, from a request or a date

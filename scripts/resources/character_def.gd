@@ -32,6 +32,11 @@ extends Resource
 ## tomorrow — the same rule as the shopkeepers' greetings.
 @export var lines: Array[String] = []
 
+## Not in the world until this is earned (DECISIONS 044): Mabel arrives on
+## spring day 5. Until then they aren't built, and have nothing to ask. Null:
+## here from the start.
+@export var requires_unlock: UnlockDef
+
 
 ## Where they stand on `day`.
 func spot_on(day: int) -> Vector2i:

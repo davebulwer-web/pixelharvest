@@ -5,8 +5,8 @@ extends StaticBody2D
 ##
 ## Like the shipping bin it joins the "interactable" group, so the player's E
 ## key needs no special case for people. All an Npc does is announce, on
-## EventBus, that it was spoken to; what that leads to (a shop menu, later a
-## quest) is up to whoever listens. This node holds a picture, a place to
+## EventBus, that it was spoken to; what that leads to (a shop menu, a
+## request) is up to whoever listens. This node holds a picture, a place to
 ## stand and which tiles count as "talking to me" — nothing else.
 ##
 ## The origin is the bottom-middle of the cell the character stands on.
@@ -16,6 +16,9 @@ const TILE_PX := 16
 
 ## Matches the player's sprite: a 56×56 frame with the feet 19px below centre.
 const SPRITE_OFFSET := Vector2(0, -19)
+
+## How high a request marker floats above the feet, in pixels.
+const MARKER_HEIGHT := 54
 
 var npc_id: StringName = &""
 
@@ -48,6 +51,24 @@ static func create(id: StringName, texture: Texture2D, cell: Vector2i) -> Npc:
 
 func _ready() -> void:
 	add_to_group(&"interactable")
+
+
+## Give this character a small "!" or "?" floating over their head, bobbing
+## gently, for requests (DECISIONS 038). Empty, and so invisible, until the
+## scene sets its text from Quests.marker_for(). Townsfolk in town and
+## shopkeepers behind a counter or stall wear the same one (DECISIONS 044).
+func add_quest_marker() -> Label:
+	var marker := Label.new()
+	marker.name = "QuestMarker"
+	marker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	marker.size = Vector2(16, 14)
+	marker.position = Vector2(-8, -MARKER_HEIGHT)
+	UiStyle.style_label(marker, 12, UiStyle.HIGHLIGHT)
+	add_child(marker)
+	var bob := marker.create_tween().set_loops()
+	bob.tween_property(marker, ^"position:y", -MARKER_HEIGHT - 2.0, 0.5).set_trans(Tween.TRANS_SINE)
+	bob.tween_property(marker, ^"position:y", float(-MARKER_HEIGHT), 0.5).set_trans(Tween.TRANS_SINE)
+	return marker
 
 
 func occupies(cell: Vector2i) -> bool:

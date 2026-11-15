@@ -194,12 +194,23 @@ func season_id_on(number: int) -> StringName:
 ## The calendar events on today, from ContentDB. Nothing about them is saved:
 ## they follow from the date.
 func events_today() -> Array[CalendarEvent]:
-	return ContentDB.events_on(day_number(), season_id())
+	return events_on(day_number())
+
+
+## The calendar events on day `number` (a day_number): the ones whose dates
+## fall on it and whose unlock, if they wait for one, is earned (DECISIONS
+## 044). For a day ahead or behind it uses today's unlocks, since nobody can
+## know what will be earned by then.
+func events_on(number: int) -> Array[CalendarEvent]:
+	return ContentDB.events_on(number, season_id_on(number)).filter(
+			func(e: CalendarEvent) -> bool: return has_unlock(e.requires_unlock))
 
 
 ## How many days until `event` next happens: 0 if it's today, -1 if it
-## doesn't come round within a year.
+## doesn't come round within a year, or is still waiting for its unlock.
 func days_until(event: CalendarEvent) -> int:
+	if not has_unlock(event.requires_unlock):
+		return -1
 	var today := day_number()
 	var year_length := RULES.days_per_season * maxi(1, RULES.seasons.size())
 	for ahead in year_length + 1:

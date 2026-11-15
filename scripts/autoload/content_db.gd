@@ -129,8 +129,10 @@ func events() -> Array[CalendarEvent]:
 	return result
 
 
-## The events on day `day_number` (GameState.day_number), whose season is
-## `season_id`. GameState.events_today() is the usual way to ask.
+## The events whose dates fall on day `day_number` (GameState.day_number),
+## whose season is `season_id`. Only the dates: GameState.events_on() and
+## events_today() also leave out any still waiting for an unlock, and are
+## the usual way to ask.
 func events_on(day_number: int, season_id: StringName) -> Array[CalendarEvent]:
 	return events().filter(func(e: CalendarEvent) -> bool: return e.happens_on(day_number, season_id))
 
@@ -476,8 +478,11 @@ func _check_quests() -> void:
 			season_ids.append(theme.id)
 	for each: QuestDef in _quests.values():
 		var where := each.resource_path
-		if character(each.giver) == null:
-			push_error("ContentDB: '%s' is asked by '%s', who isn't in %s" % [where, each.giver, CHARACTERS_DIR])
+		# A giver is a townsperson or a shopkeeper (by shop id: &"blacksmith"
+		# is Brann), DECISIONS 044.
+		if character(each.giver) == null and shop(each.giver) == null:
+			push_error("ContentDB: '%s' is asked by '%s', who isn't in %s or a shop's keeper"
+					% [where, each.giver, CHARACTERS_DIR])
 		if each.title == "":
 			push_warning("ContentDB: '%s' has no title, so the request log shows it blank" % where)
 		if each.offer_lines.is_empty():
@@ -528,6 +533,10 @@ func _check_unlocks() -> void:
 	for location in RULES.locations:
 		if location != null:
 			_is_unknown_unlock(location.requires_unlock, location.resource_path, "waits for")
+	for each: CharacterDef in _characters.values():
+		_is_unknown_unlock(each.requires_unlock, each.resource_path, "waits for")
+	for each: CalendarEvent in _events.values():
+		_is_unknown_unlock(each.requires_unlock, each.resource_path, "waits for")
 	for each: UnlockDef in _unlocks.values():
 		var where := each.resource_path
 		if not each.opens_by_date() and not given.has(each.id):

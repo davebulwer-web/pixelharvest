@@ -14,7 +14,8 @@ extends Node2D
 ##       door ──────────  ▒▒ ──────────            y 8 (x 5-6)
 ##
 ## Talking is E at the counter (Npc announces it on EventBus; this listens for
-## its own keeper, and ShopCounter does the rest, as at a market stall). The
+## its own keeper, and ShopCounter does the rest, as at a market stall). A
+## keeper with a request has a "!" or "?" over their head (DECISIONS 044). The
 ## dialogue box runs first, then the shop menu. After closing time
 ## (ShopDef.closes_at) the keeper says so instead, and the menu stays shut;
 ## the door still lets you out (DECISIONS 035). The door
@@ -48,6 +49,9 @@ const SHELF_TEXTURE := preload("res://assets/sprites/town/shelf.png")
 var _location: LocationDef
 var _shop: ShopDef
 var _counter: ShopCounter
+
+## The "!" or "?" over the keeper's head.
+var _marker: Label
 
 
 func _ready() -> void:
@@ -130,6 +134,18 @@ func _add_keeper() -> void:
 	for x in range(COUNTER_CELLS.position.x, COUNTER_CELLS.end.x):
 		keeper.talk_cells.append(Vector2i(x, COUNTER_CELLS.position.y))
 	_entities.add_child(keeper)
+	# A keeper can have a request for you, like a townsperson (DECISIONS 044):
+	# the same "!" or "?" over their head, kept up to date the same way.
+	_marker = keeper.add_quest_marker()
+	for signal_ref: Signal in [EventBus.quest_started, EventBus.quest_completed, EventBus.item_added,
+			EventBus.item_removed]:
+		signal_ref.connect(func(_a = null, _b = null) -> void: _refresh_marker())
+	EventBus.quest_progressed.connect(func(_id: StringName, _p: int, _n: int) -> void: _refresh_marker())
+	_refresh_marker()
+
+
+func _refresh_marker() -> void:
+	_marker.text = Quests.marker_for(_shop.id)
 
 
 ## The doormat: stepping out of the room's gap goes back to the town, to the

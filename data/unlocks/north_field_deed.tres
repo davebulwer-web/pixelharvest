@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"north_field_deed"
+display_name = "the deed to the north field"
+announcement = "Marlow has the deed to the north field out for you, at the general store."
+on_day = 0

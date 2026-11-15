@@ -1424,3 +1424,63 @@ greenhouse) plugs into it.
 like `first_day` does; changing `days_per_season` means revisiting those numbers. A player
 who never does the mayor's first request never sees Hollis's potatoes; that's intended
 (it's the tutorial), and the mayor's "!" and the notice board keep pointing at it.
+
+## 044 — People arrive by unlock, shopkeepers can ask, and Brann's test opens the big upgrades
+
+**Decision.** Stage 10 session 2 finishes ROADMAP section 4's "anything can require one"
+and adds the first shopkeeper request.
+
+- *Characters and calendar events get `requires_unlock`*, the field DECISIONS 043 left
+  for "when something first needs it". A townsperson waiting for one isn't built in town
+  and has nothing to ask (`Quests.is_about()`). An event waiting for one doesn't happen:
+  `GameState.events_on(day)` is the dates (ContentDB, unchanged) filtered by unlocks, and
+  `events_today()`, `days_until()` and requests' `on_event` all go through it, so the
+  notice board, the town's stalls and Pip's market-day request agree. For a day ahead or
+  behind, today's unlocks are used, since nobody knows what will be earned by then.
+  `CalendarEvent.happens_on()` stays plain data (the date only), as before.
+- *Mabel arrives on spring day 5* (`mabel_arrives`, a calendar unlock), so the roadmap's
+  "[new] Mabel" is true on screen, not just in her request's date: the board pins her up
+  as coming soon, the morning summary announces her, and she's in the square from then.
+  Nothing yet uses an event's unlock (the festivals in Stage 18 will); it's covered by a
+  test that adds a made-up event.
+- *A request's `giver` can be a shopkeeper*, named by their shop's id (`&"blacksmith"` is
+  Brann). `Quests.giver_name()` gives "Brann" or "Mabel" wherever a name is shown (the
+  request log, the summary, the board, "Go and see …"). ShopCounter asks Quests first: a
+  keeper with a request to make, remind or take in says that instead of their greeting,
+  then the menu opens as usual. The same "!" or "?" floats over keepers indoors and at
+  stalls; it moved into `Npc.add_quest_marker()` so the town and the shop share one. A
+  keeper only asks once their shop's door is open to you (the location's
+  `requires_unlock`), so Brann's request waits for the forge with no date of its own to
+  keep in step (it has `first_day = 8` only so the summary says "Brann has something to
+  ask you" that morning).
+- *Brann's test* (`blacksmith_prove_it`): sell 300g of produce from day 8 →
+  `great_tools` (the great hoe and great can wait for it, as well as for the wide ones)
+  and `north_field_deed` (Marlow's north field; the pond and east fields follow it
+  through `requires`, so all the extra land waits for Brann). No gold: the reward is what
+  it opens.
+- *Season-end warning in the morning summary* too, the board's own words
+  (`Notices.season_end_warning()`), so the warning reaches the player even if they never
+  read the board. Hollis's spring line and the mayor's bridge request need Stage 13's goal
+  kinds (ship variety, donate gold), so they moved there; the mayor mentions the bridge in
+  his daily lines meanwhile.
+- *No new save version.* Nothing saved changed shape. The version 9 → 10 step's frozen
+  list gains the three new unlocks, because a version 9 game had Mabel, the great tools
+  and every field from day 1, and that step also ticks Brann's test off as done for those
+  games (as it does the mayor's opener). A version 10 game made before today earns them in
+  the usual way: Mabel on load (her date has passed), the rest from Brann.
+
+Options considered: shopkeepers as CharacterDefs too (one kind of giver, but two files
+for one person, and the keeper's name, picture and words would live in two places);
+a separate `giver_shop` field on QuestDef (clearer to read, but every place that shows or
+matches a giver would ask two fields). One id that's either kind, resolved by
+`giver_name()` and `is_about()`, keeps the rest unchanged. For events, filtering inside
+`ContentDB.events_on()` would have been one line, but ContentDB is an index of files and
+shouldn't ask the game's state.
+
+**Why.** Rule 3 again: who arrives when, and what a shopkeeper asks, is data. Ivy (Stage
+13), Wren's and Brann's later lines, and the festivals plug into these fields with no code.
+
+**Cost.** Editing a released save step is normally wrong; here no version 9 game exists
+outside Dave's machine and the step's meaning ("version 9 had everything open") is kept,
+not changed. After the game is shared, a new unlock that old games should have needs a
+new save version instead.

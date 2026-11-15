@@ -39,9 +39,14 @@ extends Resource
 ## The stalls set up while it's on.
 @export var stalls: Array[StallDef] = []
 
+## Doesn't happen until this is earned (DECISIONS 044), however the dates
+## fall. Null: it happens from the start. happens_on() below is only the
+## date; GameState.events_on() asks this too.
+@export var requires_unlock: UnlockDef
 
-## True if this happens on `day_number` (GameState.day_number), when the season
-## that day is `season_id`.
+
+## True if the date alone says this happens on `day_number`
+## (GameState.day_number), when the season that day is `season_id`.
 func happens_on(day_number: int, season_id: StringName) -> bool:
 	if every_days < 1 or day_number < first_day:
 		return false

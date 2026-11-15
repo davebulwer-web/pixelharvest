@@ -3,7 +3,8 @@ extends RefCounted
 ##
 ## ShopCounter — what happens when you talk to a shopkeeper, indoors or at a
 ## market stall: they turn you away if they're shut, otherwise they say their
-## line for the day and then the shop menu opens (DECISIONS 027, 035, 037).
+## line for the day (or about a request they've made, DECISIONS 044) and then
+## the shop menu opens (DECISIONS 027, 035, 037).
 ##
 ## It was in the shop interior until market stalls needed the same thing in
 ## town; one copy means a keeper behaves the same wherever they stand.
@@ -35,6 +36,14 @@ func serve(shop: ShopDef) -> void:
 		if GameState.minutes < shop.opens_at:
 			closed_lines = ["Not open yet, I'm afraid. I open at %s." % Clock.format_short(shop.opens_at)]
 		_dialogue.say(shop.keeper_name, closed_lines)
+		return
+	# A keeper with a request to make, remind you of or take in says that
+	# instead of their greeting (DECISIONS 044), and the menu opens after, as
+	# usual: Brann can ask you to prove yourself and still sell you a hoe.
+	var about_requests := Quests.talk(shop.id)
+	if not about_requests.is_empty():
+		_opens_after = shop
+		_dialogue.say(shop.keeper_name, about_requests)
 		return
 	if shop.greetings.is_empty():
 		_menu.open(shop)

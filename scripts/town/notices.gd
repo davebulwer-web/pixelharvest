@@ -48,13 +48,25 @@ static func _calendar() -> String:
 	var length := GameState.RULES.days_per_season
 	var left := length - GameState.day
 	var text := "%s, day %d of %d, year %d. " % [season, GameState.day, length, GameState.year]
+	var warning := season_end_warning()
+	if warning != "":
+		return text + warning
+	return text + "%d days of %s left." % [left, season.to_lower()]
+
+
+## In the last WARN_DAYS days of a season, the warning that crops which can't
+## take the next one will die: "Spring ends in 3 days. …". Else "". The
+## morning summary says it too (DECISIONS 044), so nobody misses it.
+static func season_end_warning() -> String:
+	var season := GameState.season_name(GameState.season_id())
+	var left := GameState.RULES.days_per_season - GameState.day
 	if left == 0:
-		return text + "Last day of %s! Anything still growing tonight that can't take %s dies." \
+		return "Last day of %s! Anything still growing tonight that can't take %s dies." \
 				% [season.to_lower(), _next_season_name().to_lower()]
 	if left <= WARN_DAYS:
-		return text + "%s ends in %d %s. Crops still growing then that can't take %s will die." \
+		return "%s ends in %d %s. Crops still growing then that can't take %s will die." \
 				% [season, left, "day" if left == 1 else "days", _next_season_name().to_lower()]
-	return text + "%d days of %s left." % [left, season.to_lower()]
+	return ""
 
 
 ## "Market day today! Stalls in the square … Open 8 AM – 2 PM." or "Next
@@ -183,8 +195,7 @@ static func _seed_shop_name() -> String:
 static func _requests() -> String:
 	var names: Array[String] = []
 	for id in Quests.givers_with_offers():
-		var person := ContentDB.character(id)
-		names.append(person.display_name if person != null else String(id))
+		names.append(Quests.giver_name(id))
 	if names.is_empty():
 		return ""
 	return "Wanted: a hand for %s. Look for the ! over %s." % [_list(names),
