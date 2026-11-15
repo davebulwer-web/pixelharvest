@@ -22,6 +22,12 @@ var size: Vector2i
 ## Vector2i -> FarmTile. Includes the cliff border.
 var _tiles: Dictionary = {}
 
+## Where crows took a crop last night (DECISIONS 045), so the farm can show
+## a crow standing there in the morning until the player scares it off. Only
+## for the picture: it isn't saved (a reloaded morning has no crows to see),
+## and it's emptied at the start of every night.
+var crows_landed: Array[Vector2i] = []
+
 
 func _init(farm_size: Vector2i) -> void:
 	size = farm_size
@@ -57,6 +63,7 @@ func can_till(cell: Vector2i) -> bool:
 		and t.terrain == FarmTile.Terrain.GRASS
 		and t.object_id == &""
 		and not t.tilled
+		and not t.weeds
 	)
 
 
@@ -67,7 +74,7 @@ func can_water(cell: Vector2i) -> bool:
 
 func can_plant(cell: Vector2i) -> bool:
 	var t := tile(cell)
-	return t != null and t.tilled and not t.has_crop()
+	return t != null and t.tilled and not t.has_crop() and not t.weeds
 
 
 func can_harvest(cell: Vector2i) -> bool:
@@ -83,7 +90,23 @@ func can_place(cell: Vector2i) -> bool:
 		and t.terrain == FarmTile.Terrain.GRASS
 		and t.object_id == &""
 		and not t.has_crop()
+		and not t.weeds
 	)
+
+
+func has_weeds(cell: Vector2i) -> bool:
+	var t := tile(cell)
+	return t != null and t.weeds
+
+
+## True if a crop grows on any of the four tiles beside `cell`. Weeds come up
+## in the grass next to crops as well as in the soil (DECISIONS 045).
+func is_next_to_crop(cell: Vector2i) -> bool:
+	for step in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+		var t := tile(cell + step)
+		if t != null and t.has_crop():
+			return true
+	return false
 
 
 ## True if any cell in `area` has this terrain.
@@ -156,6 +179,48 @@ func place_object(cell: Vector2i, object_id: StringName) -> void:
 	EventBus.object_placed.emit(cell, object_id)
 
 
+## Weeds come up on `cell` (overnight, FarmHazards). Only on open ground:
+## grass or soil with nothing standing on it.
+func sprout_weeds(cell: Vector2i) -> void:
+	var t := tile(cell)
+	if t == null or t.weeds or t.object_id != &"" or t.terrain != FarmTile.Terrain.GRASS:
+		return
+	t.weeds = true
+	EventBus.weeds_sprouted.emit(cell)
+
+
+## Weeds pulled up (E) or hoed out. Returns false if there were none. What
+## the player gets for it (fibre) is GameState's business, on weeds_pulled.
+func pull_weeds(cell: Vector2i) -> bool:
+	if not has_weeds(cell):
+		return false
+	tile(cell).weeds = false
+	EventBus.weeds_pulled.emit(cell)
+	return true
+
+
+## Bare tilled soil goes back to grass (overnight, FarmHazards): a seed bed
+## left empty doesn't stay a seed bed for ever.
+func untill(cell: Vector2i) -> void:
+	var t := tile(cell)
+	if t == null or not t.tilled or t.has_crop():
+		return
+	t.tilled = false
+	t.watered = false
+	EventBus.tile_cleared.emit(cell)
+
+
+## A crow took the crop on `cell` in the night: it's gone, the soil stays.
+func lose_to_crows(cell: Vector2i) -> void:
+	var t := tile(cell)
+	if t == null or not t.has_crop():
+		return
+	var crop_id := t.crop.id
+	t.clear_crop()
+	crows_landed.append(cell)
+	EventBus.crop_died.emit(cell, crop_id, &"crows")
+
+
 func remove_object(cell: Vector2i) -> void:
 	var t := tile(cell)
 	if t == null or t.object_id == &"":
@@ -182,27 +247,44 @@ func clear_thicket(area: Rect2i) -> int:
 
 # --- Overnight ---------------------------------------------------------------
 
-## Everything that happens to the farm while the player sleeps: each watered
-## crop gets one day of growth, then all the soil dries out, then sprinklers
-## water the ground around them — so the player wakes to wet soil around every
-## sprinkler, and those crops grow the following night without being touched.
+## The first part of the night on the farm: each watered crop gets one day
+## of growth (unless weeds are choking it), each unwatered one gets a night
+## thirstier, and then all the soil dries out.
+##
+## TimeSystem then runs the night's hazards (crows, weeds: FarmHazards) and
+## last of all run_sprinklers(), so the player wakes to wet soil around every
+## sprinkler and those crops grow the following night without being touched.
 ##
 ## Called by TimeSystem once per day. It deliberately knows nothing about
-## *when* days end — only what a day's passing does to the farm.
-## `grow_scale` is the difficulty's grow_time_multiplier (DECISIONS 040),
-## passed in so the farm's data never has to look up the game's settings.
-func advance_day(grow_scale: float = 1.0) -> void:
+## *when* days end — only what a day's passing does to the farm. The settings
+## are passed in so the farm's data never has to look up the game's:
+##   `grow_scale` is the difficulty's grow_time_multiplier (DECISIONS 040);
+##   `die_after_dry_nights` is how many nights in a row without water kill a
+##   crop (DECISIONS 045), or 0 if thirst never kills (Relaxed).
+func advance_day(grow_scale: float = 1.0, die_after_dry_nights: int = 0) -> void:
+	crows_landed.clear()
 	for cell: Vector2i in _tiles:
 		var t: FarmTile = _tiles[cell]
-		if t.has_crop() and t.watered and not t.is_crop_ready():
-			_grow(cell, t, grow_scale)
+		if t.has_crop():
+			if t.is_crop_ready():
+				t.dry_nights = 0
+			elif t.watered:
+				t.dry_nights = 0
+				if not t.weeds:
+					_grow(cell, t, grow_scale)
+			else:
+				t.dry_nights += 1
+				if die_after_dry_nights > 0 and t.dry_nights >= die_after_dry_nights:
+					var crop_id := t.crop.id
+					t.clear_crop()
+					EventBus.crop_died.emit(cell, crop_id, &"thirst")
 		t.watered = false
-	_run_sprinklers()
 
 
 ## Any object with water_offsets waters those tiles. water() only wets tilled
 ## soil, so a sprinkler next to grass or a path simply does nothing there.
-func _run_sprinklers() -> void:
+## The last thing every night (TimeSystem).
+func run_sprinklers() -> void:
 	for cell: Vector2i in _tiles:
 		var object_id: StringName = _tiles[cell].object_id
 		if object_id == &"":
@@ -225,7 +307,7 @@ func wither_out_of_season(season_id: StringName) -> int:
 			var crop_id := t.crop.id
 			t.clear_crop()
 			died += 1
-			EventBus.crop_died.emit(cell, crop_id)
+			EventBus.crop_died.emit(cell, crop_id, &"season")
 	return died
 
 

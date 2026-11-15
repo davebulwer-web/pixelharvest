@@ -21,7 +21,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 10, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 11, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -54,7 +54,10 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       played at what is now "standard".
 ##  10 — unlocks: what has opened up so far, by name (DECISIONS 043). Older
 ##       games had everything open, so they're given every unlock there was.
-const CURRENT_VERSION := 10
+##  11 — hazards (DECISIONS 045): a farm tile can have weeds ("weeds") and a
+##       crop a count of nights without water ("dry_nights"). Both are left
+##       out when they're nothing, so older tiles already read correctly.
+const CURRENT_VERSION := 11
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -253,6 +256,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_8_to_9(data["game"])
 			9:
 				_upgrade_9_to_10(data["game"])
+			10:
+				_upgrade_10_to_11(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -449,3 +454,17 @@ func _upgrade_9_to_10(game: Dictionary) -> void:
 		quests[V10_OPENER] = {"state": "done", "progress": 0.0}
 	if not quests.has(V10_ALREADY_DONE):
 		quests[V10_ALREADY_DONE] = {"state": "done", "progress": 0.0}
+
+
+## Version 10 -> 11: hazards arrive (DECISIONS 045). The new tile fields are
+## only written when they aren't nothing, and an older tile has neither, so a
+## version 10 farm already means "no weeds anywhere, and every crop freshly
+## watered as far as thirst goes": no crop is put at risk by the upgrade.
+## Nothing to change; the step is here so every version has one (rule 4).
+##
+## The weeds and the crows wait for unlocks the calendar opens (spring days 6
+## and 15). An older game already past those days gets them on load, with the
+## other dates it has passed (GameState.open_due_unlocks), and they start that
+## night.
+func _upgrade_10_to_11(_game: Dictionary) -> void:
+	pass

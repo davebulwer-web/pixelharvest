@@ -35,6 +35,7 @@ func _ready() -> void:
 	EventBus.tile_tilled.connect(func(cell: Vector2i) -> void: _burst(cell, DIRT, 10, 70.0))
 	EventBus.tile_watered.connect(func(cell: Vector2i) -> void: _burst(cell, WATER, 8, 55.0))
 	EventBus.crop_planted.connect(func(cell: Vector2i, _id: StringName) -> void: _burst(cell, LEAF, 5, 40.0))
+	EventBus.weeds_pulled.connect(func(cell: Vector2i) -> void: _burst(cell, LEAF, 8, 60.0))
 	EventBus.crop_harvested.connect(_on_crop_harvested)
 	EventBus.object_placed.connect(func(cell: Vector2i, _id: StringName) -> void: _puff(cell))
 	EventBus.object_removed.connect(func(cell: Vector2i, _id: StringName) -> void: _puff(cell))

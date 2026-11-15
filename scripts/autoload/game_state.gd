@@ -80,6 +80,8 @@ var location: StringName = &""
 
 
 func _ready() -> void:
+	# Pulled weeds give fibre, whether pulled by hand or hoed out.
+	EventBus.weeds_pulled.connect(_on_weeds_pulled)
 	# Always start from a valid new game, so the farm scene can be run on its
 	# own with F6. When the game is launched properly, the boot scene then asks
 	# SaveSystem to replace this with the saved game, if there is one.
@@ -376,6 +378,56 @@ func open_due_unlocks() -> void:
 	for each in ContentDB.unlocks():
 		if each.opens_by_date() and each.on_day <= day_number():
 			unlock(each)
+
+
+# --- Hazards (DECISIONS 045) -------------------------------------------------
+# The rules are in data/hazard_rules.tres (RULES.hazards); the difficulty
+# decides how hard they press. These answer the questions the farm, the
+# summary and the night ask, so none of them has to combine the two.
+
+## How many nights in a row without water a crop survives before it dies
+## tonight, or 0 if thirst never kills at this difficulty.
+func thirst_deadline() -> int:
+	var rules := RULES.hazards
+	if rules == null or not difficulty.thirst_kills:
+		return 0
+	return rules.die_after_dry_nights
+
+
+## How many dry nights before a crop looks wilted (0: never).
+func wilt_after() -> int:
+	return RULES.hazards.wilt_after_dry_nights if RULES.hazards != null else 0
+
+
+## The crops wilting on the farm now: unwatered for wilt_after() nights and
+## not watered yet today. With thirst_deadline(), they die tonight unless
+## watered (the morning summary warns).
+func wilted_crops() -> Array[Vector2i]:
+	var wilted: Array[Vector2i] = []
+	var after := wilt_after()
+	for cell: Vector2i in farm.cells():
+		if farm.tile(cell).is_wilted(after):
+			wilted.append(cell)
+	return wilted
+
+
+## E on a tile with weeds: pull them up by hand, for a little energy (scaled
+## by the difficulty, like a tool). Returns false if there were none, or not
+## enough energy left.
+func pull_weeds(cell: Vector2i) -> bool:
+	if not farm.has_weeds(cell):
+		return false
+	var cost := (RULES.hazards.pull_weeds_energy if RULES.hazards != null else 0.0) \
+			* difficulty.energy_cost_multiplier
+	if not try_spend_energy(cost):
+		EventBus.message_posted.emit("Too tired to pull weeds")
+		return false
+	return farm.pull_weeds(cell)
+
+
+func _on_weeds_pulled(_cell: Vector2i) -> void:
+	if RULES.hazards != null and RULES.hazards.weed_item != null:
+		inventory.add(RULES.hazards.weed_item)
 
 
 # --- Harvesting --------------------------------------------------------------

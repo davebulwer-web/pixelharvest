@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 11 — hazards and weather.** Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
+**Current stage: 11 — hazards and weather.** Session 1 (thirst, weeds, crows, the working scarecrow) is built, waiting for Dave to try it; session 2 is weather. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -526,11 +526,26 @@ crop" is a ship-variety goal) and the mayor's bridge request (a donate-gold goal
 
 ROADMAP section 7.
 
-- [ ] Session 1: thirst (wilt after 2 dry nights, die after 3), weeds (and fibre), crows and
-      a scarecrow that protects, `hazard_multiplier` on DifficultyDef (Relaxed switches off)
+**Session 1 (2026-11-15) — thirst, weeds, crows and the scarecrow (DECISIONS 045)**
+
+- [x] Thirst: a crop unwatered 2 nights wilts (tinted), a 3rd and it dies; watering perks
+      it up; ripe crops never go thirsty; the summary warns what will die tonight
+- [x] Weeds from spring day 6 (`weeds_arrive`): on tilled soil and grass beside crops, at
+      most 8 a night; stop growth; E pulls (1 energy) or the hoe digs out; **fibre** item;
+      bare soil sometimes reverts to grass
+- [x] Crows from spring day 15 (`crows_arrive`): with more than 16 unguarded crops they
+      may take 1–2 a night; a crow stands on the spot in the morning and flies off as you
+      come near; the scarecrow guards a radius of 8
+- [x] `data/hazard_rules.tres` (HazardRules) holds every number; `hazard_multiplier` and
+      `thirst_kills` on DifficultyDef (Relaxed 0.5 and no thirst deaths, Hard 1.5)
+- [x] Save version 11 (weeds and dry nights on tiles); `tests/saves/v10_example.json`
+- [x] Verified: 85 scripted checks (thirst on Standard and Relaxed, weeds before and after
+      day 6, caps per difficulty, hoe and E, crows with and without a scarecrow, a full
+      night through TimeSystem, save round trip, old saves v1–v10) and rendered shots
+- [ ] Dave confirms it plays correctly on Windows
 - [ ] Session 2: weather (sun, rain, storm, heatwave, snow) with odds per season, tomorrow's
       forecast, rain overlay and sounds, autumn frost; pests if time allows
-- [ ] Save version 11
+- [x] Save version 11 (session 1)
 - [ ] Pixellab: weeds (4 seasons), crow, aphids
 
 ## Stage 12 — Crops with rules · 2 sessions + art · Opus, then Sonnet

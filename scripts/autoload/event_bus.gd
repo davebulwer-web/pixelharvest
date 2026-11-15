@@ -51,14 +51,22 @@ signal calendar_event_began(event_id: StringName)
 
 signal tile_tilled(cell: Vector2i)
 signal tile_watered(cell: Vector2i)
+
+## Tilled soil went back to grass: bare soil left empty overnight (DECISIONS 045).
 signal tile_cleared(cell: Vector2i)
+
+## Weeds came up on a tile overnight, or were pulled up (E or the hoe).
+signal weeds_sprouted(cell: Vector2i)
+signal weeds_pulled(cell: Vector2i)
 
 signal crop_planted(cell: Vector2i, crop_id: StringName)
 signal crop_grew(cell: Vector2i, stage: int)
 signal crop_harvested(cell: Vector2i, crop_id: StringName, amount: int)
 
-## A crop died — wrong season, or left unwatered too long.
-signal crop_died(cell: Vector2i, crop_id: StringName)
+## A crop was lost overnight. `cause` says why (DECISIONS 045):
+## &"season" (the season turned and it can't grow in the new one),
+## &"thirst" (left unwatered too many nights) or &"crows" (taken by a crow).
+signal crop_died(cell: Vector2i, crop_id: StringName, cause: StringName)
 
 # --- Player and economy -----------------------------------------------------
 

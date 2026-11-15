@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"weeds_arrive"
+display_name = "weeds start coming up"
+announcement = "Spring's warming up, and from tonight weeds will come up on the farm. A weedy crop stops growing: pull weeds with E, or clear them with the hoe."
+on_day = 6

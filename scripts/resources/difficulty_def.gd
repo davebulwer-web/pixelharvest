@@ -17,6 +17,8 @@ extends Resource
 ##   shop prices   — Economy.buy_price() and Economy.upgrade_price()
 ##   energy        — the player's tool swing (player.gd)
 ##   grow times    — CropDef.days_to_grow_from(), via FarmData.advance_day()
+##   hazards       — FarmHazards (weeds and crows), and whether thirst kills
+##                   in FarmData.advance_day(), via TimeSystem (DECISIONS 045)
 ##
 ## Must not use the GameState autoload: game_rules.tres preloads these files,
 ## and GameState preloads game_rules.tres (a cycle stops the game starting).
@@ -47,6 +49,15 @@ extends Resource
 ## whole days, never below one day a stage — see CropDef.days_to_grow_from().
 @export var grow_time_multiplier: float = 1.0
 
+## How hard the farm's hazards press (DECISIONS 045): times the chance of
+## weeds coming up and how many can in a night, and crows come sooner (with
+## fewer unguarded crops) and more often. 0 switches weeds and crows off.
+@export var hazard_multiplier: float = 1.0
+
+## True if a crop left without water too many nights dies. False: it wilts
+## and waits, however long, and grows again once watered.
+@export var thirst_kills: bool = true
+
 
 ## `price` times `multiplier`, rounded to whole gold. Something with a price
 ## never becomes free: it costs at least 1g. 0 stays 0 ("not for sale").
@@ -69,6 +80,12 @@ func summary(base_gold: int) -> Array[String]:
 	_describe(lines, buy_price_multiplier, "Shop prices are %d%% of the usual")
 	_describe(lines, energy_cost_multiplier, "Tools use %d%% of the usual energy")
 	_describe(lines, grow_time_multiplier, "Crops take %d%% of the usual time to grow")
+	if hazard_multiplier <= 0.0:
+		lines.append("No weeds or crows")
+	else:
+		_describe(lines, hazard_multiplier, "Weeds and crows come %d%% as often as usual")
+	if not thirst_kills:
+		lines.append("Thirsty crops wilt but never die")
 	return lines
 
 

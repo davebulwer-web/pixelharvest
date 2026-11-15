@@ -329,6 +329,20 @@ func _check() -> void:
 		if each.item != null and item(each.item.id) != each.item:
 			push_error("ContentDB: '%s' gives back an item that isn't in data/tools/ or data/decorations/" % where)
 
+	# Hazards (DECISIONS 045): pulled weeds must give a real item, and a crop
+	# needs a wilted day before it can die.
+	var hazards := RULES.hazards
+	if hazards != null:
+		var where := hazards.resource_path
+		if hazards.weed_item != null and item(hazards.weed_item.id) != hazards.weed_item:
+			push_error("ContentDB: '%s' gives a weed item that isn't in data/produce/" % where)
+		if hazards.die_after_dry_nights > 0 and hazards.die_after_dry_nights <= hazards.wilt_after_dry_nights:
+			push_warning("ContentDB: '%s' kills crops before they've wilted for a day" % where)
+		for season_id in hazards.weed_seasons:
+			if not season_ids.has(season_id):
+				push_error("ContentDB: '%s' has weeds in a season '%s' that isn't in game_rules.tres"
+						% [where, season_id])
+
 	# The bed's location must exist, or nights have nowhere to happen.
 	if not RULES.locations.any(func(l: LocationDef) -> bool: return l != null and l.id == RULES.home_location):
 		push_error("ContentDB: game_rules.tres home_location '%s' isn't one of its locations"
@@ -537,6 +551,10 @@ func _check_unlocks() -> void:
 		_is_unknown_unlock(each.requires_unlock, each.resource_path, "waits for")
 	for each: CalendarEvent in _events.values():
 		_is_unknown_unlock(each.requires_unlock, each.resource_path, "waits for")
+	var hazards := RULES.hazards
+	if hazards != null:
+		_is_unknown_unlock(hazards.weeds_start, hazards.resource_path, "waits for")
+		_is_unknown_unlock(hazards.crows_start, hazards.resource_path, "waits for")
 	for each: UnlockDef in _unlocks.values():
 		var where := each.resource_path
 		if not each.opens_by_date() and not given.has(each.id):

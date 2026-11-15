@@ -16,7 +16,10 @@ extends Node
 ##      If it was the clock, stayed_up_too_late is announced once home.
 ##   1. day_ended is announced — anything that needs to settle up against
 ##      *today* does it now. Economy sells the shipping bin here.
-##   2. The farm grows: watered crops advance, soil dries, sprinklers water.
+##   2. The farm grows: watered crops advance, unwatered ones get thirstier
+##      (and may die of it), and the soil dries. Then the night's hazards:
+##      crows, weeds, bare soil going back to grass (DECISIONS 045). Then
+##      sprinklers water, last, so the morning has wet soil round them.
 ##   3. The calendar moves on and energy refills.
 ##   4. If that started a new season: crops that can't grow in it die, and
 ##      season_changed is announced — the farm repaints itself for the season.
@@ -46,6 +49,10 @@ var _out_too_late: bool = false
 ## The clock's step: it moves in tens, like most farming-game clocks, so the
 ## HUD doesn't flicker every second.
 const CLOCK_STEP_MINUTES := 10
+
+## The dice for the night's hazards (weeds, crows). Its own, rather than the
+## global ones, so a test can set its seed and get the same night every time.
+var rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
@@ -82,7 +89,9 @@ func end_day() -> void:
 		_out_too_late = false
 		EventBus.stayed_up_too_late.emit()
 	EventBus.day_ended.emit(GameState.day)
-	GameState.farm.advance_day(GameState.difficulty.grow_time_multiplier)
+	GameState.farm.advance_day(GameState.difficulty.grow_time_multiplier, GameState.thirst_deadline())
+	_run_hazards()
+	GameState.farm.run_sprinklers()
 	var season_turned := GameState.advance_calendar()
 	EventBus.energy_changed.emit(GameState.energy, GameState.max_energy)
 	if season_turned:
@@ -94,6 +103,17 @@ func end_day() -> void:
 		EventBus.calendar_event_began.emit(event.id)
 	SaveSystem.save_game()
 	_ending_day = false
+
+
+## Crows, weeds and soil going back to grass (FarmHazards), each only once
+## its unlock has opened, scaled by the difficulty. Part of step 2.
+func _run_hazards() -> void:
+	var rules := GameState.RULES.hazards
+	if rules == null:
+		return
+	FarmHazards.run_night(GameState.farm, rules, GameState.difficulty.hazard_multiplier,
+			GameState.season_id(), GameState.has_unlock(rules.weeds_start),
+			GameState.has_unlock(rules.crows_start), rng)
 
 
 ## True from the moment the night begins until the morning's save. The HUD

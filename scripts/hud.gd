@@ -26,11 +26,12 @@ var _message_tween: Tween
 ## before the morning starts, so it's gathered here and moved into the
 ## _morning_ copies when day breaks, for the morning message.
 var _overnight_sales: int = 0
-var _overnight_deaths: int = 0
+## Crops lost overnight, by cause (&"season", &"thirst", &"crows") -> count.
+var _overnight_deaths: Dictionary = {}
 var _overnight_new_season: bool = false
 var _overnight_too_late: bool = false
 var _morning_sales: int = 0
-var _morning_deaths: int = 0
+var _morning_deaths: Dictionary = {}
 var _morning_new_season: bool = false
 var _morning_too_late: bool = false
 
@@ -56,7 +57,9 @@ func _ready() -> void:
 	EventBus.crop_harvested.connect(_on_crop_harvested)
 	EventBus.items_shipped.connect(_on_items_shipped)
 	EventBus.shipment_sold.connect(func(gold: int) -> void: _overnight_sales = gold)
-	EventBus.crop_died.connect(func(_cell: Vector2i, _id: StringName) -> void: _overnight_deaths += 1)
+	EventBus.crop_died.connect(func(_cell: Vector2i, _id: StringName, cause: StringName) -> void:
+		_overnight_deaths[cause] = _overnight_deaths.get(cause, 0) + 1
+	)
 	EventBus.season_changed.connect(func(_s: int) -> void: _overnight_new_season = true)
 	EventBus.stayed_up_too_late.connect(func() -> void: _overnight_too_late = true)
 	EventBus.time_changed.connect(_on_time_changed)
@@ -96,7 +99,7 @@ func _on_day_started(_day: int, _season: int, _year: int) -> void:
 	_morning_new_season = _overnight_new_season
 	_morning_too_late = _overnight_too_late
 	_overnight_sales = 0
-	_overnight_deaths = 0
+	_overnight_deaths = {}
 	_overnight_new_season = false
 	_overnight_too_late = false
 	_warned_late = false
@@ -187,13 +190,23 @@ func _morning_text() -> String:
 			text += " — year %d" % GameState.year
 	if _morning_too_late:
 		text += "    You stayed out too late and woke up at home"
-	if _morning_deaths > 0:
-		text += "    %d crop%s died out of season" % [_morning_deaths, "" if _morning_deaths == 1 else "s"]
+	text += _losses_text(&"season", "%d crop%s died out of season")
+	text += _losses_text(&"thirst", "%d crop%s died of thirst")
+	text += _losses_text(&"crows", "Crows took %d crop%s")
 	if _morning_sales > 0:
 		text += "    The bin sold for %dg" % _morning_sales
 	for event in GameState.events_today():
 		text += "    %s in %s today" % [event.display_name, _place_name(event.location)]
 	return text
+
+
+## One part of the morning message for crops lost to `cause` overnight, or ""
+## if none were. `pattern` takes the count and the plural "s".
+func _losses_text(cause: StringName, pattern: String) -> String:
+	var count: int = _morning_deaths.get(cause, 0)
+	if count == 0:
+		return ""
+	return "    " + pattern % [count, "" if count == 1 else "s"]
 
 
 ## "town" for &"town": a location id in words, for messages.

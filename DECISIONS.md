@@ -1484,3 +1484,69 @@ shouldn't ask the game's state.
 outside Dave's machine and the step's meaning ("version 9 had everything open") is kept,
 not changed. After the game is shared, a new unlock that old games should have needs a
 new save version instead.
+
+## 045 — Hazards are small overnight rules in one data file, started by calendar unlocks
+
+**Decision.** Stage 11 session 1 adds the first three hazards from ROADMAP section 7:
+thirst, weeds and crows, with the scarecrow made to work.
+
+- *Thirst lives with growing.* `FarmTile.dry_nights` counts nights in a row a crop went
+  unwatered; `FarmData.advance_day()` either grows a watered crop or makes an unwatered
+  one a night thirstier. Two dry nights and it looks wilted (a tint on the crop's sprite,
+  `FarmTile.is_wilted()`), three and it dies, and the tile is left as tilled soil.
+  Watering a wilted crop perks it up at once and it grows that night as usual. A ripe crop
+  never goes thirsty: it has finished growing and only waits to be picked. On difficulties
+  where thirst doesn't kill (Relaxed), crops wilt and wait however long it takes.
+- *Weeds and crows are `FarmHazards`*, plain functions on a FarmData that TimeSystem runs
+  in the night, after the growing and before the sprinklers (so the morning still has wet
+  soil round each sprinkler). They're passed everything (the rules, the difficulty's
+  multiplier, which hazards have started, the dice) and look nothing up in GameState, so
+  a test sets the dice and gets the same night every time.
+- *Weeds* (`FarmTile.weeds`): each night a few come up on tilled soil and on grass beside
+  crops, never more than 8 in a night, in spring, summer and autumn. A weedy crop doesn't
+  grow (watering still counts against thirst); weedy ground can't be tilled, planted or
+  built on. E pulls a patch for 1 energy, or the hoe digs it out (one swing, one job:
+  hoeing weedy grass takes a second swing to till it). Each patch gives one **fibre**
+  (`data/produce/fibre.tres`, 1g; Brann will want it in Stage 13). Bare tilled soil also
+  goes back to grass now and then (5% a night).
+- *Crows*: if more than 16 crops are out of every scarecrow's reach, crows may come (75%
+  a night) and take one or two. The scarecrow's `ObjectDef.protects_radius` is 8: a circle
+  of 8 tiles round it. In the morning a crow stands on each emptied tile
+  (`FarmData.crows_landed`, not saved) until the player walks up and it flies off.
+- *Both start by calendar unlocks*, `weeds_arrive` (spring day 6) and `crows_arrive`
+  (day 15), named in the rules' `weeds_start` and `crows_start`. That reuses everything
+  unlocks already do: the notice board pins them up a week ahead ("Coming soon"), the
+  morning summary announces them, and the first weeds or crows come *that night*. So every
+  hazard is announced before it bites, as the roadmap asks.
+- *All the numbers are in `data/hazard_rules.tres`* (`HazardRules`), pointed at by
+  `game_rules.tres`. Session 2's weather adds its odds there too.
+- *Difficulty*: `DifficultyDef.hazard_multiplier` (Relaxed 0.5, Standard 1, Hard 1.5)
+  multiplies the weeds' chance and nightly cap, divides the crows' safe number (Hard: 11)
+  and multiplies their chance; 0 switches weeds and crows off. `thirst_kills` (false on
+  Relaxed) is separate, because "never dies of thirst on Relaxed" isn't a matter of how
+  often. The new-game menu lists both.
+- *The morning says what happened.* `crop_died` gained a `cause` (&"season", &"thirst",
+  &"crows"). The summary shows "Weeded" and "Crops lost: 1 to thirst, 2 to crows", names
+  what the crows took, and warns "3 crops will die of thirst tonight unless watered" when
+  any are wilting.
+- *Save version 11*: tiles may carry `weeds` and `dry_nights`, written only when they're
+  something, so an older farm needs no change. An older game already past day 6 or 15
+  gets the weeds and crows on load, quietly, like any date it has passed.
+
+Options considered: weeds as an ObjectDef standing on the tile (no new tile field, but an
+object can't share a tile with a crop, and a weed on a crop is the point); a separate
+hazard autoload listening for day_ended (but the night's order matters: growing, then
+hazards, then sprinklers, and that order belongs in TimeSystem's one list); a chance
+per crop for crows (Stardew-like, but the roadmap's "more than ~16 unprotected" rule
+leaves a small garden alone, which suits the first weeks).
+
+**Why.** ROADMAP section 2: introduce, then pressure, then relieve. Weeds are a chore from
+day 6, crows a threat from day 15, and the scarecrow (sold since Stage 8 with nothing to
+do) is the relief. Each rule is a few lines over existing data, tuned in one file.
+
+**Cost.** Thirst makes a forgotten day cost a crop, not just a day: that's the intent, but
+Stage 20's balance pass should check it against the clock's pace. Crows only take crops
+out of reach, so a scarecrow placed well makes them disappear entirely; if that turns out
+too easy, the safe number is the knob. Weeds, the crow and fibre are placeholder art
+until the Pixellab pass (weeds can take a seasonal look by `object_sprites[&"weeds"]` on
+a SeasonTheme, with no code).

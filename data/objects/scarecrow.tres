@@ -10,3 +10,4 @@ id = &"scarecrow"
 display_name = "Scarecrow"
 scene = ExtResource("2_scene")
 item = ExtResource("3_item")
+protects_radius = 8

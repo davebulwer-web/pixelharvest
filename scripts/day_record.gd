@@ -25,6 +25,12 @@ var quests_done: Array[StringName] = []
 ## What opened up, by UnlockDef id: from requests handed in during the day,
 ## and from the calendar overnight (DECISIONS 043).
 var unlocked: Array[StringName] = []
+## Patches of weeds pulled or hoed out (DECISIONS 045).
+var weeds_pulled: int = 0
+## Crops lost overnight, by cause (&"season", &"thirst", &"crows") -> count.
+var lost: Dictionary[StringName, int] = {}
+## The crops crows took overnight, by crop id, for the morning's news.
+var taken_by_crows: Array[StringName] = []
 ## Gold in the purse when the night's sales were done.
 var gold_at_end: int = 0
 
@@ -46,4 +52,5 @@ func net() -> int:
 ## True if nothing at all happened worth listing.
 func is_quiet() -> bool:
 	return harvested.is_empty() and planted == 0 and watered == 0 \
-			and income() == 0 and spent == 0 and quests_done.is_empty() and unlocked.is_empty()
+			and income() == 0 and spent == 0 and quests_done.is_empty() and unlocked.is_empty() \
+		and weeds_pulled == 0 and lost.is_empty()

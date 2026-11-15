@@ -57,6 +57,12 @@ extends Resource
 ## clock turns red-ish). Midnight.
 @export var late_warning_minutes: int = 1440
 
+## --- Hazards (DECISIONS 045) ----------------------------------------------
+
+## Thirst, weeds and crows: data/hazard_rules.tres. Null switches them all
+## off (crops then never wilt or die of thirst, as before Stage 11).
+@export var hazards: HazardRules
+
 ## --- Difficulty (DECISIONS 040) -------------------------------------------
 
 ## The difficulties offered at new game, in the order the menu lists them.

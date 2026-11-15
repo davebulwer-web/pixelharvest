@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="HazardRules" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/hazard_rules.gd" id="1_rules"]
+[ext_resource type="Resource" path="res://data/unlocks/weeds_arrive.tres" id="2_weeds"]
+[ext_resource type="Resource" path="res://data/unlocks/crows_arrive.tres" id="3_crows"]
+[ext_resource type="Resource" path="res://data/produce/fibre.tres" id="4_fibre"]
+
+[resource]
+script = ExtResource("1_rules")
+wilt_after_dry_nights = 2
+die_after_dry_nights = 3
+weeds_start = ExtResource("2_weeds")
+weed_seasons = Array[StringName]([&"spring", &"summer", &"autumn"])
+weed_chance_tilled = 0.05
+weed_chance_grass = 0.02
+most_new_weeds = 8
+weed_item = ExtResource("4_fibre")
+pull_weeds_energy = 1.0
+untill_chance = 0.05
+crows_start = ExtResource("3_crows")
+crow_safe_crops = 16
+crow_chance = 0.75
+crows_most_taken = 2

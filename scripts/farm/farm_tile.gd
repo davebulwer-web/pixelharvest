@@ -39,6 +39,18 @@ var crop_days: int = 0
 ## True once a regrowing crop has been harvested at least once.
 var crop_regrowing: bool = false
 
+## Nights in a row the crop here has gone without water (Stage 11, DECISIONS
+## 045). Back to 0 on any night it was watered. After HazardRules'
+## wilt_after_dry_nights it looks wilted; after die_after_dry_nights it dies
+## (on difficulties where thirst kills). A ripe crop is never thirsty: it has
+## finished growing and only waits to be picked.
+var dry_nights: int = 0
+
+## Weeds have come up here (DECISIONS 045). On a crop's tile they stop it
+## growing; on bare soil or grass they stop it being tilled, planted or built
+## on. Pulled with E, or cleared with the hoe.
+var weeds: bool = false
+
 
 func has_crop() -> bool:
 	return crop != null
@@ -48,11 +60,20 @@ func is_crop_ready() -> bool:
 	return crop != null and crop.is_ready_stage(crop_stage)
 
 
+## True if the crop here is showing its thirst: `wilt_after` dry nights or
+## more, and not watered yet today. Watering it perks it up at once (the dry
+## count itself only resets overnight, when the water has done its work).
+func is_wilted(wilt_after: int) -> bool:
+	return has_crop() and not is_crop_ready() and not watered \
+			and wilt_after > 0 and dry_nights >= wilt_after
+
+
 func clear_crop() -> void:
 	crop = null
 	crop_stage = 0
 	crop_days = 0
 	crop_regrowing = false
+	dry_nights = 0
 
 
 # --- Saving ------------------------------------------------------------------
@@ -80,6 +101,10 @@ func to_save() -> Dictionary:
 		data["crop_days"] = crop_days
 		if crop_regrowing:
 			data["crop_regrowing"] = true
+		if dry_nights > 0:
+			data["dry_nights"] = dry_nights
+	if weeds:
+		data["weeds"] = true
 	return data
 
 
@@ -106,4 +131,6 @@ static func from_save(data: Dictionary) -> FarmTile:
 			t.crop_stage = int(data.get("crop_stage", 0))
 			t.crop_days = int(data.get("crop_days", 0))
 			t.crop_regrowing = data.get("crop_regrowing", false)
+			t.dry_nights = int(data.get("dry_nights", 0))
+	t.weeds = data.get("weeds", false)
 	return t

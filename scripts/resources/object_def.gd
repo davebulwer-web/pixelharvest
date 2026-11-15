@@ -26,3 +26,8 @@ extends Resource
 ## Tiles this object waters every morning, as steps from its own tile:
 ## (0, -1) is the tile above. Empty for anything that isn't a sprinkler.
 @export var water_offsets: Array[Vector2i] = []
+
+## Crows keep away from every crop within this many tiles (a circle round
+## this tile; DECISIONS 045). 0 for anything that doesn't scare them. The
+## scarecrow's is 8.
+@export var protects_radius: int = 0

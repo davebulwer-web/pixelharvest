@@ -19,7 +19,8 @@ extends Resource
 @export var growth_stages: int = 4
 
 ## Watered days needed to move from one stage to the next. A day without
-## water is simply a day of no growth — nothing dies of thirst yet.
+## water is a day of no growth, and a night thirstier: enough dry nights and
+## the crop wilts, then dies (HazardRules, DECISIONS 045).
 @export var days_per_stage: int = 1
 
 ## 0 means harvest once and the tile clears. Above 0, the crop drops back one

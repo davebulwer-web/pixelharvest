@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="GameRules" load_steps=22 format=3]
+[gd_resource type="Resource" script_class="GameRules" load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/game_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_itemdef"]
@@ -21,6 +21,7 @@
 [ext_resource type="Resource" path="res://data/difficulties/relaxed.tres" id="19_relaxed"]
 [ext_resource type="Resource" path="res://data/difficulties/standard.tres" id="20_standard"]
 [ext_resource type="Resource" path="res://data/difficulties/hard.tres" id="21_hard"]
+[ext_resource type="Resource" path="res://data/hazard_rules.tres" id="22_hazards"]
 
 [resource]
 script = ExtResource("1_rules")
@@ -40,5 +41,6 @@ day_start_minutes = 360
 day_end_minutes = 1560
 seconds_per_ten_minutes = 7
 late_warning_minutes = 1440
+hazards = ExtResource("22_hazards")
 difficulties = Array[ExtResource("18_diffdef")]([ExtResource("19_relaxed"), ExtResource("20_standard"), ExtResource("21_hard")])
 default_difficulty = &"standard"

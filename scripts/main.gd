@@ -40,6 +40,16 @@ extends Node2D
 const TILE_PX := 16
 const SOURCE_ID := GroundTiles.SOURCE_ID
 
+## Weeds' picture (DECISIONS 045), unless the season has its own: a
+## SeasonTheme's object_sprites can give &"weeds" a seasonal look, as it does
+## for trees.
+const WEEDS_TEXTURE: Texture2D = preload("res://assets/sprites/farm/weeds.png")
+const WEEDS_SKIN_ID := &"weeds"
+
+## A wilting crop's tint: drained and browned (DECISIONS 045). Only a look;
+## FarmTile.is_wilted() is the truth.
+const WILTED_TINT := Color(0.9, 0.62, 0.32)
+
 ## Where the town is, and which spawn point in the town the farm gate leads to.
 const TOWN_ID := &"town"
 const TOWN_ARRIVAL := &"from_farm"
@@ -59,6 +69,12 @@ var _crop_sprites: Dictionary = {}
 ## a view: what stands where is in FarmData.
 var _object_nodes: Dictionary = {}
 
+## cell -> the Sprite2D showing weeds there. A view, like the crops.
+var _weed_sprites: Dictionary = {}
+
+## cell -> the Crow standing there this morning (FarmData.crows_landed).
+var _crows: Dictionary = {}
+
 
 func _ready() -> void:
 	_add_buildings()
@@ -68,9 +84,15 @@ func _ready() -> void:
 	_draw_all()
 	_place_objects()
 	_apply_season_overlay()
+	_place_crows()
 	EventBus.tile_tilled.connect(_redraw_cell)
-	EventBus.tile_watered.connect(_redraw_cell)
+	EventBus.tile_watered.connect(func(cell: Vector2i) -> void:
+		_redraw_cell(cell)
+		_redraw_crop(cell)  # a wilting crop perks up as soon as it's watered
+	)
 	EventBus.tile_cleared.connect(_redraw_cell)
+	EventBus.weeds_sprouted.connect(_redraw_weeds)
+	EventBus.weeds_pulled.connect(_redraw_weeds)
 	EventBus.crop_planted.connect(func(cell: Vector2i, _id: StringName) -> void:
 		_redraw_crop(cell)
 		_squash_crop(cell)
@@ -80,7 +102,7 @@ func _ready() -> void:
 		_redraw_crop(cell)
 		_squash_crop(cell)  # a crop that grows back stays, and gets a shake
 	)
-	EventBus.crop_died.connect(func(cell: Vector2i, _id: StringName) -> void: _redraw_crop(cell))
+	EventBus.crop_died.connect(func(cell: Vector2i, _id: StringName, _cause: StringName) -> void: _redraw_crop(cell))
 	EventBus.object_placed.connect(func(cell: Vector2i, _id: StringName) -> void:
 		_redraw_cell(cell)
 		_place_object(cell)
@@ -90,7 +112,10 @@ func _ready() -> void:
 	EventBus.plot_unlocked.connect(func(_id: StringName) -> void: _draw_all())
 	# Overnight, many cells change at once (all the soil dries), so rather
 	# than a signal per cell the morning simply redraws the whole farm.
-	EventBus.day_started.connect(func(_d: int, _s: int, _y: int) -> void: _draw_all())
+	EventBus.day_started.connect(func(_d: int, _s: int, _y: int) -> void:
+		_draw_all()
+		_place_crows()
+	)
 	EventBus.season_changed.connect(func(_s: int) -> void:
 		_apply_season_theme()
 		_draw_all()
@@ -98,7 +123,7 @@ func _ready() -> void:
 		_apply_season_overlay()
 	)
 
-	print("--- Pixel Harvest · Stage 9 ---")
+	print("--- Pixel Harvest · Stage 11 ---")
 	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
 	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
 	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler")
@@ -112,6 +137,9 @@ func _ready() -> void:
 	print("still in the ground when their season ends die overnight.")
 	print("The game saves every morning and loads on launch. Ctrl+N starts a new game.")
 	print("Each night shows a summary of the day: Space to carry on. M mutes the sound.")
+	print("Crops left unwatered for two nights wilt, and on a third they die. From spring")
+	print("day 6 weeds come up (E pulls them, the hoe digs them out); from day 15 crows")
+	print("take unguarded crops. A scarecrow guards every crop within 8 tiles.")
 	print("-------------------------------")
 
 
@@ -163,6 +191,7 @@ func _draw_all() -> void:
 	for cell: Vector2i in GameState.farm.cells():
 		_redraw_cell(cell)
 		_redraw_crop(cell)
+		_redraw_weeds(cell)
 
 
 ## Make the crop sprite at `cell` match FarmData: create it, update its growth
@@ -193,6 +222,45 @@ func _redraw_crop(cell: Vector2i) -> void:
 	# Lift the sprite so its bottom edge sits on the bottom of the tile.
 	sprite.offset = Vector2(0, -sheet.get_height() / 2.0)
 	sprite.frame = t.crop_stage
+	sprite.modulate = WILTED_TINT if t.is_wilted(GameState.wilt_after()) else Color.WHITE
+
+
+## Make the weeds at `cell` match FarmData: show them, or take them away.
+## They stand in the y-sorted Entities a hair behind the tile's crop (one
+## pixel up), so the tufts show either side of it rather than over it.
+func _redraw_weeds(cell: Vector2i) -> void:
+	var t: FarmTile = GameState.farm.tile(cell)
+	var sprite: Sprite2D = _weed_sprites.get(cell)
+	if not t.weeds:
+		if sprite != null:
+			sprite.queue_free()
+			_weed_sprites.erase(cell)
+		return
+	if sprite == null:
+		sprite = Sprite2D.new()
+		sprite.position = cell_base(cell) - Vector2(0, 1)
+		sprite.offset = Vector2(0, -WEEDS_TEXTURE.get_height() / 2.0 + 1)
+		_entities.add_child(sprite)
+		_weed_sprites[cell] = sprite
+	sprite.texture = _weeds_texture()
+
+
+## This season's weeds, or the everyday ones.
+func _weeds_texture() -> Texture2D:
+	var theme := GameState.current_season_theme()
+	var seasonal: Texture2D = theme.object_sprites.get(WEEDS_SKIN_ID) if theme != null else null
+	return seasonal if seasonal != null else WEEDS_TEXTURE
+
+
+## A crow on every cell crows took a crop from last night, until it's
+## scared off (DECISIONS 045).
+func _place_crows() -> void:
+	for cell: Vector2i in GameState.farm.crows_landed:
+		if is_instance_valid(_crows.get(cell)):
+			continue
+		var crow := Crow.create(cell, cell_base(cell), _player)
+		_entities.add_child(crow)
+		_crows[cell] = crow
 
 
 ## A quick squash and stretch of the crop at `cell`, if there's one left:

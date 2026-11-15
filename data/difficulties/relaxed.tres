@@ -12,3 +12,5 @@ sell_price_multiplier = 1.25
 buy_price_multiplier = 0.8
 energy_cost_multiplier = 0.75
 grow_time_multiplier = 0.75
+hazard_multiplier = 0.5
+thirst_kills = false

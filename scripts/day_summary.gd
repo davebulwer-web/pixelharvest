@@ -4,7 +4,8 @@ extends CanvasLayer
 ## DaySummary — the screen at the end of each day: what you picked, planted
 ## and watered, what you sold and spent, and how the purse stands
 ## (DECISIONS 042). Below that, what's new this morning: what opened up and
-## who has something to ask (DECISIONS 043).
+## who has something to ask (DECISIONS 043), and what the hazards did or are
+## about to do: crows in the night, crops wilting (DECISIONS 045).
 ##
 ## The HUD opens it on the morning after a night, on black, before the
 ## morning fades in, with the tally DayReport kept. It only shows what it's
@@ -64,6 +65,10 @@ static func rows_for(r: DayRecord) -> Array[PackedStringArray]:
 		rows.append(PackedStringArray(["Planted", "%d seed%s" % [r.planted, _s(r.planted)]]))
 	if r.watered > 0:
 		rows.append(PackedStringArray(["Watered", "%d tile%s" % [r.watered, _s(r.watered)]]))
+	if r.weeds_pulled > 0:
+		rows.append(PackedStringArray(["Weeded", "%d patch%s" % [r.weeds_pulled, "" if r.weeds_pulled == 1 else "es"]]))
+	if not r.lost.is_empty():
+		rows.append(PackedStringArray(["Crops lost", lost_text(r.lost)]))
 	if r.shop_sales > 0:
 		rows.append(PackedStringArray(["Sold in town", "%dg" % r.shop_sales]))
 	if r.bin_sales > 0:
@@ -85,6 +90,12 @@ static func news_for(r: DayRecord) -> Array[String]:
 		var unlock_def := ContentDB.unlock(id)
 		if unlock_def != null and unlock_def.announcement != "":
 			news.append(unlock_def.announcement)
+	var crows := crows_news(r.taken_by_crows)
+	if crows != "":
+		news.append(crows)
+	var thirst := thirst_warning()
+	if thirst != "":
+		news.append(thirst)
 	var names: Array[String] = []
 	for giver in Quests.givers_new_today():
 		names.append(Quests.giver_name(giver))
@@ -95,6 +106,48 @@ static func news_for(r: DayRecord) -> Array[String]:
 	if warning != "":
 		news.append(warning)
 	return news
+
+
+## "2 to thirst, 1 to crows": crops lost overnight, by cause, in a fixed order.
+static func lost_text(lost: Dictionary[StringName, int]) -> String:
+	var words := {&"thirst": "to thirst", &"crows": "to crows", &"season": "to the season"}
+	var parts: PackedStringArray = []
+	for cause: StringName in [&"thirst", &"crows", &"season"]:
+		if lost.get(cause, 0) > 0:
+			parts.append("%d %s" % [lost[cause], words[cause]])
+	for cause: StringName in lost:  # any cause added later still shows
+		if not words.has(cause) and lost[cause] > 0:
+			parts.append("%d to %s" % [lost[cause], cause])
+	return ", ".join(parts)
+
+
+## "A crow took your Parsnip in the night. ...", or "" if none did.
+static func crows_news(crop_ids: Array[StringName]) -> String:
+	if crop_ids.is_empty():
+		return ""
+	var names: Array[String] = []
+	for id in crop_ids:
+		var crop := ContentDB.crop(id)
+		names.append(crop.display_name if crop != null else String(id))
+	return "%s %s your %s in the night. A scarecrow keeps them off the crops round it." % [
+		"A crow" if crop_ids.size() == 1 else "Crows", "took", _and_list(names)]
+
+
+## The warning about thirsty crops on the farm this morning, or "": how many
+## will die tonight unless watered, or (where thirst doesn't kill, or not
+## yet) how many are wilting.
+static func thirst_warning() -> String:
+	var wilted := GameState.wilted_crops()
+	if wilted.is_empty():
+		return ""
+	var deadline := GameState.thirst_deadline()
+	var dying := 0
+	for cell in wilted:
+		if deadline > 0 and GameState.farm.tile(cell).dry_nights + 1 >= deadline:
+			dying += 1
+	if dying > 0:
+		return "%d crop%s will die of thirst tonight unless watered." % [dying, _s(dying)]
+	return "%d crop%s %s wilting for want of water." % [wilted.size(), _s(wilted.size()), "is" if wilted.size() == 1 else "are"]
 
 
 ## "A", "A and B", "A, B and C".

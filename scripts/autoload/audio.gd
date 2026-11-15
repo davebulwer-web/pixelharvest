@@ -134,6 +134,7 @@ func _listen() -> void:
 	EventBus.tile_watered.connect(func(_c: Vector2i) -> void: _farm_sound(&"water"))
 	EventBus.crop_planted.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"plant"))
 	EventBus.crop_harvested.connect(func(_c: Vector2i, _id: StringName, _n: int) -> void: _farm_sound(&"harvest"))
+	EventBus.weeds_pulled.connect(func(_c: Vector2i) -> void: _farm_sound(&"pick_up"))
 	EventBus.object_placed.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"place"))
 	EventBus.object_removed.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"pick_up"))
 	EventBus.items_shipped.connect(func(count: int, _v: int) -> void: play(&"ship" if count > 0 else &"nope"))

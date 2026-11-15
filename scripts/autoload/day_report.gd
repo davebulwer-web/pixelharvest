@@ -3,7 +3,8 @@ extends Node
 ## DayReport — keeps a tally of the day, for the summary shown at night
 ## (DECISIONS 042).
 ##
-## It only listens on EventBus: what was harvested, planted and watered, what
+## It only listens on EventBus: what was harvested, planted, watered and
+## weeded, what was lost overnight (DECISIONS 045), what
 ## was sold where, what was spent, which requests were finished, and what
 ## opened up (DECISIONS 043). When the day
 ## ends it closes the tally, and the next morning's HUD takes it and shows the
@@ -33,6 +34,9 @@ func _ready() -> void:
 	EventBus.crop_harvested.connect(_on_crop_harvested)
 	EventBus.crop_planted.connect(func(_c: Vector2i, _id: StringName) -> void: today.planted += 1)
 	EventBus.tile_watered.connect(_on_tile_watered)
+	EventBus.weeds_pulled.connect(func(_c: Vector2i) -> void: today.weeds_pulled += 1)
+	# Crops are lost in the night, before day_started closes the record.
+	EventBus.crop_died.connect(_on_crop_died)
 	EventBus.gold_changed.connect(_on_gold_changed)
 	EventBus.shipment_sold.connect(func(gold: int) -> void: today.bin_sales += gold)
 	EventBus.items_sold_to_shop.connect(func(_id: StringName, _n: int, gold: int) -> void: today.shop_sales += gold)
@@ -85,6 +89,12 @@ func _on_crop_harvested(_cell: Vector2i, crop_id: StringName, amount: int) -> vo
 func _on_tile_watered(_cell: Vector2i) -> void:
 	if not _night:
 		today.watered += 1
+
+
+func _on_crop_died(_cell: Vector2i, crop_id: StringName, cause: StringName) -> void:
+	today.lost[cause] = today.lost.get(cause, 0) + 1
+	if cause == &"crows":
+		today.taken_by_crows.append(crop_id)
 
 
 ## Every coin in or out passes through here. Sales are also counted by kind

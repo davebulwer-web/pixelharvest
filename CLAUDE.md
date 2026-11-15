@@ -103,7 +103,8 @@ scenes/              .tscn scene files
 scripts/             Game code
   autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem,
                      Audio, DayReport…)
-  farm/              The farm's data and layout, the farmhouse and its bed, its effects
+  farm/              The farm's data and layout, the farmhouse and its bed, its effects,
+                     the night's hazards (FarmHazards) and the morning's crows
   town/              The town, its map, shop interiors and fronts, people, notice board (Stage 7)
   items/             Inventory
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
@@ -111,6 +112,8 @@ scripts/             Game code
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
   quests/            QuestGoal scripts (deliver, harvest, sell) and the saved QuestLog
 data/                Content resources (.tres), indexed by ContentDB
+  game_rules.tres    Starting conditions and global numbers (GameRules)
+  hazard_rules.tres  Thirst, weeds and crows: every number (HazardRules, DECISIONS 045)
   crops/             CropDef — how each plant grows and looks
   produce/           ItemDef — what a harvest gives, and its sell price
   tools/             ToolDef — tools, seeds and sprinklers (all things you use)
