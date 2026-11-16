@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/produce/fibre.tres" id="3_r"]
+[ext_resource type="Resource" path="res://data/quests/blacksmith_pipes.tres" id="4_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="5_r"]
+[ext_resource type="Resource" path="res://data/unlocks/sickle_made.tres" id="6_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="7_r"]
+[ext_resource type="Resource" path="res://data/tools/sickle.tres" id="8_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+item = ExtResource("3_r")
+amount = 30
+
+[resource]
+script = ExtResource("1_r")
+id = &"blacksmith_sickle"
+title = "Sickle work"
+giver = &"blacksmith"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Still pulling weeds by hand? I've seen your knuckles.", "I've a blade on the bench that wants a handle: a sickle. Cuts weeds, cuts a ripe crop clean off.", "Bring me thirty fibre from your weeding and I'll twist it into a grip that won't slip. Then it's yours."])
+reminder_line = "Thirty fibre for the grip. Your weeds have plenty."
+thanks_lines = Array[String](["Good tough stuff, this. Hold on...", "There. Space cuts what's in front of you: weeds, or anything ripe. Unripe crops it leaves be.", "One tile a swing for now. Come back with gold and I'll make it wider."])
+reward_items = Dictionary[ExtResource("7_r"), int]({
+ExtResource("8_r"): 1
+})
+reward_unlocks = Array[ExtResource("5_r")]([ExtResource("6_r")])
+requires = ExtResource("4_r")
+first_day = 61

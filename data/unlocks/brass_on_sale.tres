@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"brass_on_sale"
+display_name = "brass sprinklers at the forge"
+announcement = "Brann's brass sprinklers are on sale at the forge: twenty-four tiles round, every morning."
+on_day = 0

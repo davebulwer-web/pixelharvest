@@ -118,7 +118,8 @@ scripts/             Game code
                      and decorations, the trowel's digging, pest spray, the axe's
                      chopping, which also works in the Woods: DECISIONS 053; the
                      fishing rod's cast: DECISIONS 054; eating a dish, which is
-                     used on the farmer, not a tile: DECISIONS 056)
+                     used on the farmer, not a tile: DECISIONS 056; feeding the
+                     soil and the sickle's cut: DECISIONS 058)
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
   quests/            QuestGoal scripts (deliver, deliver any of, deliver one of each,
                      harvest, sell, give gold, grow a giant, deliver with a fee, catch
@@ -133,7 +134,8 @@ data/                Content resources (.tres), indexed by ContentDB
                      perennial, hardy…; DECISIONS 047; giants and 2 × 2 trees, 048)
   produce/           ItemDef — what a harvest gives, and its sell price (and fibre, timber,
                      bait, and the lures: LureDef, DECISIONS 055)
-  tools/             ToolDef — tools, seeds and sprinklers (all things you use)
+  tools/             ToolDef — tools, seeds and sprinklers (all things you use), and
+                     fertilisers (FertiliserDef: what fed soil does; DECISIONS 058)
   decorations/       ToolDef — decorations for the farm, placed like sprinklers (DECISIONS 039)
   objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers, decorations,
                      bee hives: an object can make something, like honey; DECISIONS 057)

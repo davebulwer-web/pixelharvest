@@ -98,6 +98,14 @@ var _weed_sprites: Dictionary = {}
 ## cell -> the Crow standing there this morning (FarmData.crows_landed).
 var _crows: Dictionary = {}
 
+## cell -> the Sprite2D showing fed soil there (DECISIONS 058): the
+## fertiliser's soil_look, flat on the ground. A view, like the crops.
+var _feed_sprites: Dictionary = {}
+
+## Where fed soil's pictures go: just above the ground and below everything
+## standing on it, so crops, weeds and the player all draw over it.
+var _feed_layer: Node2D
+
 ## The tiles this scene draws: the farm's (DECISIONS 057: the greenhouse
 ## scene gives its own plot instead, through _plot()).
 var plot: FarmData
@@ -105,6 +113,10 @@ var plot: FarmData
 
 func _ready() -> void:
 	plot = _plot()
+	_feed_layer = Node2D.new()
+	_feed_layer.name = "FedSoil"
+	add_child(_feed_layer)
+	move_child(_feed_layer, _ground.get_index() + 1)
 	_build_surroundings()
 	_place_player()
 	_apply_season_theme()
@@ -118,6 +130,7 @@ func _ready() -> void:
 		_redraw_crop(cell)  # a wilting crop perks up as soon as it's watered
 	)
 	EventBus.tile_cleared.connect(_redraw_cell)
+	EventBus.soil_fed.connect(func(cell: Vector2i, _id: StringName) -> void: _redraw_cell(cell))
 	# The axe chopped thicket here: it's grass now (DECISIONS 053).
 	EventBus.wood_chopped.connect(func(where: StringName, cell: Vector2i, _what: StringName, _id: StringName, _n: int) -> void:
 		if where == &"farm":
@@ -210,6 +223,10 @@ func _print_help() -> void:
 	print("A dish on the hotbar is eaten with Space, anywhere, for energy.")
 	print("The old greenhouse by the farmhouse (mended by Ivy's last request) grows any seed")
 	print("in any season. Marlow sells bee hives from summer: E at a hive collects its honey.")
+	print("Fertiliser goes on tilled soil with Space: growth feed (Marlow, spring day 22) makes")
+	print("seeds come up a stage ahead; mulch (from Ivy) keeps watered soil wet a night longer.")
+	print("Brann's sickle (for 30 fibre, autumn) cuts weeds and ripe crops; he makes it wider.")
+	print("His last request, in winter, is the brass sprinkler: 24 tiles round.")
 	print("-------------------------------")
 
 
@@ -412,6 +429,25 @@ func _redraw_cell(cell: Vector2i) -> void:
 	if not plot.has_cell(cell):
 		return
 	GroundTiles.draw(_ground, cell, _atlas_for(cell))
+	_redraw_feed(cell)
+
+
+## Show the fertiliser in the soil at `cell`, or take its picture away.
+func _redraw_feed(cell: Vector2i) -> void:
+	var fed := plot.fertiliser_at(cell)
+	var sprite: Sprite2D = _feed_sprites.get(cell)
+	if fed == null or fed.soil_look == null:
+		if sprite != null:
+			sprite.queue_free()
+			_feed_sprites.erase(cell)
+		return
+	if sprite == null:
+		sprite = Sprite2D.new()
+		sprite.centered = false
+		sprite.position = Vector2(cell * TILE_PX)
+		_feed_layer.add_child(sprite)
+		_feed_sprites[cell] = sprite
+	sprite.texture = fed.soil_look
 
 
 ## The one place that decides what a FarmTile looks like. The season decides

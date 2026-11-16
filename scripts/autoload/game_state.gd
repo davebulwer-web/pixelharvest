@@ -106,6 +106,8 @@ func _ready() -> void:
 	EventBus.crop_dug_up.connect(_on_crop_dug_up)
 	# Whatever the axe chops gives timber (DECISIONS 053).
 	EventBus.wood_chopped.connect(_on_wood_chopped)
+	# The sickle cut a ripe crop: pick it as E would (DECISIONS 058).
+	EventBus.crop_cut.connect(func(cell: Vector2i) -> void: harvest(cell))
 	weather_rng.randomize()
 	harvest_rng.randomize()
 	# Always start from a valid new game, so the farm scene can be run on its

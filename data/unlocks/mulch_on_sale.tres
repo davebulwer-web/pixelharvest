@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"mulch_on_sale"
+display_name = "mulch at Marlow's"
+announcement = "Marlow stocks Ivy's leaf mould now: mulch keeps watered soil wet a night longer."
+on_day = 0

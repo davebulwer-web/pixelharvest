@@ -149,6 +149,36 @@ func can_place(cell: Vector2i) -> bool:
 	)
 
 
+## True if `fertiliser` can go into the soil at `cell` (DECISIONS 058):
+## tilled soil, not fed yet, not under a giant or a tree. Growth feed only
+## helps a crop that hasn't started, so it goes on empty soil or a seed
+## just sown; mulch goes on any soil.
+func can_fertilise(cell: Vector2i, fertiliser: FertiliserDef) -> bool:
+	var t := tile(cell)
+	if fertiliser == null or t == null or not t.tilled or t.fertiliser != &"" or t.covered:
+		return false
+	if fertiliser.skips_stages > 0 and t.has_crop():
+		return t.crop_stage == 0 and t.crop_days == 0 and not t.crop_regrowing
+	return true
+
+
+## What the soil at `cell` has been fed with, or null.
+func fertiliser_at(cell: Vector2i) -> FertiliserDef:
+	var t := tile(cell)
+	if t == null or t.fertiliser == &"":
+		return null
+	return ContentDB.item(t.fertiliser) as FertiliserDef
+
+
+## The stage a crop sown at `cell` starts at: 0, or later in soil fed with
+## growth feed (DECISIONS 058), but never ripe.
+func start_stage(cell: Vector2i, crop: CropDef) -> int:
+	var fed := fertiliser_at(cell)
+	if fed == null or crop == null:
+		return 0
+	return clampi(fed.skips_stages, 0, maxi(0, crop.growth_stages - 1))
+
+
 func has_weeds(cell: Vector2i) -> bool:
 	var t := tile(cell)
 	return t != null and t.weeds
@@ -202,6 +232,21 @@ func water(cell: Vector2i) -> void:
 	EventBus.tile_watered.emit(cell)
 
 
+## Put `fertiliser` into the soil at `cell` (DECISIONS 058). Growth feed on
+## a seed just sown moves it on at once, as if it had been sown in fed soil.
+func fertilise(cell: Vector2i, fertiliser: FertiliserDef) -> void:
+	if not can_fertilise(cell, fertiliser):
+		return
+	var t := tile(cell)
+	t.fertiliser = fertiliser.id
+	if t.has_crop():
+		var stage := start_stage(cell, t.crop)
+		if stage > t.crop_stage:
+			t.crop_stage = stage
+			EventBus.crop_grew.emit(cell, stage)
+	EventBus.soil_fed.emit(cell, fertiliser.id)
+
+
 func plant(cell: Vector2i, crop: CropDef) -> void:
 	if not can_plant(cell):
 		return
@@ -209,7 +254,7 @@ func plant(cell: Vector2i, crop: CropDef) -> void:
 		return
 	var t := tile(cell)
 	t.crop = crop
-	t.crop_stage = 0
+	t.crop_stage = start_stage(cell, crop)
 	t.crop_days = 0
 	t.crop_regrowing = false
 	_cover(cell)
@@ -257,7 +302,10 @@ func dig_up(cell: Vector2i) -> bool:
 	cell = crop_cell(cell)
 	var t := tile(cell)
 	var crop_id := t.crop.id
-	var was_seed := t.crop_stage == 0 and not t.crop_regrowing
+	# A seed not come up yet: in fed soil it starts a stage on (DECISIONS 058),
+	# but it hasn't had a day's growth.
+	var was_seed := t.crop_stage <= start_stage(cell, t.crop) and t.crop_days == 0 \
+			and not t.crop_regrowing
 	_remove_crop(cell)
 	EventBus.crop_dug_up.emit(cell, crop_id, was_seed)
 	return true
@@ -293,8 +341,10 @@ func place_object(cell: Vector2i, object_id: StringName) -> void:
 	t.object_id = object_id
 	t.tilled = false
 	t.watered = false
+	t.kept_wet = 0
 	t.made_days = 0
 	t.made_ready = 0
+	_unfeed(t, cell)
 	EventBus.object_placed.emit(cell, object_id)
 
 
@@ -327,6 +377,8 @@ func untill(cell: Vector2i) -> void:
 		return
 	t.tilled = false
 	t.watered = false
+	t.kept_wet = 0
+	_unfeed(t, cell)
 	EventBus.tile_cleared.emit(cell)
 
 
@@ -404,7 +456,8 @@ func chop(cell: Vector2i, item_id: StringName, amount: int) -> bool:
 ## The first part of the night on the farm: each watered crop gets one day
 ## of growth (unless weeds are choking it or aphids are on it: DECISIONS
 ## 048), each unwatered one gets a night
-## thirstier, and then all the soil dries out.
+## thirstier, and then all the soil dries out (mulched soil a night or more
+## later: DECISIONS 058).
 ##
 ## TimeSystem then runs the night's hazards (crows, weeds: FarmHazards) and
 ## last of all run_sprinklers(), so the player wakes to wet soil around every
@@ -443,7 +496,28 @@ func advance_day(grow_scale: float = 1.0, die_after_dry_nights: int = 0, thirst_
 					var crop_id := t.crop.id
 					_remove_crop(cell)
 					EventBus.crop_died.emit(cell, crop_id, &"thirst")
-		t.watered = false
+		_dry(t)
+
+
+## The soil at the end of the night: it dries, unless mulch keeps it wet a
+## night or more longer (DECISIONS 058), counted in kept_wet.
+func _dry(t: FarmTile) -> void:
+	if t.watered and t.fertiliser != &"":
+		var fed := ContentDB.item(t.fertiliser) as FertiliserDef
+		if fed != null and t.kept_wet < fed.keeps_wet_nights:
+			t.kept_wet += 1
+			return
+	t.watered = false
+	t.kept_wet = 0
+
+
+## The soil at `cell` loses its fertiliser (it went back to grass, or
+## something was put on it), and says so if it had any.
+func _unfeed(t: FarmTile, cell: Vector2i) -> void:
+	if t.fertiliser == &"":
+		return
+	t.fertiliser = &""
+	EventBus.soil_fed.emit(cell, &"")
 
 
 ## Any object with water_offsets waters those tiles. water() only wets tilled

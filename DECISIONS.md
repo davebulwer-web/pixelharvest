@@ -2389,3 +2389,79 @@ taken from older farms (their contents returned). Honey is only sold for now; re
 requests can use it later. Placeholder art: the greenhouse (mended, broken, winter), its
 inside tiles, the hive, its icon and honey, drawn by a script in the palette until
 Pixellab.
+
+---
+
+## 058 — Fertilisers stay in the soil, the sickle is a tool with tiers, and the brass sprinkler ends Brann's line
+
+**Decision.** Stage 17 session 2 adds the late tools (ROADMAP section 8, 5.4): two
+fertilisers, the sickle and its tiers, and the brass sprinkler. **Save version 19** (fed
+soil on a tile).
+
+- *Fertilisers are bags that go into tilled soil and stay there.* A new `FertiliserDef`
+  (a `ToolDef`, so it's on the hotbar, bought by the bag and used up a bag a tile) says
+  what fed soil does: `skips_stages` and `keeps_wet_nights`, plus `soil_look`, a
+  see-through 16 × 16 picture laid over the soil (a "FedSoil" layer just above the
+  ground in `main.gd`, so it shows on the farm and in the greenhouse). One action,
+  `FertiliseAction`, names its bag by id (as `PlaceObjectAction` names its object).
+  The tile keeps the bag's id (`FarmTile.fertiliser`); `FarmData.can_fertilise()` and
+  `fertilise()` put it in. It stays through harvests, so a bed fed once feeds every crop
+  sown in it, and goes when the soil goes back to grass or something is put down on it
+  (the same two moments a seed bed stops being one). One fertiliser to a tile.
+- **Growth feed** (`skips_stages` 1): a seed sown in fed soil comes up at once, a stage
+  ahead, so a parsnip is ripe in 3 watered nights, not 4. Feeding a seed just sown moves
+  it on the same way. It never makes a crop ripe, and won't go on a crop that has started
+  growing (that would be a free stage every time it's used). Marlow sells it from spring
+  day 22 (unlock `feed_on_sale`), 40g a bag. A fed seed dug up straight away still gives
+  its seed back.
+- **Mulch** (`keeps_wet_nights` 1): watered soil under mulch stays wet one night longer
+  (`FarmTile.kept_wet` counts the nights), so one can of water lasts two nights; it goes
+  on any tilled soil, crop or none. Ivy gives ten bags with her autumn basket and asks
+  Marlow to stock it (unlock `mulch_on_sale`), 25g a bag. ROADMAP had fertiliser from
+  "Marlow; Ivy's line": growth feed is Marlow's, mulch Ivy's.
+- *"One stage faster" as a skipped stage, not a quicker day.* A multiplier on grow time
+  (as the difficulty uses) was the first idea, but every stage of most crops is one day
+  and no stage can take less than a day, so a parsnip wouldn't grow any faster at all. Skipping
+  the seed's stage works for every crop and is easy to see (a sprout appears the moment
+  you sow).
+- *The sickle* (`SickleAction`) cuts weeds (as E pulls them: fibre) and picks ripe crops
+  (EventBus `crop_cut`, which GameState answers by picking the crop exactly as E does,
+  dice for bunches and seeds included; a tool can't use GameState itself). Unripe crops
+  are left alone, so a wide swing over a mixed bed is safe. Tiers like the hoe's: Sickle
+  1 tile (1 energy), Wide sickle 3 in a row (2 energy, 400g), Great sickle 3 × 3 (4
+  energy, 1200g, after the wide one and Brann's great tools). A giant or tree is picked
+  once however many of its tiles the swing covers.
+- *Brann's line, parts 4 and 5.* **Sickle work** (`blacksmith_sickle`, after better pipes,
+  from autumn day 5): 30 fibre → the sickle, and the unlock `sickle_made` puts the wide
+  sickle on his shelf. **The brass sprinkler** (`blacksmith_brass`, after the sickle,
+  winter from day 10): 3 velvet shanks (winter's rarest forage, "to quench the brass")
+  and 2500g → a brass sprinkler, and `brass_on_sale` puts more on his shelf at 2000g.
+  The brass sprinkler is an `ObjectDef` with 24 `water_offsets` (two tiles out on every
+  side), placed and picked up like the others.
+- *v18 → v19*: no tile was fed in an older game, so the tiles need nothing. Ivy's autumn
+  basket now gives mulch; an older game that had already handed it in is given the ten
+  bags and `mulch_on_sale` (written out in the step, as v17 did for recipes).
+  `tests/saves/v18_example.json` was made by the real v18 build (crops, a big sprinkler
+  and the greenhouse planted; Ivy's basket and Brann's pipes done).
+
+Options considered: fertiliser used up by each harvest (a decision every sowing, but a
+regrowing crop would keep it for ever anyway, and it's one more thing to explain);
+fertiliser as a mark on the tile with no item (nothing to buy or give); mulch as a
+lasting "watered" flag (soil that never dries is a sprinkler with no cost). For the
+sickle: harvesting inside `FarmData` (the bag isn't the farm's business) or a
+GameState call from the tool (the load-order rule in tool_action.gd). For the brass
+request: timber again (Brann has had 60 already), so the rarest winter forage instead,
+which also sends the player to the Woods in the quiet season.
+
+**Why.** Fertilisers give gold a use on the farm itself and reward planning a bed;
+mulch lightens the watering that sprinklers otherwise own. The sickle turns weeding and
+big harvests from many presses of E into a few swings. The brass sprinkler is the
+late-game prize the roadmap gives winter. Rule 3 holds: a third fertiliser, a fourth
+sickle tier or a bigger sprinkler is a `.tres`.
+
+**Cost.** Fed soil is a little more state on every tile (saved only when there). A fed
+bed lasts as long as it's kept sown, so feed is cheap over a season: Stage 20 should look
+at its price, and whether it should go at the season's turn. Placeholder art: the two
+bags, their soil looks, the sickle and the brass sprinkler, drawn by a script in the
+palette until Pixellab. No new sounds: fertiliser uses the sowing sound, the sickle the
+weeding and harvest sounds.

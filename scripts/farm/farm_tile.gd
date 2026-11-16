@@ -75,6 +75,16 @@ var covered_by: Vector2i = Vector2i.ZERO
 var made_days: int = 0
 var made_ready: int = 0
 
+## What the soil here has been fed with (DECISIONS 058): the id of a
+## FertiliserDef (growth feed, mulch), or empty for none. Only on tilled
+## soil; it stays through harvests and goes when the soil goes back to grass
+## or something is put down here.
+var fertiliser: StringName = &""
+
+## Nights this soil has stayed wet past its drying because of mulch. Back to
+## 0 when it dries. Only ever above 0 while `watered`.
+var kept_wet: int = 0
+
 
 func has_crop() -> bool:
 	return crop != null
@@ -153,6 +163,10 @@ func to_save() -> Dictionary:
 		data["made_days"] = made_days
 	if made_ready > 0:
 		data["made_ready"] = made_ready
+	if fertiliser != &"":
+		data["fertiliser"] = String(fertiliser)
+	if kept_wet > 0:
+		data["kept_wet"] = kept_wet
 	return data
 
 
@@ -187,4 +201,14 @@ static func from_save(data: Dictionary) -> FarmTile:
 	if t.object_id != &"":
 		t.made_days = int(data.get("made_days", 0))
 		t.made_ready = int(data.get("made_ready", 0))
+	# Fed soil (save version 19). A fertiliser the game no longer knows is
+	# dropped, as an unknown crop is.
+	if t.tilled and data.has("fertiliser"):
+		var fertiliser_id := StringName(data["fertiliser"])
+		if ContentDB.item(fertiliser_id) is FertiliserDef:
+			t.fertiliser = fertiliser_id
+		else:
+			push_warning("Save has a fertiliser '%s' the game doesn't know; it's been removed" % fertiliser_id)
+	if t.watered:
+		t.kept_wet = int(data.get("kept_wet", 0))
 	return t

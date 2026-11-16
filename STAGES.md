@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 17 — greenhouse, bees and late tools.** Session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is built, waiting for Dave to try it. Session 2 is fertilisers, the sickle's tiers and the brass sprinkler. Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 17 — greenhouse, bees and late tools.** Session 2 (fertilisers: growth feed and mulch; Brann's sickle with its tiers and his brass sprinkler; save version 19) is built, waiting for Dave to try it; then Stage 17 is done bar its Pixellab art, and Stage 18 (festivals) is next. Session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -877,13 +877,39 @@ Energy food only (narrows DECISIONS 006; no selling chains).
       working under glass, a tulip's bonus; save and load; saves v1–v17, and v17's
       greenhouse cells given back), rendered the broken and mended greenhouse (and in
       winter), the plot planted, a full greenhouse in winter and the honey jar over hives
+- [x] Dave confirms it plays correctly on Windows (committed and pushed as "Stage 16a", 2026-11-16)
+
+**Session 2 — late tools** (2026-11-16, DECISIONS 058, save version 19)
+
+- [x] Fertilisers (`FertiliserDef`, a ToolDef with a `FertiliseAction`): Space on tilled
+      soil puts a bag in, and the soil keeps it through harvests until it goes back to
+      grass or something is put on it (a picture of it lies on the soil). **Growth feed**
+      (Marlow's, 40g, from spring day 22): seeds sown in it come up at once, a stage
+      ahead (a parsnip in 3 nights, not 4). **Mulch** (Ivy's autumn basket now gives ten
+      and puts it on Marlow's shelf, 25g): watered soil stays wet a night longer. Both
+      work in the greenhouse
+- [x] The sickle (`SickleAction`): Space cuts weeds (fibre) and picks ripe crops, leaving
+      unripe ones. Brann's **Sickle work** (after better pipes, from autumn day 5: 30
+      fibre → the sickle); the wide sickle (3 in a row, 400g) and great sickle (3 × 3,
+      1200g) at his forge
+- [x] The brass sprinkler (24 tiles): Brann's last request, **The brass sprinkler**
+      (after the sickle, winter from day 10: 3 velvet shanks and 2500g → one, and more
+      on his shelf at 2000g)
+- [x] Save version 19 (fed soil on a tile); v18 → v19 gives Ivy's mulch to games that had
+      finished her autumn basket; `tests/saves/v18_example.json`
+- [x] Verified in the sandbox: headless import and run clean, 137 harness checks (the
+      data and the shelves by date; feeding with Space, its cost, not twice; fed and plain
+      parsnips side by side, 3 nights against 4; feed kept after harvest; a seed just sown
+      moved on and dug up for its seed; no feed on a growing crop; feed gone with the soil
+      or under a sprinkler; the greenhouse; mulch with Space, wet two nights, rewatered,
+      saved; Brann's sickle request by date and order, its reward and shelf; the sickle
+      on weeds, ripe and unripe crops with Space; the great sickle's 3 × 3 for 4 energy;
+      a giant picked once; the sickle in the greenhouse; the brass request only in
+      winter, gold and shanks taken, the shelf; the brass sprinkler placed with Space,
+      watering all 24 tiles, picked up with E; Ivy's basket giving mulch; save and load;
+      saves v1–v18), rendered fed, mulched and plain soil on the farm and in the
+      greenhouse, the brass sprinkler's wet square and the great sickle's cursor
 - [ ] Dave confirms it plays correctly on Windows
-
-**Session 2 — late tools**
-
-- [ ] Fertilisers (growth, and mulch that keeps soil wet a night longer)
-- [ ] The sickle and its tiers (Brann's line: fibre); the brass sprinkler (Brann's last
-      request, winter)
 
 **Art**
 

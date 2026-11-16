@@ -18,7 +18,8 @@ extends Node
 ## Where things live (DECISIONS 023, 024):
 ##   data/crops/     CropDef — how a plant grows and looks
 ##   data/produce/   ItemDef — what a harvest gives you, and its sell price
-##   data/tools/     ToolDef — tools, seeds and sprinklers (all things you use)
+##   data/tools/     ToolDef — tools, seeds and sprinklers (all things you use),
+##                   and the fertilisers (FertiliserDef, a ToolDef; DECISIONS 058)
 ##   data/decorations/ ToolDef — decorations for the farm, bought or given as
 ##                   rewards and placed like sprinklers (DECISIONS 039)
 ##   data/objects/   ObjectDef — things standing on the farm: trees, the bin,
@@ -409,6 +410,15 @@ func _check() -> void:
 				if object(tool_def.action.object_id) == null:
 					push_error("ContentDB: '%s' places an object '%s' that isn't in %s"
 							% [where, tool_def.action.object_id, OBJECTS_DIR])
+			elif tool_def.action is FertiliseAction:
+				# Fertilisers (DECISIONS 058) name the bag they are, which must
+				# be a FertiliserDef with something to do.
+				var fed := item(tool_def.action.fertiliser_id) as FertiliserDef
+				if fed == null:
+					push_error("ContentDB: '%s' feeds the soil with '%s', which isn't a FertiliserDef in data/tools/"
+							% [where, tool_def.action.fertiliser_id])
+				elif fed.skips_stages <= 0 and fed.keeps_wet_nights <= 0:
+					push_warning("ContentDB: '%s' is a fertiliser that does nothing" % where)
 			for tier in tool_def.tiers:
 				if tier == null or tier.display_name == "":
 					push_error("ContentDB: '%s' has a tier with no name" % where)

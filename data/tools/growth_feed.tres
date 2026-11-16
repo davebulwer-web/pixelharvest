@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="FertiliserDef" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/fertiliser_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/tools/fertilise_action.gd" id="2_action"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/growth_feed.png" id="3_icon"]
+[ext_resource type="Texture2D" path="res://assets/sprites/farm/growth_feed_soil.png" id="4_soil"]
+[ext_resource type="Resource" path="res://data/unlocks/feed_on_sale.tres" id="5_unlock"]
+
+[sub_resource type="Resource" id="Resource_action"]
+script = ExtResource("2_action")
+fertiliser_id = &"growth_feed"
+
+[resource]
+script = ExtResource("1_def")
+id = &"growth_feed"
+display_name = "Growth feed"
+description = "Space on tilled soil feeds it. Seeds sown in fed soil come up at once, a stage ahead. It stays in the soil until it goes back to grass."
+icon = ExtResource("3_icon")
+buy_price = 40
+energy_cost = 1.0
+action = SubResource("Resource_action")
+consumed_on_use = true
+sold_only_by = Array[StringName]([&"general_store"])
+requires_unlock = ExtResource("5_unlock")
+skips_stages = 1
+soil_look = ExtResource("4_soil")

@@ -83,7 +83,12 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       stands on become BUILDING terrain and whatever was on them is given
 ##       back (crops as their seeds, sprinklers and decorations as
 ##       themselves).
-const CURRENT_VERSION := 18
+##  19 — fertilisers and late tools (DECISIONS 058): fed soil on a farm or
+##       greenhouse tile ("fertiliser": the bag's id, and "kept_wet": nights
+##       mulch has kept it wet; both left out when there's none). Ivy's
+##       autumn basket now also gives mulch, so an older game that has
+##       finished it is given the mulch and Marlow's mulch on sale.
+const CURRENT_VERSION := 19
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -312,6 +317,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_16_to_17(data["game"])
 			17:
 				_upgrade_17_to_18(data["game"])
+			18:
+				_upgrade_18_to_19(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -691,3 +698,42 @@ func _upgrade_17_to_18(game: Dictionary) -> void:
 				break
 		if not found:
 			inventory.append({"id": item_id, "count": 1.0})
+
+
+## Version 18 -> 19: fertilisers and late tools (DECISIONS 058). No soil is
+## fed yet in an older game, so the tiles need nothing. Ivy's autumn basket
+## now gives a bag of mulch and puts it on Marlow's shelf: an older game
+## that has already handed the basket in is given both. Written out here,
+## not looked up in the request, so this step means the same thing later.
+const V19_DONE_GIVES: Dictionary = {
+	"ivy_autumn_set": {"unlocks": ["mulch_on_sale"], "items": {"mulch": 10}},
+}
+
+
+func _upgrade_18_to_19(game: Dictionary) -> void:
+	var quests: Variant = game.get("quests")
+	if typeof(quests) != TYPE_DICTIONARY:
+		return
+	for quest_id: String in V19_DONE_GIVES:
+		var entry: Variant = quests.get(quest_id)
+		if typeof(entry) != TYPE_DICTIONARY or entry.get("state") != "done":
+			continue
+		var gives: Dictionary = V19_DONE_GIVES[quest_id]
+		var unlocks: Variant = game.get("unlocks")
+		if typeof(unlocks) == TYPE_ARRAY:
+			for unlock_id: String in gives["unlocks"]:
+				if unlock_id not in unlocks:
+					unlocks.append(unlock_id)
+		var inventory: Variant = game.get("inventory")
+		if typeof(inventory) != TYPE_ARRAY:
+			continue
+		for item_id: String in gives["items"]:
+			var count: int = gives["items"][item_id]
+			var found := false
+			for stack: Variant in inventory:
+				if typeof(stack) == TYPE_DICTIONARY and stack.get("id", "") == item_id:
+					stack["count"] = float(int(stack.get("count", 0)) + count)
+					found = true
+					break
+			if not found:
+				inventory.append({"id": item_id, "count": float(count)})

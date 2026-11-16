@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="UpgradeDef" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/upgrade_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/upgrades/tool_tier_effect.gd" id="2_effect"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/sickle.png" id="3_icon"]
+[ext_resource type="Resource" path="res://data/tools/sickle.tres" id="5_tool"]
+[ext_resource type="Resource" path="res://data/unlocks/sickle_made.tres" id="9_unlock"]
+
+[sub_resource type="Resource" id="Resource_effect"]
+script = ExtResource("2_effect")
+tool = ExtResource("5_tool")
+tier = 1
+
+[resource]
+script = ExtResource("1_def")
+id = &"wide_sickle"
+display_name = "Wide sickle"
+description = "Cuts weeds and picks ripe crops 3 tiles in a row with one swing, for 2 energy."
+icon = ExtResource("3_icon")
+price = 400
+effect = SubResource("Resource_effect")
+requires_unlock = ExtResource("9_unlock")

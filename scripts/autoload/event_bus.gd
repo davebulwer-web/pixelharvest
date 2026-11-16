@@ -69,6 +69,16 @@ signal tile_cleared(cell: Vector2i)
 signal weeds_sprouted(cell: Vector2i)
 signal weeds_pulled(cell: Vector2i)
 
+## Fertiliser went into the soil at `cell` (DECISIONS 058): `fertiliser_id`
+## is the bag it came from (growth feed, mulch). Also announced with &"" when
+## the soil loses it (it went back to grass, or something was put on it).
+signal soil_fed(cell: Vector2i, fertiliser_id: StringName)
+
+## The sickle swung at `cell` (DECISIONS 058), where a crop is ripe. GameState
+## picks it into the bag, as E would, so the sickle's handler never touches
+## the bag itself (a tool can't use the GameState autoload).
+signal crop_cut(cell: Vector2i)
+
 signal crop_planted(cell: Vector2i, crop_id: StringName)
 signal crop_grew(cell: Vector2i, stage: int)
 signal crop_harvested(cell: Vector2i, crop_id: StringName, amount: int)

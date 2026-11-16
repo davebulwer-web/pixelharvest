@@ -145,6 +145,10 @@ func _listen() -> void:
 	EventBus.crop_planted.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"plant"))
 	EventBus.crop_harvested.connect(func(_c: Vector2i, _id: StringName, _n: int) -> void: _farm_sound(&"harvest"))
 	EventBus.weeds_pulled.connect(func(_c: Vector2i) -> void: _farm_sound(&"pick_up"))
+	# Fertiliser going into the soil (DECISIONS 058) sounds like sowing.
+	EventBus.soil_fed.connect(func(_c: Vector2i, id: StringName) -> void:
+		if id != &"":
+			_farm_sound(&"plant"))
 	EventBus.foraged.connect(func(_id: StringName, _where: StringName) -> void: play(&"harvest"))
 	EventBus.wood_chopped.connect(func(_where: StringName, _c: Vector2i, _what: StringName, _id: StringName, _n: int) -> void: play(&"chop"))
 	# Fishing (DECISIONS 054): the float lands, the bite, the fish landed.
