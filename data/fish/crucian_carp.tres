@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="FishDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/fish_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/fish/crucian_carp.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"crucian_carp"
+display_name = "Crucian carp"
+description = "A small, round, golden carp from old ponds."
+icon = ExtResource("2_icon")
+sell_price = 25
+tags = Array[StringName]([&"fish"])
+waters = Array[StringName]([&"pond"])
+seasons = Array[StringName]([&"summer", &"autumn"])
+bites_from = 360
+bites_until = 1560
+weight = 6
+min_size = 10
+max_size = 30
+fight = 2

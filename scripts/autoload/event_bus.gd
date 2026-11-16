@@ -107,6 +107,27 @@ signal foraged(item_id: StringName, location_id: StringName)
 ## which GameState puts in the bag; the farm and the Woods redraw the cell.
 signal wood_chopped(location_id: StringName, cell: Vector2i, what: StringName, item_id: StringName, amount: int)
 
+## Fishing (DECISIONS 054). The rod cast a line into `water` (&"pond",
+## &"river", &"stream") at `cell` in the current location; the float waits
+## `wait_multiplier` times as long as the rules say (a better rod, sooner).
+## Fishing (the autoload) takes it from there.
+signal line_cast(cell: Vector2i, water: StringName, wait_multiplier: float)
+
+## Something bit: the float went under. Space now to strike.
+signal fish_bit()
+
+## Struck in time: a `fish_id` is on the line, and the reel bar is up.
+signal fish_hooked(fish_id: StringName)
+
+## A fish was landed: `size` cm, from `water` in `location_id`. GameState has
+## put it in the bag and the fish log already. Wren's and Pip's requests
+## count these; the day's summary lists them.
+signal fish_caught(fish_id: StringName, size: int, location_id: StringName, water: StringName)
+
+## The fish on the line got away: too slow to strike, too much slack, or
+## left too long without a pull.
+signal fish_escaped(fish_id: StringName)
+
 # --- Player and economy -----------------------------------------------------
 
 signal energy_changed(current: float, maximum: float)

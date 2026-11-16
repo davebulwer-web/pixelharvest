@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/forage/worm.tres" id="3_r"]
+[ext_resource type="Resource" path="res://data/unlocks/woods_open.tres" id="4_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="5_r"]
+[ext_resource type="Resource" path="res://data/tools/fishing_rod.tres" id="6_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+item = ExtResource("3_r")
+amount = 5
+
+[resource]
+script = ExtResource("1_r")
+id = &"wren_worms"
+title = "Wren's worms"
+giver = &"angler"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Nothing's biting. Nothing's bitten all week. It's the bait: shop bread, and the fish know it.", "Now, the Woods are open again. After rain the worms come up in the glades, fat ones.", "Bring me five fresh worms and I'll show you something. I've an old rod at home that wants using."])
+reminder_line = "Five worms. They come up in the Woods when it rains."
+thanks_lines = Array[String](["Oh, look at these. Proper wrigglers.", "Here: my old rod. Face the water and Space to cast. Watch the float, and when it goes under, Space! Quick, but not too quick.", "Then reel: Space whenever the marker's in the green. Big fish need more than one good pull. E reels in if you lose heart.", "Every water has its own fish, and they keep their own hours. Except in winter: it all freezes over."])
+reward_items = Dictionary[ExtResource("5_r"), int]({
+ExtResource("6_r"): 1
+})
+first_day = 30
+seasons = Array[StringName]([&"spring", &"summer", &"autumn"])
+requires_unlock = ExtResource("4_r")

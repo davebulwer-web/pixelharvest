@@ -9,7 +9,10 @@ extends Node2D
 ## new shop or a new townsperson appears with no edit to this file), sets up
 ## a Stall for every stall of today's calendar events (DECISIONS 037), and puts
 ## the arriving player at the spawn point LocationManager asked for. Tools are
-## off in town (the farm's tiles aren't here to be hoed), and so is sleeping.
+## off in town (the farm's tiles aren't here to be hoed), and so is sleeping,
+## except the fishing rod (DECISIONS 054): the player asks this scene
+## water_at(cell), the pond or the river, and the tile cursor shows where
+## the rod would cast.
 ##
 ## The bridge to the Woods (DECISIONS 052) stands at the top of the pond path:
 ## broken until the Woods open (the mayor's request pays for it, and it's
@@ -60,6 +63,13 @@ const BRIDGE_BROKEN: Texture2D = preload("res://assets/sprites/town/bridge_broke
 
 var _counter: ShopCounter
 
+## True once the bridge to the Woods is mended: its cells are dry then.
+var _bridge_open: bool = false
+
+## The outline on the water the fishing rod would cast into, shown only when
+## it would (as in the Woods).
+var _cursor: Node2D
+
 ## The market stalls' shops standing here today, by shop id.
 var _stall_shops: Dictionary = {}  # StringName -> ShopDef
 
@@ -79,6 +89,7 @@ var _asking_at_board: Array[QuestDef] = []
 
 func _ready() -> void:
 	_player.can_farm = false
+	_player.tool_place = self
 	var doors: Array[LocationDef] = LocationManager.buildings_on(TOWN_ID)
 	var door_cells: Array[Vector2i] = []
 	for def in doors:
@@ -86,9 +97,14 @@ func _ready() -> void:
 
 	SeasonLook.apply_ground(_ground)
 	var bridge_open := _woods_open()
+	_bridge_open = bridge_open
 	var tiles := TownLayout.build(door_cells, bridge_open)
 	for cell: Vector2i in tiles:
 		GroundTiles.draw(_ground, cell, tiles[cell])
+	_cursor = preload("res://scripts/tile_cursor.gd").new()
+	_cursor.name = "TileCursor"
+	add_child(_cursor)
+	move_child(_cursor, _entities.get_index())
 
 	for def in doors:
 		_entities.add_child(Building.create(def))
@@ -214,6 +230,24 @@ func _pack_up_closed_stalls() -> void:
 		_markers.erase(shop_id)
 		_stall_shops.erase(shop_id)
 		_stall_nodes.erase(shop_id)
+
+
+## The kind of water at `cell` for the fishing rod (DECISIONS 054): &"pond",
+## &"river", or &"" for dry land.
+func water_at(cell: Vector2i) -> StringName:
+	return TownLayout.water_at(cell, _bridge_open)
+
+
+func _physics_process(_delta: float) -> void:
+	# Outline the water the held rod would cast into, only when it would.
+	var cells: Array[Vector2i] = []
+	var tool := GameState.selected_tool()
+	if tool != null and tool.action != null and tool.action.usable_in_season(GameState.season_id()) \
+			and not Fishing.is_busy():
+		for cell in _player.target_cells():
+			if tool.action.can_use_away(self, cell):
+				cells.append(cell)
+	_cursor.set_cells(cells)
 
 
 ## True once the Woods are open: the bridge is mended (DECISIONS 052).

@@ -90,9 +90,12 @@ static func list_names(items: Array[ItemDef]) -> String:
 
 
 ## Names that stay the same for more than one: "20 timber", "12 fibre", not
-## "timbers" (DECISIONS 053).
+## "timbers" (DECISIONS 053). Most fish too (DECISIONS 054).
 const SAME_IN_PLURAL: Array[String] = ["timber", "fibre", "holly", "kale", "garlic", "wild garlic",
-		"corn", "rhubarb"]
+		"corn", "rhubarb",
+		# Fish, as anglers say them (DECISIONS 054): "3 perch", "2 pike".
+		"fish", "bait", "perch", "roach", "rudd", "dace", "tench", "chub", "pike", "carp", "crucian carp",
+		"barbel", "grayling", "brown trout", "sea trout"]
 
 
 ## "parsnip" -> "parsnips", "strawberry" -> "strawberries", "potato" ->

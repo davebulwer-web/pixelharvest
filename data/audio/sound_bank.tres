@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SoundBank" load_steps=23 format=3]
+[gd_resource type="Resource" script_class="SoundBank" load_steps=26 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/sound_bank.gd" id="1_bank"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/till.wav" id="2_till"]
@@ -22,6 +22,9 @@
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/menu.wav" id="20_menu"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/thunder.wav" id="21_thunder"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/chop.wav" id="22_chop"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/cast.wav" id="23_cast"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/bite.wav" id="24_bite"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/splash.wav" id="25_splash"]
 
 [resource]
 script = ExtResource("1_bank")
@@ -46,6 +49,9 @@ sounds = Dictionary[StringName, AudioStream]({
 &"nope": ExtResource("19_nope"),
 &"menu": ExtResource("20_menu"),
 &"thunder": ExtResource("21_thunder"),
-&"chop": ExtResource("22_chop")
+&"chop": ExtResource("22_chop"),
+&"cast": ExtResource("23_cast"),
+&"bite": ExtResource("24_bite"),
+&"splash": ExtResource("25_splash")
 })
 pitch_variation = 0.05

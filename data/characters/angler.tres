@@ -10,4 +10,4 @@ display_name = "Wren"
 sprite = ExtResource("2_sprite")
 location = &"town"
 spots = Array[Vector2i]([Vector2i(33, 6), Vector2i(30, 4), Vector2i(30, 6)])
-lines = Array[String](["Shh. You'll scare the fish.", "Nothing's biting today. Nothing's bitten all week, come to think of it.", "Your farm's got a pond too, hasn't it? Lucky.", "Sprinklers, eh? In my day we carried every drop."])
+lines = Array[String](["Shh. You'll scare the fish.", "Tench in the early morning, barbel at dusk, eels after dark. Every fish keeps its own hours.", "Your farm's got a pond too, hasn't it? Lucky.", "The river has its own fish, chub and dace and the like. The Woods' stream has trout.", "Sprinklers, eh? In my day we carried every drop.", "When the rain swells the stream, the sea trout come up. Silver, and strong with it."])

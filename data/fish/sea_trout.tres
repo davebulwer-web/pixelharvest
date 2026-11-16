@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="FishDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/fish_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/fish/sea_trout.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"sea_trout"
+display_name = "Sea trout"
+description = "Silver from the sea. Runs up the stream when the rain swells it."
+icon = ExtResource("2_icon")
+sell_price = 70
+tags = Array[StringName]([&"fish"])
+waters = Array[StringName]([&"stream"])
+seasons = Array[StringName]([&"summer", &"autumn"])
+bites_from = 360
+bites_until = 1560
+only_in_weather = Array[StringName]([&"rain", &"storm"])
+weight = 4
+min_size = 35
+max_size = 70
+fight = 4

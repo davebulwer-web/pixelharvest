@@ -67,6 +67,8 @@ static func rows_for(r: DayRecord) -> Array[PackedStringArray]:
 		rows.append(PackedStringArray(["Planted", "%d seed%s" % [r.planted, _s(r.planted)]]))
 	if r.watered > 0:
 		rows.append(PackedStringArray(["Watered", "%d tile%s" % [r.watered, _s(r.watered)]]))
+	if not r.caught.is_empty():
+		rows.append(PackedStringArray(["Caught", harvest_text(r.caught)]))
 	if r.weeds_pulled > 0:
 		rows.append(PackedStringArray(["Weeded", "%d patch%s" % [r.weeds_pulled, "" if r.weeds_pulled == 1 else "es"]]))
 	if not r.lost.is_empty():
@@ -200,7 +202,7 @@ static func _and_list(names: Array[String]) -> String:
 	return ", ".join(names.slice(0, names.size() - 1)) + " and " + names[-1]
 
 
-## "6 Parsnip, 2 Potato", most first.
+## "6 Parsnip, 2 Potato", most first. Fish caught are listed the same way.
 static func harvest_text(harvested: Dictionary[StringName, int]) -> String:
 	var ids: Array = harvested.keys()
 	ids.sort_custom(func(a: StringName, b: StringName) -> bool:

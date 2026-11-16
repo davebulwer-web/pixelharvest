@@ -147,6 +147,11 @@ func _listen() -> void:
 	EventBus.weeds_pulled.connect(func(_c: Vector2i) -> void: _farm_sound(&"pick_up"))
 	EventBus.foraged.connect(func(_id: StringName, _where: StringName) -> void: play(&"harvest"))
 	EventBus.wood_chopped.connect(func(_where: StringName, _c: Vector2i, _what: StringName, _id: StringName, _n: int) -> void: play(&"chop"))
+	# Fishing (DECISIONS 054): the float lands, the bite, the fish landed.
+	EventBus.line_cast.connect(func(_c: Vector2i, _water: StringName, _m: float) -> void: play(&"cast"))
+	EventBus.fish_bit.connect(func() -> void: play(&"bite"))
+	EventBus.fish_caught.connect(func(_id: StringName, _size: int, _where: StringName, _water: StringName) -> void: play(&"splash"))
+	EventBus.fish_escaped.connect(func(_id: StringName) -> void: play(&"nope"))
 	EventBus.object_placed.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"place"))
 	EventBus.object_removed.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"pick_up"))
 	EventBus.items_shipped.connect(func(count: int, _v: int) -> void: play(&"ship" if count > 0 else &"nope"))

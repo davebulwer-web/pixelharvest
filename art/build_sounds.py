@@ -557,6 +557,41 @@ def build_axe() -> None:
     print("sfx chop")
 
 
+# --- Fishing (DECISIONS 054) ------------------------------------------------
+# Added after everything else, with dice of their own, so no sound above
+# changes when this file is run again.
+
+fish_rng = np.random.default_rng(54)
+
+
+def sfx_cast():
+    """A line whipping out, then the float landing: a swish and a plop."""
+    swish = highpass(fish_rng.uniform(-1, 1, int(0.18 * RATE)), 3) * env(int(0.18 * RATE), 0.06, 0.05)
+    plop = tone(sweep_phase(620, 180, 0.12)) * env(int(0.12 * RATE), 0.002, 0.05)
+    drops = smooth(fish_rng.uniform(-1, 1, int(0.15 * RATE)), 6) * env(int(0.15 * RATE), 0.005, 0.05)
+    return mix(swish * 0.35, at(0.2, plop, 0.45), at(0.21, drops * 0.25, 0.45))
+
+
+def sfx_bite():
+    """Something takes the float under: two quick bloops, rising."""
+    one = tone(sweep_phase(300, 520, 0.07)) * env(int(0.07 * RATE), 0.002, 0.03)
+    two = tone(sweep_phase(360, 640, 0.07)) * env(int(0.07 * RATE), 0.002, 0.03)
+    return mix(one, at(0.09, two, 0.2))
+
+
+def sfx_splash():
+    """A fish landed: a splash of water and a bright little rising chime."""
+    water = smooth(fish_rng.uniform(-1, 1, int(0.35 * RATE)), 4) * env(int(0.35 * RATE), 0.004, 0.12)
+    chime = mix(note(76, 0.12, "triangle", 0.1), at(0.08, note(81, 0.2, "triangle", 0.15), 0.3))
+    return mix(water * 0.45, at(0.12, chime * 0.6, 0.45))
+
+
+def build_fishing() -> None:
+    for name, make, peak in (("cast", sfx_cast, 0.5), ("bite", sfx_bite, 0.45), ("splash", sfx_splash, 0.5)):
+        write_wav(f"{SFX_DIR}/{name}.wav", make(), peak)
+        print("sfx", name)
+
+
 def main() -> None:
     os.makedirs(SFX_DIR, exist_ok=True)
     os.makedirs(MUSIC_DIR, exist_ok=True)
@@ -571,6 +606,7 @@ def main() -> None:
     write_ogg(f"{MUSIC_DIR}/woods.ogg", woods_tune(), 0.6)
     print("music woods")
     build_axe()
+    build_fishing()
 
 
 if __name__ == "__main__":

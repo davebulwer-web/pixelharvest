@@ -46,13 +46,25 @@ var _facing: StringName = &"down"
 var can_farm: bool = true
 
 ## Away from the farm, the map scene whose tools can still do something there
-## (DECISIONS 053): the Woods set it to themselves, so the axe works there.
-## Null everywhere else: the town, the shops and the farmhouse have nothing
-## to use a tool on.
+## (DECISIONS 053): the Woods set it to themselves, so the axe works there,
+## and the town too, for the fishing rod at its pond and river (DECISIONS
+## 054). Null in the shops and the farmhouse: nothing to use a tool on.
 var tool_place: Node = null
 
 
+func _ready() -> void:
+	# Fishing (DECISIONS 054) finds whoever holds the rod by this group, to
+	# draw the line from their hands.
+	add_to_group(&"player")
+
+
 func _physics_process(_delta: float) -> void:
+	# A line is out (DECISIONS 054): stand still, facing the water, and leave
+	# the keys to Fishing until it's reeled in.
+	if Fishing.is_busy():
+		velocity = Vector2.ZERO
+		_update_animation(Vector2.ZERO)
+		return
 	var direction := Input.get_vector(
 		&"move_left", &"move_right", &"move_up", &"move_down"
 	)
@@ -64,6 +76,8 @@ func _physics_process(_delta: float) -> void:
 ## Discrete presses (use, switch tool) are handled here rather than polled in
 ## _physics_process, so one key press is exactly one action.
 func _unhandled_input(event: InputEvent) -> void:
+	if Fishing.is_busy():
+		return
 	if event.is_action_pressed(&"use_tool"):
 		if can_farm:
 			_use_tool()
@@ -137,7 +151,7 @@ func _use_tool() -> void:
 ## about each cell instead of the farm's tiles. Energy is paid the same way.
 func _use_tool_away() -> void:
 	var tool := GameState.selected_tool()
-	if tool == null or tool.action == null:
+	if tool == null or tool.action == null or not tool.action.usable_in_season(GameState.season_id()):
 		return
 	var usable: Array[Vector2i] = []
 	for cell in target_cells():

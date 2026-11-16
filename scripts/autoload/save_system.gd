@@ -21,7 +21,7 @@ extends Node
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
 ## The file always looks like:
-##   { "save_version": 14, "game": { ...whatever GameState.to_save() returned... } }
+##   { "save_version": 16, "game": { ...whatever GameState.to_save() returned... } }
 ##
 
 const SAVE_PATH := "user://save.json"
@@ -70,7 +70,9 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       this season ("cleared": location id -> list of [x, y]). Older games
 ##       have chopped none. Sprinklers now wait for Brann's line, so older
 ##       games, which could always buy them, are given its two unlocks.
-const CURRENT_VERSION := 15
+##  16 — fishing (DECISIONS 054): the fish log ("fish_log": fish id ->
+##       {"caught", "biggest"}). Older games have caught nothing.
+const CURRENT_VERSION := 16
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -92,6 +94,7 @@ const REQUIRED_FIELDS: Dictionary = {
 	"weather": TYPE_STRING,
 	"forecast": TYPE_STRING,
 	"cleared": TYPE_DICTIONARY,
+	"fish_log": TYPE_DICTIONARY,
 }
 
 ## Saving is switched on by load_or_new_game(), i.e. only when the game was
@@ -282,6 +285,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_13_to_14(data["game"])
 			14:
 				_upgrade_14_to_15(data["game"])
+			15:
+				_upgrade_15_to_16(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -559,3 +564,10 @@ func _upgrade_14_to_15(game: Dictionary) -> void:
 		for id in V15_ALREADY_DONE:
 			if not quests.has(id):
 				quests[id] = {"state": "done", "progress": 0.0}
+
+
+## Version 15 -> 16: fishing (DECISIONS 054). An older game has caught no
+## fish. Nothing else changes: the rod comes from Wren's first request, which
+## an older game simply hasn't been asked yet.
+func _upgrade_15_to_16(game: Dictionary) -> void:
+	game["fish_log"] = {}

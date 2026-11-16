@@ -10,7 +10,8 @@ extends Node2D
 ## are off here, as in town, except the axe (DECISIONS 053): the player asks
 ## this scene what's at a cell (choppable_at) and the axe chops it (chop):
 ## the undergrowth, which stays down until the season turns, and the day's
-## fallen logs (FallenLogs), which are new each morning.
+## fallen logs (FallenLogs), which are new each morning. And the fishing rod
+## (DECISIONS 054), which asks water_at: the stream.
 ##
 ##   Woods
 ##   ├── Ground      (TileMapLayer, the same seasonal tilesets as the farm)
@@ -129,11 +130,20 @@ func _physics_process(_delta: float) -> void:
 	# Woods don't show a cursor wherever you walk.
 	var cells: Array[Vector2i] = []
 	var tool := GameState.selected_tool()
-	if tool != null and tool.action != null:
+	if tool != null and tool.action != null and tool.action.usable_in_season(GameState.season_id()) \
+			and not Fishing.is_busy():
 		for cell in _player.target_cells():
 			if tool.action.can_use_away(self, cell):
 				cells.append(cell)
 	_cursor.set_cells(cells)
+
+
+# --- The fishing rod (DECISIONS 054) ----------------------------------------------
+
+## The kind of water at `cell` for the fishing rod: &"stream", or &"" for
+## dry land (the footbridge is dry land, over the stream).
+func water_at(cell: Vector2i) -> StringName:
+	return &"stream" if WoodsLayout.is_stream(cell) else &""
 
 
 # --- The axe (DECISIONS 053) ---------------------------------------------------

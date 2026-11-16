@@ -41,8 +41,9 @@ extends Node
 
 const CROPS_DIR := "res://data/crops/"
 const FORAGE_DIR := "res://data/forage/"
+const FISH_DIR := "res://data/fish/"
 const ITEM_DIRS: Array[String] = ["res://data/tools/", "res://data/produce/", "res://data/decorations/",
-		FORAGE_DIR]
+		FORAGE_DIR, FISH_DIR]
 const OBJECTS_DIR := "res://data/objects/"
 const UPGRADES_DIR := "res://data/upgrades/"
 const CHARACTERS_DIR := "res://data/characters/"
@@ -86,8 +87,9 @@ func _ready() -> void:
 	_check_weather()
 	_check_orders()
 	_check_forage()
-	print("ContentDB: %d crops, %d items (%d forage), %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers, %d order patterns"
-			% [_crops.size(), _items.size(), forage().size(), _objects.size(), _upgrades.size(), _characters.size(),
+	_check_fish()
+	print("ContentDB: %d crops, %d items (%d forage, %d fish), %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers, %d order patterns"
+			% [_crops.size(), _items.size(), forage().size(), fish().size(), _objects.size(), _upgrades.size(), _characters.size(),
 			_events.size(), _quests.size(), _unlocks.size(), _weathers.size(), _orders.size()])
 
 
@@ -205,6 +207,24 @@ func forage() -> Array[ForageDef]:
 ## `weather_id`, in the same order as forage().
 func forage_growing(location_id: StringName, season_id: StringName, weather_id: StringName) -> Array[ForageDef]:
 	return forage().filter(func(f: ForageDef) -> bool: return f.grows(location_id, season_id, weather_id))
+
+
+## Every kind of fish (DECISIONS 054), by id as Strings, so the dice that
+## pick between them always see them in the same order.
+func fish() -> Array[FishDef]:
+	var result: Array[FishDef] = []
+	for each: ItemDef in _items.values():
+		if each is FishDef:
+			result.append(each)
+	result.sort_custom(func(a: FishDef, b: FishDef) -> bool: return String(a.id) < String(b.id))
+	return result
+
+
+## The fish that bite in `water` at `location_id` on a day of `season_id`, at
+## `minutes` on the clock, with `weather_id`, in the same order as fish().
+func fish_biting(water: StringName, location_id: StringName, season_id: StringName, minutes: int,
+		weather_id: StringName) -> Array[FishDef]:
+	return fish().filter(func(f: FishDef) -> bool: return f.bites(water, location_id, season_id, minutes, weather_id))
 
 
 ## The crop whose harvest is `item`, or null if nothing grows it (fibre).
@@ -748,5 +768,36 @@ func _check_forage() -> void:
 		for weather_id in each.only_in_weather:
 			if weather(weather_id) == null:
 				push_error("ContentDB: '%s' waits for weather '%s', which isn't in %s" % [where, weather_id, WEATHER_DIR])
+		if each.sell_price <= 0:
+			push_warning("ContentDB: '%s' sells for nothing, so the bin won't take it" % where)
+
+
+## Fish (DECISIONS 054): each kind must live in a real kind of water, bite in
+## a real season and some stretch of the day, and be worth something.
+const FISH_WATERS: Array[StringName] = [&"pond", &"river", &"stream"]
+
+
+func _check_fish() -> void:
+	var season_ids: Array[StringName] = []
+	for theme in RULES.seasons:
+		if theme != null:
+			season_ids.append(theme.id)
+	for each in fish():
+		var where := each.resource_path
+		if each.waters.is_empty() or each.seasons.is_empty():
+			push_warning("ContentDB: '%s' has no waters or no seasons, so it never bites" % where)
+		for water in each.waters:
+			if water not in FISH_WATERS:
+				push_error("ContentDB: '%s' lives in '%s', which isn't one of %s" % [where, water, FISH_WATERS])
+		for season_id in each.seasons:
+			if season_id not in season_ids:
+				push_error("ContentDB: '%s' bites in a season '%s' that isn't in game_rules.tres" % [where, season_id])
+		for weather_id in each.only_in_weather:
+			if weather(weather_id) == null:
+				push_error("ContentDB: '%s' waits for weather '%s', which isn't in %s" % [where, weather_id, WEATHER_DIR])
+		if each.bites_until <= each.bites_from:
+			push_error("ContentDB: '%s' bites from %d until %d, which is no time at all" % [where, each.bites_from, each.bites_until])
+		if each.max_size < each.min_size:
+			push_error("ContentDB: '%s' has a max_size smaller than its min_size" % where)
 		if each.sell_price <= 0:
 			push_warning("ContentDB: '%s' sells for nothing, so the bin won't take it" % where)

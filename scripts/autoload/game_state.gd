@@ -131,6 +131,7 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	unlocks = []
 	_foraged_today.clear()
 	cleared = {}
+	fish_log = {}
 	# Anything the calendar opens on day 1 is there from the start.
 	open_due_unlocks()
 	location = RULES.starting_location
@@ -495,6 +496,71 @@ func _on_wood_chopped(_location_id: StringName, _cell: Vector2i, _what: StringNa
 	EventBus.message_posted.emit("+%d %s" % [amount, item.display_name.to_lower()])
 
 
+# --- Fishing (DECISIONS 054) ----------------------------------------------------
+# The cast, the bite and the reel are Fishing's (scripts/autoload/fishing.gd).
+# A fish landed comes here: into the bag, and into the fish log, which keeps
+# how many of each kind have been caught and the biggest (saved, save version
+# 16). The log is for records now, and for the almanac, the summer contest
+# and Pip's biggest fish later.
+
+## Fish caught, ever: fish id -> {"caught": how many, "biggest": cm}.
+var fish_log: Dictionary = {}
+
+
+## Land `fish`, `size` cm long, from `water` in `location_id`: into the bag
+## and the log, and announced (fish_caught).
+func catch_fish(fish: FishDef, size: int, location_id: StringName, water: StringName) -> void:
+	if fish == null:
+		return
+	var entry: Dictionary = fish_log.get(fish.id, {"caught": 0, "biggest": 0})
+	var record: bool = entry["caught"] > 0 and size > entry["biggest"]
+	entry["caught"] += 1
+	entry["biggest"] = maxi(entry["biggest"], size)
+	fish_log[fish.id] = entry
+	inventory.add(fish)
+	EventBus.fish_caught.emit(fish.id, size, location_id, water)
+	var text := "Caught %s %s! %d cm" % ["an" if "aeiou".contains(fish.display_name.to_lower().left(1)) else "a",
+			fish.display_name.to_lower(), size]
+	if entry["caught"] == 1:
+		text += ", your first"
+	elif record:
+		text += ", your biggest yet"
+	EventBus.message_posted.emit(text)
+
+
+## How many of `fish_id` have been caught, ever.
+func fish_caught_count(fish_id: StringName) -> int:
+	return int(fish_log.get(fish_id, {}).get("caught", 0))
+
+
+## The biggest `fish_id` caught, in cm, or 0 if none yet.
+func biggest_fish(fish_id: StringName) -> int:
+	return int(fish_log.get(fish_id, {}).get("biggest", 0))
+
+
+## {"perch": {"caught": 3, "biggest": 31}}: as it's kept, with plain numbers.
+func _fish_log_to_save() -> Dictionary:
+	var data := {}
+	for id: StringName in fish_log:
+		data[String(id)] = {"caught": int(fish_log[id]["caught"]), "biggest": int(fish_log[id]["biggest"])}
+	return data
+
+
+## A fish the game no longer has is dropped with a warning, like an item.
+func _fish_log_from_save(data: Variant) -> void:
+	fish_log = {}
+	if typeof(data) != TYPE_DICTIONARY:
+		return
+	for key: Variant in data:
+		var entry: Variant = data[key]
+		if typeof(entry) != TYPE_DICTIONARY:
+			continue
+		if not (ContentDB.item(StringName(key)) is FishDef):
+			push_warning("Save's fish log has a fish '%s' the game doesn't know; it's been removed" % key)
+			continue
+		fish_log[StringName(key)] = {"caught": int(entry.get("caught", 0)), "biggest": int(entry.get("biggest", 0))}
+
+
 # --- Hazards (DECISIONS 045) -------------------------------------------------
 # The rules are in data/hazard_rules.tres (RULES.hazards); the difficulty
 # decides how hard they press. These answer the questions the farm, the
@@ -695,6 +761,7 @@ func to_save() -> Dictionary:
 		"weather": String(weather_id()),
 		"forecast": String(forecast.id) if forecast != null else "",
 		"cleared": _cleared_to_save(),
+		"fish_log": _fish_log_to_save(),
 	}
 
 
@@ -779,6 +846,8 @@ func load_from_save(data: Dictionary) -> void:
 	_foraged_today.clear()
 	# Undergrowth chopped in the Woods this season (save version 15).
 	_cleared_from_save(data["cleared"])
+	# Every fish caught, and the biggest of each (save version 16).
+	_fish_log_from_save(data["fish_log"])
 	unlocks = []
 	for id: Variant in data["unlocks"]:
 		if StringName(id) not in unlocks:

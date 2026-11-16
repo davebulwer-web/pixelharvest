@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemDef" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="1_item"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/bait.png" id="2_icon"]
+[ext_resource type="Resource" path="res://data/unlocks/bait_on_sale.tres" id="3_unlock"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"bait"
+display_name = "Bait"
+description = "Wren's own mix. With bait in the bag, each cast puts some on the hook, and fish bite twice as soon."
+icon = ExtResource("2_icon")
+buy_price = 5
+sold_only_by = Array[StringName]([&"general_store"])
+requires_unlock = ExtResource("3_unlock")

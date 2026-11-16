@@ -102,7 +102,7 @@ icon.svg
 scenes/              .tscn scene files
 scripts/             Game code
   autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem,
-                     Audio, DayReport…)
+                     Audio, DayReport, Fishing…)
   farm/              The farm's data and layout, the farmhouse and its bed, its effects,
                      the night's hazards (FarmHazards) and the morning's crows
   town/              The town, its map, shop interiors and fronts, people, notice board (Stage 7),
@@ -110,20 +110,25 @@ scripts/             Game code
   woods/             The Woods: their map, the day's forage (Forage, ForageSpot; DECISIONS 052)
                      and fallen logs (FallenLogs, FallenLog; DECISIONS 053)
   items/             Inventory
+  fishing/           FishingLine: the float, the line and the reel bar (DECISIONS 054)
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
                      and decorations, the trowel's digging, pest spray, the axe's
-                     chopping, which also works in the Woods: DECISIONS 053)
+                     chopping, which also works in the Woods: DECISIONS 053; the
+                     fishing rod's cast: DECISIONS 054)
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
   quests/            QuestGoal scripts (deliver, deliver any of, deliver one of each,
-                     harvest, sell, give gold, grow a giant, deliver with a fee) and the
-                     saved QuestLog
+                     harvest, sell, give gold, grow a giant, deliver with a fee, catch
+                     fish) and the saved QuestLog
 data/                Content resources (.tres), indexed by ContentDB
   game_rules.tres    Starting conditions and global numbers (GameRules)
   hazard_rules.tres  Thirst, weeds, crows and aphids: every number (HazardRules,
                      DECISIONS 045, 048)
+  fishing_rules.tres The wait, the strike and the reel bar's numbers (FishingRules,
+                     DECISIONS 054)
   crops/             CropDef — how each plant grows and looks, and its rules (trellis,
                      perennial, hardy…; DECISIONS 047; giants and 2 × 2 trees, 048)
-  produce/           ItemDef — what a harvest gives, and its sell price (and fibre, timber)
+  produce/           ItemDef — what a harvest gives, and its sell price (and fibre, timber,
+                     bait)
   tools/             ToolDef — tools, seeds and sprinklers (all things you use)
   decorations/       ToolDef — decorations for the farm, placed like sprinklers (DECISIONS 039)
   objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers, decorations)
@@ -146,10 +151,13 @@ data/                Content resources (.tres), indexed by ContentDB
                      market orders, the notice board's daily jobs (DECISIONS 050)
   forage/            ForageDef — wild things found in the Woods: items, with the seasons,
                      places and weather they grow in (DECISIONS 052)
+  fish/              FishDef — fish: items, with the water, seasons, hours and weather
+                     they bite in, their size and fight (DECISIONS 054)
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
                      farm/ the farmhouse and its furniture, decorations/ the farm's decorations,
-                     forage/ the wild things' icons, woods/ the Woods' own pieces)
+                     forage/ the wild things' icons, woods/ the Woods' own pieces,
+                     fish/ the fish's icons, fishing/ the float)
 assets/tilesets/     Ground and world tilesets
 assets/audio/        Sound effects (sfx/*.wav), music (music/*.ogg: farm, town, woods) and the weather's loops
                      (ambience/*.ogg), made by art/build_sounds.py

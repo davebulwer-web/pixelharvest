@@ -7,7 +7,7 @@ extends Node
 ## the farming code changing. They do. Progress comes entirely from EventBus —
 ## this file listens to signals the farm, the bin and the shops already
 ## announced (crop_harvested, items_shipped, items_sold_to_shop, item_bought,
-## giant_harvested) and offers each one to every active request's goal (QuestGoal.counts).
+## giant_harvested, fish_caught) and offers each one to every active request's goal (QuestGoal.counts).
 ## Nothing that grows, ships or sells knows a request exists.
 ##
 ## What's saved lives in GameState.quests (a QuestLog). The requests
@@ -74,6 +74,8 @@ func _ready() -> void:
 		_record(&"item_bought", [item_id, amount, cost]), CONNECT_DEFERRED)
 	EventBus.giant_harvested.connect(func(cell: Vector2i, crop_id: StringName) -> void:
 		_record(&"giant_harvested", [cell, crop_id]), CONNECT_DEFERRED)
+	EventBus.fish_caught.connect(func(fish_id: StringName, size: int, location_id: StringName, water: StringName) -> void:
+		_record(&"fish_caught", [fish_id, size, location_id, water]), CONNECT_DEFERRED)
 	# Deliveries count what's in the bag, and gifts of gold the purse, so any
 	# change to either may finish one.
 	EventBus.item_added.connect(func(_id: StringName, _n: int) -> void: _check_ready(), CONNECT_DEFERRED)

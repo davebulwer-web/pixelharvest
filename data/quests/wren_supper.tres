@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/catch_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/quests/wren_worms.tres" id="3_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="4_r"]
+[ext_resource type="Resource" path="res://data/produce/bait.tres" id="5_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="6_r"]
+[ext_resource type="Resource" path="res://data/unlocks/bait_on_sale.tres" id="7_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+amount = 3
+
+[resource]
+script = ExtResource("1_r")
+id = &"wren_supper"
+title = "Something for supper"
+giver = &"angler"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["How's the rod? Still in one piece?", "Tell you what: catch three fish, any three, anywhere, and come and tell me about them. Keep them, mind. I've my own supper."])
+reminder_line = "Three fish. The pond's fine for roach; the river has its own lot."
+thanks_lines = Array[String](["Three already! You've the knack.", "Here's a tin of my bait. With some in your bag the fish bite twice as quick. Marlow will keep it in for you from now on: I've told him the recipe."])
+reward_items = Dictionary[ExtResource("4_r"), int]({
+ExtResource("5_r"): 10
+})
+reward_unlocks = Array[ExtResource("6_r")]([ExtResource("7_r")])
+requires = ExtResource("3_r")

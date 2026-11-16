@@ -2076,3 +2076,86 @@ timber, instead of the forge's second week). Fallen logs are the same in every g
 the same date. A field partly chopped still costs its full price. Placeholder art: axe,
 timber and fallen log, drawn by a script in the palette until Pixellab.
 
+## 054 — Fishing: a rod that only casts, a service that runs the bite, and fish as data
+
+**Decision.** Stage 15 session 1 adds fishing (ROADMAP sections 5.5, 8 and 9): the rod, a
+cast-and-timing minigame, fish as data, a fish log, and the first two of Wren's requests.
+Ice fishing, the rest of Wren's line and the better rod are session 2.
+
+- *The rod* is a ToolDef (`data/tools/fishing_rod.tres`) with a new action, `FishAction`.
+  It only casts: facing water, Space pays 2 energy and announces EventBus `line_cast`
+  (the cell, the kind of water, and how long this rod makes the wait). It works on the
+  farm's pond (FarmData's WATER) and, through `can_use_away` (DECISIONS 053), wherever the
+  map answers `water_at(cell)`: the town (its pond, and the river along the top) and the
+  Woods (the stream). The town now sets `Player.tool_place` too, and both show the tile
+  cursor only where the rod would cast. Not sold: Wren gives it.
+- *Fishing* is a new autoload (`scripts/autoload/fishing.gd`) that takes over from
+  `line_cast`: WAITING (the float sits 2.5–7 seconds), BITING (the float goes under with
+  a "!": Space within 1.2 seconds strikes), REELING (a bar over the farmer's head, a marker
+  swinging end to end, a green zone: Space over the green is a good pull, anywhere else
+  slack). Enough good pulls land the fish; a third slack pull, or 8 seconds without a
+  pull, loses it. Space too soon reels in empty, and E gives up at any point. Going
+  anywhere (a door, bed, passing out) reels in. While a line is out the player stands
+  still and leaves the keys to Fishing (`Fishing.is_busy()`); the clock runs on, so
+  fishing costs time, not much energy. It's timing, not speed: the marker swings at a
+  steady pace and the zone is wide for small fish.
+- *The look* is `FishingLine`, a node put in the current scene while the line is out:
+  the line sagging from the rod tip, the float bobbing (a picture,
+  `assets/sprites/fishing/bobber.png`, so Pixellab can replace it), rings on the water,
+  the "!" and the bar with a pip per pull. Cast upwards, the float lands a little further
+  out and the bar goes under the feet, so the farmer's hat doesn't hide either.
+- *Fish* are a kind of item: `FishDef` extends `ItemDef` (as `ForageDef` does) with the
+  waters it lives in (`pond`, `river`, `stream`), optionally only certain places, the
+  seasons, the stretch of the day it bites (`bites_from`/`bites_until`, in the clock's
+  minutes), optionally the weather, a weight, a size range in cm and a fight from 1 to 5.
+  Fifteen, one file each in `data/fish/`: roach, rudd, perch, tench (early mornings),
+  crucian carp, carp, pike (autumn and winter), eel (nights), chub, dace, barbel (dusk),
+  grayling, brown trout, minnow, sea trout (the stream, in rain). 5–75g. At least one bites
+  in every water, at every hour, in every season but winter (checked). Which fish bites
+  is decided when it bites, by weight among those biting there and then; its size when
+  it's hooked (two dice averaged, so records are rare).
+- *How hard* is data too: `FishingRules` (`data/fishing_rules.tres`, from game_rules.tres)
+  has the waits, the strike time, and for each step of fight the marker's speed, the
+  zone's width and the pulls needed (a minnow: one pull in a wide zone; a pike: three in
+  a narrow one, fast), the slack allowed, the patience, the bait and the frozen seasons.
+  What differs between rods (`bite_wait_multiplier`) is on the rod.
+- *Winter:* every water is drawn as ice in winter, so it is ice: the rod can't be used
+  (`usable_in_season`, so the hotbar greys it) until session 2 cuts a hole. The winter
+  fish (perch, pike, roach, grayling, chub, dace, minnow) are written already.
+- *Bait*: a plain ItemDef in `data/produce/`. With any in the bag, each cast uses one and
+  the wait is halved. Worms are not used as bait: they're for Wren and the board.
+- *The fish log*: `GameState.fish_log`, fish id -> how many caught and the biggest (cm),
+  for the almanac, the summer contest and Pip's biggest fish to come. The catch message
+  says "your first" or "your biggest yet". **Save version 16**; older games have caught
+  nothing. EventBus `fish_caught` (fish, size, place, water) is what Quests, DayReport
+  (a "Caught" row in the morning summary) and Audio hear; `fish_bit`, `fish_hooked` and
+  `fish_escaped` are for the sounds. Three new sounds (cast, bite, splash), made last in
+  `art/build_sounds.py` with dice of their own, so no other sound changed.
+- *Wren's line* (ROADMAP 5.5), parts 1 and 2. **Wren's worms** (from summer day 2, once
+  the Woods are open, not in winter when there are none): 5 worms → the rod, and Wren
+  explains it. **Something for supper**: catch any 3 fish → 10 bait, and Marlow sells
+  bait from then on (5g, unlock `bait_on_sale`). A new goal kind, `CatchGoal`: counts
+  `fish_caught`, optionally one kind, one water or a smallest size, so Wren's river fish,
+  Pip's biggest fish and the contest are a `.tres` each. Wren's daily lines now hint at
+  the hours and waters.
+- *Small:* "3 perch", "2 pike", "10 bait": most fish names stay the same in the plural.
+
+Options considered: the minigame as its own scene that pauses the game (like the shop
+menu: simpler input, but fishing would stop the clock, and "fills afternoons" means it
+should cost time), or as code inside the Player (no new autoload, but the player would
+grow a state machine for one tool, against rule 5). A service woken by an EventBus
+signal keeps the rod a ten-line ToolAction and the player unaware of fishing. For the
+bar: hold-to-reel against a moving fish (more twitchy, and harder to tune); a press in a
+zone is ROADMAP's "a timing bar, not twitchy". For winter: leaving open water to fish in
+(the tiles show ice everywhere, so it would look wrong) or no fish at all in winter
+(ROADMAP wants ice fishing): frozen until session 2's hole.
+
+**Why.** ROADMAP section 9: fishing fills afternoons and winter, adds a light skill, and
+gives fish for requests, cooking and the contest. Rule 3 holds: a new fish is a `.tres`
+and an icon; a new fishing request is a `.tres`; another fishing place is a
+`water_at(cell)` on its map.
+
+**Cost.** One more autoload. The farm's pond is inside the pond field, behind thicket,
+until the field is bought or chopped; the town's pond and river are open from the start.
+Fish are the same price whatever their size. Placeholder art: 15 fish icons, the rod,
+bait and the float, drawn by a script in the palette until Pixellab.

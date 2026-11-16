@@ -37,6 +37,8 @@ var lost: Dictionary[StringName, int] = {}
 var taken_by_crows: Array[StringName] = []
 ## Giants that grew overnight, by crop id (DECISIONS 048).
 var giants: Array[StringName] = []
+## Fish landed, by fish id -> how many (DECISIONS 054).
+var caught: Dictionary[StringName, int] = {}
 ## Gold in the purse when the night's sales were done.
 var gold_at_end: int = 0
 
@@ -60,4 +62,4 @@ func is_quiet() -> bool:
 	return harvested.is_empty() and planted == 0 and watered == 0 \
 			and income() == 0 and spent == 0 and quests_done.is_empty() and unlocked.is_empty() \
 		and quests_expired.is_empty() \
-		and weeds_pulled == 0 and lost.is_empty() and giants.is_empty()
+		and weeds_pulled == 0 and lost.is_empty() and giants.is_empty() and caught.is_empty()

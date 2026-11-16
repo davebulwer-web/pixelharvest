@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="FishDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/fish_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/fish/tench.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"tench"
+display_name = "Tench"
+description = "The doctor fish: olive-green and slimy. Bites best in the early morning."
+icon = ExtResource("2_icon")
+sell_price = 30
+tags = Array[StringName]([&"fish"])
+waters = Array[StringName]([&"pond"])
+seasons = Array[StringName]([&"summer"])
+bites_from = 360
+bites_until = 660
+weight = 6
+min_size = 20
+max_size = 50
+fight = 2

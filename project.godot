@@ -29,6 +29,7 @@ LocationManager="*res://scripts/autoload/location_manager.gd"
 SaveSystem="*res://scripts/autoload/save_system.gd"
 Audio="*res://scripts/autoload/audio.gd"
 DayReport="*res://scripts/autoload/day_report.gd"
+Fishing="*res://scripts/autoload/fishing.gd"
 
 [display]
 

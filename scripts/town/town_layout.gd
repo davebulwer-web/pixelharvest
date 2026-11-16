@@ -141,6 +141,19 @@ static func build(door_cells: Array[Vector2i], bridge_open: bool = false) -> Dic
 	return tiles
 
 
+## The kind of water at `cell`, for the fishing rod (DECISIONS 054): &"pond",
+## &"river", or &"" for dry land. The bridge's cells are river while it's
+## broken and dry once it's mended (`bridge_open`).
+static func water_at(cell: Vector2i, bridge_open: bool) -> StringName:
+	if cell.x < 0 or cell.y < 0 or cell.x >= SIZE.x or cell.y >= SIZE.y:
+		return &""
+	if POND.has_point(cell):
+		return &"pond"
+	if cell.y in RIVER_ROWS:
+		return &"" if bridge_open and BRIDGE.has_point(cell) else &"river"
+	return &""
+
+
 static func _tile_for(cell: Vector2i, door_cells: Array[Vector2i]) -> Vector2i:
 	if cell.x < 0 or cell.y < 0 or cell.x >= SIZE.x or cell.y >= SIZE.y:
 		return GroundTiles.CLIFF

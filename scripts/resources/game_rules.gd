@@ -63,6 +63,11 @@ extends Resource
 ## off (crops then never wilt or die of thirst, as before Stage 11).
 @export var hazards: HazardRules
 
+## --- Fishing (DECISIONS 054) ------------------------------------------------
+
+## The wait, the strike and the reel bar: data/fishing_rules.tres.
+@export var fishing: FishingRules
+
 ## --- Difficulty (DECISIONS 040) -------------------------------------------
 
 ## The difficulties offered at new game, in the order the menu lists them.

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="FishDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/fish_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/fish/eel.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"eel"
+display_name = "Eel"
+description = "Slips up the river and the stream on summer nights."
+icon = ExtResource("2_icon")
+sell_price = 45
+tags = Array[StringName]([&"fish"])
+waters = Array[StringName]([&"river", &"stream", &"pond"])
+seasons = Array[StringName]([&"summer", &"autumn"])
+bites_from = 1200
+bites_until = 1560
+weight = 5
+min_size = 30
+max_size = 90
+fight = 3
