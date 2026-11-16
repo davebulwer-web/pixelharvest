@@ -98,6 +98,8 @@ func _ready() -> void:
 	EventBus.weeds_pulled.connect(_on_weeds_pulled)
 	# A seed dug up before it came up goes back in the bag (DECISIONS 048).
 	EventBus.crop_dug_up.connect(_on_crop_dug_up)
+	# Whatever the axe chops gives timber (DECISIONS 053).
+	EventBus.wood_chopped.connect(_on_wood_chopped)
 	weather_rng.randomize()
 	harvest_rng.randomize()
 	# Always start from a valid new game, so the farm scene can be run on its
@@ -128,6 +130,7 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	quests = QuestLog.new()
 	unlocks = []
 	_foraged_today.clear()
+	cleared = {}
 	# Anything the calendar opens on day 1 is there from the start.
 	open_due_unlocks()
 	location = RULES.starting_location
@@ -431,8 +434,65 @@ func forage(location_id: StringName, cell: Vector2i, what: ForageDef) -> void:
 	EventBus.message_posted.emit("Found: %s" % what.display_name)
 
 
-func _forage_key(location_id: StringName, cell: Vector2i) -> String:
-	return "%s@%d,%d" % [location_id, cell.x, cell.y]
+## "woods@12,7" for forage; "log:woods@12,7" for a fallen log (DECISIONS 053).
+func _forage_key(location_id: StringName, cell: Vector2i, kind: String = "") -> String:
+	var prefix := kind + ":" if kind != "" else ""
+	return "%s%s@%d,%d" % [prefix, location_id, cell.x, cell.y]
+
+
+# --- Chopping (DECISIONS 053) --------------------------------------------------
+# The farm's thicket is farm terrain, saved with the farm. Away from the farm
+# (the Woods) the map itself has no state, so what has been chopped there is
+# kept here: the undergrowth cleared this season (saved, save version 15),
+# and the fallen logs chopped today (not saved: they're worked out from the
+# date, like forage, and by morning there are new ones).
+
+## Undergrowth cleared this season: location id -> Array of cells. Emptied
+## when the season turns (regrow_undergrowth, called by TimeSystem).
+var cleared: Dictionary = {}
+
+
+## True if the undergrowth at `cell` in `location_id` has been chopped down
+## this season.
+func is_cleared(location_id: StringName, cell: Vector2i) -> bool:
+	return cleared.has(location_id) and cleared[location_id].has(cell)
+
+
+## Remember that the undergrowth at `cell` in `location_id` is chopped down.
+func clear_undergrowth(location_id: StringName, cell: Vector2i) -> void:
+	if not cleared.has(location_id):
+		cleared[location_id] = []
+	if not cleared[location_id].has(cell):
+		cleared[location_id].append(cell)
+
+
+## The season has turned: everything chopped in the Woods has grown back.
+func regrow_undergrowth() -> void:
+	cleared = {}
+
+
+## True if the fallen log at `cell` in `location_id` has been chopped today.
+func is_log_chopped(location_id: StringName, cell: Vector2i) -> bool:
+	return _foraged_on_day == day_number() and _foraged_today.has(_forage_key(location_id, cell, "log"))
+
+
+## Remember for the rest of today that the log at `cell` is chopped. It
+## shares forage's list of things taken today (as "log:woods@x,y"), so both
+## are forgotten overnight together.
+func chop_log(location_id: StringName, cell: Vector2i) -> void:
+	if _foraged_on_day != day_number():
+		_foraged_today.clear()
+		_foraged_on_day = day_number()
+	_foraged_today[_forage_key(location_id, cell, "log")] = true
+
+
+func _on_wood_chopped(_location_id: StringName, _cell: Vector2i, _what: StringName,
+		item_id: StringName, amount: int) -> void:
+	var item := ContentDB.item(item_id)
+	if item == null or amount <= 0:
+		return
+	inventory.add(item, amount)
+	EventBus.message_posted.emit("+%d %s" % [amount, item.display_name.to_lower()])
 
 
 # --- Hazards (DECISIONS 045) -------------------------------------------------
@@ -634,7 +694,32 @@ func to_save() -> Dictionary:
 		"unlocks": unlocks.map(func(id: StringName) -> String: return String(id)),
 		"weather": String(weather_id()),
 		"forecast": String(forecast.id) if forecast != null else "",
+		"cleared": _cleared_to_save(),
 	}
+
+
+## {"woods": [[3, 16], [4, 16]]}: plain lists, which JSON can hold.
+func _cleared_to_save() -> Dictionary:
+	var data := {}
+	for location_id: StringName in cleared:
+		var cells: Array = []
+		for cell: Vector2i in cleared[location_id]:
+			cells.append([cell.x, cell.y])
+		data[String(location_id)] = cells
+	return data
+
+
+func _cleared_from_save(data: Variant) -> void:
+	cleared = {}
+	if typeof(data) != TYPE_DICTIONARY:
+		return
+	for location_id: Variant in data:
+		var cells: Variant = data[location_id]
+		if typeof(cells) != TYPE_ARRAY:
+			continue
+		for pair: Variant in cells:
+			if typeof(pair) == TYPE_ARRAY and pair.size() == 2:
+				clear_undergrowth(StringName(location_id), Vector2i(int(pair[0]), int(pair[1])))
 
 
 ## Replace the current game with a saved one. `data` has already been upgraded
@@ -692,6 +777,8 @@ func load_from_save(data: Dictionary) -> void:
 	# Unlocks are kept by name even if no UnlockDef has it any more: it does
 	# nothing then, and it's there again if the file comes back.
 	_foraged_today.clear()
+	# Undergrowth chopped in the Woods this season (save version 15).
+	_cleared_from_save(data["cleared"])
 	unlocks = []
 	for id: Variant in data["unlocks"]:
 		if StringName(id) not in unlocks:

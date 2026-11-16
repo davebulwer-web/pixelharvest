@@ -21,8 +21,11 @@ extends RefCounted
 
 ## Today's forage in `location`, among `candidates` (the cells its map
 ## offers, always in the same order): cell -> ForageDef, leaving out what's
-## been picked already today. Empty for a place with no foraging.
-static func spots_today(location: LocationDef, candidates: Array[Vector2i]) -> Dictionary:
+## been picked already today (unless `include_picked`: the fallen logs keep
+## off every spot today's forage was on, picked or not). Empty for a place
+## with no foraging.
+static func spots_today(location: LocationDef, candidates: Array[Vector2i],
+		include_picked: bool = false) -> Dictionary:
 	var result: Dictionary = {}  # Vector2i -> ForageDef
 	if location == null or location.forage_per_day <= 0 or candidates.is_empty():
 		return result
@@ -43,7 +46,7 @@ static func spots_today(location: LocationDef, candidates: Array[Vector2i]) -> D
 		pool[j] = pool[i]
 		pool[i] = cell
 		var kind := _pick(kinds, total_weight, dice)
-		if not GameState.is_foraged(location.id, cell):
+		if include_picked or not GameState.is_foraged(location.id, cell):
 			result[cell] = kind
 	return result
 

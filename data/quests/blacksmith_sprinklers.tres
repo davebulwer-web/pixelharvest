@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/commission_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/produce/timber.tres" id="3_r"]
+[ext_resource type="Resource" path="res://data/quests/blacksmith_prove_it.tres" id="4_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="5_r"]
+[ext_resource type="Resource" path="res://data/unlocks/sprinkler_design.tres" id="6_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="7_r"]
+[ext_resource type="Resource" path="res://data/tools/sprinkler.tres" id="8_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+item = ExtResource("3_r")
+amount = 20
+fee = 200
+
+[resource]
+script = ExtResource("1_r")
+id = &"blacksmith_sprinklers"
+title = "The sprinkler design"
+giver = &"blacksmith"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Summer's here, and you'll be hauling water till your arms drop off. I've been drawing up a sprinkler: a pipe, a spinner, a good stand.", "Thing is, the stand wants seasoned wood, and brass isn't free. Bring me 20 timber and 200 gold for the metal.", "Marlow sells axes. There's thicket on your land and undergrowth in the Woods. The first one I make is yours."])
+reminder_line = "Twenty timber and 200 for the brass. Then you'll have your sprinkler."
+thanks_lines = Array[String](["Good timber, this. Dry and straight. Give me a moment...", "There. Your first sprinkler, and the design's sound. I'll make them to order from now on: they're on my shelf."])
+reward_items = Dictionary[ExtResource("7_r"), int]({
+ExtResource("8_r"): 1
+})
+reward_unlocks = Array[ExtResource("5_r")]([ExtResource("6_r")])
+requires = ExtResource("4_r")
+first_day = 33

@@ -66,7 +66,11 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       due by ("due") and run out ("expired"); orders made from patterns
 ##       (Rosa's, the board's) keep what they were made of ("order"); and
 ##       "orders_done" counts the orders handed in. Older games have none.
-const CURRENT_VERSION := 14
+##  15 — the axe and timber (DECISIONS 053): the Woods' undergrowth chopped
+##       this season ("cleared": location id -> list of [x, y]). Older games
+##       have chopped none. Sprinklers now wait for Brann's line, so older
+##       games, which could always buy them, are given its two unlocks.
+const CURRENT_VERSION := 15
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -87,6 +91,7 @@ const REQUIRED_FIELDS: Dictionary = {
 	"unlocks": TYPE_ARRAY,
 	"weather": TYPE_STRING,
 	"forecast": TYPE_STRING,
+	"cleared": TYPE_DICTIONARY,
 }
 
 ## Saving is switched on by load_or_new_game(), i.e. only when the game was
@@ -275,6 +280,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_12_to_13(data["game"])
 			13:
 				_upgrade_13_to_14(data["game"])
+			14:
+				_upgrade_14_to_15(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -527,3 +534,28 @@ func _upgrade_12_to_13(game: Dictionary) -> void:
 ## handed in no orders yet.
 func _upgrade_13_to_14(game: Dictionary) -> void:
 	game["orders_done"] = 0
+
+
+## Version 14 -> 15: the axe and timber (DECISIONS 053). An older game has
+## chopped nothing in the Woods. Sprinklers and big sprinklers used to be on
+## Brann's shelves from the day the forge opened; now Brann's sprinkler line
+## (timber and gold) opens them. An older game is given both unlocks and has
+## both of Brann's requests ticked off, as version 10 did for his first
+## (V10_ALREADY_DONE): nobody loses something they could buy. The names are
+## written here, not looked up, so this step means the same thing later.
+const V15_UNLOCKS: Array[String] = ["sprinkler_design", "better_pipes"]
+const V15_ALREADY_DONE: Array[String] = ["blacksmith_sprinklers", "blacksmith_pipes"]
+
+
+func _upgrade_14_to_15(game: Dictionary) -> void:
+	game["cleared"] = {}
+	var unlocks: Variant = game.get("unlocks")
+	if typeof(unlocks) == TYPE_ARRAY:
+		for id in V15_UNLOCKS:
+			if not unlocks.has(id):
+				unlocks.append(id)
+	var quests: Variant = game.get("quests")
+	if typeof(quests) == TYPE_DICTIONARY:
+		for id in V15_ALREADY_DONE:
+			if not quests.has(id):
+				quests[id] = {"state": "done", "progress": 0.0}

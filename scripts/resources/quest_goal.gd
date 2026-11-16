@@ -89,12 +89,18 @@ static func list_names(items: Array[ItemDef]) -> String:
 	return ", ".join(names.slice(0, names.size() - 1)) + " and " + names[-1]
 
 
+## Names that stay the same for more than one: "20 timber", "12 fibre", not
+## "timbers" (DECISIONS 053).
+const SAME_IN_PLURAL: Array[String] = ["timber", "fibre", "holly", "kale", "garlic", "wild garlic",
+		"corn", "rhubarb"]
+
+
 ## "parsnip" -> "parsnips", "strawberry" -> "strawberries", "potato" ->
 ## "potatoes", lower case. One of something stays singular, and a name
 ## that already ends in s ("potato seeds") is left alone.
 static func plural(name: String, count: int) -> String:
 	var word := name.to_lower()
-	if count == 1 or word == "":
+	if count == 1 or word == "" or word in SAME_IN_PLURAL:
 		return word
 	if word.ends_with("y") and word.length() > 1 and not "aeiou".contains(word[-2]):
 		return word.left(-1) + "ies"

@@ -107,20 +107,23 @@ scripts/             Game code
                      the night's hazards (FarmHazards) and the morning's crows
   town/              The town, its map, shop interiors and fronts, people, notice board (Stage 7),
                      the river and the bridge to the Woods
-  woods/             The Woods: their map, and the day's forage (Forage, ForageSpot; DECISIONS 052)
+  woods/             The Woods: their map, the day's forage (Forage, ForageSpot; DECISIONS 052)
+                     and fallen logs (FallenLogs, FallenLog; DECISIONS 053)
   items/             Inventory
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
-                     and decorations, the trowel's digging, pest spray)
+                     and decorations, the trowel's digging, pest spray, the axe's
+                     chopping, which also works in the Woods: DECISIONS 053)
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
   quests/            QuestGoal scripts (deliver, deliver any of, deliver one of each,
-                     harvest, sell, give gold, grow a giant) and the saved QuestLog
+                     harvest, sell, give gold, grow a giant, deliver with a fee) and the
+                     saved QuestLog
 data/                Content resources (.tres), indexed by ContentDB
   game_rules.tres    Starting conditions and global numbers (GameRules)
   hazard_rules.tres  Thirst, weeds, crows and aphids: every number (HazardRules,
                      DECISIONS 045, 048)
   crops/             CropDef — how each plant grows and looks, and its rules (trellis,
                      perennial, hardy…; DECISIONS 047; giants and 2 × 2 trees, 048)
-  produce/           ItemDef — what a harvest gives, and its sell price
+  produce/           ItemDef — what a harvest gives, and its sell price (and fibre, timber)
   tools/             ToolDef — tools, seeds and sprinklers (all things you use)
   decorations/       ToolDef — decorations for the farm, placed like sprinklers (DECISIONS 039)
   objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers, decorations)

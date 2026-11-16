@@ -107,6 +107,11 @@ func _ready() -> void:
 		_redraw_crop(cell)  # a wilting crop perks up as soon as it's watered
 	)
 	EventBus.tile_cleared.connect(_redraw_cell)
+	# The axe chopped thicket here: it's grass now (DECISIONS 053).
+	EventBus.wood_chopped.connect(func(where: StringName, cell: Vector2i, _what: StringName, _id: StringName, _n: int) -> void:
+		if where == &"farm":
+			_redraw_cell(cell)
+	)
 	EventBus.weeds_sprouted.connect(_redraw_weeds)
 	EventBus.weeds_pulled.connect(_redraw_weeds)
 	EventBus.crop_planted.connect(func(cell: Vector2i, _id: StringName) -> void:

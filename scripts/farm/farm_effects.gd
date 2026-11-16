@@ -1,9 +1,9 @@
 class_name FarmEffects
 extends Node2D
 ##
-## FarmEffects — the farm's "juice": little bursts of dirt, water and leaves,
-## the harvest popping up out of the ground, a jolt of the camera
-## (DECISIONS 042).
+## FarmEffects — the farm's "juice": little bursts of dirt, water, leaves and
+## wood chips, the harvest popping up out of the ground, a jolt of the camera
+## (DECISIONS 042). The Woods have one too, for the axe's chips (DECISIONS 053).
 ##
 ## Like the HUD and Audio, it only listens on EventBus, and it only draws:
 ## take this node out of main.tscn and the farm plays exactly the same.
@@ -24,6 +24,7 @@ const DIRT := [Color8(200, 153, 123), Color8(74, 47, 34)]
 const WATER := [Color8(247, 253, 255), Color8(79, 184, 172)]
 const LEAF := [Color8(168, 224, 107), Color8(74, 127, 58)]
 const DUST := [Color8(255, 231, 216), Color8(171, 129, 108)]
+const BARK := [Color8(200, 153, 123), Color8(107, 74, 47)]
 
 ## Camera jolts, in world pixels and seconds. Presentation, not balance.
 const HARVEST_SHAKE := [1.0, 0.12]
@@ -36,6 +37,12 @@ func _ready() -> void:
 	EventBus.tile_watered.connect(func(cell: Vector2i) -> void: _burst(cell, WATER, 8, 55.0))
 	EventBus.crop_planted.connect(func(cell: Vector2i, _id: StringName) -> void: _burst(cell, LEAF, 5, 40.0))
 	EventBus.weeds_pulled.connect(func(cell: Vector2i) -> void: _burst(cell, LEAF, 8, 60.0))
+	# Chips of wood from the axe (DECISIONS 053), on the farm or in the Woods.
+	EventBus.wood_chopped.connect(func(_where: StringName, cell: Vector2i, what: StringName, _id: StringName, _n: int) -> void:
+		_burst(cell, BARK, 12, 75.0)
+		if what == &"thicket":
+			_burst(cell, LEAF, 6, 50.0)
+	)
 	EventBus.crop_harvested.connect(_on_crop_harvested)
 	EventBus.object_placed.connect(func(cell: Vector2i, _id: StringName) -> void: _puff(cell))
 	EventBus.object_removed.connect(func(cell: Vector2i, _id: StringName) -> void: _puff(cell))

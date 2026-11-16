@@ -13,6 +13,7 @@ Output:
                                  (the Woods', DECISIONS 052)
   assets/audio/ambience/rain.ogg the rain's loop, and sfx/thunder.wav, for
                                  the weather (DECISIONS 046)
+  assets/audio/sfx/chop.wav      the axe (DECISIONS 053)
 
 The music is written out note by note below (melody, chords) and rendered
 "round the loop": a note that rings past the end of the tune wraps round to
@@ -536,6 +537,26 @@ def build_weather() -> None:
     print("sfx thunder")
 
 
+# --- The axe (DECISIONS 053) ---------------------------------------------------
+# Made last, with dice of its own, so adding it changed no other sound.
+
+chop_rng = np.random.default_rng(53)
+
+
+def sfx_chop():
+    """An axe biting wood: a hard knock, a woody ring, and a few splinters."""
+    knock = tone(sweep_phase(260, 140, 0.09)) * env(int(0.09 * RATE), 0.001, 0.03)
+    ring = tone(sweep_phase(520, 470, 0.16), "triangle") * env(int(0.16 * RATE), 0.001, 0.06)
+    bite = highpass(chop_rng.uniform(-1, 1, int(0.05 * RATE)), 4) * env(int(0.05 * RATE), 0.0005, 0.012)
+    splinters = smooth(chop_rng.uniform(-1, 1, int(0.12 * RATE)), 3) * env(int(0.12 * RATE), 0.01, 0.04)
+    return mix(knock, ring * 0.35, bite * 0.6, at(0.03, splinters * 0.3, 0.16))
+
+
+def build_axe() -> None:
+    write_wav(f"{SFX_DIR}/chop.wav", sfx_chop(), 0.55)
+    print("sfx chop")
+
+
 def main() -> None:
     os.makedirs(SFX_DIR, exist_ok=True)
     os.makedirs(MUSIC_DIR, exist_ok=True)
@@ -549,6 +570,7 @@ def main() -> None:
     build_weather()
     write_ogg(f"{MUSIC_DIR}/woods.ogg", woods_tune(), 0.6)
     print("music woods")
+    build_axe()
 
 
 if __name__ == "__main__":

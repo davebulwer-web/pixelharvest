@@ -367,6 +367,27 @@ func clear_thicket(area: Rect2i) -> int:
 	return cleared
 
 
+## True if there's thicket at `cell` for the axe to chop (DECISIONS 053).
+func can_chop(cell: Vector2i) -> bool:
+	var t := tile(cell)
+	return t != null and t.terrain == FarmTile.Terrain.THICKET
+
+
+## Chop the thicket at `cell` with the axe: it becomes grass, one tile at a
+## time, and gives `amount` of `item_id` (timber), which GameState hands
+## over on wood_chopped. Returns false if there was no thicket there.
+##
+## A field (DECISIONS 024) is still for sale while any of its thicket is left
+## standing; buying it clears the rest at once. Chopping is the slow, cheap way
+## to the same land, and the only way to timber on the farm.
+func chop(cell: Vector2i, item_id: StringName, amount: int) -> bool:
+	if not can_chop(cell):
+		return false
+	tile(cell).terrain = FarmTile.Terrain.GRASS
+	EventBus.wood_chopped.emit(&"farm", cell, &"thicket", item_id, amount)
+	return true
+
+
 # --- Overnight ---------------------------------------------------------------
 
 ## The first part of the night on the farm: each watered crop gets one day

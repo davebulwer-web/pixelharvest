@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"axe_on_sale"
+display_name = "Axes at Marlow's"
+announcement = "Marlow has axes in stock. An axe chops the thicket on your farm, a tile at a time, for timber and open ground."
+on_day = 8

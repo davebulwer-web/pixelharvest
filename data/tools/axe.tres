@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ToolDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/tools/chop_action.gd" id="2_action"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/axe.png" id="3_icon"]
+[ext_resource type="Resource" path="res://data/produce/timber.tres" id="4_timber"]
+[ext_resource type="Resource" path="res://data/unlocks/axe_on_sale.tres" id="5_unlock"]
+
+[sub_resource type="Resource" id="Resource_action"]
+script = ExtResource("2_action")
+timber = ExtResource("4_timber")
+timber_from_thicket = 1
+timber_from_log = 3
+
+[resource]
+script = ExtResource("1_def")
+id = &"axe"
+display_name = "Axe"
+description = "Chops thicket, a tile at a time, for timber: on the farm it clears the ground. In the Woods, undergrowth and fallen logs."
+icon = ExtResource("3_icon")
+buy_price = 150
+energy_cost = 4.0
+action = SubResource("Resource_action")
+sold_only_by = Array[StringName]([&"general_store"])
+requires_unlock = ExtResource("5_unlock")

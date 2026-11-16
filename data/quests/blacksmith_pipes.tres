@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/commission_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/produce/timber.tres" id="3_r"]
+[ext_resource type="Resource" path="res://data/quests/blacksmith_sprinklers.tres" id="4_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="5_r"]
+[ext_resource type="Resource" path="res://data/unlocks/better_pipes.tres" id="6_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="7_r"]
+[ext_resource type="Resource" path="res://data/tools/big_sprinkler.tres" id="8_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+item = ExtResource("3_r")
+amount = 40
+fee = 600
+
+[resource]
+script = ExtResource("1_r")
+id = &"blacksmith_pipes"
+title = "Better pipes"
+giver = &"blacksmith"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Those sprinklers holding up? Good. Four tiles, though. I can do better.", "Wider pipes, a stronger spinner, and a frame that won't rot. It'll water all eight tiles round it.", "Forty timber and 600 gold. Bring them and the first big one's yours."])
+reminder_line = "Forty timber, 600 gold. Then we'll see some real water."
+thanks_lines = Array[String](["That's the lot. Stand back...", "Eight tiles, every morning. Here's the first one. The rest are on my shelf, if you can afford them."])
+reward_items = Dictionary[ExtResource("7_r"), int]({
+ExtResource("8_r"): 1
+})
+reward_unlocks = Array[ExtResource("5_r")]([ExtResource("6_r")])
+requires = ExtResource("4_r")
+first_day = 47

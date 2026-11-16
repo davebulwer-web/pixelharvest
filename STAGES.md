@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 14 — the Woods and foraging.** Session 1 (the bridge, the Woods, forage that changes daily, Pip's mushroom hunt; no save change) is built, waiting for Dave to try it. Session 2 is the axe and timber. Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 14 — the Woods and foraging.** Session 1 (the bridge, the Woods, forage that changes daily, Pip's mushroom hunt; no save change) is tested and committed by Dave (2026-11-16). Session 2 (the axe and timber, Brann's sprinkler line, Ivy's glasshouse frame; save version 15) is built, waiting for Dave to try it. Then the Stage 14 art, and Stage 15 (fishing). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -698,19 +698,44 @@ ROADMAP sections 8 and 9. Reverses DESIGN.md's "no foraging" (updated 2026-11-15
       up with E, staying picked after a trip out, gone by morning; Pip's hunt; passing out
       in the Woods; saves v1–v13), rendered the Woods in summer, autumn and winter and the
       bridge broken and whole
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-16)
+
+**Session 2 — the axe and timber** (2026-11-16, DECISIONS 053, save version 15)
+
+- [x] The axe: at Marlow's from spring day 8 (`axe_on_sale`), 150g, 4 energy a swing. It
+      chops the farm's thicket a tile at a time for 1 timber (the ground becomes grass: a
+      slow, cheap way into a field, which stays on sale while any thicket is left)
+- [x] In the Woods: the undergrowth (1 timber a tile; grows back when the season turns)
+      and 3 fallen logs a day (3 timber each), placed by the date like forage, never on
+      forage or in anyone's way. The axe is the first tool that works off the farm
+      (`ToolAction.can_use_away`/`apply_away`, asked of the Woods)
+- [x] Timber (2g at the bin); wood chips and a chop sound (`art/build_sounds.py`)
+- [x] Brann's sprinkler line: sprinklers now wait for it. **The sprinkler design**
+      (summer day 5: 20 timber + 200g → a sprinkler, and sprinklers on his shelf);
+      **Better pipes** (summer day 19: 40 timber + 600g → a big sprinkler, and big
+      sprinklers on his shelf). New goal kind `CommissionGoal` (items and a fee)
+- [x] Ivy's **glasshouse frame** (autumn or winter, after her basket: 50 timber → 300g and
+      the unlock `glasshouse_frame`, for Stage 17's restoration to follow on from).
+      Wren's worms wait for fishing (Stage 15)
+- [x] "20 timber", "12 fibre": names that stay the same in the plural
+- [x] Save version 15 (undergrowth cleared this season); older games keep sprinklers on
+      sale (both of Brann's sprinkler requests ticked off); `tests/saves/v14_example.json`
+- [x] Verified in the sandbox: headless import and run clean, 192 harness checks (the axe's
+      day on Marlow's shelf and nobody else's; chopping farm thicket with Space, its cost,
+      walking onto it, tilling it, a whole field chopped taking it off sale, saved; the
+      Woods' undergrowth and logs chopped with Space, staying chopped after a trip out,
+      new logs next morning, undergrowth kept through a save and back at the season's
+      turn; too tired to chop; a year of log days: three a day, the same however often
+      asked, off the forage, apart, and every forage spot and log reachable; both of
+      Brann's requests and Ivy's, gold and timber taken, rewards and shelves; saves
+      v1–v14), rendered the farm with a field half chopped and the Woods with logs and
+      cleared undergrowth
 - [ ] Dave confirms it plays correctly on Windows
-
-**Session 2 — the axe and timber**
-
-- [ ] The axe (Marlow, spring week 2) and timber: chopping thicket on the farm and the
-      Woods' undergrowth and fallen logs
-- [ ] Brann's sprinkler line and Ivy's timber, now that timber exists; Wren's worms wait
-      for fishing (Stage 15)
 
 **Art**
 
 - [ ] Pixellab: woods tileset (4 seasons), bridge (whole and broken), footbridge, 14 forage
-      icons, axe, timber
+      icons, axe, timber, fallen log
 
 ## Stage 15 — Fishing with Wren · 1–2 sessions + art · Opus
 

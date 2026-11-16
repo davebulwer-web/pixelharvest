@@ -58,7 +58,8 @@ const CLEARINGS: Array[Rect2i] = [
 ]
 
 ## Thick undergrowth at the edges of the glades: solid, like the farm's
-## thicket. Stage 14 session 2's axe can clear it for timber.
+## thicket. The axe clears it for timber (DECISIONS 053); it grows back when
+## the season turns.
 const THICKETS: Array[Rect2i] = [
 	Rect2i(3, 16, 3, 2),   # the west glade's bottom corner
 	Rect2i(28, 16, 2, 2),  # the middle clearing's bottom corner
@@ -180,6 +181,37 @@ static func forage_cells() -> Array[Vector2i]:
 			if _in_any(cell, CLEARINGS) or _beside_path(cell):
 				result.append(cell)
 	return result
+
+
+## Every left-hand cell a fallen log could lie on (DECISIONS 053): two tiles
+## of a glade, with a ring of open glade all round them, so a log never
+## blocks a path, a gap or the way to anything. Never on the undergrowth.
+## Always in the same order, top row first.
+static func log_cells() -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	for y in SIZE.y:
+		for x in SIZE.x:
+			var cell := Vector2i(x, y)
+			if _glade_all_round(cell):
+				result.append(cell)
+	return result
+
+
+## True if the two tiles from `cell` rightwards, and every tile touching
+## them, are open glade (not path, undergrowth or water).
+static func _glade_all_round(cell: Vector2i) -> bool:
+	for dy in range(-1, 2):
+		for dx in range(-1, 3):
+			var near := cell + Vector2i(dx, dy)
+			if not _in_any(near, CLEARINGS) or _in_any(near, THICKETS) or is_path(near) or is_stream(near):
+				return false
+	return true
+
+
+## True for undergrowth: a cell of THICKETS (DECISIONS 053). Whether it has
+## been chopped down this season is GameState's (is_cleared).
+static func is_undergrowth(cell: Vector2i) -> bool:
+	return _in_any(cell, THICKETS)
 
 
 static func _beside_path(cell: Vector2i) -> bool:

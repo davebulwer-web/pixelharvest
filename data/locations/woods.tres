@@ -13,3 +13,4 @@ music = ExtResource("2_music")
 requires_unlock = ExtResource("3_unlock")
 locked_message = "The old bridge to the Woods is down. Until it's mended there's no way across the river."
 forage_per_day = 10
+fallen_logs_per_day = 3

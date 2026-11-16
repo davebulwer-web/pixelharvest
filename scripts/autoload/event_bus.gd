@@ -101,6 +101,12 @@ signal giant_harvested(cell: Vector2i, crop_id: StringName)
 ## Pip's and Wren's requests and the day's summary can count these.
 signal foraged(item_id: StringName, location_id: StringName)
 
+## The axe chopped something (DECISIONS 053): `what` is &"thicket" (the
+## farm's thicket or the Woods' undergrowth) or &"log" (a fallen log in the
+## Woods), at `cell` in `location_id`. It gave `amount` of `item_id` (timber),
+## which GameState puts in the bag; the farm and the Woods redraw the cell.
+signal wood_chopped(location_id: StringName, cell: Vector2i, what: StringName, item_id: StringName, amount: int)
+
 # --- Player and economy -----------------------------------------------------
 
 signal energy_changed(current: float, maximum: float)

@@ -33,3 +33,22 @@ func apply(_farm: FarmData, _cell: Vector2i) -> void:
 ## be used today.
 func usable_in_season(_season_id: StringName) -> bool:
 	return true
+
+
+# --- Away from the farm (DECISIONS 053) ----------------------------------------
+# The axe is the first tool that works somewhere other than the farm: in the
+# Woods. Those places have no FarmData, so they're asked through `place`, the
+# map's scene, instead. Each place says for itself what its tools can do
+# there (the Woods answers choppable_at). Most tools only work on the farm,
+# so by default these say no.
+
+## True if this tool would do something to `cell` in `place` (the scene of a
+## map that isn't the farm). Must not change anything.
+func can_use_away(_place: Node, _cell: Vector2i) -> bool:
+	return false
+
+
+## Do it, away from the farm. Only called after can_use_away() said yes and
+## the energy was paid.
+func apply_away(_place: Node, _cell: Vector2i) -> void:
+	pass

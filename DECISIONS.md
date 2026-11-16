@@ -1996,3 +1996,83 @@ bridge appears only on summer day 1 even if paid on spring day 20 (as promised).
 is the same in every game on the same date. Players can walk over forage, and must face
 it to pick it up, like everything else. Fishing in the stream waits for Stage 15.
 
+## 053 — The axe and timber: chopping on the farm and in the Woods, and Brann's sprinkler line
+
+**Decision.** Stage 14 session 2 adds the axe and timber (ROADMAP sections 5.4, 5.8 and 8),
+and the requests that need timber.
+
+- *The axe* is a ToolDef (`data/tools/axe.tres`) with a new action, `ChopAction`. Marlow
+  sells it from spring day 8 (a calendar unlock, `axe_on_sale`, so the board pins it up
+  and the morning summary announces it), 150g; a swing costs 4 energy. How much timber
+  each thing gives, and what timber is, are fields on the action in the axe's `.tres`
+  (1 from thicket, 3 from a log): rule 6. No tiers yet.
+- *On the farm* it chops thicket, a tile at a time: `FarmData.chop` turns the tile to
+  grass (saved with the farm, as terrain always was) and gives 1 timber. A field stays on
+  sale while any of its thicket is left; buying it clears the rest. The north field is
+  126 tiles: about 500 energy, five days of work, against 500g. That is ROADMAP's "cheap,
+  slow alternative", and the farm is the timber source before the Woods open.
+- *Off the farm.* The Woods have no FarmData, so ToolAction gains a second pair,
+  `can_use_away(place, cell)` and `apply_away(place, cell)`, asked of the map's scene
+  (`Player.tool_place`, which the Woods set to themselves). Every other tool says no, so
+  the town and shops are unchanged. The Woods answer `choppable_at(cell)` (&"thicket",
+  &"log" or nothing) and `chop()`. The Woods show the tile cursor only when the held
+  tool can do something there, so it doesn't follow the player about.
+- *The Woods' undergrowth* (DECISIONS 052's THICKETS, 20 tiles) gives 1 timber a tile and
+  stays down until the season turns (TimeSystem calls `GameState.regrow_undergrowth`).
+  What has been chopped is the one new thing saved: `GameState.cleared`, location id ->
+  cells. **Save version 15.**
+- *Fallen logs*: each morning `LocationDef.fallen_logs_per_day` (3 in the Woods) lie
+  across two tiles of a glade, placed like forage, by dice seeded by place and date
+  (`FallenLogs`), so nothing about them is saved. They keep off every spot today's forage
+  is on, picked or not, and off each other; and they only lie where every tile round them
+  is open glade, so a log can never block a path or the way to anything (checked over a
+  year of days). A log is solid; E on it says what it's for. Chopping one gives 3 timber,
+  and it stays chopped for the day (remembered with the day's picked forage).
+- *Timber* is a plain ItemDef in `data/produce/` (beside fibre), 2g at the bin: it's for
+  requests, not money. Chopping announces EventBus `wood_chopped`; GameState puts the
+  timber in the bag, the farm redraws the tile, FarmEffects throws wood chips (the Woods
+  now have a FarmEffects too), and Audio plays a new `chop` sound (made last in
+  `art/build_sounds.py`, with dice of its own, so no other sound changed).
+- *Brann's sprinkler line* (ROADMAP 5.4). Sprinklers and big sprinklers are no longer on
+  his shelf from the day the forge opens: each waits for an unlock his requests give.
+  **The sprinkler design** (from summer day 5, after his test): 20 timber and 200g → a
+  sprinkler and `sprinkler_design`. **Better pipes** (from summer day 19): 40 timber and
+  600g → a big sprinkler and `better_pipes`. ROADMAP's "and something from the woods"
+  is left out: the timber is from the woods. Mabel's pumpkin still gives a sprinkler,
+  so one can come early that way.
+- *A delivery with a fee* is a new goal kind, `CommissionGoal` (extends DeliverGoal with
+  `fee`): the items as a delivery, the gold as a gift (DECISIONS 049). `Quests.is_ready`
+  now also checks the purse holds the goal's `gold_to_hand_in()`, so the "?" waits for
+  both; the request log reads "12 / 20 timber, and 200g".
+- *Ivy's glasshouse frame* (ROADMAP 5.8, part 1): autumn or winter, after her basket,
+  50 timber → 300g and the unlock `glasshouse_frame`. Parts 2 and 3 (1,500g; autumn
+  crops and a fish → the greenhouse) wait for fishing and the greenhouse (Stages 15, 17)
+  and can `requires_unlock` the frame.
+- *Old games* (save version 14 and earlier) could always buy sprinklers, so the upgrade
+  gives them both unlocks and ticks both of Brann's sprinkler requests off, as version
+  10 did for his first request: nobody loses something they could buy.
+- *Small fix:* names that don't take an s ("20 timber", "12 fibre", holly, kale, garlic,
+  corn, rhubarb) stay the same in the plural (`QuestGoal.SAME_IN_PLURAL`). The board's
+  fibre jobs used to say "12 fibres".
+
+Options considered: for the Woods' undergrowth, growing back every night like forage (no
+save change, but chopping the same 20 tiles every morning would be the best timber in the
+game and the glades would never open up) or staying down for ever (a one-off 20 timber).
+Back each season makes it a small seasonal supply and opens the glades for a while. For
+working off the farm: Woods cells as nodes in an "interactable"-style group (one node
+per undergrowth tile, for something the map already knows), or making the Woods a
+FarmData (a whole saved tile grid for a place whose only state is 20 cells). Asking the
+scene keeps rule 5: the player still never knows which tool it holds. For Brann's fee:
+a request with two goals (a bigger change to QuestDef, the log and every goal check),
+or two requests in a row (timber, then gold: an extra trip for nothing).
+
+**Why.** ROADMAP section 8: the axe is the timber source and a cheap way to land; section
+5: Brann's and Ivy's lines needed timber to exist before they could be written. Rule 3
+holds: another place with logs is a `fallen_logs_per_day` and a `log_cells()`, and
+another commission is a `.tres`.
+
+**Cost.** Sprinklers come later in a new game than they used to (summer, and 200g plus
+timber, instead of the forge's second week). Fallen logs are the same in every game on
+the same date. A field partly chopped still costs its full price. Placeholder art: axe,
+timber and fallen log, drawn by a script in the palette until Pixellab.
+

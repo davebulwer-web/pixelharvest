@@ -125,10 +125,13 @@ func progress(quest: QuestDef) -> int:
 			quest.goal.needed())
 
 
-## True if `quest` is taken and has everything it needs.
+## True if `quest` is taken and has everything it needs: the items, and any
+## gold that goes with them (a CommissionGoal's fee, DECISIONS 053; a gift of
+## gold already counts the purse as its progress).
 func is_ready(quest: QuestDef) -> bool:
 	return GameState.quests.is_active(quest.id) and quest.goal != null \
-			and progress(quest) >= quest.goal.needed()
+			and progress(quest) >= quest.goal.needed() \
+			and GameState.gold >= quest.goal.gold_to_hand_in()
 
 
 ## The request `npc_id` has given you that's still open, or null.

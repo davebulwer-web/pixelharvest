@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SoundBank" load_steps=22 format=3]
+[gd_resource type="Resource" script_class="SoundBank" load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/sound_bank.gd" id="1_bank"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/till.wav" id="2_till"]
@@ -21,6 +21,7 @@
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/nope.wav" id="19_nope"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/menu.wav" id="20_menu"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/thunder.wav" id="21_thunder"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/chop.wav" id="22_chop"]
 
 [resource]
 script = ExtResource("1_bank")
@@ -44,6 +45,7 @@ sounds = Dictionary[StringName, AudioStream]({
 &"paper": ExtResource("18_paper"),
 &"nope": ExtResource("19_nope"),
 &"menu": ExtResource("20_menu"),
-&"thunder": ExtResource("21_thunder")
+&"thunder": ExtResource("21_thunder"),
+&"chop": ExtResource("22_chop")
 })
 pitch_variation = 0.05

@@ -6,15 +6,19 @@ extends Node2D
 ##
 ## Like the town it owns no game state. It draws a fixed map (WoodsLayout),
 ## stands the trees on it, and lays out today's forage (Forage.spots_today),
-## a ForageSpot on each, which the player picks up with E. Tools are off here,
-## as in town: the farm's tiles aren't here to be hoed. (Stage 14 session 2's
-## axe will be the first tool that works here.)
+## a ForageSpot on each, which the player picks up with E. The farm's tools
+## are off here, as in town, except the axe (DECISIONS 053): the player asks
+## this scene what's at a cell (choppable_at) and the axe chops it (chop):
+## the undergrowth, which stays down until the season turns, and the day's
+## fallen logs (FallenLogs), which are new each morning.
 ##
 ##   Woods
 ##   ├── Ground      (TileMapLayer, the same seasonal tilesets as the farm)
 ##   ├── Footbridge  (the planks over the stream, drawn over the ground)
 ##   ├── SpawnPoints (Marker2Ds, made here: one for the way in from town)
-##   ├── Entities    (y-sorted: player, trees, forage)
+##   ├── TileCursor  (made here: the tile the axe would chop, when it would)
+##   ├── Entities    (y-sorted: player, trees, forage, fallen logs)
+##   ├── Effects     (made here: FarmEffects, the axe's wood chips)
 ##   ├── Weather     (the season's and the day's overlays, as on the farm)
 ##   ├── Daylight    (the time-of-day tint, as on the farm)
 ##   └── Hud         (the same HUD scene as the farm)
@@ -31,19 +35,40 @@ const TOWN_ID := &"town"
 @onready var _spawns: Node2D = $SpawnPoints
 @onready var _weather: Node = $Weather
 
+## Today's fallen logs: each of a log's two cells -> its FallenLog node.
+var _logs: Dictionary = {}
+
+## The outline on the tile the held tool would act on (as on the farm), shown
+## only when there's something here it can act on: the axe at undergrowth or
+## a log.
+var _cursor: Node2D
+
 
 func _ready() -> void:
 	_player.can_farm = false
+	_player.tool_place = self
 	SeasonLook.apply_ground(_ground)
 	var tiles := WoodsLayout.build()
 	for cell: Vector2i in tiles:
 		GroundTiles.draw(_ground, cell, tiles[cell])
+	# Undergrowth chopped down this season is grass until the season turns.
+	for cell: Vector2i in GameState.cleared.get(WOODS_ID, []):
+		GroundTiles.draw(_ground, cell, GroundTiles.grass_for(cell))
+	_cursor = preload("res://scripts/tile_cursor.gd").new()
+	_cursor.name = "TileCursor"
+	add_child(_cursor)
+	move_child(_cursor, _entities.get_index())
+	# Chips of wood when the axe bites, as on the farm.
+	var effects := FarmEffects.new()
+	effects.name = "Effects"
+	add_child(effects)
 	# The footbridge's picture covers its cells, which are path underneath.
 	_footbridge.position = Vector2(WoodsLayout.FOOTBRIDGE.position * TILE_PX)
 
 	_add_spawn(&"from_town", WoodsLayout.ARRIVAL_FROM_TOWN)
 	_place_objects()
 	_place_forage()
+	_place_logs()
 	_add_town_gate()
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
@@ -85,6 +110,62 @@ func _place_forage() -> void:
 	var spots := Forage.spots_today(location, WoodsLayout.forage_cells())
 	for cell: Vector2i in spots:
 		_entities.add_child(ForageSpot.create(WOODS_ID, cell, spots[cell]))
+
+
+## Today's fallen logs (FallenLogs), keeping off every spot today's forage
+## is on, picked or not.
+func _place_logs() -> void:
+	var location := LocationManager.current()
+	var forage := Forage.spots_today(location, WoodsLayout.forage_cells(), true)
+	for cell in FallenLogs.today(location, WoodsLayout.log_cells(), forage):
+		var log_node := FallenLog.create(cell)
+		_entities.add_child(log_node)
+		_logs[cell] = log_node
+		_logs[cell + Vector2i.RIGHT] = log_node
+
+
+func _physics_process(_delta: float) -> void:
+	# Outline the axe's tile only when it would do something there, so the
+	# Woods don't show a cursor wherever you walk.
+	var cells: Array[Vector2i] = []
+	var tool := GameState.selected_tool()
+	if tool != null and tool.action != null:
+		for cell in _player.target_cells():
+			if tool.action.can_use_away(self, cell):
+				cells.append(cell)
+	_cursor.set_cells(cells)
+
+
+# --- The axe (DECISIONS 053) ---------------------------------------------------
+
+## What the axe would chop at `cell`: &"thicket" for undergrowth not yet
+## cleared this season, &"log" for a fallen log not yet chopped today, &""
+## for nothing.
+func choppable_at(cell: Vector2i) -> StringName:
+	if _logs.has(cell):
+		return &"log"
+	if WoodsLayout.is_undergrowth(cell) and not GameState.is_cleared(WOODS_ID, cell):
+		return &"thicket"
+	return &""
+
+
+## Chop whatever is at `cell`, for `amount` of `item_id` (the axe says how
+## much each gives). The undergrowth becomes grass for the rest of the
+## season; a log is gone for today. wood_chopped puts the timber in the bag.
+func chop(cell: Vector2i, item_id: StringName, amount: int) -> void:
+	var what := choppable_at(cell)
+	if what == &"log":
+		var log_node: FallenLog = _logs[cell]
+		GameState.chop_log(WOODS_ID, log_node.cell)
+		_logs.erase(log_node.cell)
+		_logs.erase(log_node.cell + Vector2i.RIGHT)
+		log_node.queue_free()
+	elif what == &"thicket":
+		GameState.clear_undergrowth(WOODS_ID, cell)
+		GroundTiles.draw(_ground, cell, GroundTiles.grass_for(cell))
+	else:
+		return
+	EventBus.wood_chopped.emit(WOODS_ID, cell, what, item_id, amount)
 
 
 ## The way back: the gap in the south edge, over the bridge into town.

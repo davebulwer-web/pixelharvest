@@ -57,3 +57,8 @@ extends Resource
 ## How many spots get something wild each morning (a mushroom, berries), out of
 ## the spots the location's map offers. 0: no foraging here.
 @export var forage_per_day: int = 0
+
+## --- Timber (DECISIONS 053) -------------------------------------------------------
+## How many fallen logs lie about each morning, for the axe, out of the places
+## the location's map offers. 0: none here.
+@export var fallen_logs_per_day: int = 0

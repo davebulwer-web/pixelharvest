@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/produce/timber.tres" id="3_r"]
+[ext_resource type="Resource" path="res://data/quests/ivy_autumn_set.tres" id="4_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="5_r"]
+[ext_resource type="Resource" path="res://data/unlocks/glasshouse_frame.tres" id="6_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+item = ExtResource("3_r")
+amount = 50
+
+[resource]
+script = ExtResource("1_r")
+id = &"ivy_timber"
+title = "The glasshouse frame"
+giver = &"ivy"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["You came back! I've been looking at the old frame. The glass is long gone, and the wood is rotten through.", "If I'm to bring this place back, it starts with a new frame. Fifty lengths of good timber would do it.", "Chop the thicket on your farm, or the undergrowth and fallen logs in the Woods. There's no hurry, dear."])
+reminder_line = "Fifty lengths of timber for the frame, dear. No hurry."
+thanks_lines = Array[String](["Fifty! Look at that. Good honest wood.", "I'll have the frame up before the frost. The glass will be the hard part, and that's for another day.", "Take this for your trouble."])
+reward_gold = 300
+reward_unlocks = Array[ExtResource("5_r")]([ExtResource("6_r")])
+requires = ExtResource("4_r")
+first_day = 1
+seasons = Array[StringName]([&"autumn", &"winter"])

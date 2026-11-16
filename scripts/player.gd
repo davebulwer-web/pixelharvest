@@ -45,6 +45,12 @@ var _facing: StringName = &"down"
 ## True on the farm. The town and the shops switch it off (see above).
 var can_farm: bool = true
 
+## Away from the farm, the map scene whose tools can still do something there
+## (DECISIONS 053): the Woods set it to themselves, so the axe works there.
+## Null everywhere else: the town, the shops and the farmhouse have nothing
+## to use a tool on.
+var tool_place: Node = null
+
 
 func _physics_process(_delta: float) -> void:
 	var direction := Input.get_vector(
@@ -61,6 +67,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"use_tool"):
 		if can_farm:
 			_use_tool()
+		elif tool_place != null:
+			_use_tool_away()
 	elif event.is_action_pressed(&"interact"):
 		_interact()
 	elif event.is_action_pressed(&"sleep"):
@@ -123,6 +131,29 @@ func _use_tool() -> void:
 		if tool.consumed_on_use and not GameState.inventory.remove(tool):
 			break
 		tool.action.apply(GameState.farm, cell)
+
+
+## The same, away from the farm: the tool asks `tool_place` (the Woods)
+## about each cell instead of the farm's tiles. Energy is paid the same way.
+func _use_tool_away() -> void:
+	var tool := GameState.selected_tool()
+	if tool == null or tool.action == null:
+		return
+	var usable: Array[Vector2i] = []
+	for cell in target_cells():
+		if tool.action.can_use_away(tool_place, cell):
+			usable.append(cell)
+	if usable.is_empty():
+		return
+	var tier_cost := tool.energy_cost_at(GameState.tool_tier(tool))
+	var cost := minf(tier_cost, tool.energy_cost * usable.size())
+	cost *= GameState.difficulty.energy_cost_multiplier
+	if not GameState.try_spend_energy(cost):
+		return
+	for cell in usable:
+		if tool.consumed_on_use and not GameState.inventory.remove(tool):
+			break
+		tool.action.apply_away(tool_place, cell)
 
 
 ## E: harvest a ready crop by hand, pull up weeds (DECISIONS 045), or use

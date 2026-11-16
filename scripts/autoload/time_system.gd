@@ -22,7 +22,8 @@ extends Node
 ##      048). Then ripe blocks of melons or pumpkins may go giant (DECISIONS
 ##      048). Then sprinklers water, last, so the morning has wet soil round them.
 ##   3. The calendar moves on and energy refills.
-##   4. If that started a new season: crops that can't grow in it die, and
+##   4. If that started a new season: crops that can't grow in it die, the
+##      undergrowth chopped in the Woods grows back (DECISIONS 053), and
 ##      season_changed is announced — the farm repaints itself for the season.
 ##   4b. Whatever the calendar opens today opens (Brann's forge on day 8,
 ##      DECISIONS 043), so the morning's summary can say so.
@@ -105,6 +106,8 @@ func end_day() -> void:
 	EventBus.energy_changed.emit(GameState.energy, GameState.max_energy)
 	if season_turned:
 		GameState.farm.wither_out_of_season(GameState.season_id())
+		# The Woods' undergrowth grows back with the new season (DECISIONS 053).
+		GameState.regrow_undergrowth()
 		EventBus.season_changed.emit(GameState.season)
 	GameState.open_due_unlocks()
 	_bring_weather()
