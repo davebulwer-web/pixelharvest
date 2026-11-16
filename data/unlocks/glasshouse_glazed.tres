@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"glasshouse_glazed"
+display_name = "new glass for Ivy's glasshouse"
+announcement = "Ivy's glasshouse has its glass again. She says it only wants planting now."
+on_day = 0

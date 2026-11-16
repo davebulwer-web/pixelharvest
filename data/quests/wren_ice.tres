@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/catch_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/quests/wren_river_fish.tres" id="3_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="4_r"]
+[ext_resource type="Resource" path="res://data/produce/winter_lure.tres" id="5_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+through_ice = true
+
+[resource]
+script = ExtResource("1_r")
+id = &"wren_ice"
+title = "Ice and patience"
+giver = &"angler"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Frozen solid, the lot of it. Most folk put their rods away till spring.", "Not me. Face the ice with your rod and Space: that cuts a hole. Space again and you're fishing through it.", "They're slow under the ice, mind. Patience. Bring one up and I'll give you something for the cold months."])
+reminder_line = "One fish through the ice. Cut a hole, then wait. And wait."
+thanks_lines = Array[String](["Through the ice! Now you're an angler.", "Here: my winter lure. Keep it in your bag and they'll bite twice as quick under the ice, and you'll not waste a scrap of bait."])
+reward_items = Dictionary[ExtResource("4_r"), int]({
+ExtResource("5_r"): 1
+})
+requires = ExtResource("3_r")
+seasons = Array[StringName]([&"winter"])

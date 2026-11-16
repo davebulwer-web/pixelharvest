@@ -20,7 +20,7 @@ giver = &"angler"
 goal = SubResource("Resource_goal")
 offer_lines = Array[String](["Nothing's biting. Nothing's bitten all week. It's the bait: shop bread, and the fish know it.", "Now, the Woods are open again. After rain the worms come up in the glades, fat ones.", "Bring me five fresh worms and I'll show you something. I've an old rod at home that wants using."])
 reminder_line = "Five worms. They come up in the Woods when it rains."
-thanks_lines = Array[String](["Oh, look at these. Proper wrigglers.", "Here: my old rod. Face the water and Space to cast. Watch the float, and when it goes under, Space! Quick, but not too quick.", "Then reel: Space whenever the marker's in the green. Big fish need more than one good pull. E reels in if you lose heart.", "Every water has its own fish, and they keep their own hours. Except in winter: it all freezes over."])
+thanks_lines = Array[String](["Oh, look at these. Proper wrigglers.", "Here: my old rod. Face the water and Space to cast. Watch the float, and when it goes under, Space! Quick, but not too quick.", "Then reel: Space whenever the marker's in the green. Big fish need more than one good pull. E reels in if you lose heart.", "Every water has its own fish, and they keep their own hours. In winter it all freezes over, but that needn't stop you. Come and see me then."])
 reward_items = Dictionary[ExtResource("5_r"), int]({
 ExtResource("6_r"): 1
 })

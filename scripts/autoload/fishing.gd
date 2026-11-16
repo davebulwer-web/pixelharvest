@@ -18,6 +18,16 @@ extends Node
 ##             many slack ones and it gets away (fish_escaped).
 ## E gives up at any point and reels in.
 ##
+## Winter (DECISIONS 055): every water is ice. Space with the rod on bare ice
+## cuts a hole there (ice_hole_cut) instead of casting; Space at a hole casts
+## through it, and the wait is longer (the rules' ice_wait_multiplier). The
+## holes are kept here, by location, and drawn as IceHole pictures in
+## whichever map is showing. The night freezes them all over, so they're
+## never saved.
+##
+## What shortens the wait, in order: the rod's tier (Wren's fine rod), then a
+## lure that works today (kept, never used up), or else bait (used up).
+##
 ## Which fish bites is decided when it bites: one of the FishDefs biting in
 ## that water, in that place, this season, at this hour, in today's weather,
 ## chosen by weight. Its fight (1 to 5) sets the bar: data/fishing_rules.tres
@@ -66,8 +76,25 @@ var _slack: int = 0
 ## service too, and mustn't count as striking.
 var _cast_frame: int = -1
 
+## True if this line went down through a hole in the ice.
+var _through_ice: bool = false
+
 var _line: FishingLine
 var _dice := RandomNumberGenerator.new()
+
+## The holes in the ice: location id -> the cells cut today.
+var _holes: Dictionary = {}
+
+## The map the holes were last drawn in, and the pictures drawn there, so a
+## new map (going through a gate, waking up) gets its own.
+var _holes_scene: Node
+var _hole_sprites: Array[Node] = []
+
+const ICE_HOLE: Texture2D = preload("res://assets/sprites/fishing/ice_hole.png")
+
+## On the ground's own level (-1, as the town's bridge is), added after the
+## ground so it draws over it, and under the farmer and everything standing.
+const ICE_HOLE_Z := -1
 
 
 func _ready() -> void:
@@ -78,6 +105,10 @@ func _ready() -> void:
 	EventBus.day_ended.connect(func(_d: int) -> void: _stop(""))
 	EventBus.new_game_started.connect(func() -> void: _stop(""))
 	EventBus.game_loaded.connect(func() -> void: _stop(""))
+	# The night freezes every hole over; a different game has none.
+	EventBus.day_started.connect(func(_d: int, _s: int, _y: int) -> void: clear_holes())
+	EventBus.new_game_started.connect(clear_holes)
+	EventBus.game_loaded.connect(clear_holes)
 
 
 ## True while a line is out: the player stands still and leaves Space and E
@@ -97,10 +128,69 @@ func fish_on_line() -> FishDef:
 	return _fish
 
 
-## True if every water is frozen in `season_id` (winter, until the ice hole).
+## True if every water is frozen in `season_id` (winter): the rod cuts a
+## hole before it can cast.
 func is_frozen(season_id: StringName) -> bool:
 	var rules: FishingRules = GameState.RULES.fishing
 	return rules != null and season_id in rules.frozen_seasons
+
+
+## True if a hole has been cut in the ice at `cell` in `location_id` today.
+func has_hole(location_id: StringName, cell: Vector2i) -> bool:
+	return cell in _holes.get(location_id, [])
+
+
+## The cells with holes cut today in `location_id`.
+func holes_in(location_id: StringName) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	cells.assign(_holes.get(location_id, []))
+	return cells
+
+
+## Freeze every hole over (each night, and for a different game).
+func clear_holes() -> void:
+	_holes.clear()
+	_remove_hole_sprites()
+
+
+## How long the float waits as things stand, as a multiple of the rules'
+## wait, and what's on the hook: the rod's tier, then a lure that works in
+## today's season or else bait. Doesn't use anything up: see _bait_up().
+func wait_factor(through_ice: bool) -> float:
+	var rules: FishingRules = GameState.RULES.fishing
+	var multiplier := rules.rod_wait_multiplier(_rod_tier())
+	if through_ice:
+		multiplier *= rules.ice_wait_multiplier
+	var lure := lure_today()
+	if lure != null:
+		multiplier *= lure.wait_multiplier
+	elif _bait_in_bag() != null:
+		multiplier *= rules.bait_wait_multiplier
+	return multiplier
+
+
+## A lure in the bag that works today, or null.
+func lure_today() -> LureDef:
+	var rules: FishingRules = GameState.RULES.fishing
+	for lure in rules.lures:
+		if lure != null and GameState.inventory.count(lure) > 0 and lure.works_in(GameState.season_id()):
+			return lure
+	return null
+
+
+func _bait_in_bag() -> ItemDef:
+	var rules: FishingRules = GameState.RULES.fishing
+	for bait in rules.bait:
+		if bait != null and GameState.inventory.count(bait) > 0:
+			return bait
+	return null
+
+
+## The tier of the rod the player owns (1 once Wren gives the fine rod).
+func _rod_tier() -> int:
+	var rules: FishingRules = GameState.RULES.fishing
+	var rod := ContentDB.item(rules.rod_tool) as ToolDef
+	return GameState.tool_tier(rod) if rod != null else 0
 
 
 ## The fish that would bite in `water` at `location_id` right now: today's
@@ -116,29 +206,80 @@ func _on_line_cast(cell: Vector2i, water: StringName, wait_multiplier: float) ->
 	if is_busy():
 		return
 	var rules: FishingRules = GameState.RULES.fishing
+	var location := GameState.location
+	var through_ice := is_frozen(GameState.season_id())
+	if through_ice:
+		cell = _ice_cell(cell)
+	# On bare ice the rod's Space cuts a hole instead (the energy is the
+	# cast's). The next Space there casts through it.
+	if through_ice and not has_hole(location, cell):
+		_cut_hole(location, cell)
+		return
 	_cell = cell
 	_water = water
-	_location = GameState.location
+	_location = location
+	_through_ice = through_ice
 	_fish = null
 	_size = 0
 	_cast_frame = Engine.get_process_frames()
-	var wait := _dice.randf_range(rules.wait_min_seconds, rules.wait_max_seconds) * wait_multiplier
-	# Bait, if there's any in the bag, goes on the hook and is used up.
-	for bait in rules.bait:
-		if bait != null and GameState.inventory.count(bait) > 0:
-			GameState.inventory.remove(bait, 1)
-			wait *= rules.bait_wait_multiplier
-			var left := GameState.inventory.count(bait)
-			EventBus.message_posted.emit("Baited the hook (%d %s left)" % [left, QuestGoal.plural(bait.display_name, left)])
-			break
+	var wait := _dice.randf_range(rules.wait_min_seconds, rules.wait_max_seconds) * wait_multiplier \
+			* wait_factor(through_ice)
+	_bait_up()
 	_timer = wait
 	_state = State.WAITING
 	_line = FishingLine.new()
 	_line.name = "FishingLine"
-	_line.setup(_find_player(), cell)
+	_line.setup(_find_player(), cell, through_ice)
 	var scene := get_tree().current_scene
 	if scene != null:
 		scene.add_child(_line)
+
+
+## Where on the ice the hole goes for a cast at `cell`. Facing down, left or
+## right, that's the tile ahead. Facing up, the tile ahead is hidden behind
+## the farmer's head and hat (open water has the float land further out for
+## the same reason), so the hole goes one tile further, if that's ice too.
+func _ice_cell(cell: Vector2i) -> Vector2i:
+	var player := _find_player()
+	if player == null or player.position.y <= (cell.y + 1) * FishingLine.TILE_PX:
+		return cell
+	var further := cell + Vector2i.UP
+	return further if _is_water(further) else cell
+
+
+## True if `cell` in the map showing is water (ice, in winter): the farm's
+## pond, or wherever the map's water_at says.
+func _is_water(cell: Vector2i) -> bool:
+	if GameState.location == LocationManager.FARM_ID:
+		var tile := GameState.farm.tile(cell)
+		return tile != null and tile.terrain == FarmTile.Terrain.WATER
+	var scene := get_tree().current_scene
+	return scene != null and scene.has_method(&"water_at") and scene.water_at(cell) != &""
+
+
+## What goes on the hook for this cast: a lure that works today is tied on
+## and kept; otherwise bait, if there's any in the bag, is used up.
+func _bait_up() -> void:
+	var lure := lure_today()
+	if lure != null:
+		return
+	var bait := _bait_in_bag()
+	if bait == null:
+		return
+	GameState.inventory.remove(bait, 1)
+	var left := GameState.inventory.count(bait)
+	EventBus.message_posted.emit("Baited the hook (%d %s left)" % [left, QuestGoal.plural(bait.display_name, left)])
+
+
+## Cut a hole in the ice at `cell`, and draw it if that's here.
+func _cut_hole(location: StringName, cell: Vector2i) -> void:
+	var cells: Array = _holes.get(location, [])
+	cells.append(cell)
+	_holes[location] = cells
+	if _holes_scene != null and is_instance_valid(_holes_scene) and _holes_scene == get_tree().current_scene:
+		_add_hole_sprite(cell)
+	EventBus.ice_hole_cut.emit(location, cell)
+	EventBus.message_posted.emit("You cut a hole in the ice. Space again to fish through it.")
 
 
 func _find_player() -> Node2D:
@@ -148,6 +289,10 @@ func _find_player() -> Node2D:
 # --- Each frame ------------------------------------------------------------------
 
 func _process(delta: float) -> void:
+	# A different map is showing (a gate, a door, the morning): draw its holes.
+	var scene := get_tree().current_scene
+	if scene != _holes_scene:
+		_draw_holes(scene)
 	match _state:
 		State.WAITING:
 			_timer -= delta
@@ -275,8 +420,9 @@ func _land() -> void:
 	var size := _size
 	var water := _water
 	var location := _location
+	var through_ice := _through_ice
 	_stop("")
-	GameState.catch_fish(fish, size, location, water)
+	GameState.catch_fish(fish, size, location, water, through_ice)
 
 
 func _escape(message: String) -> void:
@@ -296,3 +442,35 @@ func _stop(message: String) -> void:
 	_line = null
 	if message != "":
 		EventBus.message_posted.emit(message)
+
+
+# --- The holes' pictures --------------------------------------------------------
+
+## Draw the holes cut today in `scene`'s location. Each is a picture in the
+## middle of its tile, just above the ground and under everything standing.
+func _draw_holes(scene: Node) -> void:
+	_remove_hole_sprites()
+	_holes_scene = scene
+	if scene == null:
+		return
+	for cell in holes_in(GameState.location):
+		_add_hole_sprite(cell)
+
+
+func _add_hole_sprite(cell: Vector2i) -> void:
+	if _holes_scene == null:
+		return
+	var sprite := Sprite2D.new()
+	sprite.name = "IceHole"
+	sprite.texture = ICE_HOLE
+	sprite.position = Vector2(cell * FishingLine.TILE_PX) + Vector2.ONE * FishingLine.TILE_PX / 2.0
+	sprite.z_index = ICE_HOLE_Z
+	_holes_scene.add_child(sprite, true)  # true: "IceHole2", not "@Sprite2D@5"
+	_hole_sprites.append(sprite)
+
+
+func _remove_hole_sprites() -> void:
+	for sprite in _hole_sprites:
+		if is_instance_valid(sprite):
+			sprite.queue_free()
+	_hole_sprites.clear()

@@ -85,6 +85,8 @@ func upgrades_on_offer(shop: ShopDef = null) -> Array[UpgradeDef]:
 	for upgrade in ContentDB.upgrades():
 		if GameState.has_upgrade(upgrade):
 			continue
+		if upgrade.gift_only:
+			continue  # given by a request, never sold (DECISIONS 055)
 		if upgrade.requires != null and not GameState.has_upgrade(upgrade.requires):
 			continue
 		if not GameState.has_unlock(upgrade.requires_unlock):

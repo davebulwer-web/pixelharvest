@@ -507,9 +507,11 @@ func _on_wood_chopped(_location_id: StringName, _cell: Vector2i, _what: StringNa
 var fish_log: Dictionary = {}
 
 
-## Land `fish`, `size` cm long, from `water` in `location_id`: into the bag
-## and the log, and announced (fish_caught).
-func catch_fish(fish: FishDef, size: int, location_id: StringName, water: StringName) -> void:
+## Land `fish`, `size` cm long, from `water` in `location_id` (`through_ice`
+## if through a hole in winter's ice): into the bag and the log, and
+## announced (fish_caught).
+func catch_fish(fish: FishDef, size: int, location_id: StringName, water: StringName,
+		through_ice: bool = false) -> void:
 	if fish == null:
 		return
 	var entry: Dictionary = fish_log.get(fish.id, {"caught": 0, "biggest": 0})
@@ -518,7 +520,7 @@ func catch_fish(fish: FishDef, size: int, location_id: StringName, water: String
 	entry["biggest"] = maxi(entry["biggest"], size)
 	fish_log[fish.id] = entry
 	inventory.add(fish)
-	EventBus.fish_caught.emit(fish.id, size, location_id, water)
+	EventBus.fish_caught.emit(fish.id, size, location_id, water, through_ice)
 	var text := "Caught %s %s! %d cm" % ["an" if "aeiou".contains(fish.display_name.to_lower().left(1)) else "a",
 			fish.display_name.to_lower(), size]
 	if entry["caught"] == 1:

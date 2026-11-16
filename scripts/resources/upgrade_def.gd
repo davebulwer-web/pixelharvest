@@ -32,3 +32,7 @@ extends Resource
 @export var requires_unlock: UnlockDef
 
 @export var effect: UpgradeEffect
+
+## Given by a request, never sold (DECISIONS 055): Wren's fine rod. Shops
+## leave it off their shelves, whatever its price.
+@export var gift_only: bool = false

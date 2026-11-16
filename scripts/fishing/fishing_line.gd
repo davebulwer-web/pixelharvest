@@ -52,15 +52,18 @@ var _pulls_needed: int = 1
 var _slack: int = 0
 
 
-## `player` is who's holding the rod; the float lands in the middle of `cell`.
-func setup(player: Node2D, cell: Vector2i) -> void:
+## `player` is who's holding the rod; the float lands in the middle of `cell`
+## (in its hole, `through_ice`).
+func setup(player: Node2D, cell: Vector2i, through_ice: bool = false) -> void:
 	_player = player
 	_float_at = Vector2(cell * TILE_PX) + Vector2(TILE_PX / 2.0, TILE_PX / 2.0)
 	# Casting upwards, the tile ahead is behind the farmer's head and hat, so
-	# the float lands a little further out where it can be seen.
+	# the float lands a little further out where it can be seen. Not through
+	# the ice: the float goes where the hole is.
 	if player != null and player.position.y > _float_at.y + TILE_PX / 2.0:
 		_cast_up = true
-		_float_at.y -= FAR_CAST_PX
+		if not through_ice:
+			_float_at.y -= FAR_CAST_PX
 	# Over the y-sorted world (people, trees), under the HUD.
 	z_index = 20
 

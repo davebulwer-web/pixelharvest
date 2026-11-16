@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=26 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_each_goal.gd" id="2_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="3_r"]
+[ext_resource type="Resource" path="res://data/quests/ivy_glass.tres" id="4_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="5_r"]
+[ext_resource type="Resource" path="res://data/unlocks/glasshouse_restored.tres" id="6_r"]
+[ext_resource type="Resource" path="res://data/produce/pumpkin.tres" id="7_r"]
+[ext_resource type="Resource" path="res://data/produce/cranberry.tres" id="8_r"]
+[ext_resource type="Resource" path="res://data/produce/beetroot.tres" id="9_r"]
+[ext_resource type="Resource" path="res://data/fish/minnow.tres" id="10_f"]
+[ext_resource type="Resource" path="res://data/fish/roach.tres" id="11_f"]
+[ext_resource type="Resource" path="res://data/fish/dace.tres" id="12_f"]
+[ext_resource type="Resource" path="res://data/fish/rudd.tres" id="13_f"]
+[ext_resource type="Resource" path="res://data/fish/perch.tres" id="14_f"]
+[ext_resource type="Resource" path="res://data/fish/crucian_carp.tres" id="15_f"]
+[ext_resource type="Resource" path="res://data/fish/chub.tres" id="16_f"]
+[ext_resource type="Resource" path="res://data/fish/tench.tres" id="17_f"]
+[ext_resource type="Resource" path="res://data/fish/brown_trout.tres" id="18_f"]
+[ext_resource type="Resource" path="res://data/fish/grayling.tres" id="19_f"]
+[ext_resource type="Resource" path="res://data/fish/eel.tres" id="20_f"]
+[ext_resource type="Resource" path="res://data/fish/barbel.tres" id="21_f"]
+[ext_resource type="Resource" path="res://data/fish/carp.tres" id="22_f"]
+[ext_resource type="Resource" path="res://data/fish/sea_trout.tres" id="23_f"]
+[ext_resource type="Resource" path="res://data/fish/pike.tres" id="24_f"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+items = Array[ExtResource("3_r")]([ExtResource("7_r"), ExtResource("8_r"), ExtResource("9_r")])
+and_one_of = Array[ExtResource("3_r")]([ExtResource("10_f"), ExtResource("11_f"), ExtResource("12_f"), ExtResource("13_f"), ExtResource("14_f"), ExtResource("15_f"), ExtResource("16_f"), ExtResource("17_f"), ExtResource("18_f"), ExtResource("19_f"), ExtResource("20_f"), ExtResource("21_f"), ExtResource("22_f"), ExtResource("23_f"), ExtResource("24_f")])
+and_one_of_what = "a fish"
+
+[resource]
+script = ExtResource("1_r")
+id = &"ivy_planting"
+title = "Ivy's first planting"
+giver = &"ivy"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Look at it! Every pane in, and not a crack. I could cry.", "Now, the old way to start a glasshouse: the best of the autumn, laid out on the bench, and a fish from the water for the soil. My mother swore by it.", "One pumpkin, one cranberry, one beetroot, and a fish. Any fish. Then we plant."])
+reminder_line = "A pumpkin, a cranberry, a beetroot and a fish, dear. Any fish will do."
+thanks_lines = Array[String](["The fish goes under the bench, the rest on top. There.", "It's alive again. Listen: you can hear it breathing.", "Thank you, dear. I'll be growing things in here all winter, and I've an idea for your farm, once you're ready for it."])
+reward_gold = 500
+reward_unlocks = Array[ExtResource("5_r")]([ExtResource("6_r")])
+requires = ExtResource("4_r")
+seasons = Array[StringName]([&"autumn"])

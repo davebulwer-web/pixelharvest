@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 15 — fishing with Wren.** Session 1 (the rod, the bite and the reel, 15 fish, the fish log, Wren's worms and supper; save version 16) is built, waiting for Dave to try it. Then session 2 (ice fishing, the rest of Wren's line). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 15 — fishing with Wren.** Session 1 (the rod, the bite and the reel, 15 fish, the fish log, Wren's worms and supper; save version 16) is tested and committed by Dave (2026-11-16). Session 2 (ice fishing, lures, the fine rod, the rest of Wren's first year, the summer contest, Pip's biggest fish, Ivy's glass and planting, fish jobs on the board; no save change) is built, waiting for Dave to try it. Then Stage 15's Pixellab art, and Stage 16 (kitchen and cooking). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -765,17 +765,44 @@ ROADMAP sections 8 and 9. Reverses DESIGN.md's "no foraging" (updated 2026-11-15
       rod, the bait and Marlow's shelf; `CatchGoal`'s kinds; the summary row; the log
       saved and loaded; saves v1–v15), rendered the float, the bite and the reel bar at
       the farm's pond and the town's
+- [x] Dave confirms it plays correctly on Windows (committed as "Stage fishing", 2026-11-16)
+
+**Session 2 — the ice and the rest of Wren's line** (2026-11-16, DECISIONS 055, no save change)
+
+- [x] Ice fishing: in winter, Space with the rod on the ice cuts a hole (the cast's 2
+      energy, the chop sound); Space at the hole fishes through it, slower (×1.5). Facing
+      up, the hole goes a tile further so the hat doesn't hide it. Holes freeze over in
+      the night (never saved); `fish_caught` says `through_ice`
+- [x] Lures (`LureDef`, kept, never used up, bait stays in the tin): Wren's winter lure
+      (winter, ×0.5) and Pip's spinner (spring to autumn, ×0.75)
+- [x] The fine rod: a tier of the rod (×0.6 wait), given by a request
+      (`QuestDef.reward_upgrades`; `UpgradeDef.gift_only` keeps it off Brann's shelf)
+- [x] Wren's line, parts 3–4: **The river fish** (from summer day 15: a fish from the
+      Woods' stream → the fine rod) and **Ice and patience** (winter: a fish through the
+      ice → the winter lure). Part 5 (the legendary fish) is year 2
+- [x] The summer contest hook: `fishing_contest` on summer day 14 every year, and Wren's
+      one-day request (a fish of 25 cm or more from the town pond → 300g). The festival
+      proper (rivals, judging) is Stage 18
+- [x] **Pip's biggest fish** (a fish of 40 cm or more → Pip's spinner)
+- [x] Ivy's restoration, parts 2–3: **The glass** (1,500g → `glasshouse_glazed`) and
+      **Ivy's first planting** (autumn: pumpkin, cranberry, beetroot and any fish → 500g
+      and `glasshouse_restored`, which Stage 17's greenhouse should wait for).
+      `DeliverEachGoal.and_one_of` ("and a fish")
+- [x] The notice board: Wren's fish jobs (`board_wren`, 1–3 of a fish biting this season)
+- [x] Verified in the sandbox: headless import and run clean, 85 harness checks (the data;
+      the rod usable in winter; cutting a hole in the town pond by pressing Space, its
+      energy, its picture; casting through it, the bite, strike and reel, the catch marked
+      through the ice and a winter fish; bait and lure, the fine rod and the spinner in the
+      wait; holes freezing overnight, still open after a trip to the Woods and back; the
+      farm's pond, facing right and up; the contest on its day and its rules; Wren's river
+      fish and fine rod; ice and patience; Pip; Ivy's glass and planting, the cheapest fish
+      handed in; the board's fish in summer and winter; save and load), rendered the hole,
+      the float through it and the farm's pond in winter
 - [ ] Dave confirms it plays correctly on Windows
-
-**Session 2 — the ice and the rest of Wren's line**
-
-- [ ] Ice fishing in winter (a hole in the pond)
-- [ ] Wren's river fish (→ a better rod, faster bite), ice and patience (→ a winter lure);
-      Pip's biggest fish; the summer contest hook; fish in Ivy's restoration and the board
 
 **Art**
 
-- [ ] Pixellab: 15 fish icons, rod, bait, bobber, ice hole
+- [ ] Pixellab: 15 fish icons, rod, bait, bobber, ice hole, winter lure, spinner
 
 ## Stage 16 — Kitchen and cooking · 1 session + art · Sonnet
 

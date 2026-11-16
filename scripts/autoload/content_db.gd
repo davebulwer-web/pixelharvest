@@ -588,7 +588,7 @@ func _check() -> void:
 						% [where, tier_effect.tier, tier_effect.tool.id, tier_effect.tool.max_tier()])
 		if each.requires != null and upgrade(each.requires.id) != each.requires:
 			push_error("ContentDB: '%s' requires an upgrade that isn't in %s" % [where, UPGRADES_DIR])
-		if each.price <= 0:
+		if each.price <= 0 and not each.gift_only:
 			push_warning("ContentDB: '%s' has no price, so it's free" % where)
 
 
@@ -620,6 +620,8 @@ func _check_quests() -> void:
 				wanted_items.append(each.goal.item)
 			elif each.goal is DeliverAnyGoal or each.goal is DeliverEachGoal:
 				wanted_items.assign(each.goal.items)
+			if each.goal is DeliverEachGoal:
+				wanted_items.append_array(each.goal.and_one_of)
 			for wanted in wanted_items:
 				if wanted == null or item(wanted.id) != wanted:
 					push_error("ContentDB: '%s' asks for an item that isn't in data/produce/ or data/tools/" % where)
@@ -633,6 +635,11 @@ func _check_quests() -> void:
 		for reward: ItemDef in each.reward_items:
 			if reward == null or item(reward.id) != reward:
 				push_error("ContentDB: '%s' gives a reward item that isn't in data/produce/ or data/tools/" % where)
+		for reward in each.reward_upgrades:
+			if reward == null or upgrade(reward.id) != reward:
+				push_error("ContentDB: '%s' gives an upgrade that isn't in data/upgrades/" % where)
+			elif not reward.gift_only:
+				push_warning("ContentDB: '%s' gives '%s', which isn't gift_only, so a shop sells it too" % [where, reward.id])
 		if each.requires != null and quest(each.requires.id) != each.requires:
 			push_error("ContentDB: '%s' requires a request that isn't in %s" % [where, QUESTS_DIR])
 		if each.requires == each:

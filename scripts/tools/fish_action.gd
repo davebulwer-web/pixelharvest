@@ -12,27 +12,22 @@ extends ToolAction
 ##   - on the farm, its pond (FarmData's WATER tiles), which is `farm_water`;
 ##   - away from the farm, wherever the map scene answers water_at(cell)
 ##     (the town's pond and river, the Woods' stream).
-## Every water is frozen in winter (the season's tiles draw it as ice), so the
-## rod can't be used then: usable_in_season says no, and the hotbar greys it.
-## Session 2 cuts a hole in the ice.
+## In winter every water is frozen (the season's tiles draw it as ice). The
+## rod still casts at it, and Fishing decides what that means: on bare ice,
+## Space cuts a hole; at a hole, the line goes down through it (DECISIONS
+## 055). So the rod itself never needs to know the season.
 ##
 ## Must not use the GameState autoload (tools can be listed in the starting
-## kit, which game_rules.tres preloads): the frozen seasons are read from
-## data/fishing_rules.tres directly.
+## kit, which game_rules.tres preloads).
 ##
 
-const FISHING_RULES: FishingRules = preload("res://data/fishing_rules.tres")
-
 ## How long the float waits for a bite with this rod, as a multiple of the
-## fishing rules' wait: a better rod bites sooner (below 1).
+## fishing rules' wait. The fine rod is a tier of this one, and its speed is
+## in the fishing rules (rod_tier_wait_multipliers), so this stays 1.
 @export var bite_wait_multiplier: float = 1.0
 
 ## The kind of water the farm's pond is.
 @export var farm_water: StringName = &"pond"
-
-
-func usable_in_season(season_id: StringName) -> bool:
-	return season_id not in FISHING_RULES.frozen_seasons
 
 
 func can_use(farm: FarmData, cell: Vector2i) -> bool:

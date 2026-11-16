@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="LureDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/lure_def.gd" id="1_lure"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/winter_lure.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_lure")
+id = &"winter_lure"
+display_name = "Winter lure"
+description = "Wren's silver spoon, for fishing through the ice. Kept in the bag, never used up: in winter fish bite twice as soon, and your bait stays in its tin."
+icon = ExtResource("2_icon")
+seasons = Array[StringName]([&"winter"])
+wait_multiplier = 0.5

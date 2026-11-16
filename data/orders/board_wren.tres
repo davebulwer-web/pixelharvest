@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="OrderTemplate" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/order_template.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_t"]
+[ext_resource type="Resource" path="res://data/unlocks/bait_on_sale.tres" id="3_t"]
+[ext_resource type="Resource" path="res://data/fish/roach.tres" id="4_i"]
+[ext_resource type="Resource" path="res://data/fish/perch.tres" id="5_i"]
+[ext_resource type="Resource" path="res://data/fish/rudd.tres" id="6_i"]
+[ext_resource type="Resource" path="res://data/fish/dace.tres" id="7_i"]
+[ext_resource type="Resource" path="res://data/fish/chub.tres" id="8_i"]
+[ext_resource type="Resource" path="res://data/fish/crucian_carp.tres" id="9_i"]
+[ext_resource type="Resource" path="res://data/fish/tench.tres" id="10_i"]
+[ext_resource type="Resource" path="res://data/fish/brown_trout.tres" id="11_i"]
+[ext_resource type="Resource" path="res://data/fish/grayling.tres" id="12_i"]
+
+[resource]
+script = ExtResource("1_t")
+id = &"board_wren"
+posted_at = &"notice_board"
+client = "Wren"
+title = "Help wanted: {count} {item} for Wren"
+choice_line = ""
+offer_line = "Wren's promised the inn {count} {item} for tonight's supper, and nothing's biting for him. {gold}g to whoever brings them."
+reminder_line = "Wren's {count} {item} for the inn, by tonight."
+thanks_line = "You leave the {item} in the crate under the board, on a bed of wet grass. {client}'s {gold}g is pinned up waiting."
+news_line = "There's a job on the notice board today."
+items = Array[ExtResource("2_t")]([ExtResource("4_i"), ExtResource("5_i"), ExtResource("6_i"), ExtResource("7_i"), ExtResource("8_i"), ExtResource("9_i"), ExtResource("10_i"), ExtResource("11_i"), ExtResource("12_i")])
+count_min = 1
+count_max = 3
+max_value = 150
+pay_rate = 1.6
+bonus_gold = 10
+deadline_days = 1
+choices = 1
+weight = 1
+first_day = 1
+on_event = &""
+requires_unlock = ExtResource("3_t")

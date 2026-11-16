@@ -2159,3 +2159,75 @@ and an icon; a new fishing request is a `.tres`; another fishing place is a
 until the field is bought or chopped; the town's pond and river are open from the start.
 Fish are the same price whatever their size. Placeholder art: 15 fish icons, the rod,
 bait and the float, drawn by a script in the palette until Pixellab.
+
+## 055 — Ice fishing, lures, the fine rod, and the rest of Wren's line
+
+**Decision.** Stage 15 session 2 finishes fishing (ROADMAP 5.3, 5.5, 5.8, 5.9 and the
+summer calendar): ice fishing in winter, Wren's last two requests of the first year, the
+summer contest, Pip's biggest fish, a fish in Ivy's restoration and fish jobs on the
+notice board. **No save change** (still version 16).
+
+- *Ice fishing.* The rod now works all year (`FishAction` lost its winter ban). In a
+  frozen season (`FishingRules.frozen_seasons`), Space with the rod on bare ice cuts a
+  hole there instead of casting, for the cast's 2 energy (EventBus `ice_hole_cut`, the
+  chop sound); Space at a hole casts through it. The wait through ice is 1.5 times as
+  long (`ice_wait_multiplier`: Wren's "ice and patience"). Only the fish that bite in
+  winter come up (written in session 1: perch, pike, roach, chub, dace, grayling,
+  minnow). Facing up, the tile ahead is behind the farmer's hat, so the hole goes one
+  tile further if that's ice too (as the float lands further out on open water). The
+  holes are kept by Fishing, by location, and drawn as `IceHole` pictures
+  (`assets/sprites/fishing/ice_hole.png`) on the ground's level of whichever map is
+  showing. **The night freezes them over**, so they are never saved, and walking away
+  and back finds them still open that day. `fish_caught` gained a fifth value,
+  `through_ice`.
+- *Lures.* A new kind of item, `LureDef` (extends ItemDef: seasons, wait multiplier),
+  listed in `FishingRules.lures`. A lure is kept in the bag and never used up; on a
+  day in its seasons it shortens the wait, and the bait stays in its tin. Two: Wren's
+  **winter lure** (winter, ×0.5) and **Pip's spinner** (spring to autumn, ×0.75).
+- *The fine rod* is a tier of the rod, given the way the wide hoe is: a `ToolTier`
+  ("Fine rod") on `fishing_rod.tres` and an `UpgradeDef` (`fine_rod`) with a
+  ToolTierEffect. Its speed is `FishingRules.rod_tier_wait_multipliers` (×0.6 at tier
+  1). Two small new fields make it a gift: `QuestDef.reward_upgrades` (Quests adds them
+  on hand-in, the reward text names them) and `UpgradeDef.gift_only` (no shop sells it,
+  whatever its price). So the hotbar's rod simply becomes "Fine rod".
+- *How long the float waits* is worked out by `Fishing.wait_factor()`: the rod's tier,
+  then the ice, then a lure that works today or else bait.
+- *Wren's line*, parts 3 and 4 (part 5, the legendary fish, is year 2): **The river
+  fish** (after supper, from summer day 15: any fish from the Woods' stream → the fine
+  rod) and **Ice and patience** (winter, after the river fish: any fish through the
+  ice → the winter lure). Wren's daily lines mention the ice and the contest.
+- *The summer contest hook.* A `CalendarEvent` `fishing_contest` on summer day 14 each
+  year (day 42, every 112 days; never a market day), shown on the notice board, and
+  Wren's one-day request **The summer contest** (`on_event`, due tonight, after the
+  worms): any fish of 25 cm or more from the town's pond → 300g. Judging against other
+  anglers, prizes by size and the crowd are Stage 18's festivals. `CatchGoal` gained
+  `location`, `through_ice` and `where` (the words for the place).
+- *Pip's biggest fish* (summer day 15 on, once bait is on sale): any fish of 40 cm or
+  more → Pip's spinner.
+- *Ivy's restoration*, parts 2 and 3: **The glass** (after the frame: 1,500g →
+  `glasshouse_glazed`) and **Ivy's first planting** (autumn, after the glass: a pumpkin,
+  a cranberry, a beetroot and any fish → 500g and `glasshouse_restored`). The greenhouse
+  plot itself is Stage 17, which should wait for `glasshouse_restored`. The "any fish"
+  is a new option on `DeliverEachGoal`: `and_one_of` (a list, the cheapest first, as
+  hand-in takes the first the bag has) and `and_one_of_what` ("a fish").
+- *The notice board* has a fifth job pattern, `board_wren` (once bait is on sale): 1–3
+  of a fish for Wren, by tonight. `Quests._in_season` now treats a fish as in season if
+  it bites this season, and never offers one that waits for weather.
+
+Options considered: for winter, open-water patches (simpler, but every water is drawn
+as ice), or a separate ice auger tool (one more item to carry for one job; the rod's
+own Space reads naturally). For holes: saving them (a save change for something that
+would refreeze anyway). For the better rod: a second rod item (two rods on the hotbar,
+and the old one useless), or a field on ToolTier (a rod-only number on every tool's
+tier); the tier plus a number in the fishing rules keeps both generic. For the contest
+while Wren is busy: letting an event request jump the one-at-a-time rule (it would
+need two requests in hand from one person, which the log and the talk don't do). The
+river fish waits until the day after the contest so it can't block it; if the worms or
+supper are still in hand on contest day, the contest is missed that year.
+
+**Why.** ROADMAP section 9: fishing fills winter as well as afternoons. Rule 3 holds:
+another lure, another fish job or another contest prize is a `.tres`.
+
+**Cost.** The contest is a request, not yet a festival: one prize, no rivals. Winter
+fishing takes some walking-to-the-ice the first time each day. Placeholder art: the ice
+hole, the winter lure and the spinner, drawn by a script in the palette until Pixellab.

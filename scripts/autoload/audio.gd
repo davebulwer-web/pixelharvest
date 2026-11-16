@@ -150,7 +150,9 @@ func _listen() -> void:
 	# Fishing (DECISIONS 054): the float lands, the bite, the fish landed.
 	EventBus.line_cast.connect(func(_c: Vector2i, _water: StringName, _m: float) -> void: play(&"cast"))
 	EventBus.fish_bit.connect(func() -> void: play(&"bite"))
-	EventBus.fish_caught.connect(func(_id: StringName, _size: int, _where: StringName, _water: StringName) -> void: play(&"splash"))
+	EventBus.fish_caught.connect(func(_id: StringName, _size: int, _where: StringName, _water: StringName, _ice: bool) -> void: play(&"splash"))
+	# Cutting a hole in the ice (DECISIONS 055) sounds like a blow of the axe.
+	EventBus.ice_hole_cut.connect(func(_where: StringName, _cell: Vector2i) -> void: play(&"chop"))
 	EventBus.fish_escaped.connect(func(_id: StringName) -> void: play(&"nope"))
 	EventBus.object_placed.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"place"))
 	EventBus.object_removed.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"pick_up"))

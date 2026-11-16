@@ -119,14 +119,19 @@ signal fish_bit()
 ## Struck in time: a `fish_id` is on the line, and the reel bar is up.
 signal fish_hooked(fish_id: StringName)
 
-## A fish was landed: `size` cm, from `water` in `location_id`. GameState has
-## put it in the bag and the fish log already. Wren's and Pip's requests
-## count these; the day's summary lists them.
-signal fish_caught(fish_id: StringName, size: int, location_id: StringName, water: StringName)
+## A fish was landed: `size` cm, from `water` in `location_id`, and
+## `through_ice` if it came up through a hole in winter's ice (DECISIONS
+## 055). GameState has put it in the bag and the fish log already. Wren's
+## and Pip's requests count these; the day's summary lists them.
+signal fish_caught(fish_id: StringName, size: int, location_id: StringName, water: StringName, through_ice: bool)
 
 ## The fish on the line got away: too slow to strike, too much slack, or
 ## left too long without a pull.
 signal fish_escaped(fish_id: StringName)
+
+## A hole was cut in the ice at `cell` in `location_id` (DECISIONS 055). It
+## stays open until the night freezes it over.
+signal ice_hole_cut(location_id: StringName, cell: Vector2i)
 
 # --- Player and economy -----------------------------------------------------
 

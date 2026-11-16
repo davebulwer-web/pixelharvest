@@ -74,8 +74,8 @@ func _ready() -> void:
 		_record(&"item_bought", [item_id, amount, cost]), CONNECT_DEFERRED)
 	EventBus.giant_harvested.connect(func(cell: Vector2i, crop_id: StringName) -> void:
 		_record(&"giant_harvested", [cell, crop_id]), CONNECT_DEFERRED)
-	EventBus.fish_caught.connect(func(fish_id: StringName, size: int, location_id: StringName, water: StringName) -> void:
-		_record(&"fish_caught", [fish_id, size, location_id, water]), CONNECT_DEFERRED)
+	EventBus.fish_caught.connect(func(fish_id: StringName, size: int, location_id: StringName, water: StringName, through_ice: bool) -> void:
+		_record(&"fish_caught", [fish_id, size, location_id, water, through_ice]), CONNECT_DEFERRED)
 	# Deliveries count what's in the bag, and gifts of gold the purse, so any
 	# change to either may finish one.
 	EventBus.item_added.connect(func(_id: StringName, _n: int) -> void: _check_ready(), CONNECT_DEFERRED)
@@ -321,6 +321,9 @@ func _complete(quest: QuestDef) -> Array[String]:
 	GameState.add_gold(quest.reward_gold)
 	for item: ItemDef in quest.reward_items:
 		GameState.inventory.add(item, quest.reward_items[item])
+	for upgrade in quest.reward_upgrades:
+		if upgrade != null:
+			GameState.add_upgrade(upgrade)
 	# After quest_completed, so the day's summary lists the request before
 	# what it opened.
 	EventBus.quest_completed.emit(quest.id)
@@ -448,13 +451,21 @@ func _template_today(place: StringName, number: int) -> OrderTemplate:
 
 ## The items of `template` that can be asked for today: produce of a crop
 ## growing this season whose seeds are on sale to the player (unlocked, with
-## a price), and anything nobody grows (fibre). In the template's own order.
+## a price), fish that bite this season, and anything nobody grows (fibre).
+## In the template's own order.
 func _in_season(template: OrderTemplate) -> Array[ItemDef]:
 	var result: Array[ItemDef] = []
 	var season := GameState.season_id()
 	for item in template.items:
 		if item == null:
 			continue
+		# A fish (DECISIONS 055) is wanted only in a season it bites in, and
+		# never one that waits for the weather: a job due tonight can't
+		# promise rain.
+		if item is FishDef:
+			var fish := item as FishDef
+			if season not in fish.seasons or not fish.only_in_weather.is_empty():
+				continue
 		var crop := ContentDB.crop_giving(item)
 		if crop != null:
 			if not crop.grows_in(season):

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/donate_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/quests/ivy_timber.tres" id="3_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="4_r"]
+[ext_resource type="Resource" path="res://data/unlocks/glasshouse_glazed.tres" id="5_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+amount = 1500
+cause = "the glass for Ivy's glasshouse"
+
+[resource]
+script = ExtResource("1_r")
+id = &"ivy_glass"
+title = "The glass"
+giver = &"ivy"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["The frame's up and it's a fine one. But a glasshouse without glass is only a fence.", "There's a glazier in the city who'll make the panes and bring them up the valley road. He wants fifteen hundred gold.", "It's a great deal, I know. Whenever you can, dear. I've waited this long."])
+reminder_line = "Fifteen hundred gold for the glazier, dear. Whenever you can."
+thanks_lines = Array[String](["You're sure? Oh, thank you. I'll write to him tonight.", "Glass by the end of the month, and then it only wants planting. Come and see me in the autumn: I'll need the best of what you grow."])
+reward_unlocks = Array[ExtResource("4_r")]([ExtResource("5_r")])
+requires = ExtResource("3_r")

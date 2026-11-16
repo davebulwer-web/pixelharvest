@@ -52,6 +52,11 @@ extends Resource
 ## told what they've opened.
 @export var reward_unlocks: Array[UnlockDef] = []
 
+## Upgrades given as a reward (DECISIONS 055): Wren's fine rod is a better
+## tier of the rod, given the way a bought upgrade gives the wide hoe. Mark
+## them gift_only so no shop sells them too.
+@export var reward_upgrades: Array[UpgradeDef] = []
+
 # --- When it's offered ---------------------------------------------------------
 
 ## Another request that must be finished first, or null.
@@ -93,6 +98,10 @@ func reward_text() -> String:
 			parts.append(("an " if "aeiou".contains(word.left(1)) else "a ") + word)
 		else:
 			parts.append("%d %s" % [count, QuestGoal.plural(item.display_name, count)])
+	for upgrade in reward_upgrades:
+		if upgrade != null:
+			var word := upgrade.display_name.to_lower()
+			parts.append(("an " if "aeiou".contains(word.left(1)) else "a ") + word)
 	for unlock in reward_unlocks:
 		if unlock != null and unlock.display_name != "":
 			parts.append(unlock.display_name)

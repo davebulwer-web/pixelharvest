@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CalendarEvent" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/calendar_event.gd" id="1_event"]
+[ext_resource type="Script" path="res://scripts/resources/stall_def.gd" id="2_stall"]
+
+[resource]
+script = ExtResource("1_event")
+id = &"fishing_contest"
+display_name = "Summer fishing contest"
+first_day = 42
+every_days = 112
+seasons = Array[StringName]([&"summer"])
+location = &"town"
+description = "Wren's contest at the town pond, all day. Bring a rod and see Wren."
+stalls = Array[ExtResource("2_stall")]([])

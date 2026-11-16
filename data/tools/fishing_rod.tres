@@ -1,19 +1,28 @@
-[gd_resource type="Resource" script_class="ToolDef" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="ToolDef" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="1_def"]
 [ext_resource type="Script" path="res://scripts/tools/fish_action.gd" id="2_action"]
 [ext_resource type="Texture2D" path="res://assets/sprites/items/fishing_rod.png" id="3_icon"]
+[ext_resource type="Script" path="res://scripts/resources/tool_tier.gd" id="4_tier"]
 
 [sub_resource type="Resource" id="Resource_action"]
 script = ExtResource("2_action")
 bite_wait_multiplier = 1.0
 farm_water = &"pond"
 
+[sub_resource type="Resource" id="ToolTier_1"]
+script = ExtResource("4_tier")
+display_name = "Fine rod"
+energy_cost = 2.0
+length = 1
+width = 1
+
 [resource]
 script = ExtResource("1_def")
 id = &"fishing_rod"
 display_name = "Fishing rod"
-description = "Wren's old rod. Face water and Space to cast; Space again when the float goes under, then Space with the marker in the green. E reels in."
+description = "Wren's old rod. Face water and Space to cast; Space again when the float goes under, then Space with the marker in the green. E reels in. On winter's ice, Space cuts a hole first."
 icon = ExtResource("3_icon")
 energy_cost = 2.0
 action = SubResource("Resource_action")
+tiers = Array[ExtResource("4_tier")]([SubResource("ToolTier_1")])

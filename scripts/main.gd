@@ -177,7 +177,8 @@ func _ready() -> void:
 	print("slow them. A 3 x 3 block of ripe melons or pumpkins may grow into a giant.")
 	print("Fennel sells apple saplings: a tree for a 2 x 2 patch of tilled soil.")
 	print("Fishing (Wren's rod, from summer): Space at water casts; Space when the float goes")
-	print("under; then Space while the marker is over the green. E reels in. Frozen in winter.")
+	print("under; then Space while the marker is over the green. E reels in. In winter, Space")
+	print("on the ice cuts a hole, and Space at the hole fishes through it.")
 	print("-------------------------------")
 
 

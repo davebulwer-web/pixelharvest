@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/catch_goal.gd" id="2_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="3_r"]
+[ext_resource type="Resource" path="res://data/produce/spinner.tres" id="4_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="5_r"]
+[ext_resource type="Resource" path="res://data/unlocks/bait_on_sale.tres" id="6_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+min_size = 40
+
+[resource]
+script = ExtResource("1_r")
+id = &"child_biggest_fish"
+title = "Pip's biggest fish"
+giver = &"child"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Wren says you can fish now! Have you caught a really big one?", "Bigger than my arm? My arm is forty centimetres. I measured it.", "If you catch one bigger than my arm, I'll give you my best treasure."])
+reminder_line = "A fish bigger than my arm: forty centimetres! Carp get big. So do pike, in the cold."
+thanks_lines = Array[String](["Forty centimetres or MORE? That's bigger than my arm!", "Here's my best treasure: a spinner I found in the reeds. Wren says it's a real one. Keep it in your bag and the fish will want to look at it."])
+reward_items = Dictionary[ExtResource("3_r"), int]({
+ExtResource("4_r"): 1
+})
+first_day = 43
+seasons = Array[StringName]([&"summer", &"autumn", &"winter"])
+requires_unlock = ExtResource("6_r")

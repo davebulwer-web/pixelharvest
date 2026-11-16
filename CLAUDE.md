@@ -123,12 +123,12 @@ data/                Content resources (.tres), indexed by ContentDB
   game_rules.tres    Starting conditions and global numbers (GameRules)
   hazard_rules.tres  Thirst, weeds, crows and aphids: every number (HazardRules,
                      DECISIONS 045, 048)
-  fishing_rules.tres The wait, the strike and the reel bar's numbers (FishingRules,
-                     DECISIONS 054)
+  fishing_rules.tres The wait, the strike and the reel bar's numbers, the ice, the lures and
+                     the fine rod (FishingRules, DECISIONS 054, 055)
   crops/             CropDef — how each plant grows and looks, and its rules (trellis,
                      perennial, hardy…; DECISIONS 047; giants and 2 × 2 trees, 048)
   produce/           ItemDef — what a harvest gives, and its sell price (and fibre, timber,
-                     bait)
+                     bait, and the lures: LureDef, DECISIONS 055)
   tools/             ToolDef — tools, seeds and sprinklers (all things you use)
   decorations/       ToolDef — decorations for the farm, placed like sprinklers (DECISIONS 039)
   objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers, decorations)
