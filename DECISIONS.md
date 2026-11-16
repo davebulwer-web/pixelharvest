@@ -1895,3 +1895,24 @@ every morning still has something worth a trip to town. Rule 3 holds: a new kind
 patterns with other goals). The board's job can't be planned for: it asks for what you
 might have in hand, which is the point. Brann's fibre job depends on weeds, so a very
 tidy farm can't do it.
+
+## 051 — A faster clock: 10 minutes per 5 real seconds (revisits 035)
+
+**Decision.** `seconds_per_ten_minutes` in `data/game_rules.tres` goes from 7 to 5, so
+6 AM to 2 AM now takes about 10 minutes of play instead of 14. Dave chose it on
+2026-11-16 after playing: the day felt slow. Nothing else changes (no save change, still
+v14); the clock still stops in menus and every hour, shop time and deadline is in game
+minutes, so all of them simply arrive sooner.
+
+Options considered: making the maps bigger so walking uses up the day. Rejected as the
+fix: the player walks about 4.4 tiles a second, so the farmhouse-to-Hollis trip (about
+42 tiles) costs only about 14 game minutes at the old pace, and even maps twice the size
+would add well under an hour of walking to a 20-hour day. The slow feel comes from the
+clock's pace and from having little to do once watered, which Stages 14–16 (woods,
+fishing, cooking) address. A pace of 4 (about 8 minutes a day) was the other candidate.
+
+**Why.** It's one number, it's easy to try, and Stage 20's balance pass checks it again
+once the Woods, fishing and cooking fill the day.
+
+**Cost.** Less time per day for the same work; opening hours and deadlines are tighter in
+real time. If it's too fast, 6 is the halfway point.

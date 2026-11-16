@@ -440,6 +440,9 @@ Mostly writing, so a cheaper model.
 **Stage 14 — The Woods and foraging.** The bridge (a gate unlocked by the mayor), a new
 location, forage spots that refill per season, the axe and timber (chopping thicket and
 fallen logs). The woods' stream is ready for fishing.
+Suggested size (2026-11-16): about 48 × 32 tiles, bigger than the town (40 × 24) so it
+feels like exploring; the bridge at the top of the town's pond path, which already runs
+north past Brann's. The farm (30 × 20) and town stay as they are.
 
 **Stage 15 — Fishing.** The rod, a cast-and-timing minigame, fish as data (place, season,
 time of day, weather, size), Wren's line wired up, the summer contest hook.
@@ -461,7 +464,7 @@ on a schedule.
 **Stage 20 — Balance and release.** The original Stage 9 session 2 list: title screen,
 settings with volume, save slots, the full balance pass across a simulated year (now worth
 doing, because the content exists), Windows export, itch.io page. Dave noticed the clock
-seems slow (2026-11-15): the pass checks the clock's pace (`seconds_per_ten_minutes`, 7 now)
+seems slow (2026-11-15; set to 5 on 2026-11-16, DECISIONS 051): the pass checks the clock's pace (`seconds_per_ten_minutes`)
 against how long a day's work really takes once hazards and activities exist, and that it
 keeps a steady pace through the day.
 

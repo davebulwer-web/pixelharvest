@@ -49,7 +49,8 @@ The design intent at every step: **the chore you used to do by hand becomes auto
 ## Time and calendar
 
 - A day ends on sleep, when energy hits zero, or at 2 AM.
-- A clock runs from 6 AM to 2 AM while you play (about 14 real minutes; it stops in menus).
+- A clock runs from 6 AM to 2 AM while you play (about 10 real minutes; it stops in menus;
+  `DECISIONS.md` 051).
   Actions cost energy; walking and waiting cost time. At 2 AM you collapse and wake at
   home. Shops keep opening hours (`DECISIONS.md` 035).
 - Seasons of a fixed number of days (length to be set in Stage 6), then the year rolls over.
