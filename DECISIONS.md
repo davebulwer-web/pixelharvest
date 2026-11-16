@@ -1916,3 +1916,83 @@ once the Woods, fishing and cooking fill the day.
 
 **Cost.** Less time per day for the same work; opening hours and deadlines are tighter in
 real time. If it's too fast, 6 is the halfway point.
+
+## 052 — The Woods: a bridge that waits for summer, and forage worked out from the date
+
+**Decision.** Stage 14 session 1 opens the Woods (ROADMAP sections 8 and 9), with
+foraging. The axe and timber are session 2.
+
+- *Where.* A river now runs along the top of the town and feeds the pond. The path up past
+  Brann's carries on beside the pond to a bridge over it, at the top of the town's east
+  side, as ROADMAP suggested. Through the gap beyond, the Woods: 48 × 32 tiles (the town is
+  40 × 24), so it takes a little exploring. Five glades joined by two-tile paths, a stream
+  down the east side with a footbridge, undergrowth at the glades' edges (the thicket
+  tile; session 2's axe will clear it) and trees one to every 2 × 2 block everywhere else,
+  close enough that their tops make one canopy and the trunks can't be squeezed between:
+  the glades and paths are the way through. Like the town it has no state, so
+  `WoodsLayout` is a function from a cell to its ground and its trees.
+- *When.* The mayor's request (DECISIONS 049) gives `woods_bridge` and promised the bridge
+  "by summer". A new unlock, `woods_open`, opens by the calendar on summer day 1 but only
+  once `woods_bridge` is earned: `UnlockDef.needs`, a second unlock it waits for. Paid in
+  spring, it opens on summer day 1 and the board pins it up a week before; paid later, it
+  opens the next morning; never paid, never. The Woods' LocationDef `requires_unlock`
+  is `woods_open`, so the existing door rule (LocationManager.closed_message) does the
+  rest. The town shows the bridge whole (path under its picture, the edge open beyond) or
+  broken (river, with stumps), and walking up to the broken one says why there's no way
+  across.
+- *Forage* is a kind of item: `ForageDef` extends `ItemDef` (as `ToolDef` does) with the
+  seasons and places it grows in, a weight, and optionally the weather it needs (worms
+  come up in the rain). One file per kind in `data/forage/`; ContentDB indexes them with
+  the other items, so the bag, the bin, Rosa's stall and requests treat them like
+  produce. Fourteen kinds: wild garlic, morel, primrose (spring); bilberries,
+  elderflower, chanterelle (summer, chanterelle into autumn); blackberries, hazelnut,
+  penny bun, puffball (autumn); holly, pine cone, velvet shank (winter); worms on rainy
+  days from spring to autumn. Prices 3–60g, the rarer the dearer. Tags `mushroom` and
+  `flower`, for Pip, the almanac and the flower show.
+- *Where it lies.* Each morning `forage_per_day` spots (a LocationDef field: 10 in the
+  Woods) among the glades' grass and the grass along the paths get something, picked by
+  weight among what's in season there in today's weather. The dice are seeded by the
+  place and the date, like Rosa's orders (DECISIONS 050), so the same spots hold the same
+  things however often the player walks in and out. E picks one up (a `ForageSpot` in the
+  "interactable" group, not solid), free of energy: foraging costs time, which the clock
+  now makes count. What has been picked today is kept in GameState, so it stays picked
+  after a trip to town, and is forgotten overnight. EventBus `foraged` announces each
+  find (it makes the harvest sound; Stage 15's worms and the almanac can count it).
+- *No save change* (still version 14). The game saves only overnight, and by morning
+  everything has grown back somewhere new, so there is nothing to keep: the date decides
+  it all. An old save that paid for the bridge and is past summer day 1 opens the Woods
+  as it loads (open_due_unlocks already runs on load).
+- *Pip's mushroom hunt* (ROADMAP 5.3): in autumn, once the Woods are open, bring a
+  chanterelle, a penny bun and a puffball → 200g. It's a "bring one of each" request
+  (DECISIONS 049), not a new "forage" goal: counting finds would have to be saved, and
+  bringing them counts the ones found before he asked. ROADMAP's reward, a field guide
+  showing the day's forage, is left for later; gold for now.
+- *Small moves:* Wren's third spot (37, 4) is on the new path, so it moved to (30, 6). The
+  mayor's offer now says the river is at the top of town (it said "past the farm"). The
+  Woods have their own slow tune in A minor (`art/build_sounds.py`, added after
+  everything else so no other sound changed) and Daylight, like the farm and town.
+- *Placeholder art:* the bridge (whole and broken), the footbridge and the 14 forage icons
+  are drawn by a script in the game's palette until Pixellab; the Woods use the farm's
+  seasonal ground and trees until their own tileset.
+
+Options considered for the opening: the quest giving `woods_open` directly (the Woods
+the same afternoon, but the mayor's "ready by summer" would be wrong, and in spring the
+Woods would open before anything in ROADMAP's summer arc); or a plain calendar unlock on
+summer day 1 (open whether or not anyone paid). `needs` is one field and one line in
+open_due_unlocks. For forage: fixed spots that refill each season (ROADMAP's first
+wording) would mean saving what's been picked all season (a new save version) and a
+woods emptied by the second week; daily spots are what section 9 recommends, and cost no
+save change. For the map: a hand-drawn tile grid (exact, but a 48 × 32 table nobody could
+read in a code file); the rectangles and rules here are short, and the trees, worked out
+by position, are the same every time.
+
+**Why.** ROADMAP section 9: a reason to leave the farm, income without energy (costing
+time, now the clock is faster), and items for requests. Rule 3 holds: a new wild thing is
+a `.tres` and an icon, and another place with forage is a `forage_per_day` and a list of
+cells.
+
+**Cost.** The Woods look like the farm's ground and trees until their tileset is made. The
+bridge appears only on summer day 1 even if paid on spring day 20 (as promised). Forage
+is the same in every game on the same date. Players can walk over forage, and must face
+it to pick it up, like everything else. Fishing in the stream waits for Stage 15.
+

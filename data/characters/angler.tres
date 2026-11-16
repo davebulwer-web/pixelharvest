@@ -9,5 +9,5 @@ id = &"angler"
 display_name = "Wren"
 sprite = ExtResource("2_sprite")
 location = &"town"
-spots = Array[Vector2i]([Vector2i(33, 6), Vector2i(30, 4), Vector2i(37, 4)])
+spots = Array[Vector2i]([Vector2i(33, 6), Vector2i(30, 4), Vector2i(30, 6)])
 lines = Array[String](["Shh. You'll scare the fish.", "Nothing's biting today. Nothing's bitten all week, come to think of it.", "Your farm's got a pond too, hasn't it? Lucky.", "Sprinklers, eh? In my day we carried every drop."])

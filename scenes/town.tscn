@@ -16,6 +16,10 @@ script = ExtResource("1_town")
 z_index = -1
 tile_set = ExtResource("2_tileset")
 
+[node name="Bridge" type="Sprite2D" parent="."]
+z_index = -1
+centered = false
+
 [node name="SpawnPoints" type="Node2D" parent="."]
 
 [node name="Entities" type="Node2D" parent="."]

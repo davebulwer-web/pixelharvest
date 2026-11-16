@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 13 — questlines.** Session 1 (new request kinds, the lines as data, Ivy, the mayor's bridge and Hollis's sets) is tested and committed by Dave (2026-11-15). Session 2 (deadlines, Rosa's market orders, the notice board's daily jobs; save version 14) is built, waiting for Dave to try it. After that: Ivy's Pixellab art, and Dave plays a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them.
+**Current stage: 14 — the Woods and foraging.** Session 1 (the bridge, the Woods, forage that changes daily, Pip's mushroom hunt; no save change) is built, waiting for Dave to try it. Session 2 is the axe and timber. Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -658,22 +658,59 @@ ROADMAP section 5.
       crate and orders in every season; an order through a save and load; a written request
       with a deadline; the question box's keys; saves v1–v13), rendered Rosa's choice, the new
       request, her menu after, the board's job and the request log with due days
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (committed and pushed as "Stage 13b", 2026-11-15)
 - [ ] Pixellab: Ivy (and the ruined glasshouse)
 - [ ] Dave plays a full year
 
 Waiting for later stages: Ivy's glasshouse restoration (timber, 1,500g and a fish → the
 greenhouse; Stages 14, 15, 17), Brann's sprinkler and sickle lines (14, 17), Wren's line
-(15), Mabel's kitchen lessons (16), Pip's mushroom hunt, biggest fish and snowman (14, 15,
-18–19), the mayor's harvest fair and year review (18, 19).
+(15), Mabel's kitchen lessons (16), Pip's biggest fish and snowman (15, 18–19), the mayor's
+harvest fair and year review (18, 19). Pip's mushroom hunt came in Stage 14.
 
 ## Stage 14 — The Woods and foraging · 2 sessions + art · Opus, then Sonnet
 
 ROADMAP sections 8 and 9. Reverses DESIGN.md's "no foraging" (updated 2026-11-15).
 
-- [ ] The bridge (the mayor's request opens it), the Woods location, forage spots per season
-- [ ] The axe and timber (chopping thicket and fallen logs)
-- [ ] Pixellab: woods tileset (4 seasons), bridge, forage icons, axe, timber
+**Session 1 — the bridge, the Woods and foraging** (2026-11-16, DECISIONS 052, no save change)
+
+- [x] A river along the top of the town; the pond path carries on up beside the pond to
+      the bridge. Broken (walking up to it says why) until the Woods open
+- [x] The Woods open on summer day 1 once the mayor's bridge is paid for, or the morning
+      after it's paid for if that's later (`woods_open`, a calendar unlock that `needs`
+      `woods_bridge`); the board pins it up a week ahead, the morning summary announces it
+- [x] The Woods (48 × 32): five glades joined by paths, a stream down the east side with a
+      footbridge, undergrowth at the glades' edges (for session 2's axe), close-set trees
+      everywhere else; the seasons' ground and trees; its own tune
+- [x] Forage (`ForageDef`, `data/forage/`): 14 kinds over the four seasons (mushrooms,
+      berries, flowers, nuts, holly, pine cones; worms on rainy days). Each morning 10 spots
+      among the glades and path edges get something, picked by weight; E picks it up, free
+      of energy; picked spots stay picked until morning
+- [x] Pip's mushroom hunt (autumn, once the Woods are open): a chanterelle, a penny bun and a
+      puffball → 200g
+- [x] Wren's third spot moved off the new path (to 30, 6); the mayor's bridge request
+      names the river at the top of town
+- [x] Save version: unchanged (14). Nothing new is saved: the forage follows from the date
+- [x] Verified in the sandbox: headless import and run clean, 3,671 harness checks (when the
+      Woods open, paid early, late or never, and through a loaded save; the board's notice;
+      a year of forage days: the same spots however often asked, ten a day, all in season,
+      worms only in the rain, every kind turns up; every forage spot reachable on foot;
+      walking up to the broken bridge, over the whole one into the Woods and back; picking
+      up with E, staying picked after a trip out, gone by morning; Pip's hunt; passing out
+      in the Woods; saves v1–v13), rendered the Woods in summer, autumn and winter and the
+      bridge broken and whole
+- [ ] Dave confirms it plays correctly on Windows
+
+**Session 2 — the axe and timber**
+
+- [ ] The axe (Marlow, spring week 2) and timber: chopping thicket on the farm and the
+      Woods' undergrowth and fallen logs
+- [ ] Brann's sprinkler line and Ivy's timber, now that timber exists; Wren's worms wait
+      for fishing (Stage 15)
+
+**Art**
+
+- [ ] Pixellab: woods tileset (4 seasons), bridge (whole and broken), footbridge, 14 forage
+      icons, axe, timber
 
 ## Stage 15 — Fishing with Wren · 1–2 sessions + art · Opus
 

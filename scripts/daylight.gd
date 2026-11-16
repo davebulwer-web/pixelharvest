@@ -10,9 +10,9 @@ extends CanvasModulate
 ## colour from the clock, listening for time_changed, and fades to each new
 ## colour rather than jumping, because the clock moves in 10-minute steps.
 ##
-## Only the farm and the town have one (scenes/daylight.tscn). Interiors don't,
-## so the farmhouse and the shops stay lit at any hour, as rooms with lamps
-## would be.
+## Only the outdoor places have one (scenes/daylight.tscn): the farm, the town
+## and the Woods. Interiors don't, so the farmhouse and the shops stay lit at
+## any hour, as rooms with lamps would be.
 ##
 ## Godot allows one CanvasModulate per scene, so the season's tint lives here
 ## too: the colour shown is the time's colour times SeasonTheme.light_tint

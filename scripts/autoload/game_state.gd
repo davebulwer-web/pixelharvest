@@ -127,6 +127,7 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	farm = FarmLayout.build_default()
 	quests = QuestLog.new()
 	unlocks = []
+	_foraged_today.clear()
 	# Anything the calendar opens on day 1 is there from the start.
 	open_due_unlocks()
 	location = RULES.starting_location
@@ -391,12 +392,47 @@ func unlock(unlock_def: UnlockDef) -> void:
 	EventBus.unlocked.emit(unlock_def.id)
 
 
-## Earn every unlock the calendar has reached by today. TimeSystem calls this
-## overnight, once the date has moved on; a new game calls it for day 1.
+## Earn every unlock the calendar has reached by today, if what it `needs`
+## is earned too (DECISIONS 052). TimeSystem calls this overnight, once the
+## date has moved on; a new game calls it for day 1.
 func open_due_unlocks() -> void:
 	for each in ContentDB.unlocks():
-		if each.opens_by_date() and each.on_day <= day_number():
+		if each.opens_by_date() and each.on_day <= day_number() and has_unlock(each.needs):
 			unlock(each)
+
+
+# --- Foraging (DECISIONS 052) -------------------------------------------------
+# What grows where today is Forage's (scripts/woods/forage.gd), worked out from
+# the date. All that's kept here is what has been picked today, so a mushroom
+# picked in the Woods stays picked after a trip back to town. Not saved: the
+# game saves overnight, and by morning everything has grown back.
+
+## Spots picked today, as "location@x,y", and the day_number they're for.
+var _foraged_today: Dictionary = {}
+var _foraged_on_day: int = 0
+
+
+## True if the forage at `cell` in `location_id` has been picked today.
+func is_foraged(location_id: StringName, cell: Vector2i) -> bool:
+	return _foraged_on_day == day_number() and _foraged_today.has(_forage_key(location_id, cell))
+
+
+## Pick up `what` from `cell` in `location_id`: into the bag, and remembered
+## for the rest of the day. Free: foraging costs time, not energy.
+func forage(location_id: StringName, cell: Vector2i, what: ForageDef) -> void:
+	if what == null or is_foraged(location_id, cell):
+		return
+	if _foraged_on_day != day_number():
+		_foraged_today.clear()
+		_foraged_on_day = day_number()
+	_foraged_today[_forage_key(location_id, cell)] = true
+	inventory.add(what)
+	EventBus.foraged.emit(what.id, location_id)
+	EventBus.message_posted.emit("Found: %s" % what.display_name)
+
+
+func _forage_key(location_id: StringName, cell: Vector2i) -> String:
+	return "%s@%d,%d" % [location_id, cell.x, cell.y]
 
 
 # --- Hazards (DECISIONS 045) -------------------------------------------------
@@ -655,6 +691,7 @@ func load_from_save(data: Dictionary) -> void:
 
 	# Unlocks are kept by name even if no UnlockDef has it any more: it does
 	# nothing then, and it's there again if the file comes back.
+	_foraged_today.clear()
 	unlocks = []
 	for id: Variant in data["unlocks"]:
 		if StringName(id) not in unlocks:

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ForageDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/forage_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/forage/penny_bun.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"penny_bun"
+display_name = "Penny bun"
+description = "A fat brown mushroom, like a bread roll. The best the Woods have."
+icon = ExtResource("2_icon")
+sell_price = 55
+tags = Array[StringName]([&"mushroom"])
+seasons = Array[StringName]([&"autumn"])
+weight = 4

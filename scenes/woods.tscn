@@ -1,0 +1,34 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/woods/woods.gd" id="1_woods"]
+[ext_resource type="TileSet" path="res://assets/tilesets/ground_tileset.tres" id="2_tileset"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="4_hud"]
+[ext_resource type="Texture2D" path="res://assets/sprites/woods/footbridge.png" id="5_footbridge"]
+[ext_resource type="PackedScene" path="res://scenes/daylight.tscn" id="6_daylight"]
+
+[node name="Woods" type="Node2D"]
+script = ExtResource("1_woods")
+
+[node name="Ground" type="TileMapLayer" parent="."]
+z_index = -1
+tile_set = ExtResource("2_tileset")
+
+[node name="Footbridge" type="Sprite2D" parent="."]
+z_index = -1
+texture = ExtResource("5_footbridge")
+centered = false
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="Entities" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Player" parent="Entities" instance=ExtResource("3_player")]
+position = Vector2(384, 492)
+
+[node name="Weather" type="Node" parent="."]
+
+[node name="Daylight" parent="." instance=ExtResource("6_daylight")]
+
+[node name="Hud" parent="." instance=ExtResource("4_hud")]

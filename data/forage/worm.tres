@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ForageDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/forage_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/forage/worm.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"worm"
+display_name = "Worm"
+description = "They come up when it rains. An angler would know what to do with one."
+icon = ExtResource("2_icon")
+sell_price = 3
+seasons = Array[StringName]([&"spring", &"summer", &"autumn"])
+weight = 8
+only_in_weather = Array[StringName]([&"rain", &"storm"])

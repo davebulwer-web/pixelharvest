@@ -11,6 +11,10 @@ extends Node2D
 ## the arriving player at the spawn point LocationManager asked for. Tools are
 ## off in town (the farm's tiles aren't here to be hoed), and so is sleeping.
 ##
+## The bridge to the Woods (DECISIONS 052) stands at the top of the pond path:
+## broken until the Woods open (the mayor's request pays for it, and it's
+## ready by summer), then whole, with the way into the Woods beyond it.
+##
 ## Talking: E on a townsperson or the notice board is announced on EventBus
 ## (npc_talked_to, notice_board_read); this scene answers with the dialogue
 ## box. Shopkeepers indoors never reach here; a market stall's keeper does,
@@ -24,7 +28,9 @@ extends Node2D
 ##
 ##   Town
 ##   ├── Ground      (TileMapLayer, same seasonal tilesets as the farm)
-##   ├── SpawnPoints (Marker2Ds, made here: one per door, one for the farm gate)
+##   ├── Bridge      (the bridge over the river to the Woods, whole or broken)
+##   ├── SpawnPoints (Marker2Ds, made here: one per door, one for the farm gate,
+##   │                one for the bridge)
 ##   ├── Entities    (y-sorted: player, trees, decoration, shop fronts, people,
 ##   │                market stalls and their keepers)
 ##   ├── Weather     (the season's and the day's overlays — rain, snow — as on the farm)
@@ -37,8 +43,14 @@ extends Node2D
 const TILE_PX := 16
 const TOWN_ID := &"town"
 const FARM_ID := &"farm"
+const WOODS_ID := &"woods"
+
+## The bridge's pictures: whole (the Woods are open) and broken (not yet).
+const BRIDGE_WHOLE: Texture2D = preload("res://assets/sprites/town/bridge.png")
+const BRIDGE_BROKEN: Texture2D = preload("res://assets/sprites/town/bridge_broken.png")
 
 @onready var _ground: TileMapLayer = $Ground
+@onready var _bridge: Sprite2D = $Bridge
 @onready var _entities: Node2D = $Entities
 @onready var _player: Player = $Entities/Player
 @onready var _spawns: Node2D = $SpawnPoints
@@ -73,7 +85,8 @@ func _ready() -> void:
 		door_cells.append(def.door_cell)
 
 	SeasonLook.apply_ground(_ground)
-	var tiles := TownLayout.build(door_cells)
+	var bridge_open := _woods_open()
+	var tiles := TownLayout.build(door_cells, bridge_open)
 	for cell: Vector2i in tiles:
 		GroundTiles.draw(_ground, cell, tiles[cell])
 
@@ -82,6 +95,8 @@ func _ready() -> void:
 		_add_spawn(StringName("from_%s" % def.id), Vector2(
 				def.door_cell.x * TILE_PX + TILE_PX / 2.0, (def.door_cell.y + 2) * TILE_PX - 2))
 	_add_spawn(&"from_farm", TownLayout.ARRIVAL_FROM_FARM)
+	_add_spawn(&"from_woods", TownLayout.ARRIVAL_FROM_WOODS)
+	_add_bridge(bridge_open)
 	_place_objects()
 	_mark_notice_board()
 	_place_townsfolk()
@@ -199,6 +214,36 @@ func _pack_up_closed_stalls() -> void:
 		_markers.erase(shop_id)
 		_stall_shops.erase(shop_id)
 		_stall_nodes.erase(shop_id)
+
+
+## True once the Woods are open: the bridge is mended (DECISIONS 052).
+func _woods_open() -> bool:
+	var woods := _location(WOODS_ID)
+	return woods != null and GameState.has_unlock(woods.requires_unlock)
+
+
+func _location(id: StringName) -> LocationDef:
+	for each in LocationManager.all():
+		if each.id == id:
+			return each
+	return null
+
+
+## The bridge over the river at the top of the pond path. Whole, it has the
+## way into the Woods at its far end. Broken, its cells are river, and
+## walking up to it says why there's no way across (the Woods' locked
+## message), as a shut shop door does.
+func _add_bridge(open: bool) -> void:
+	var top_left: Vector2i = TownLayout.WOODS_GATE[0] if open else TownLayout.BRIDGE.position
+	_bridge.texture = BRIDGE_WHOLE if open else BRIDGE_BROKEN
+	_bridge.position = Vector2(top_left * TILE_PX)
+	var width := TILE_PX * TownLayout.WOODS_GATE.size()
+	if open:
+		_add_zone(Rect2(TownLayout.WOODS_GATE[0] * TILE_PX, Vector2(width, TILE_PX)), WOODS_ID, &"from_town")
+	else:
+		# Just this side of the river: the bank at the top of the path.
+		var bank := Vector2i(TownLayout.BRIDGE.position.x, TownLayout.BRIDGE.end.y)
+		_add_zone(Rect2(bank * TILE_PX, Vector2(width, TILE_PX / 2.0)), WOODS_ID, &"from_town")
 
 
 ## The way back: the gap beyond the east end of the road.

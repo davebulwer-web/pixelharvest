@@ -35,10 +35,14 @@ extends Node
 ##                   season's odds (SeasonTheme) choose among them (DECISIONS 046)
 ##   data/orders/    OrderTemplate — patterns for requests made fresh each day:
 ##                   Rosa's market orders, the notice board's jobs (DECISIONS 050)
+##   data/forage/    ForageDef — wild things to pick up in the Woods: items, with
+##                   where and when they grow (DECISIONS 052)
 ##
 
 const CROPS_DIR := "res://data/crops/"
-const ITEM_DIRS: Array[String] = ["res://data/tools/", "res://data/produce/", "res://data/decorations/"]
+const FORAGE_DIR := "res://data/forage/"
+const ITEM_DIRS: Array[String] = ["res://data/tools/", "res://data/produce/", "res://data/decorations/",
+		FORAGE_DIR]
 const OBJECTS_DIR := "res://data/objects/"
 const UPGRADES_DIR := "res://data/upgrades/"
 const CHARACTERS_DIR := "res://data/characters/"
@@ -81,8 +85,9 @@ func _ready() -> void:
 	_check_unlocks()
 	_check_weather()
 	_check_orders()
-	print("ContentDB: %d crops, %d items, %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers, %d order patterns"
-			% [_crops.size(), _items.size(), _objects.size(), _upgrades.size(), _characters.size(),
+	_check_forage()
+	print("ContentDB: %d crops, %d items (%d forage), %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers, %d order patterns"
+			% [_crops.size(), _items.size(), forage().size(), _objects.size(), _upgrades.size(), _characters.size(),
 			_events.size(), _quests.size(), _unlocks.size(), _weathers.size(), _orders.size()])
 
 
@@ -183,6 +188,23 @@ func order_templates() -> Array[OrderTemplate]:
 		result.append(each)
 	result.sort_custom(func(a: OrderTemplate, b: OrderTemplate) -> bool: return String(a.id) < String(b.id))
 	return result
+
+
+## Every kind of forage (DECISIONS 052), by id as Strings, so the dice that
+## pick between them always see them in the same order.
+func forage() -> Array[ForageDef]:
+	var result: Array[ForageDef] = []
+	for each: ItemDef in _items.values():
+		if each is ForageDef:
+			result.append(each)
+	result.sort_custom(func(a: ForageDef, b: ForageDef) -> bool: return String(a.id) < String(b.id))
+	return result
+
+
+## The forage that grows in `location_id` on a day of `season_id` with
+## `weather_id`, in the same order as forage().
+func forage_growing(location_id: StringName, season_id: StringName, weather_id: StringName) -> Array[ForageDef]:
+	return forage().filter(func(f: ForageDef) -> bool: return f.grows(location_id, season_id, weather_id))
 
 
 ## The crop whose harvest is `item`, or null if nothing grows it (fibre).
@@ -631,6 +653,12 @@ func _check_unlocks() -> void:
 		_is_unknown_unlock(hazards.crows_start, hazards.resource_path, "waits for")
 	for each: UnlockDef in _unlocks.values():
 		var where := each.resource_path
+		if _is_unknown_unlock(each.needs, where, "needs"):
+			pass
+		elif each.needs == each:
+			push_error("ContentDB: '%s' needs itself, so it never opens" % where)
+		elif each.needs != null and not each.opens_by_date():
+			push_warning("ContentDB: '%s' needs another unlock but has no on_day; needs only works with a date" % where)
 		if not each.opens_by_date() and not given.has(each.id):
 			push_warning("ContentDB: '%s' has no on_day and no request gives it, so it never opens" % where)
 		if each.announcement == "":
@@ -694,3 +722,31 @@ func _check_orders() -> void:
 		if each.on_event != &"" and event(each.on_event) == null:
 			push_error("ContentDB: '%s' is offered on '%s', which isn't in %s" % [where, each.on_event, EVENTS_DIR])
 		_is_unknown_unlock(each.requires_unlock, where, "waits for")
+
+
+## Forage (DECISIONS 052): each kind must grow in a real season and a real
+## place, and be worth something, or it's clutter in the bag.
+func _check_forage() -> void:
+	var season_ids: Array[StringName] = []
+	for theme in RULES.seasons:
+		if theme != null:
+			season_ids.append(theme.id)
+	var location_ids: Array[StringName] = []
+	for location in RULES.locations:
+		if location != null:
+			location_ids.append(location.id)
+	for each in forage():
+		var where := each.resource_path
+		if each.seasons.is_empty():
+			push_warning("ContentDB: '%s' has no seasons, so it's never found" % where)
+		for season_id in each.seasons:
+			if season_id not in season_ids:
+				push_error("ContentDB: '%s' grows in a season '%s' that isn't in game_rules.tres" % [where, season_id])
+		for location_id in each.found_in:
+			if location_id not in location_ids:
+				push_error("ContentDB: '%s' grows in '%s', which isn't a location in game_rules.tres" % [where, location_id])
+		for weather_id in each.only_in_weather:
+			if weather(weather_id) == null:
+				push_error("ContentDB: '%s' waits for weather '%s', which isn't in %s" % [where, weather_id, WEATHER_DIR])
+		if each.sell_price <= 0:
+			push_warning("ContentDB: '%s' sells for nothing, so the bin won't take it" % where)

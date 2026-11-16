@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ForageDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/forage_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/forage/holly.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"holly"
+display_name = "Holly"
+description = "Spiky leaves and red berries. The town likes it for lantern night."
+icon = ExtResource("2_icon")
+sell_price = 20
+seasons = Array[StringName]([&"winter"])
+weight = 10

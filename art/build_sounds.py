@@ -9,7 +9,8 @@ Output:
   assets/audio/sfx/<name>.wav    short sounds, one per thing that happens
                                  (the names are the keys in
                                  data/audio/sound_bank.tres)
-  assets/audio/music/<name>.ogg  two loops: farm.ogg and town.ogg
+  assets/audio/music/<name>.ogg  three loops: farm.ogg, town.ogg and woods.ogg
+                                 (the Woods', DECISIONS 052)
   assets/audio/ambience/rain.ogg the rain's loop, and sfx/thunder.wav, for
                                  the weather (DECISIONS 046)
 
@@ -315,7 +316,7 @@ SFX = {
 CHORDS = {  # chord name -> MIDI notes of a root-position triad, around middle C
     "F": (53, 57, 60), "Dm": (50, 53, 57), "Bb": (46, 50, 53), "C": (48, 52, 55),
     "Am": (45, 48, 52), "Gm": (43, 46, 50), "G": (43, 47, 50), "Em": (40, 43, 47),
-    "D": (50, 54, 57), "Bm": (47, 50, 54),
+    "D": (50, 54, 57), "Bm": (47, 50, 54), "E": (52, 56, 59),
 }
 
 
@@ -441,6 +442,35 @@ def town_tune() -> np.ndarray:
                 swing=0.18)
 
 
+def woods_tune() -> np.ndarray:
+    """The Woods (DECISIONS 052): slow and a little mysterious, in A minor at
+    72 bpm, soft sine lead, no drums. Its own function, run after everything
+    else, so adding it changed none of the other files."""
+    r = None
+    A = [(69, 3), (72, 1), (76, 4),
+         (74, 2), (72, 2), (71, 4),
+         (72, 3), (74, 1), (76, 2), (79, 2),
+         (76, 6), (r, 2),
+         (81, 3), (79, 1), (76, 4),
+         (77, 2), (76, 2), (74, 4),
+         (72, 2), (71, 2), (69, 2), (71, 2),
+         (69, 6), (r, 2)]
+    B = [(76, 4), (77, 2), (79, 2),
+         (81, 4), (79, 4),
+         (77, 2), (76, 2), (74, 2), (72, 2),
+         (74, 6), (r, 2),
+         (72, 4), (74, 2), (76, 2),
+         (79, 4), (77, 2), (76, 2),
+         (74, 2), (72, 2), (71, 2), (68, 2),
+         (69, 6), (r, 2)]
+    a_chords = ["Am", "Am", "G", "G", "C", "C", "Em", "Em",
+                "Am", "Am", "Dm", "Dm", "Am", "E", "Am", "Am"]
+    b_chords = ["C", "C", "G", "G", "Dm", "Dm", "G", "G",
+                "F", "F", "C", "C", "Dm", "E", "Am", "Am"]
+    return tune(72, A + B + A + B, a_chords + b_chords + a_chords + b_chords,
+                "sine", 0.4, "calm", 0.06, {})
+
+
 def write_ogg(path: str, x: np.ndarray, peak: float) -> None:
     tmp = path + ".tmp.wav"
     write_wav_raw(tmp, x / (np.max(np.abs(x)) or 1) * peak)
@@ -517,6 +547,8 @@ def main() -> None:
     write_ogg(f"{MUSIC_DIR}/town.ogg", town_tune(), 0.6)
     print("music town")
     build_weather()
+    write_ogg(f"{MUSIC_DIR}/woods.ogg", woods_tune(), 0.6)
+    print("music woods")
 
 
 if __name__ == "__main__":

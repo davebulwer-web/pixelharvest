@@ -52,3 +52,8 @@ extends Resource
 
 ## What the player is told at the locked door. Empty: "<name> is shut."
 @export var locked_message: String = ""
+
+## --- Foraging (DECISIONS 052) -----------------------------------------------------
+## How many spots get something wild each morning (a mushroom, berries), out of
+## the spots the location's map offers. 0: no foraging here.
+@export var forage_per_day: int = 0

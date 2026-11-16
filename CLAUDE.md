@@ -105,7 +105,9 @@ scripts/             Game code
                      Audio, DayReport…)
   farm/              The farm's data and layout, the farmhouse and its bed, its effects,
                      the night's hazards (FarmHazards) and the morning's crows
-  town/              The town, its map, shop interiors and fronts, people, notice board (Stage 7)
+  town/              The town, its map, shop interiors and fronts, people, notice board (Stage 7),
+                     the river and the bridge to the Woods
+  woods/             The Woods: their map, and the day's forage (Forage, ForageSpot; DECISIONS 052)
   items/             Inventory
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
                      and decorations, the trowel's digging, pest spray)
@@ -139,11 +141,14 @@ data/                Content resources (.tres), indexed by ContentDB
                      (DECISIONS 043); content waits for one with `requires_unlock`
   orders/            OrderTemplate — patterns for requests made fresh each day: Rosa's
                      market orders, the notice board's daily jobs (DECISIONS 050)
+  forage/            ForageDef — wild things found in the Woods: items, with the seasons,
+                     places and weather they grow in (DECISIONS 052)
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
-                     farm/ the farmhouse and its furniture, decorations/ the farm's decorations)
+                     farm/ the farmhouse and its furniture, decorations/ the farm's decorations,
+                     forage/ the wild things' icons, woods/ the Woods' own pieces)
 assets/tilesets/     Ground and world tilesets
-assets/audio/        Sound effects (sfx/*.wav), music (music/*.ogg) and the weather's loops
+assets/audio/        Sound effects (sfx/*.wav), music (music/*.ogg: farm, town, woods) and the weather's loops
                      (ambience/*.ogg), made by art/build_sounds.py
 art/                 Art specification and generation log (not shipped art)
 ```

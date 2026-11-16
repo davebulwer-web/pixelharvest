@@ -13,8 +13,9 @@ extends RefCounted
 ##
 ## The map, roughly (each character is about two cells):
 ##
-##        trees  (glasshouse) trees  ~~pond~~
-##                                    ~~~~~~~~  angler
+##   ~~~~~~~~~~~~~~~~~~~~~ the river ~~~~~~~~~~~~~~~~~~~~~ [=] bridge to the Woods
+##        trees  (glasshouse) trees  ~~pond~~ ||
+##                                    ~~~~~~~~ ||  angler
 ##    *  [Seeds]  *  |  * [General] *   * [Smith] * ||  path to the pond
 ##   ==================== road ==========================  -> farm
 ##          fence           #  square  #
@@ -22,6 +23,12 @@ extends RefCounted
 ##          fence          #  (fountain)#  mayor
 ##                         #   bench    #
 ##   (* flower bed, | lamp post, # the square's paving)
+##
+## The river along the top and the bridge over it came with the Woods
+## (DECISIONS 052): the path up past Brann's carries on beside the pond to
+## the bridge. Until the bridge is mended, its two cells are water and only
+## the broken stumps show; once it's open, they're path under the bridge's
+## picture and the edge beyond opens into the Woods.
 ##
 
 const SIZE := Vector2i(40, 24)
@@ -38,6 +45,21 @@ const SQUARE := Rect2i(15, 15, 11, 7)
 const POND_PATH := Rect2i(35, 6, 2, 7)
 
 const POND := Rect2i(31, 2, 6, 4)
+
+## The river along the top of the town, which feeds the pond (DECISIONS 052).
+const RIVER_ROWS: Array[int] = [0, 1]
+
+## From the pond path, on up the east side of the pond to the river.
+const BRIDGE_PATH := Rect2i(37, 2, 2, 6)
+
+## The bridge's cells over the river, and the gap in the north edge beyond it
+## that leads into the Woods. The bridge is open once the Woods are.
+const BRIDGE := Rect2i(37, 0, 2, 2)
+const WOODS_GATE: Array[Vector2i] = [Vector2i(37, -1), Vector2i(38, -1)]
+
+## Where the farmer stands on coming back from the Woods: at the town end of
+## the bridge, in pixels.
+const ARRIVAL_FROM_WOODS := Vector2(608, 44)
 
 ## Where the farmer stands on arriving from the farm: in the middle of the
 ## road, in pixels (the road is rows 13 and 14).
@@ -99,9 +121,10 @@ const OBJECTS: Dictionary = {
 
 
 ## The ground tile (an atlas coordinate, see GroundTiles) for every cell of the
-## town and its border, given the cells shop doors stand on. A door cell is
-## path, so the doorstep reads as one with the road.
-static func build(door_cells: Array[Vector2i]) -> Dictionary:
+## town and its border, given the cells shop doors stand on and whether the
+## bridge to the Woods is open. A door cell is path, so the doorstep reads as
+## one with the road.
+static func build(door_cells: Array[Vector2i], bridge_open: bool = false) -> Dictionary:
 	var tiles: Dictionary = {}
 	for y in range(-1, SIZE.y + 1):
 		for x in range(-1, SIZE.x + 1):
@@ -109,18 +132,24 @@ static func build(door_cells: Array[Vector2i]) -> Dictionary:
 			tiles[cell] = _tile_for(cell, door_cells)
 	for cell in FARM_GATE:
 		tiles[cell] = GroundTiles.path_for(cell)
+	if bridge_open:
+		for y in range(BRIDGE.position.y, BRIDGE.end.y):
+			for x in range(BRIDGE.position.x, BRIDGE.end.x):
+				tiles[Vector2i(x, y)] = GroundTiles.PATH
+		for cell in WOODS_GATE:
+			tiles[cell] = GroundTiles.PATH
 	return tiles
 
 
 static func _tile_for(cell: Vector2i, door_cells: Array[Vector2i]) -> Vector2i:
 	if cell.x < 0 or cell.y < 0 or cell.x >= SIZE.x or cell.y >= SIZE.y:
 		return GroundTiles.CLIFF
-	if POND.has_point(cell):
+	if POND.has_point(cell) or cell.y in RIVER_ROWS:
 		return GroundTiles.WATER
 	if cell.y in ROAD_ROWS or cell in door_cells:
 		return GroundTiles.path_for(cell)
 	if SQUARE.has_point(cell):
 		return GroundTiles.PAVING
-	if POND_PATH.has_point(cell):
+	if POND_PATH.has_point(cell) or BRIDGE_PATH.has_point(cell):
 		return GroundTiles.path_for(cell)
 	return GroundTiles.grass_for(cell)

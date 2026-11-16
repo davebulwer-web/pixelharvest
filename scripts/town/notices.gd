@@ -252,7 +252,9 @@ static func _opening_soon() -> String:
 	var today := GameState.day_number()
 	var length := GameState.RULES.days_per_season
 	for each in ContentDB.unlocks():
-		if not each.opens_by_date() or GameState.has_unlock(each):
+		# One that waits for another (the Woods, for the bridge to be paid
+		# for) is only pinned up once that's earned.
+		if not each.opens_by_date() or GameState.has_unlock(each) or not GameState.has_unlock(each.needs):
 			continue
 		var ahead := each.on_day - today
 		if ahead < 1 or ahead > SOON_DAYS:

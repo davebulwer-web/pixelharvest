@@ -15,6 +15,9 @@ extends Resource
 ## Two ways to earn one:
 ##   - a request gives it as a reward (QuestDef.reward_unlocks);
 ##   - the calendar gives it on `on_day`, overnight (the forge on day 8).
+## A calendar unlock can also wait for another one (`needs`, DECISIONS 052):
+## the Woods open on summer day 1, but only once the bridge has been paid for,
+## and the morning after that if it's paid for later.
 ##
 ## Rule for writing content (ROADMAP section 4): an unlock is announced by a
 ## person or the notice board, never silently. `announcement` is the line the
@@ -38,6 +41,11 @@ extends Resource
 ## (GameState.day_number), like QuestDef.first_day. 0 means never by the
 ## calendar: only a request can give it.
 @export var on_day: int = 0
+
+## Another unlock this one waits for, as well as its date: `woods_open` needs
+## `woods_bridge`, which the mayor's request gives (DECISIONS 052). It opens
+## on the first night that both are true. Null: the date alone.
+@export var needs: UnlockDef
 
 
 ## True if the calendar opens it at all.

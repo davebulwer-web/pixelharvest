@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+[ext_resource type="Resource" path="res://data/unlocks/woods_bridge.tres" id="2_bridge"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"woods_open"
+display_name = "the bridge to the Woods"
+announcement = "The new bridge is finished! The Woods are open: take the path up past Brann's forge and the pond. Mushrooms, berries and more grow wild there, different every day."
+on_day = 29
+needs = ExtResource("2_bridge")

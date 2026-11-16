@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_each_goal.gd" id="2_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="3_r"]
+[ext_resource type="Resource" path="res://data/forage/chanterelle.tres" id="4_r"]
+[ext_resource type="Resource" path="res://data/forage/penny_bun.tres" id="5_r"]
+[ext_resource type="Resource" path="res://data/forage/puffball.tres" id="6_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="7_r"]
+[ext_resource type="Resource" path="res://data/unlocks/woods_open.tres" id="8_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+items = Array[ExtResource("3_r")]([ExtResource("4_r"), ExtResource("5_r"), ExtResource("6_r")])
+
+[resource]
+script = ExtResource("1_r")
+id = &"child_mushroom_hunt"
+title = "Pip's mushroom hunt"
+giver = &"child"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["My book has a whole page of mushrooms, and it says autumn's the best time for them. In the Woods!", "I'm not allowed over the bridge on my own. Could you find me three? A chanterelle, a penny bun and a puffball. Those are the ones in the pictures.", "I just want to look at them. And maybe poke the puffball."])
+reminder_line = "Any mushrooms yet? A chanterelle, a penny bun and a puffball. Check the clearings!"
+thanks_lines = Array[String](["They're real! They look just like the pictures!", "*poke* ...It puffed! Here, this is all my pocket money. It's worth it."])
+reward_gold = 200
+first_day = 61
+seasons = Array[StringName]([&"autumn"])
+requires_unlock = ExtResource("8_r")

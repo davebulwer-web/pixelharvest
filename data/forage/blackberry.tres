@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ForageDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/forage_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/forage/blackberry.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"blackberry"
+display_name = "Blackberries"
+description = "A handful from the brambles. Mind the thorns."
+icon = ExtResource("2_icon")
+sell_price = 15
+seasons = Array[StringName]([&"autumn"])
+weight = 12

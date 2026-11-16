@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="GameRules" load_steps=24 format=3]
+[gd_resource type="Resource" script_class="GameRules" load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/game_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_itemdef"]
@@ -12,6 +12,7 @@
 [ext_resource type="Resource" path="res://data/locations/general_store.tres" id="15_general"]
 [ext_resource type="Resource" path="res://data/locations/blacksmith.tres" id="16_smith"]
 [ext_resource type="Resource" path="res://data/locations/farmhouse.tres" id="17_house"]
+[ext_resource type="Resource" path="res://data/locations/woods.tres" id="24_woods"]
 [ext_resource type="Script" path="res://scripts/resources/season_theme.gd" id="8_theme"]
 [ext_resource type="Resource" path="res://data/seasons/spring.tres" id="9_spring"]
 [ext_resource type="Resource" path="res://data/seasons/summer.tres" id="10_summer"]
@@ -34,7 +35,7 @@ ExtResource("4_can"): 1,
 ExtResource("23_trowel"): 1,
 ExtResource("5_seeds"): 10
 })
-locations = Array[ExtResource("6_locdef")]([ExtResource("7_farm"), ExtResource("13_town"), ExtResource("14_seeds"), ExtResource("15_general"), ExtResource("16_smith"), ExtResource("17_house")])
+locations = Array[ExtResource("6_locdef")]([ExtResource("7_farm"), ExtResource("13_town"), ExtResource("14_seeds"), ExtResource("15_general"), ExtResource("16_smith"), ExtResource("17_house"), ExtResource("24_woods")])
 starting_location = &"farmhouse"
 home_location = &"farmhouse"
 seasons = Array[ExtResource("8_theme")]([ExtResource("9_spring"), ExtResource("10_summer"), ExtResource("11_autumn"), ExtResource("12_winter")])

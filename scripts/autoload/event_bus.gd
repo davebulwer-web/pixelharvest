@@ -97,6 +97,10 @@ signal giant_grew(cell: Vector2i, crop_id: StringName)
 ## giant pumpkin request counts these).
 signal giant_harvested(cell: Vector2i, crop_id: StringName)
 
+## Something wild was picked up (DECISIONS 052): a mushroom in the Woods.
+## Pip's and Wren's requests and the day's summary can count these.
+signal foraged(item_id: StringName, location_id: StringName)
+
 # --- Player and economy -----------------------------------------------------
 
 signal energy_changed(current: float, maximum: float)
