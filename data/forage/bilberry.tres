@@ -12,3 +12,4 @@ icon = ExtResource("2_icon")
 sell_price = 18
 seasons = Array[StringName]([&"summer"])
 weight = 12
+tags = Array[StringName]([&"fruit"])

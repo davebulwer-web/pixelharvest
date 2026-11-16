@@ -132,6 +132,7 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	_foraged_today.clear()
 	cleared = {}
 	fish_log = {}
+	recipes = {}
 	# Anything the calendar opens on day 1 is there from the start.
 	open_due_unlocks()
 	location = RULES.starting_location
@@ -563,6 +564,108 @@ func _fish_log_from_save(data: Variant) -> void:
 		fish_log[StringName(key)] = {"caught": int(entry.get("caught", 0)), "biggest": int(entry.get("biggest", 0))}
 
 
+# --- Cooking and eating (DECISIONS 056) ---------------------------------------
+# Recipes are data (RecipeDef, data/recipes/); dishes are ToolDefs with an
+# EatAction (data/dishes/). All that's kept here is which recipes the farmer
+# knows, and how many times each has been cooked (saved, save version 17).
+# The stove in the farmhouse cooks once the kitchen is open
+# (RULES.kitchen_unlock, from Mabel's lessons); a dish on the hotbar is eaten
+# with Space, anywhere.
+
+## Recipes known: recipe id -> times cooked (0: known, not cooked yet).
+var recipes: Dictionary = {}
+
+
+## True if the farmhouse kitchen is open: Mabel has shown the farmer how.
+func kitchen_open() -> bool:
+	return has_unlock(RULES.kitchen_unlock)
+
+
+func knows_recipe(recipe_id: StringName) -> bool:
+	return recipes.has(recipe_id)
+
+
+## Learn `recipe` (a request's reward). Announces recipe_learned the first
+## time; learning it again does nothing.
+func learn_recipe(recipe: RecipeDef) -> void:
+	if recipe == null or recipes.has(recipe.id):
+		return
+	recipes[recipe.id] = 0
+	EventBus.recipe_learned.emit(recipe.id)
+
+
+## The recipes known, by the dish's name, for the stove's menu.
+func known_recipes() -> Array[RecipeDef]:
+	var result: Array[RecipeDef] = []
+	for id: StringName in recipes:
+		var recipe := ContentDB.recipe(id)
+		if recipe != null:
+			result.append(recipe)
+	result.sort_custom(func(a: RecipeDef, b: RecipeDef) -> bool: return a.display_name() < b.display_name())
+	return result
+
+
+## Cook `recipe` once: take what goes in from the bag and put the dish in.
+## Returns false and changes nothing if the kitchen isn't open, the recipe
+## isn't known, or something's missing (RecipeDef.missing says what).
+func cook(recipe: RecipeDef) -> bool:
+	if recipe == null or recipe.dish == null or not kitchen_open() or not knows_recipe(recipe.id):
+		return false
+	if not recipe.can_cook(inventory):
+		return false
+	recipe.take_from(inventory)
+	inventory.add(recipe.dish, maxi(1, recipe.makes))
+	recipes[recipe.id] = int(recipes[recipe.id]) + 1
+	EventBus.dish_cooked.emit(recipe.id, recipe.dish.id)
+	return true
+
+
+## How many times `recipe_id` has been cooked, ever.
+func times_cooked(recipe_id: StringName) -> int:
+	return int(recipes.get(recipe_id, 0))
+
+
+## Eat one of `dish` (a ToolDef with an EatAction) from the bag: its energy
+## comes back, up to today's maximum. Returns false and keeps the dish if the
+## farmer is already full, so a helping is never wasted.
+func eat(dish: ToolDef) -> bool:
+	if dish == null or not dish.action is EatAction:
+		return false
+	if energy >= max_energy:
+		EventBus.message_posted.emit("You're full. Save the %s for later" % dish.display_name.to_lower())
+		return false
+	if not inventory.remove(dish):
+		return false
+	var before := energy
+	energy = minf(max_energy, energy + (dish.action as EatAction).energy)
+	var gained := energy - before
+	EventBus.energy_changed.emit(energy, max_energy)
+	EventBus.dish_eaten.emit(dish.id, gained)
+	EventBus.message_posted.emit("%s: +%d energy" % [dish.display_name, roundi(gained)])
+	return true
+
+
+## {"tomato_soup": 2}: as it's kept, with plain numbers.
+func _recipes_to_save() -> Dictionary:
+	var data := {}
+	for id: StringName in recipes:
+		data[String(id)] = int(recipes[id])
+	return data
+
+
+## A recipe the game no longer has is dropped with a warning, like an item.
+func _recipes_from_save(data: Variant) -> void:
+	recipes = {}
+	if typeof(data) != TYPE_DICTIONARY:
+		return
+	for key: Variant in data:
+		if ContentDB.recipe(StringName(key)) == null:
+			push_warning("Save knows a recipe '%s' the game doesn't have; it's been removed" % key)
+			continue
+		var cooked: Variant = data[key]
+		recipes[StringName(key)] = int(cooked) if typeof(cooked) in [TYPE_INT, TYPE_FLOAT] else 0
+
+
 # --- Hazards (DECISIONS 045) -------------------------------------------------
 # The rules are in data/hazard_rules.tres (RULES.hazards); the difficulty
 # decides how hard they press. These answer the questions the farm, the
@@ -764,6 +867,7 @@ func to_save() -> Dictionary:
 		"forecast": String(forecast.id) if forecast != null else "",
 		"cleared": _cleared_to_save(),
 		"fish_log": _fish_log_to_save(),
+		"recipes": _recipes_to_save(),
 	}
 
 
@@ -850,6 +954,8 @@ func load_from_save(data: Dictionary) -> void:
 	_cleared_from_save(data["cleared"])
 	# Every fish caught, and the biggest of each (save version 16).
 	_fish_log_from_save(data["fish_log"])
+	# The recipes known, and how often each has been cooked (save version 17).
+	_recipes_from_save(data["recipes"])
 	unlocks = []
 	for id: Variant in data["unlocks"]:
 		if StringName(id) not in unlocks:

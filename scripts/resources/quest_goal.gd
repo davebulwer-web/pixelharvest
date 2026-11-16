@@ -95,7 +95,9 @@ const SAME_IN_PLURAL: Array[String] = ["timber", "fibre", "holly", "kale", "garl
 		"corn", "rhubarb",
 		# Fish, as anglers say them (DECISIONS 054): "3 perch", "2 pike".
 		"fish", "bait", "perch", "roach", "rudd", "dace", "tench", "chub", "pike", "carp", "crucian carp",
-		"barbel", "grayling", "brown trout", "sea trout"]
+		"barbel", "grayling", "brown trout", "sea trout",
+		# And in recipes (DECISIONS 056): "any 3 fruit".
+		"fruit"]
 
 
 ## "parsnip" -> "parsnips", "strawberry" -> "strawberries", "potato" ->

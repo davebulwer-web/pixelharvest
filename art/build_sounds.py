@@ -14,6 +14,8 @@ Output:
   assets/audio/ambience/rain.ogg the rain's loop, and sfx/thunder.wav, for
                                  the weather (DECISIONS 046)
   assets/audio/sfx/chop.wav      the axe (DECISIONS 053)
+  assets/audio/sfx/sizzle.wav,   cooking at the stove and eating a dish
+            eat.wav              (DECISIONS 056)
 
 The music is written out note by note below (melody, chords) and rendered
 "round the loop": a note that rings past the end of the tune wraps round to
@@ -592,6 +594,42 @@ def build_fishing() -> None:
         print("sfx", name)
 
 
+# --- Cooking (DECISIONS 056) -------------------------------------------------
+# Added after everything else, with dice of their own, so no sound above
+# changes when this file is run again.
+
+cook_rng = np.random.default_rng(56)
+
+
+def sfx_sizzle():
+    """Something into a hot pan: a crackling hiss that settles, and a pan's clink."""
+    seconds = 0.55
+    n = int(seconds * RATE)
+    hiss = highpass(cook_rng.uniform(-1, 1, n), 2) * env(n, 0.01, 0.3)
+    # Crackle: a few sharp ticks scattered through the hiss.
+    crackle = np.zeros(n)
+    for start in cook_rng.integers(0, n - 200, 14):
+        crackle[start:start + 60] += cook_rng.uniform(-1, 1, 60) * np.linspace(1, 0, 60)
+    clink = note(84, 0.12, "triangle", 0.1)
+    return mix(hiss * 0.3, crackle * 0.5, clink * 0.25)
+
+
+def sfx_eat():
+    """Three soft bites, a little lower each time, then a contented hum."""
+    def bite(f):
+        crunch = smooth(cook_rng.uniform(-1, 1, int(0.06 * RATE)), 3) * env(int(0.06 * RATE), 0.002, 0.03)
+        thump = tone(sweep_phase(f, f * 0.7, 0.06)) * env(int(0.06 * RATE), 0.002, 0.03)
+        return mix(crunch * 0.6, thump * 0.5)
+    hum = mix(note(67, 0.18, "triangle", 0.1), at(0.1, note(72, 0.22, "triangle", 0.15), 0.32))
+    return mix(bite(300), at(0.13, bite(270), 0.8), at(0.26, bite(240), 0.8), at(0.42, hum * 0.5, 0.8))
+
+
+def build_cooking() -> None:
+    for name, make, peak in (("sizzle", sfx_sizzle, 0.45), ("eat", sfx_eat, 0.5)):
+        write_wav(f"{SFX_DIR}/{name}.wav", make(), peak)
+        print("sfx", name)
+
+
 def main() -> None:
     os.makedirs(SFX_DIR, exist_ok=True)
     os.makedirs(MUSIC_DIR, exist_ok=True)
@@ -607,6 +645,7 @@ def main() -> None:
     print("music woods")
     build_axe()
     build_fishing()
+    build_cooking()
 
 
 if __name__ == "__main__":

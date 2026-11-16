@@ -58,6 +58,9 @@ func _draw() -> void:
 			var label := GameState.tool_name(tool_def)
 			if not usable:
 				label += " · not in %s" % GameState.season_name(season).to_lower()
+			# A dish says what it gives back (DECISIONS 056).
+			if tool_def.action is EatAction:
+				label += " · Space to eat, +%d energy" % roundi((tool_def.action as EatAction).energy)
 			_draw_name(label, Vector2(x + SLOT_PX / 2.0, y - 4))
 		x += SLOT_PX + GAP
 	x += GROUP_GAP

@@ -2231,3 +2231,74 @@ another lure, another fish job or another contest prize is a `.tres`.
 **Cost.** The contest is a request, not yet a festival: one prize, no rivals. Winter
 fishing takes some walking-to-the-ice the first time each day. Placeholder art: the ice
 hole, the winter lure and the spinner, drawn by a script in the palette until Pixellab.
+
+---
+
+## 056 — Cooking: recipes as data, a stove that waits for Mabel, and food eaten from the hotbar
+
+**Decision.** Stage 16 session 1 adds cooking, for energy only (ROADMAP section 9:
+narrows 006, no selling chains). **Save version 17** (the recipes known).
+
+- *Dishes are tools you eat.* A dish is a `ToolDef` whose action is the new
+  `EatAction` (`energy`: what one helping gives back), kept in `data/dishes/`. So it
+  sits on the hotbar like a packet of seeds, Tab and Q reach it, it shows a count and
+  leaves the hotbar when the last is eaten (`consumed_on_use`). Its sell and buy
+  prices are 0, so no shop or bin takes it (ContentDB warns if one ever has a price).
+- *Eating is used on the farmer, not a tile.* `ToolAction` gained one method,
+  `used_on_self()` (false for every tool so far). The player asks it first: a dish
+  goes to `GameState.eat()` wherever the farmer is (the farm, the town, a shop, the
+  Woods), and its tile methods are never asked. Eating at full energy does nothing
+  and says so, so a helping is never wasted; otherwise energy goes up to today's
+  maximum. EventBus `dish_eaten`, the "eat" sound, and the hotbar's name line says
+  "Space to eat, +30 energy".
+- *Recipes are data.* `RecipeDef` in `data/recipes/`: the dish, how many it makes,
+  particular things (`ingredients`, a dictionary of item → count) and optionally some
+  of a kind (`any_tag`, `any_count`, `any_what`: "any fish", "any 3 fruit"), found by
+  the items' tags so a new fish or fruit works without touching a recipe. Of a kind,
+  the cheapest go in first (a minnow before a pike; blueberries before the melon),
+  and the menu says so. A new `&"fruit"` tag is on the strawberry, blueberry,
+  cranberry, melon, apple, rhubarb, bilberries and blackberries.
+- *Known recipes are saved* as `GameState.recipes`: recipe id → times cooked, for the
+  almanac (Stage 19). `learn_recipe()` (EventBus `recipe_learned`), `cook()`
+  (EventBus `dish_cooked`, the "sizzle" sound).
+- *The stove.* In the farmhouse, against the back wall between the bed and the table
+  (cell 4,2). It's always there, cold until `GameRules.kitchen_unlock`
+  (`farmhouse_kitchen`) is earned; E at a cold stove says Mabel could teach you. E at
+  a lit stove opens `CookMenu`, which works like the shop's counter: paused, a list
+  of every known recipe with its energy, what's in the bag ("2 tomatoes (have 3)") and
+  dimmed if something's missing; Space cooks one, Esc leaves. Cooking costs no energy
+  and no time: its cost is the produce that could have been sold.
+- *Where recipes come from.* A new `QuestDef.reward_recipes` (named in the reward
+  text: "the recipes for tomato soup, potato and bean hash and fruit crumble").
+  **Mabel's kitchen lessons** (`baker_kitchen`, ROADMAP 5.2 part 4): after the tarts,
+  from summer day 15 (summer or autumn), a tomato, a green bean, a potato and some
+  fruit → the farmhouse kitchen and her three favourites. **Her leek pies** (winter)
+  now also give her recipe book: leek and potato soup, winter stew, bubble and squeak,
+  pumpkin soup, fish pie, mushrooms on toast. **Wren's river fish** also teaches
+  grilled fish. Recipes taught before the kitchen is open wait for it.
+- *Ten dishes*, energy 30 to 70 (max energy is 100): tomato soup 30 (2 tomatoes),
+  potato and bean hash 40 (potato, 2 green beans), fruit crumble 45 (any 3 fruit),
+  leek and potato soup 40, winter stew 60 (leek, kale, sprouts), bubble and squeak 40
+  (cabbage, potato), pumpkin soup 50 (a pumpkin), fish pie 70 (2 potatoes, any fish),
+  mushrooms on toast 35 (any mushroom), grilled fish 30 (any fish).
+- *v16 → v17*: `"recipes"`, empty, except that a game which had already finished
+  Mabel's leek pies or Wren's river fish is given what they now teach (a frozen list
+  in the upgrade step). `tests/saves/v16_example.json` was made by the real v16 build.
+
+Options considered: a separate `DishDef` item class beside ToolDef (the hotbar,
+selection and counts would all have needed teaching about a second kind of usable
+thing); an "eat" key of its own (one more key to learn, and the roadmap says eat from
+the hotbar); an `EatAction` that pretends every tile is usable (it would not work in
+shops and the farmhouse, which have no tiles to use, and the cursor would lie).
+Cooking time (a clock cost) was left out because Dave already finds the day short
+of time; Stage 20's balance pass can add one. The kitchen as a separate building or
+upgrade was left for later: Mabel opening it is the roadmap's "[unlock]".
+
+**Why.** Energy is the game's main brake; food is a second lever on it, earned by
+farming and foraging, with fishing and the Woods feeding into it. Rule 3 holds: a new
+dish is two `.tres` files and an icon; teaching it is one line on a request.
+
+**Cost.** One more method on the tool interface. The fish pie (70) is generous for a
+minnow and two potatoes; Stage 20 should look at energy per gold across the dishes.
+Placeholder art: the stove (lit and cold) and ten dish icons, drawn by a script in
+the palette until Pixellab.

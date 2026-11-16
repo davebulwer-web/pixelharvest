@@ -103,8 +103,10 @@ scenes/              .tscn scene files
 scripts/             Game code
   autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem,
                      Audio, DayReport, Fishing…)
-  farm/              The farm's data and layout, the farmhouse and its bed, its effects,
-                     the night's hazards (FarmHazards) and the morning's crows
+  farm/              The farm's data and layout, the farmhouse with its bed and its
+                     stove and cooking menu (Stove, CookMenu; DECISIONS 056), the
+                     farm's effects, the night's hazards (FarmHazards) and the
+                     morning's crows
   town/              The town, its map, shop interiors and fronts, people, notice board (Stage 7),
                      the river and the bridge to the Woods
   woods/             The Woods: their map, the day's forage (Forage, ForageSpot; DECISIONS 052)
@@ -114,7 +116,8 @@ scripts/             Game code
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
                      and decorations, the trowel's digging, pest spray, the axe's
                      chopping, which also works in the Woods: DECISIONS 053; the
-                     fishing rod's cast: DECISIONS 054)
+                     fishing rod's cast: DECISIONS 054; eating a dish, which is
+                     used on the farmer, not a tile: DECISIONS 056)
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
   quests/            QuestGoal scripts (deliver, deliver any of, deliver one of each,
                      harvest, sell, give gold, grow a giant, deliver with a fee, catch
@@ -153,11 +156,16 @@ data/                Content resources (.tres), indexed by ContentDB
                      places and weather they grow in (DECISIONS 052)
   fish/              FishDef — fish: items, with the water, seasons, hours and weather
                      they bite in, their size and fight (DECISIONS 054)
+  dishes/            ToolDef with an EatAction — food: eaten from the hotbar for
+                     energy, never sold (DECISIONS 056)
+  recipes/           RecipeDef — what goes into each dish; known recipes are taught by
+                     requests and cooked at the farmhouse stove (DECISIONS 056)
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
                      farm/ the farmhouse and its furniture, decorations/ the farm's decorations,
                      forage/ the wild things' icons, woods/ the Woods' own pieces,
-                     fish/ the fish's icons, fishing/ the float)
+                     fish/ the fish's icons, fishing/ the float,
+                     dishes/ the dishes' icons)
 assets/tilesets/     Ground and world tilesets
 assets/audio/        Sound effects (sfx/*.wav), music (music/*.ogg: farm, town, woods) and the weather's loops
                      (ambience/*.ogg), made by art/build_sounds.py

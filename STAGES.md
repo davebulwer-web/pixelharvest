@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 15 — fishing with Wren.** Session 1 (the rod, the bite and the reel, 15 fish, the fish log, Wren's worms and supper; save version 16) is tested and committed by Dave (2026-11-16). Session 2 (ice fishing, lures, the fine rod, the rest of Wren's first year, the summer contest, Pip's biggest fish, Ivy's glass and planting, fish jobs on the board; no save change) is built, waiting for Dave to try it. Then Stage 15's Pixellab art, and Stage 16 (kitchen and cooking). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 16 — kitchen and cooking.** Session 1 (recipes as data, the farmhouse stove, eating from the hotbar, Mabel's kitchen lessons and recipe book, Wren's grilled fish; save version 17) is built, waiting for Dave to try it. Then Stage 16's Pixellab art (stove, ten dishes), and Stage 17 (greenhouse, bees and late tools). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -798,7 +798,7 @@ ROADMAP sections 8 and 9. Reverses DESIGN.md's "no foraging" (updated 2026-11-15
       fish and fine rod; ice and patience; Pip; Ivy's glass and planting, the cheapest fish
       handed in; the board's fish in summer and winter; save and load), rendered the hole,
       the float through it and the farm's pond in winter
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (committed and pushed as "Stage 15b", 2026-11-16)
 
 **Art**
 
@@ -808,9 +808,41 @@ ROADMAP sections 8 and 9. Reverses DESIGN.md's "no foraging" (updated 2026-11-15
 
 Energy food only (narrows DECISIONS 006; no selling chains).
 
-- [ ] Recipes as resources; cook at the farmhouse; eat from the hotbar to restore energy
-- [ ] Mabel's lessons give recipes
-- [ ] Pixellab: stove, dish icons
+**Session 1 — the stove, recipes and eating** (2026-11-16, DECISIONS 056, save version 17)
+
+- [x] Recipes as resources: `RecipeDef` in `data/recipes/` (the dish, particular things,
+      and "any fish / any mushroom / any 3 fruit" by tag, the cheapest going in first);
+      a new `fruit` tag on eight fruits
+- [x] Dishes are ToolDefs with an `EatAction` in `data/dishes/`: ten of them, 30 to 70
+      energy, never sold. On the hotbar like seeds; Space eats one anywhere (the farm,
+      town, shops, the Woods), up to the day's maximum; not when already full.
+      `ToolAction.used_on_self()`
+- [x] Cook at the farmhouse: a stove by the back wall (cold until the kitchen opens:
+      E says Mabel could teach you). E at a lit stove opens the cooking menu: every
+      recipe known, what goes in and what you have, Space cooks one, Esc leaves. Free
+      and instant
+- [x] Mabel's kitchen lessons (after the tarts, summer day 15 on, summer or autumn: a
+      tomato, a green bean, a potato and some fruit → the farmhouse kitchen, tomato
+      soup, potato and bean hash, fruit crumble). Her leek pies (winter) now also give
+      her recipe book (six more); Wren's river fish teaches grilled fish.
+      `QuestDef.reward_recipes`
+- [x] Saved: the recipes known and how often each was cooked (`recipes`, save version
+      17). v16 → v17 gives the recipes of those two requests if already finished
+- [x] Sounds: a sizzle at the stove, a munch when eating (art/build_sounds.py
+      `build_cooking`)
+- [x] Verified in the sandbox: headless import and run clean, 116 harness checks (the
+      data; eating with Space on the farm and in a shop, full, capped, the last one
+      leaving the hotbar, the farm untouched; Mabel's lessons offered on summer day 15
+      and not before, the reward text, the kitchen and three recipes, the cheapest fruit
+      handed in; cooking, the missing text, the cheapest fruit and fish going in; the
+      recipe book; E at the lit stove opening the menu, pausing, Space cooking, Esc
+      closing; the cold stove; save and load; saves v1–v16, and v16 with the leek pies
+      done), rendered the stove lit, the menu and a dish on the hotbar
+- [ ] Dave confirms it plays correctly on Windows
+
+**Art**
+
+- [ ] Pixellab: stove (lit and cold), ten dish icons
 
 ## Stage 17 — Greenhouse, bees and late tools · 2 sessions + art · Sonnet
 

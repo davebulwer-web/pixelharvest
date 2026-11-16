@@ -9,3 +9,4 @@ id = &"rhubarb"
 display_name = "Rhubarb"
 icon = ExtResource("2_icon")
 sell_price = 70
+tags = Array[StringName]([&"fruit"])

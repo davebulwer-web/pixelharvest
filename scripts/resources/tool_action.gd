@@ -52,3 +52,14 @@ func can_use_away(_place: Node, _cell: Vector2i) -> bool:
 ## the energy was paid.
 func apply_away(_place: Node, _cell: Vector2i) -> void:
 	pass
+
+
+# --- Used on the farmer (DECISIONS 056) ----------------------------------------
+# Food is used on the farmer rather than on a tile, so it works anywhere,
+# including the shops and the farmhouse. The player asks this first; a tool
+# that says yes is given to GameState.eat() and its tile methods are never
+# asked.
+
+## True for something used on the farmer, not a tile: a dish (EatAction).
+func used_on_self() -> bool:
+	return false

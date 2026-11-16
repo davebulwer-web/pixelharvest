@@ -72,7 +72,11 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       games, which could always buy them, are given its two unlocks.
 ##  16 — fishing (DECISIONS 054): the fish log ("fish_log": fish id ->
 ##       {"caught", "biggest"}). Older games have caught nothing.
-const CURRENT_VERSION := 16
+##  17 — cooking (DECISIONS 056): the recipes known ("recipes": recipe id ->
+##       times cooked). Older games know none, except those taught by
+##       requests they had already finished (Mabel's leek pies, Wren's river
+##       fish), which are given to them.
+const CURRENT_VERSION := 17
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -95,6 +99,7 @@ const REQUIRED_FIELDS: Dictionary = {
 	"forecast": TYPE_STRING,
 	"cleared": TYPE_DICTIONARY,
 	"fish_log": TYPE_DICTIONARY,
+	"recipes": TYPE_DICTIONARY,
 }
 
 ## Saving is switched on by load_or_new_game(), i.e. only when the game was
@@ -287,6 +292,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_14_to_15(data["game"])
 			15:
 				_upgrade_15_to_16(data["game"])
+			16:
+				_upgrade_16_to_17(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -571,3 +578,26 @@ func _upgrade_14_to_15(game: Dictionary) -> void:
 ## an older game simply hasn't been asked yet.
 func _upgrade_15_to_16(game: Dictionary) -> void:
 	game["fish_log"] = {}
+
+
+## Version 16 -> 17: cooking (DECISIONS 056). Requests finished before
+## recipes existed now teach some; an older game that has already finished
+## one is given what it now teaches. Written here, not looked up, so this step
+## means the same thing later.
+const V17_TAUGHT_BY_DONE: Dictionary = {
+	"baker_leek_pies": ["bubble_and_squeak", "fish_pie", "leek_and_potato_soup", "mushrooms_on_toast",
+			"pumpkin_soup", "winter_stew"],
+	"wren_river_fish": ["grilled_fish"],
+}
+
+
+func _upgrade_16_to_17(game: Dictionary) -> void:
+	var recipes := {}
+	var quests: Variant = game.get("quests")
+	if typeof(quests) == TYPE_DICTIONARY:
+		for quest_id: String in V17_TAUGHT_BY_DONE:
+			var entry: Variant = quests.get(quest_id)
+			if typeof(entry) == TYPE_DICTIONARY and entry.get("state") == "done":
+				for recipe_id: String in V17_TAUGHT_BY_DONE[quest_id]:
+					recipes[recipe_id] = 0
+	game["recipes"] = recipes

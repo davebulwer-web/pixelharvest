@@ -179,6 +179,8 @@ func _ready() -> void:
 	print("Fishing (Wren's rod, from summer): Space at water casts; Space when the float goes")
 	print("under; then Space while the marker is over the green. E reels in. In winter, Space")
 	print("on the ice cuts a hole, and Space at the hole fishes through it.")
+	print("Cooking (Mabel's lessons, from summer): E at the farmhouse stove cooks what you know.")
+	print("A dish on the hotbar is eaten with Space, anywhere, for energy.")
 	print("-------------------------------")
 
 

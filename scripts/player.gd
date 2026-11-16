@@ -2,7 +2,8 @@ class_name Player
 extends CharacterBody2D
 ##
 ## Player — movement, four-direction animation, and the player's actions:
-## using the held tool, and interacting (harvest, shipping bin, the bed).
+## using the held tool (or eating the held dish), and interacting (harvest,
+## shipping bin, the bed, the stove).
 ##
 ## Away from the farm (the town, a shop, the farmhouse) `can_farm` is switched
 ## off by the scene: tools and harvesting are about the farm's tiles, which
@@ -79,7 +80,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if Fishing.is_busy():
 		return
 	if event.is_action_pressed(&"use_tool"):
-		if can_farm:
+		# Food is used on the farmer, not a tile, so it's eaten anywhere
+		# (DECISIONS 056): even in a shop, where no other tool works.
+		var held := GameState.selected_tool()
+		if held != null and held.action != null and held.action.used_on_self():
+			GameState.eat(held)
+		elif can_farm:
 			_use_tool()
 		elif tool_place != null:
 			_use_tool_away()

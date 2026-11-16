@@ -1,14 +1,15 @@
 extends Node2D
 ##
-## Farmhouse — inside the farmer's house: the bed, a table, and the door back
-## out to the farm. Going to bed (E at the bed) ends the day, and every morning
-## starts here (TimeSystem, DECISIONS 033).
+## Farmhouse — inside the farmer's house: the bed, the stove, a table, and the
+## door back out to the farm. Going to bed (E at the bed) ends the day, and
+## every morning starts here (TimeSystem, DECISIONS 033). E at the stove cooks,
+## once Mabel has opened the kitchen (DECISIONS 056).
 ##
 ## The room, in cells (the back wall is the top two rows):
 ##
 ##       wall top  . . . . . . . .
 ##       wall face ░ ░ ░ ░ ░ ░ ░ ░         y 0-1
-##       floor    bed         table        y 2   (bed head)
+##       floor    bed      stove table     y 2   (bed head)
 ##       floor    bed  you                 y 3   (bed foot; you wake beside it)
 ##       floor        (  rug  )            y 4-5
 ##       door ──────── ▒▒ ────────         y 6 (x 3-4)
@@ -23,6 +24,7 @@ const DOOR_CELLS := [3, 4]
 const BED_FOOT := Vector2i(1, 3)
 const WAKE_CELL := Vector2i(2, 3)
 const TABLE_CELL := Vector2i(6, 2)
+const STOVE_CELL := Vector2i(4, 2)
 const RUG := Rect2i(2, 4, 4, 2)
 
 ## The spawn point the farm's door leads to; anything else (a fresh morning, a
@@ -39,6 +41,8 @@ const SOURCE_ID := 0
 
 const BED_TEXTURE := preload("res://assets/sprites/farm/bed.png")
 const TABLE_TEXTURE := preload("res://assets/sprites/farm/table.png")
+const STOVE_TEXTURE := preload("res://assets/sprites/farm/stove.png")
+const STOVE_COLD_TEXTURE := preload("res://assets/sprites/farm/stove_cold.png")
 
 @onready var _ground: TileMapLayer = $Ground
 @onready var _entities: Node2D = $Entities
@@ -50,6 +54,7 @@ func _ready() -> void:
 	_draw_room()
 	_entities.add_child(Bed.create(BED_TEXTURE, BED_FOOT))
 	_add_table()
+	_add_stove()
 	_add_door()
 	_place_player()
 	_fit_camera()
@@ -89,6 +94,18 @@ func _add_table() -> void:
 	shape.position = Vector2(0, -box.size.y / 2.0)
 	table.add_child(shape)
 	_entities.add_child(table)
+
+
+## The stove, and the cooking menu it opens (DECISIONS 056). The menu is
+## built here in code: it belongs to this room, like a shop's counter menu
+## belongs to the shop.
+func _add_stove() -> void:
+	var menu := CookMenu.new()
+	menu.name = "CookMenu"
+	add_child(menu)
+	var stove := Stove.create(STOVE_TEXTURE, STOVE_COLD_TEXTURE, STOVE_CELL)
+	stove.used.connect(menu.open)
+	_entities.add_child(stove)
 
 
 ## The doormat: stepping out goes back to the farm, in front of the door.

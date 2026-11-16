@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SoundBank" load_steps=26 format=3]
+[gd_resource type="Resource" script_class="SoundBank" load_steps=28 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/sound_bank.gd" id="1_bank"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/till.wav" id="2_till"]
@@ -25,6 +25,8 @@
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/cast.wav" id="23_cast"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/bite.wav" id="24_bite"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/splash.wav" id="25_splash"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/sizzle.wav" id="26_sizzle"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/eat.wav" id="27_eat"]
 
 [resource]
 script = ExtResource("1_bank")
@@ -52,6 +54,8 @@ sounds = Dictionary[StringName, AudioStream]({
 &"chop": ExtResource("22_chop"),
 &"cast": ExtResource("23_cast"),
 &"bite": ExtResource("24_bite"),
-&"splash": ExtResource("25_splash")
+&"splash": ExtResource("25_splash"),
+&"sizzle": ExtResource("26_sizzle"),
+&"eat": ExtResource("27_eat")
 })
 pitch_variation = 0.05

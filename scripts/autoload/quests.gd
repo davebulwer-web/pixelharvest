@@ -329,6 +329,8 @@ func _complete(quest: QuestDef) -> Array[String]:
 	EventBus.quest_completed.emit(quest.id)
 	for unlock_def in quest.reward_unlocks:
 		GameState.unlock(unlock_def)
+	for recipe in quest.reward_recipes:
+		GameState.learn_recipe(recipe)
 	var lines: Array[String] = quest.thanks_lines.duplicate()
 	var reward := quest.reward_text()
 	lines.append("Request done: %s.%s" % [quest.title, " You got %s." % reward if reward != "" else ""])

@@ -37,13 +37,18 @@ extends Node
 ##                   Rosa's market orders, the notice board's jobs (DECISIONS 050)
 ##   data/forage/    ForageDef — wild things to pick up in the Woods: items, with
 ##                   where and when they grow (DECISIONS 052)
+##   data/dishes/    ToolDef with an EatAction — food cooked at the farmhouse
+##                   stove and eaten from the hotbar (DECISIONS 056)
+##   data/recipes/   RecipeDef — what goes into each dish (DECISIONS 056)
 ##
 
 const CROPS_DIR := "res://data/crops/"
 const FORAGE_DIR := "res://data/forage/"
 const FISH_DIR := "res://data/fish/"
+const DISHES_DIR := "res://data/dishes/"
 const ITEM_DIRS: Array[String] = ["res://data/tools/", "res://data/produce/", "res://data/decorations/",
-		FORAGE_DIR, FISH_DIR]
+		FORAGE_DIR, FISH_DIR, DISHES_DIR]
+const RECIPES_DIR := "res://data/recipes/"
 const OBJECTS_DIR := "res://data/objects/"
 const UPGRADES_DIR := "res://data/upgrades/"
 const CHARACTERS_DIR := "res://data/characters/"
@@ -67,6 +72,7 @@ var _quests: Dictionary = {}  # StringName -> QuestDef
 var _unlocks: Dictionary = {}  # StringName -> UnlockDef
 var _weathers: Dictionary = {}  # StringName -> WeatherDef
 var _orders: Dictionary = {}  # StringName -> OrderTemplate
+var _recipes: Dictionary = {}  # StringName -> RecipeDef
 
 
 func _ready() -> void:
@@ -81,6 +87,7 @@ func _ready() -> void:
 	_index(UNLOCKS_DIR, _unlocks)
 	_index(WEATHER_DIR, _weathers)
 	_index(ORDERS_DIR, _orders)
+	_index(RECIPES_DIR, _recipes)
 	_check()
 	_check_quests()
 	_check_unlocks()
@@ -88,9 +95,10 @@ func _ready() -> void:
 	_check_orders()
 	_check_forage()
 	_check_fish()
-	print("ContentDB: %d crops, %d items (%d forage, %d fish), %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers, %d order patterns"
-			% [_crops.size(), _items.size(), forage().size(), fish().size(), _objects.size(), _upgrades.size(), _characters.size(),
-			_events.size(), _quests.size(), _unlocks.size(), _weathers.size(), _orders.size()])
+	_check_recipes()
+	print("ContentDB: %d crops, %d items (%d forage, %d fish, %d dishes), %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers, %d order patterns, %d recipes"
+			% [_crops.size(), _items.size(), forage().size(), fish().size(), dishes().size(), _objects.size(), _upgrades.size(), _characters.size(),
+			_events.size(), _quests.size(), _unlocks.size(), _weathers.size(), _orders.size(), _recipes.size()])
 
 
 ## The crop with this id, or null if there isn't one (for example, a save from
@@ -217,6 +225,30 @@ func fish() -> Array[FishDef]:
 		if each is FishDef:
 			result.append(each)
 	result.sort_custom(func(a: FishDef, b: FishDef) -> bool: return String(a.id) < String(b.id))
+	return result
+
+
+## Every dish (DECISIONS 056): the items that are eaten, by id.
+func dishes() -> Array[ToolDef]:
+	var result: Array[ToolDef] = []
+	for each: ItemDef in _items.values():
+		if each is ToolDef and each.action is EatAction:
+			result.append(each)
+	result.sort_custom(func(a: ToolDef, b: ToolDef) -> bool: return String(a.id) < String(b.id))
+	return result
+
+
+## The recipe with this id, or null.
+func recipe(id: StringName) -> RecipeDef:
+	return _recipes.get(id)
+
+
+## Every recipe, by id.
+func recipes() -> Array[RecipeDef]:
+	var result: Array[RecipeDef] = []
+	for each: RecipeDef in _recipes.values():
+		result.append(each)
+	result.sort_custom(func(a: RecipeDef, b: RecipeDef) -> bool: return String(a.id) < String(b.id))
 	return result
 
 
@@ -635,6 +667,9 @@ func _check_quests() -> void:
 		for reward: ItemDef in each.reward_items:
 			if reward == null or item(reward.id) != reward:
 				push_error("ContentDB: '%s' gives a reward item that isn't in data/produce/ or data/tools/" % where)
+		for reward in each.reward_recipes:
+			if reward == null or recipe(reward.id) != reward:
+				push_error("ContentDB: '%s' teaches a recipe that isn't in %s" % [where, RECIPES_DIR])
 		for reward in each.reward_upgrades:
 			if reward == null or upgrade(reward.id) != reward:
 				push_error("ContentDB: '%s' gives an upgrade that isn't in data/upgrades/" % where)
@@ -782,6 +817,40 @@ func _check_forage() -> void:
 ## Fish (DECISIONS 054): each kind must live in a real kind of water, bite in
 ## a real season and some stretch of the day, and be worth something.
 const FISH_WATERS: Array[StringName] = [&"pond", &"river", &"stream"]
+
+
+## Recipes and dishes (DECISIONS 056): every recipe makes a real dish from
+## real things, a kind it asks for exists, and every dish can be cooked.
+func _check_recipes() -> void:
+	var cooked: Dictionary = {}  # dish id -> true
+	for each: RecipeDef in _recipes.values():
+		var where := each.resource_path
+		if each.dish == null or item(each.dish.id) != each.dish:
+			push_error("ContentDB: '%s' makes a dish that isn't in %s" % [where, DISHES_DIR])
+		elif not each.dish.action is EatAction:
+			push_error("ContentDB: '%s' makes '%s', which can't be eaten (no EatAction)" % [where, each.dish.id])
+		else:
+			cooked[each.dish.id] = true
+		if each.ingredients.is_empty() and each.any_tag == &"":
+			push_warning("ContentDB: '%s' needs nothing, so it's free food" % where)
+		for thing: ItemDef in each.ingredients:
+			if thing == null or item(thing.id) != thing:
+				push_error("ContentDB: '%s' needs something that isn't an item in data/" % where)
+			elif each.ingredients[thing] < 1:
+				push_warning("ContentDB: '%s' needs %d of '%s'" % [where, each.ingredients[thing], thing.id])
+		if each.any_tag != &"":
+			if each.any_count < 1:
+				push_warning("ContentDB: '%s' asks for any %s but none of them" % [where, each.any_tag])
+			if not _items.values().any(func(i: ItemDef) -> bool: return i.has_tag(each.any_tag)):
+				push_error("ContentDB: '%s' needs any '%s', but nothing has that tag" % [where, each.any_tag])
+	for dish in dishes():
+		var energy := (dish.action as EatAction).energy
+		if energy <= 0.0:
+			push_warning("ContentDB: '%s' gives no energy" % dish.resource_path)
+		if not cooked.has(dish.id):
+			push_warning("ContentDB: no recipe makes '%s', so it can only be given" % dish.id)
+		if dish.sell_price > 0:
+			push_warning("ContentDB: '%s' sells for gold, but food is for energy only (DECISIONS 056)" % dish.resource_path)
 
 
 func _check_fish() -> void:

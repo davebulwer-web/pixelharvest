@@ -133,6 +133,16 @@ signal fish_escaped(fish_id: StringName)
 ## stays open until the night freezes it over.
 signal ice_hole_cut(location_id: StringName, cell: Vector2i)
 
+# --- Cooking (DECISIONS 056) -------------------------------------------------
+
+## A recipe was learned (a request's reward).
+signal recipe_learned(recipe_id: StringName)
+## A dish was cooked at the stove.
+signal dish_cooked(recipe_id: StringName, dish_id: StringName)
+## A dish was eaten, giving back `energy` (what it actually gave, after the
+## maximum).
+signal dish_eaten(dish_id: StringName, energy: float)
+
 # --- Player and economy -----------------------------------------------------
 
 signal energy_changed(current: float, maximum: float)

@@ -57,6 +57,10 @@ extends Resource
 ## them gift_only so no shop sells them too.
 @export var reward_upgrades: Array[UpgradeDef] = []
 
+## Recipes taught as a reward (DECISIONS 056): Mabel's lessons, her recipe
+## book. Known from then on, cooked at the farmhouse stove.
+@export var reward_recipes: Array[RecipeDef] = []
+
 # --- When it's offered ---------------------------------------------------------
 
 ## Another request that must be finished first, or null.
@@ -105,6 +109,14 @@ func reward_text() -> String:
 	for unlock in reward_unlocks:
 		if unlock != null and unlock.display_name != "":
 			parts.append(unlock.display_name)
+	var dishes: Array[String] = []
+	for recipe in reward_recipes:
+		if recipe != null:
+			dishes.append(recipe.display_name().to_lower())
+	if dishes.size() == 1:
+		parts.append("the recipe for %s" % dishes[0])
+	elif dishes.size() > 1:
+		parts.append("the recipes for %s and %s" % [", ".join(dishes.slice(0, dishes.size() - 1)), dishes[-1]])
 	if parts.is_empty():
 		return ""
 	if parts.size() == 1:

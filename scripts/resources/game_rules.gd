@@ -68,6 +68,12 @@ extends Resource
 ## The wait, the strike and the reel bar: data/fishing_rules.tres.
 @export var fishing: FishingRules
 
+## --- Cooking (DECISIONS 056) ------------------------------------------------
+
+## What opens the farmhouse kitchen, so the stove cooks: Mabel's lessons give
+## it. Null: the stove works from the start.
+@export var kitchen_unlock: UnlockDef
+
 ## --- Difficulty (DECISIONS 040) -------------------------------------------
 
 ## The difficulties offered at new game, in the order the menu lists them.

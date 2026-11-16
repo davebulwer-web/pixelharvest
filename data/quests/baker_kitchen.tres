@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_each_goal.gd" id="2_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="3_r"]
+[ext_resource type="Resource" path="res://data/produce/tomato.tres" id="4_r"]
+[ext_resource type="Resource" path="res://data/produce/green_bean.tres" id="5_r"]
+[ext_resource type="Resource" path="res://data/produce/potato.tres" id="6_r"]
+[ext_resource type="Resource" path="res://data/forage/bilberry.tres" id="7_r"]
+[ext_resource type="Resource" path="res://data/produce/blueberry.tres" id="8_r"]
+[ext_resource type="Resource" path="res://data/produce/cranberry.tres" id="9_r"]
+[ext_resource type="Resource" path="res://data/produce/strawberry.tres" id="10_r"]
+[ext_resource type="Resource" path="res://data/produce/apple.tres" id="11_r"]
+[ext_resource type="Resource" path="res://data/quests/baker_tarts.tres" id="12_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="13_r"]
+[ext_resource type="Resource" path="res://data/unlocks/farmhouse_kitchen.tres" id="14_r"]
+[ext_resource type="Script" path="res://scripts/resources/recipe_def.gd" id="15_r"]
+[ext_resource type="Resource" path="res://data/recipes/tomato_soup.tres" id="16_r"]
+[ext_resource type="Resource" path="res://data/recipes/potato_and_bean_hash.tres" id="17_r"]
+[ext_resource type="Resource" path="res://data/recipes/fruit_crumble.tres" id="18_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+items = Array[ExtResource("3_r")]([ExtResource("4_r"), ExtResource("5_r"), ExtResource("6_r")])
+and_one_of = Array[ExtResource("3_r")]([ExtResource("7_r"), ExtResource("8_r"), ExtResource("9_r"), ExtResource("10_r"), ExtResource("11_r")])
+and_one_of_what = "some fruit"
+
+[resource]
+script = ExtResource("1_r")
+id = &"baker_kitchen"
+title = "Mabel's kitchen lessons"
+giver = &"baker"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["You look worn through, love. Out in those fields from dawn on nothing but a crust, I'll bet.", "There's a stove in that farmhouse of yours, I know there is. Let me teach you my three favourites.", "Bring me what goes in them: a tomato, a green bean, a potato and some fruit. Berries, an apple, whatever you've got. We'll cook them together."])
+reminder_line = "A tomato, a green bean, a potato and some fruit, love, and you'll have your first lesson."
+thanks_lines = Array[String](["Right. Sleeves up. Soup first: you can't go wrong with soup.", "There. Tomato soup, a potato and bean hash, and a crumble with whatever fruit's about. Light that stove when you get home.", "A good dish puts the strength back in you. Eat when you're flagging, not when you're done in."])
+reward_unlocks = Array[ExtResource("13_r")]([ExtResource("14_r")])
+reward_recipes = Array[ExtResource("15_r")]([ExtResource("16_r"), ExtResource("17_r"), ExtResource("18_r")])
+requires = ExtResource("12_r")
+first_day = 43
+seasons = Array[StringName]([&"summer", &"autumn"])
