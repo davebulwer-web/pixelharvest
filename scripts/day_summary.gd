@@ -106,6 +106,9 @@ static func news_for(r: DayRecord) -> Array[String]:
 	var giants := giants_news(r.giants)
 	if giants != "":
 		news.append(giants)
+	var made := made_news(r.made)
+	if made != "":
+		news.append(made)
 	var thirst := thirst_warning()
 	if thirst != "":
 		news.append(thirst)
@@ -154,22 +157,41 @@ static func crows_news(crop_ids: Array[StringName]) -> String:
 		"A crow" if crop_ids.size() == 1 else "Crows", "took", _and_list(names)]
 
 
-## The warning about thirsty crops on the farm this morning, or "": how many
-## will die tonight unless watered, or (where thirst doesn't kill, or not
-## yet) how many are wilting. In a heatwave a crop gets thirstier faster
-## (DECISIONS 046), so a dry night counts double here too.
+## The warning about thirsty crops on the farm and in the greenhouse this
+## morning, or "": how many will die tonight unless watered, or (where thirst
+## doesn't kill, or not yet) how many are wilting. In a heatwave a crop
+## outside gets thirstier faster (DECISIONS 046), so a dry night counts
+## double here too; under glass (DECISIONS 057) it never does.
 static func thirst_warning() -> String:
-	var wilted := GameState.wilted_crops()
-	if wilted.is_empty():
-		return ""
 	var deadline := GameState.thirst_deadline()
+	var wilting := 0
 	var dying := 0
-	for cell in wilted:
-		if deadline > 0 and GameState.farm.tile(cell).dry_nights + GameState.thirst_per_dry_night() >= deadline:
-			dying += 1
+	for plot in GameState.plots():
+		if plot == null:
+			continue
+		var step := 1 if plot.under_glass else GameState.thirst_per_dry_night()
+		for cell in GameState.wilted_crops(plot):
+			wilting += 1
+			if deadline > 0 and plot.tile(cell).dry_nights + step >= deadline:
+				dying += 1
+	if wilting == 0:
+		return ""
 	if dying > 0:
 		return "%d crop%s will die of thirst tonight unless watered." % [dying, _s(dying)]
-	return "%d crop%s %s wilting for want of water." % [wilted.size(), _s(wilted.size()), "is" if wilted.size() == 1 else "are"]
+	return "%d crop%s %s wilting for want of water." % [wilting, _s(wilting), "is" if wilting == 1 else "are"]
+
+
+## "Your bees have been busy: 2 honey ready to collect...", or "" if nothing was made
+## overnight (DECISIONS 057).
+static func made_news(made: Dictionary[StringName, int]) -> String:
+	if made.is_empty():
+		return ""
+	var parts: Array[String] = []
+	for item_id: StringName in made:
+		var item := ContentDB.item(item_id)
+		var name := item.display_name.to_lower() if item != null else String(item_id)
+		parts.append("%d %s" % [made[item_id], name])
+	return "Your bees have been busy: %s ready to collect. E at a hive takes it." % _and_list(parts)
 
 
 ## "A giant Pumpkin grew overnight! ...", or "" if none did (DECISIONS 048).

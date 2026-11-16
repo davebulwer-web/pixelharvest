@@ -69,6 +69,12 @@ var giant: bool = false
 var covered: bool = false
 var covered_by: Vector2i = Vector2i.ZERO
 
+## For an object that makes something (a bee hive; DECISIONS 057): nights
+## worked towards the next batch, and how many are made and waiting to be
+## collected with E. Both go back to 0 when the object is moved.
+var made_days: int = 0
+var made_ready: int = 0
+
 
 func has_crop() -> bool:
 	return crop != null
@@ -143,6 +149,10 @@ func to_save() -> Dictionary:
 			data["giant"] = true
 	if weeds:
 		data["weeds"] = true
+	if made_days > 0:
+		data["made_days"] = made_days
+	if made_ready > 0:
+		data["made_ready"] = made_ready
 	return data
 
 
@@ -173,4 +183,8 @@ static func from_save(data: Dictionary) -> FarmTile:
 			t.pests = data.get("pests", false)
 			t.giant = data.get("giant", false) and crop_def.can_go_giant()
 	t.weeds = data.get("weeds", false)
+	# A hive's honey in the making (save version 18): only with an object.
+	if t.object_id != &"":
+		t.made_days = int(data.get("made_days", 0))
+		t.made_ready = int(data.get("made_ready", 0))
 	return t

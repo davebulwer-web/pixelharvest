@@ -186,6 +186,14 @@ signal plot_unlocked(plot_id: StringName)
 signal object_placed(cell: Vector2i, object_id: StringName)
 signal object_removed(cell: Vector2i, object_id: StringName)
 
+## An object that makes something finished a batch overnight (DECISIONS 057):
+## `amount` of `item_id` waits in it (honey in a bee hive) until collected.
+signal object_made(cell: Vector2i, object_id: StringName, item_id: StringName, amount: int)
+
+## The player took what an object made (E at a hive with honey in it), and
+## it went into the bag.
+signal object_emptied(cell: Vector2i, object_id: StringName, item_id: StringName, amount: int)
+
 ## The player spoke to someone. `npc_id` is the character's id (a shopkeeper's
 ## is its shop's id). Whatever should happen next — a conversation, a quest
 ## step — listens for this; the player doesn't know who it is talking to.

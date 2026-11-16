@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ToolDef" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/tools/place_object_action.gd" id="2_action"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/bee_hive.png" id="3_icon"]
+[ext_resource type="Resource" path="res://data/unlocks/bees_on_sale.tres" id="4_unlock"]
+
+[sub_resource type="Resource" id="Resource_action"]
+script = ExtResource("2_action")
+object_id = &"bee_hive"
+
+[resource]
+script = ExtResource("1_def")
+id = &"bee_hive"
+display_name = "Bee hive"
+description = "Makes a jar of honey every 3 days from spring to autumn (all year in the greenhouse), two with a flower within 4 tiles. E collects it; E at an empty hive picks it up."
+icon = ExtResource("3_icon")
+buy_price = 500
+energy_cost = 1.0
+action = SubResource("Resource_action")
+consumed_on_use = true
+sold_only_by = Array[StringName]([&"general_store"])
+requires_unlock = ExtResource("4_unlock")

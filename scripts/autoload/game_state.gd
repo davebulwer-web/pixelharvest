@@ -1,7 +1,7 @@
 extends Node
 ##
 ## GameState — the player's progress: gold, the calendar, energy, the bag of
-## items, the upgrades bought, and the farm itself.
+## items, the upgrades bought, and the farm itself (and the greenhouse's plot).
 ##
 ## It's an autoload so it outlives any one scene. When Stage 7 adds the town,
 ## walking there swaps the scene but not this — the farm, the gold and the day
@@ -65,6 +65,12 @@ var _selected_slot: int = 0
 
 var farm: FarmData
 
+## The plot inside the farm's greenhouse (DECISIONS 057): a second FarmData,
+## under glass, saved with the game. It's there from the start, empty and dug
+## over, but the greenhouse's door stays shut until Ivy's request mends it.
+## plot_here() says which of the two the player is standing in.
+var greenhouse: FarmData
+
 ## The townsfolk's requests taken on and finished (DECISIONS 038). The
 ## requests themselves are data; this is only where the player has got to.
 var quests: QuestLog
@@ -127,6 +133,7 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	_selected_tool_id = &""
 	_selected_slot = 0
 	farm = FarmLayout.build_default()
+	greenhouse = GreenhouseLayout.build_default()
 	quests = QuestLog.new()
 	unlocks = []
 	_foraged_today.clear()
@@ -685,14 +692,16 @@ func wilt_after() -> int:
 	return RULES.hazards.wilt_after_dry_nights if RULES.hazards != null else 0
 
 
-## The crops wilting on the farm now: unwatered for wilt_after() nights and
-## not watered yet today. With thirst_deadline(), they die tonight unless
+## The crops wilting on the farm (or another plot: the greenhouse's) now:
+## unwatered for wilt_after() nights and not watered yet today. With thirst_deadline(), they die tonight unless
 ## watered (the morning summary warns).
-func wilted_crops() -> Array[Vector2i]:
+func wilted_crops(plot: FarmData = null) -> Array[Vector2i]:
+	if plot == null:
+		plot = farm
 	var wilted: Array[Vector2i] = []
 	var after := wilt_after()
-	for cell: Vector2i in farm.cells():
-		if farm.tile(cell).is_wilted(after):
+	for cell: Vector2i in plot.cells():
+		if plot.tile(cell).is_wilted(after):
 			wilted.append(cell)
 	return wilted
 
@@ -701,14 +710,15 @@ func wilted_crops() -> Array[Vector2i]:
 ## by the difficulty, like a tool). Returns false if there were none, or not
 ## enough energy left.
 func pull_weeds(cell: Vector2i) -> bool:
-	if not farm.has_weeds(cell):
+	var plot := plot_here()
+	if plot == null or not plot.has_weeds(cell):
 		return false
 	var cost := (RULES.hazards.pull_weeds_energy if RULES.hazards != null else 0.0) \
 			* difficulty.energy_cost_multiplier
 	if not try_spend_energy(cost):
 		EventBus.message_posted.emit("Too tired to pull weeds")
 		return false
-	return farm.pull_weeds(cell)
+	return plot.pull_weeds(cell)
 
 
 func _on_weeds_pulled(_cell: Vector2i) -> void:
@@ -796,11 +806,12 @@ func next_season_id() -> StringName:
 ## gives a roll of the dice; one that returns seeds (CropDef.seed_chance)
 ## sometimes puts a packet in the bag too (DECISIONS 047).
 func harvest(cell: Vector2i) -> bool:
-	if not farm.can_harvest(cell):
+	var plot := plot_here()
+	if plot == null or not plot.can_harvest(cell):
 		return false
 	# A giant or a tree is held by its corner tile (DECISIONS 048).
-	var crop: CropDef = farm.tile(farm.crop_cell(cell)).crop
-	var amount := farm.harvest(cell, harvest_rng)
+	var crop: CropDef = plot.tile(plot.crop_cell(cell)).crop
+	var amount := plot.harvest(cell, harvest_rng)
 	inventory.add(crop.produce, amount)
 	if crop.seed_chance > 0.0 and harvest_rng.randf() < crop.seed_chance:
 		var seeds := ContentDB.seeds_for(crop)
@@ -813,15 +824,72 @@ func harvest(cell: Vector2i) -> bool:
 ## E on a placed object (a sprinkler, a decoration): take it back into the bag. Returns
 ## false for things that can't be picked up, like trees and the bin.
 func pick_up_object(cell: Vector2i) -> bool:
-	var t := farm.tile(cell)
+	var plot := plot_here()
+	var t := plot.tile(cell) if plot != null else null
 	if t == null or t.object_id == &"":
 		return false
 	var object_def := ContentDB.object(t.object_id)
 	if object_def == null or object_def.item == null:
 		return false
-	farm.remove_object(cell)
+	plot.remove_object(cell)
 	inventory.add(object_def.item)
 	return true
+
+
+## E on an object that has made something (a hive with honey in it;
+## DECISIONS 057): take it all into the bag. Returns false if there was
+## nothing waiting, so E falls through to picking the object up.
+func collect_from_object(cell: Vector2i) -> bool:
+	var plot := plot_here()
+	var t := plot.tile(cell) if plot != null else null
+	if t == null or t.object_id == &"" or t.made_ready <= 0:
+		return false
+	var object_def := ContentDB.object(t.object_id)
+	if object_def == null or object_def.makes == null:
+		return false
+	var object_id := t.object_id
+	var amount := plot.empty_object(cell)
+	inventory.add(object_def.makes, amount)
+	EventBus.object_emptied.emit(cell, object_id, object_def.makes.id, amount)
+	EventBus.message_posted.emit("Collected %d %s" % [amount, object_def.makes.display_name.to_lower()])
+	return true
+
+
+# --- Plots: the farm and the greenhouse (DECISIONS 057) -----------------------
+# Two places have tiles to farm: the farm, and the plot inside the greenhouse.
+# Tools, harvesting and E ask plot_here() which one the player is in, so the
+# same hoe, can and seeds work in both, and neither knows about the other.
+
+## The plot of `location_id`: the farm's, the greenhouse's, or null for a
+## place with nothing to farm (the town, a shop, the farmhouse).
+func plot_at(location_id: StringName) -> FarmData:
+	if location_id == LocationManager.FARM_ID:
+		return farm
+	if location_id == RULES.greenhouse_location and location_id != &"":
+		return greenhouse
+	return null
+
+
+## The plot where the player is now, or null.
+func plot_here() -> FarmData:
+	return plot_at(location)
+
+
+## Every plot there is, the farm first: what the night's growing goes round.
+func plots() -> Array[FarmData]:
+	return [farm, greenhouse]
+
+
+## True if `tool` can be used here today. Seeds out of season can't, except
+## under glass, where the season doesn't matter (DECISIONS 057). The player
+## asks this before using a tool, and the hotbar to grey one out.
+func tool_usable_here(tool: ToolDef) -> bool:
+	if tool == null or tool.action == null:
+		return true
+	var plot := plot_here()
+	if plot != null and plot.under_glass:
+		return true
+	return tool.action.usable_in_season(season_id())
 
 
 # --- Saving ------------------------------------------------------------------
@@ -842,6 +910,9 @@ func pick_up_object(cell: Vector2i) -> bool:
 # The difficulty is saved by id (save version 9); its multipliers are read
 # from data/difficulties/ on load, so retuning Hard reaches existing games.
 #
+# The greenhouse's plot is saved like the farm, tile by tile (save version
+# 18), and so is any honey waiting in a hive.
+#
 # Upgrades are saved as a list of ids (save version 4). Maximum energy isn't
 # saved at all: it's worked out from the upgrades on load, so a rebalanced
 # energy upgrade reaches existing games too.
@@ -860,6 +931,7 @@ func to_save() -> Dictionary:
 		"selected_tool": String(selected.id) if selected != null else "",
 		"location": String(location),
 		"farm": farm.to_save(),
+		"greenhouse": greenhouse.to_save(),
 		"quests": quests.to_save(),
 		"orders_done": quests.orders_done,
 		"unlocks": unlocks.map(func(id: StringName) -> String: return String(id)),
@@ -942,6 +1014,9 @@ func load_from_save(data: Dictionary) -> void:
 		location = RULES.starting_location
 
 	farm = FarmData.from_save(data["farm"])
+	# The greenhouse's plot (save version 18), always under glass.
+	greenhouse = FarmData.from_save(data["greenhouse"])
+	greenhouse.under_glass = true
 	quests = QuestLog.from_save(data["quests"])
 	# Orders handed in (save version 14, DECISIONS 050): their entries are
 	# cleared away each morning, so the count is kept on its own.

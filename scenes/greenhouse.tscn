@@ -1,0 +1,52 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/farm/greenhouse.gd" id="1_gh"]
+[ext_resource type="TileSet" path="res://assets/tilesets/greenhouse_tileset.tres" id="2_floor"]
+[ext_resource type="TileSet" path="res://assets/tilesets/ground_tileset.tres" id="3_ground"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="4_player"]
+[ext_resource type="Script" path="res://scripts/tile_cursor.gd" id="5_cursor"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="6_hud"]
+[ext_resource type="PackedScene" path="res://scenes/daylight.tscn" id="7_daylight"]
+[ext_resource type="Script" path="res://scripts/farm/farm_effects.gd" id="8_effects"]
+
+[node name="Greenhouse" type="Node2D"]
+script = ExtResource("1_gh")
+
+[node name="Backdrop" type="CanvasLayer" parent="."]
+layer = -5
+
+[node name="Dark" type="ColorRect" parent="Backdrop"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.133333, 0.133333, 0.168627, 1)
+
+[node name="Floor" type="TileMapLayer" parent="."]
+z_index = -2
+tile_set = ExtResource("2_floor")
+
+[node name="Ground" type="TileMapLayer" parent="."]
+z_index = -1
+tile_set = ExtResource("3_ground")
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="TileCursor" type="Node2D" parent="."]
+script = ExtResource("5_cursor")
+
+[node name="Entities" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Player" parent="Entities" instance=ExtResource("4_player")]
+position = Vector2(80, 156)
+
+[node name="Effects" type="Node2D" parent="."]
+script = ExtResource("8_effects")
+
+[node name="Weather" type="Node" parent="."]
+
+[node name="Daylight" parent="." instance=ExtResource("7_daylight")]
+
+[node name="Hud" parent="." instance=ExtResource("6_hud")]

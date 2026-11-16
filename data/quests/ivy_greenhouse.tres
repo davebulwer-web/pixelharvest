@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/commission_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/produce/timber.tres" id="3_r"]
+[ext_resource type="Resource" path="res://data/quests/ivy_planting.tres" id="4_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="5_r"]
+[ext_resource type="Resource" path="res://data/unlocks/farm_greenhouse.tres" id="6_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="7_r"]
+[ext_resource type="Resource" path="res://data/tools/strawberry_seeds.tres" id="8_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+item = ExtResource("3_r")
+amount = 30
+fee = 800
+
+[resource]
+script = ExtResource("1_r")
+id = &"ivy_greenhouse"
+title = "A glasshouse of your own"
+giver = &"ivy"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["I said I had an idea for your farm, didn't I? There's an old greenhouse by your farmhouse. I saw it from the road.", "The glazier's still in the valley, and he's done my panes for less than he feared. He'd do yours for eight hundred gold.", "And thirty lengths of timber for a new door and the rotten bars. Then you'll have soil that never feels the frost: plant what you like, whenever you like."])
+reminder_line = "Thirty timber and eight hundred for the glazier, dear. Then the greenhouse is yours again."
+thanks_lines = Array[String](["Good. The glazier's been itching to get up your farm track. He'll be done before you're home.", "Strawberries in the snow, dear! Take these to start you off.", "It ignores the seasons, but not the watering can. Nothing rains in there."])
+reward_items = Dictionary[ExtResource("7_r"), int]({
+ExtResource("8_r"): 5
+})
+reward_unlocks = Array[ExtResource("5_r")]([ExtResource("6_r")])
+requires = ExtResource("4_r")

@@ -32,6 +32,10 @@ const CLOSED_DOOR_DEPTH := 10.0
 var _location_id: StringName = &""
 var _closed_door: CollisionShape2D
 
+## Where the pictures come from: the open one, and the broken one shown until
+## the building is mended (LocationDef.locked_exterior; DECISIONS 057).
+var _def: LocationDef
+
 
 static func create(def: LocationDef) -> Building:
 	var building := Building.new()
@@ -46,9 +50,8 @@ static func create(def: LocationDef) -> Building:
 	sprite.texture = texture
 	sprite.offset = Vector2(0, -height / 2.0)
 	building.add_child(sprite)
-	# The season may have its own picture for this building, by location id
-	# (winter's farmhouse has a snowy roof). Same size, so the walls below fit.
-	SeasonLook.skin_object(building, def.id)
+	building._def = def
+	building._update_picture()
 
 	var half_door := float(TILE_PX)  # half the 32px doorway
 	# Left of the doorway, right of it, and the wall above it.
@@ -71,7 +74,10 @@ func _ready() -> void:
 	_update_closed_door()
 	EventBus.time_changed.connect(func(_minutes: int) -> void: _update_closed_door())
 	# A building can also open up mid-day, when a request is handed in (DECISIONS 043).
-	EventBus.unlocked.connect(func(_id: StringName) -> void: _update_closed_door())
+	EventBus.unlocked.connect(func(_id: StringName) -> void:
+		_update_closed_door()
+		_update_picture()
+	)
 
 
 ## Shut the doorway while the shop is closed, open it while it's open. A
@@ -82,6 +88,23 @@ func _update_closed_door() -> void:
 		return
 	var closed := LocationManager.closed_message(_location_id) != ""
 	_closed_door.set_deferred(&"disabled", not closed)
+
+
+## Show the building's picture: the broken one while it waits to be mended
+## (the farm's old greenhouse, until Ivy's request; DECISIONS 057), and
+## otherwise the season's own picture for it, by location id (winter's
+## farmhouse has a snowy roof), or its usual one. All the same size, so the
+## walls fit whichever is showing.
+func _update_picture() -> void:
+	var sprite := get_node_or_null(^"Sprite") as Sprite2D
+	if sprite == null or _def == null:
+		return
+	var mended := _def.locked_exterior == null or GameState.has_unlock(_def.requires_unlock)
+	sprite.set_meta(&"base_texture", _def.exterior if mended else _def.locked_exterior)
+	if mended:
+		SeasonLook.skin_object(self, _def.id)
+	else:
+		sprite.texture = _def.locked_exterior
 
 
 ## The cells the building's picture covers, on the map it stands on: centred on

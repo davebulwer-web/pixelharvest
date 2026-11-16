@@ -35,7 +35,14 @@ extends Node2D
 ## The farmhouse (Stage 7) is a Building like the town's shops: a LocationDef
 ## whose door is on the farm. Walking into its door goes inside, where the bed
 ## is. The ground under it is BUILDING terrain in FarmData (FarmLayout), so no
-## tool can reach it.
+## tool can reach it. The old greenhouse (DECISIONS 057) is another.
+##
+## The greenhouse's room is drawn by greenhouse.gd, which extends this script:
+## its plot is a FarmData too, so the crops, soil, objects and weeds are drawn
+## by the same code here. Everything reads `plot` (the farm's FarmData here,
+## the greenhouse's there), and the few things that differ indoors (the
+## surroundings, the season's look, the weather, the crows) are the
+## functions greenhouse.gd replaces.
 ##
 
 const TILE_PX := 16
@@ -91,11 +98,15 @@ var _weed_sprites: Dictionary = {}
 ## cell -> the Crow standing there this morning (FarmData.crows_landed).
 var _crows: Dictionary = {}
 
+## The tiles this scene draws: the farm's (DECISIONS 057: the greenhouse
+## scene gives its own plot instead, through _plot()).
+var plot: FarmData
+
 
 func _ready() -> void:
-	_add_buildings()
+	plot = _plot()
+	_build_surroundings()
 	_place_player()
-	_add_town_gate()
 	_apply_season_theme()
 	_draw_all()
 	_place_objects()
@@ -148,7 +159,23 @@ func _ready() -> void:
 	)
 	# Rain, snow: today's weather's overlay goes with the season's (DECISIONS 046).
 	EventBus.weather_changed.connect(func(_w: StringName) -> void: _apply_season_overlay())
+	_print_help()
 
+
+## The FarmData this scene shows. The greenhouse gives its own.
+func _plot() -> FarmData:
+	return GameState.farm
+
+
+## What surrounds the plot: on the farm, its buildings and the gate to the
+## town. The greenhouse builds its room instead.
+func _build_surroundings() -> void:
+	_add_buildings()
+	_add_town_gate()
+
+
+## The keys, printed to Godot's Output panel when the farm opens.
+func _print_help() -> void:
 	print("--- Pixel Harvest · Stage 12 (crops with rules) ---")
 	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
 	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
@@ -181,6 +208,8 @@ func _ready() -> void:
 	print("on the ice cuts a hole, and Space at the hole fishes through it.")
 	print("Cooking (Mabel's lessons, from summer): E at the farmhouse stove cooks what you know.")
 	print("A dish on the hotbar is eaten with Space, anywhere, for energy.")
+	print("The old greenhouse by the farmhouse (mended by Ivy's last request) grows any seed")
+	print("in any season. Marlow sells bee hives from summer: E at a hive collects its honey.")
 	print("-------------------------------")
 
 
@@ -229,7 +258,7 @@ func _apply_season_theme() -> void:
 
 
 func _draw_all() -> void:
-	for cell: Vector2i in GameState.farm.cells():
+	for cell: Vector2i in plot.cells():
 		_redraw_cell(cell)
 		_redraw_crop(cell)
 		_redraw_weeds(cell)
@@ -238,7 +267,9 @@ func _draw_all() -> void:
 ## Make the crop sprite at `cell` match FarmData: create it, update its growth
 ## frame, or remove it.
 func _redraw_crop(cell: Vector2i) -> void:
-	var t: FarmTile = GameState.farm.tile(cell)
+	var t: FarmTile = plot.tile(cell)
+	if t == null:
+		return  # not one of this scene's tiles (a signal from the other plot)
 	var sprite: Sprite2D = _crop_sprites.get(cell)
 	if t.has_crop() and t.crop.sprite_sheet == null:
 		# A content mistake, not a code one: say which crop, and carry on
@@ -269,7 +300,7 @@ func _redraw_crop(cell: Vector2i) -> void:
 	_set_crop_pests(sprite, t.pests)
 	if t.is_wilted(GameState.wilt_after()):
 		sprite.modulate = WILTED_TINT
-	elif t.crop.rests_during(GameState.season_id()):
+	elif not plot.under_glass and t.crop.rests_during(GameState.season_id()):
 		sprite.modulate = RESTING_TINT
 	else:
 		sprite.modulate = Color.WHITE
@@ -330,7 +361,9 @@ func _set_crop_pests(sprite: Sprite2D, pests: bool) -> void:
 ## They stand in the y-sorted Entities a hair behind the tile's crop (one
 ## pixel up), so the tufts show either side of it rather than over it.
 func _redraw_weeds(cell: Vector2i) -> void:
-	var t: FarmTile = GameState.farm.tile(cell)
+	var t: FarmTile = plot.tile(cell)
+	if t == null:
+		return
 	var sprite: Sprite2D = _weed_sprites.get(cell)
 	if not t.weeds:
 		if sprite != null:
@@ -356,7 +389,7 @@ func _weeds_texture() -> Texture2D:
 ## A crow on every cell crows took a crop from last night, until it's
 ## scared off (DECISIONS 045).
 func _place_crows() -> void:
-	for cell: Vector2i in GameState.farm.crows_landed:
+	for cell: Vector2i in plot.crows_landed:
 		if is_instance_valid(_crows.get(cell)):
 			continue
 		var crow := Crow.create(cell, cell_base(cell), _player)
@@ -376,6 +409,8 @@ func _squash_crop(cell: Vector2i) -> void:
 
 
 func _redraw_cell(cell: Vector2i) -> void:
+	if not plot.has_cell(cell):
+		return
 	GroundTiles.draw(_ground, cell, _atlas_for(cell))
 
 
@@ -383,7 +418,7 @@ func _redraw_cell(cell: Vector2i) -> void:
 ## which tileset these coordinates point into (_apply_season_theme), never
 ## which coordinates are used.
 func _atlas_for(cell: Vector2i) -> Vector2i:
-	var t: FarmTile = GameState.farm.tile(cell)
+	var t: FarmTile = plot.tile(cell)
 	if t.tilled:
 		return GroundTiles.TILLED_WET if t.watered else GroundTiles.TILLED
 	match t.terrain:
@@ -405,14 +440,17 @@ func cell_base(cell: Vector2i) -> Vector2:
 
 
 func _place_objects() -> void:
-	for cell: Vector2i in GameState.farm.cells():
+	for cell: Vector2i in plot.cells():
 		_place_object(cell)
 
 
 ## Show whatever FarmData says stands at `cell`. What scene that is comes from
 ## its ObjectDef (data/objects/), so a new kind of object needs no code here.
 func _place_object(cell: Vector2i) -> void:
-	var object_id: StringName = GameState.farm.tile(cell).object_id
+	var t: FarmTile = plot.tile(cell)
+	if t == null:
+		return
+	var object_id: StringName = t.object_id
 	if object_id == &"":
 		return
 	var object_def := ContentDB.object(object_id)
@@ -442,7 +480,7 @@ func _remove_object(cell: Vector2i) -> void:
 ## Give every object on the farm this season's picture.
 func _reskin_objects() -> void:
 	for cell: Vector2i in _object_nodes:
-		_skin_object(_object_nodes[cell], GameState.farm.tile(cell).object_id)
+		_skin_object(_object_nodes[cell], plot.tile(cell).object_id)
 
 
 ## Show `node` with the current season's picture for `object_id`, if the

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="1_item"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/honey.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"honey"
+display_name = "Honey"
+description = "A jar of honey from your own bees. Flowers near the hive make more of it."
+icon = ExtResource("2_icon")
+sell_price = 80

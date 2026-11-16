@@ -52,7 +52,8 @@ func _draw() -> void:
 	for tool_def in tools:
 		var is_selected := tool_def == selected
 		# Seeds out of season are greyed out, and say so when selected.
-		var usable := tool_def.action == null or tool_def.action.usable_in_season(season)
+		# Under glass (the greenhouse, DECISIONS 057) every seed can go in.
+		var usable := GameState.tool_usable_here(tool_def)
 		_draw_slot(Vector2(x, y), tool_def, is_selected, tool_def.consumed_on_use, usable)
 		if is_selected:
 			var label := GameState.tool_name(tool_def)

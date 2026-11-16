@@ -10,3 +10,4 @@ id = &"garden_flower_bed"
 display_name = "Flower bed"
 scene = ExtResource("2_scene")
 item = ExtResource("3_item")
+counts_as_flower = true

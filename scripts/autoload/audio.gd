@@ -159,6 +159,7 @@ func _listen() -> void:
 	EventBus.dish_eaten.connect(func(_d: StringName, _e: float) -> void: play(&"eat"))
 	EventBus.object_placed.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"place"))
 	EventBus.object_removed.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"pick_up"))
+	EventBus.object_emptied.connect(func(_c: Vector2i, _o: StringName, _i: StringName, _n: int) -> void: _farm_sound(&"harvest"))
 	EventBus.items_shipped.connect(func(count: int, _v: int) -> void: play(&"ship" if count > 0 else &"nope"))
 	EventBus.item_bought.connect(func(_id: StringName, _n: int, _g: int) -> void: play(&"coins"))
 	EventBus.upgrade_bought.connect(func(_id: StringName, _g: int) -> void: play(&"coins"))

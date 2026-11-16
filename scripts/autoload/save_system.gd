@@ -76,7 +76,14 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       times cooked). Older games know none, except those taught by
 ##       requests they had already finished (Mabel's leek pies, Wren's river
 ##       fish), which are given to them.
-const CURRENT_VERSION := 17
+##  18 — the greenhouse and bees (DECISIONS 057): the greenhouse's plot
+##       ("greenhouse", tiles like the farm's), and a hive's honey in the
+##       making on its farm tile ("made_days", "made_ready", left out when
+##       0). The old greenhouse now stands on the farm, so the cells it
+##       stands on become BUILDING terrain and whatever was on them is given
+##       back (crops as their seeds, sprinklers and decorations as
+##       themselves).
+const CURRENT_VERSION := 18
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -100,6 +107,7 @@ const REQUIRED_FIELDS: Dictionary = {
 	"cleared": TYPE_DICTIONARY,
 	"fish_log": TYPE_DICTIONARY,
 	"recipes": TYPE_DICTIONARY,
+	"greenhouse": TYPE_DICTIONARY,
 }
 
 ## Saving is switched on by load_or_new_game(), i.e. only when the game was
@@ -224,6 +232,14 @@ func _check_fields(game: Dictionary) -> String:
 	if typeof(farm.get("tiles")) != TYPE_ARRAY or typeof(farm.get("width")) != TYPE_FLOAT \
 			or typeof(farm.get("height")) != TYPE_FLOAT:
 		return "the farm is incomplete"
+	var greenhouse: Dictionary = game["greenhouse"]
+	if typeof(greenhouse.get("tiles")) != TYPE_ARRAY or typeof(greenhouse.get("width")) != TYPE_FLOAT \
+			or typeof(greenhouse.get("height")) != TYPE_FLOAT:
+		return "the greenhouse is incomplete"
+	for entry: Variant in greenhouse["tiles"]:
+		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("x")) != TYPE_FLOAT \
+				or typeof(entry.get("y")) != TYPE_FLOAT:
+			return "a greenhouse tile has no position"
 	for entry: Variant in game["inventory"]:
 		# A count read from the file is a float (JSON has only one kind of
 		# number); one written by an upgrade step may be an int. Either is fine.
@@ -294,6 +310,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_15_to_16(data["game"])
 			16:
 				_upgrade_16_to_17(data["game"])
+			17:
+				_upgrade_17_to_18(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -601,3 +619,75 @@ func _upgrade_16_to_17(game: Dictionary) -> void:
 				for recipe_id: String in V17_TAUGHT_BY_DONE[quest_id]:
 					recipes[recipe_id] = 0
 	game["recipes"] = recipes
+
+
+## Version 17 -> 18: the greenhouse and bees (DECISIONS 057).
+##
+## The greenhouse's plot is new: an empty one, every tile dug over, as a new
+## game has. It's written out here, not built by GreenhouseLayout, so this
+## step means the same thing however the room changes later.
+##
+## The farm's old greenhouse now stands west of the farmhouse, on cells that
+## an older game could have farmed. As version 7 did for the farmhouse, those
+## cells become BUILDING terrain and are cleared, but nothing is lost: a crop
+## goes back in the bag as its seeds (a tree as its sapling), and a sprinkler
+## or a decoration as itself. A crop of several tiles (the apple tree, a
+## giant) that reaches into it from outside goes too. Trees and weeds just go.
+const V18_PLOT := Rect2i(1, 3, 8, 6)
+const V18_GREENHOUSE := Rect2i(0, 9, 5, 3)
+## What each placeable object was picked up as when version 18 arrived.
+const V18_OBJECT_ITEMS: Dictionary = {
+	"sprinkler": "sprinkler", "big_sprinkler": "big_sprinkler", "garden_fence": "garden_fence",
+	"garden_flower_bed": "garden_flower_bed", "garden_lamp": "garden_lamp", "hay_bale": "hay_bale",
+	"scarecrow": "scarecrow", "sundial": "sundial",
+}
+## Seeds are the crop's id and "_seeds", except for the crops listed here.
+const V18_CROP_SEEDS: Dictionary = {"apple_tree": "apple_sapling"}
+## How many tiles square a crop stands on, when it isn't one (giants are 3).
+const V18_CROP_SPANS: Dictionary = {"apple_tree": 2}
+
+
+func _upgrade_17_to_18(game: Dictionary) -> void:
+	var plot_tiles: Array = []
+	for y in range(V18_PLOT.position.y, V18_PLOT.end.y):
+		for x in range(V18_PLOT.position.x, V18_PLOT.end.x):
+			plot_tiles.append({"x": float(x), "y": float(y), "tilled": true})
+	# Numbers as floats, as they'd be read back from the file.
+	game["greenhouse"] = {"width": float(V18_PLOT.size.x), "height": float(V18_PLOT.size.y), "tiles": plot_tiles}
+
+	var farm: Dictionary = game.get("farm", {})
+	var returned: Array[String] = []
+	for entry: Variant in farm.get("tiles", []):
+		if typeof(entry) != TYPE_DICTIONARY:
+			continue
+		var cell := Vector2i(int(entry.get("x", -999)), int(entry.get("y", -999)))
+		var inside := V18_GREENHOUSE.has_point(cell)
+		var crop_id: String = entry.get("crop", "")
+		if crop_id != "":
+			# A crop's tile is the front-left corner of what it stands on.
+			var span: int = 3 if entry.get("giant", false) else int(V18_CROP_SPANS.get(crop_id, 1))
+			var area := Rect2i(cell.x, cell.y - span + 1, span, span)
+			if area.intersects(V18_GREENHOUSE):
+				returned.append(V18_CROP_SEEDS.get(crop_id, crop_id + "_seeds"))
+				for key in ["crop", "crop_stage", "crop_days", "crop_regrowing", "dry_nights", "pests", "giant"]:
+					entry.erase(key)
+		if not inside:
+			continue
+		var object_id: String = entry.get("object", "")
+		if V18_OBJECT_ITEMS.has(object_id):
+			returned.append(V18_OBJECT_ITEMS[object_id])
+		for key in ["object", "tilled", "watered", "weeds", "made_days", "made_ready"]:
+			entry.erase(key)
+		entry["terrain"] = "BUILDING"
+	var inventory: Variant = game.get("inventory")
+	if typeof(inventory) != TYPE_ARRAY:
+		return
+	for item_id in returned:
+		var found := false
+		for stack: Variant in inventory:
+			if typeof(stack) == TYPE_DICTIONARY and stack.get("id", "") == item_id:
+				stack["count"] = float(int(stack.get("count", 0)) + 1)
+				found = true
+				break
+		if not found:
+			inventory.append({"id": item_id, "count": 1.0})

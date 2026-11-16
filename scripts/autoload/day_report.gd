@@ -38,6 +38,9 @@ func _ready() -> void:
 	# Crops are lost in the night, before day_started closes the record.
 	EventBus.crop_died.connect(_on_crop_died)
 	EventBus.giant_grew.connect(func(_c: Vector2i, id: StringName) -> void: today.giants.append(id))
+	# Honey made in the night (DECISIONS 057), before day_started.
+	EventBus.object_made.connect(func(_c: Vector2i, _o: StringName, item_id: StringName, n: int) -> void:
+		today.made[item_id] = today.made.get(item_id, 0) + n)
 	EventBus.fish_caught.connect(func(id: StringName, _size: int, _where: StringName, _water: StringName, _ice: bool) -> void:
 		today.caught[id] = today.caught.get(id, 0) + 1)
 	EventBus.gold_changed.connect(_on_gold_changed)

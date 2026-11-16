@@ -36,3 +36,32 @@ extends Resource
 ## this tile, so 1 is the eight tiles touching it; DECISIONS 047). 0 for
 ## anything that gives no shelter. The garden fence's is 1.
 @export var shelters_radius: int = 0
+
+## --- Making things (DECISIONS 057) -------------------------------------------
+## An object that makes something by itself over the days, like the bee hive
+## and its honey. FarmData counts the days overnight (run_makers); what's
+## made waits on the object's tile until the player collects it with E. A
+## full object makes no more until it's emptied.
+
+## What it makes (honey). Null for everything that makes nothing.
+@export var makes: ItemDef
+
+## How many nights it takes to make a batch.
+@export var makes_every_days: int = 0
+
+## How many it makes in a batch.
+@export var makes_amount: int = 1
+
+## The seasons it works in (bees sleep through winter). Empty: every season.
+## Under glass (the greenhouse) it works all year.
+@export var makes_in_seasons: Array[StringName] = []
+
+## A flower within this many tiles (a square round it) adds `flower_bonus`
+## to each batch: bees with flowers to visit make more honey. 0: flowers
+## make no difference.
+@export var flower_radius: int = 0
+@export var flower_bonus: int = 0
+
+## True for an object that counts as a flower to the bees (the flower bed).
+## Flowering crops (an item tagged &"flower") count without this.
+@export var counts_as_flower: bool = false

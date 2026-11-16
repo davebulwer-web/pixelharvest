@@ -62,3 +62,9 @@ extends Resource
 ## How many fallen logs lie about each morning, for the axe, out of the places
 ## the location's map offers. 0: none here.
 @export var fallen_logs_per_day: int = 0
+
+## --- A building waiting to be mended (DECISIONS 057) ----------------------------
+## The picture shown while requires_unlock hasn't been earned: the farm's old
+## greenhouse, broken until Ivy's request mends it. Null: the building looks
+## the same locked or not (Brann's forge).
+@export var locked_exterior: Texture2D

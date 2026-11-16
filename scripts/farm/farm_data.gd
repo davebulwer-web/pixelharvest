@@ -28,6 +28,13 @@ var _tiles: Dictionary = {}
 ## and it's emptied at the start of every night.
 var crows_landed: Array[Vector2i] = []
 
+## True for the greenhouse's plot (DECISIONS 057): under glass, the seasons
+## and the weather don't reach it. Seeds go in whatever the season, nothing
+## rests or dies at the season's turn, no rain falls, and no weeds, crows or
+## aphids get in (TimeSystem simply doesn't run those on it). Not saved:
+## GameState sets it on the plot it builds or loads.
+var under_glass: bool = false
+
 
 func _init(farm_size: Vector2i) -> void:
 	size = farm_size
@@ -286,6 +293,8 @@ func place_object(cell: Vector2i, object_id: StringName) -> void:
 	t.object_id = object_id
 	t.tilled = false
 	t.watered = false
+	t.made_days = 0
+	t.made_ready = 0
 	EventBus.object_placed.emit(cell, object_id)
 
 
@@ -349,6 +358,8 @@ func remove_object(cell: Vector2i) -> void:
 		return
 	var object_id := t.object_id
 	t.object_id = &""
+	t.made_days = 0
+	t.made_ready = 0
 	EventBus.object_removed.emit(cell, object_id)
 
 
@@ -448,6 +459,80 @@ func run_sprinklers() -> void:
 			continue
 		for offset in object_def.water_offsets:
 			water(cell + offset)
+
+
+## Objects that make something (bee hives; DECISIONS 057) work a night
+## towards their next batch, and one that's done fills up: honey waits in
+## the hive for the player. `season_id` is the season of the day that just
+## ended; out of an object's seasons it rests (bees in winter), except under
+## glass. A full object makes no more until it's emptied. A flower near it
+## (FarmHazards.flowers_on, or an object that counts as one) adds its
+## flower_bonus to the batch. Called by TimeSystem every night, after the
+## sprinklers. Returns how many batches were made tonight.
+func run_makers(season_id: StringName) -> int:
+	var batches := 0
+	var flowers: Array[Vector2i] = []
+	var flowers_found := false
+	for cell: Vector2i in _tiles:
+		var t: FarmTile = _tiles[cell]
+		if t.object_id == &"" or t.made_ready > 0:
+			continue
+		var object_def := ContentDB.object(t.object_id)
+		if object_def == null or object_def.makes == null or object_def.makes_every_days < 1:
+			continue
+		if not under_glass and not object_def.makes_in_seasons.is_empty() \
+				and season_id not in object_def.makes_in_seasons:
+			continue
+		t.made_days += 1
+		if t.made_days < object_def.makes_every_days:
+			continue
+		if not flowers_found:
+			flowers = flower_cells()
+			flowers_found = true
+		var amount := object_def.makes_amount
+		if object_def.flower_radius > 0 \
+				and FarmHazards.is_near_flower(cell, flowers, object_def.flower_radius):
+			amount += object_def.flower_bonus
+		t.made_days = 0
+		t.made_ready = maxi(1, amount)
+		batches += 1
+		EventBus.object_made.emit(cell, t.object_id, object_def.makes.id, t.made_ready)
+	return batches
+
+
+## Every cell with a flower on it, for the bees: a flowering crop (as the
+## aphids see it, FarmHazards.flowers_on) or an object that counts as one
+## (the flower bed).
+func flower_cells() -> Array[Vector2i]:
+	var flowers := FarmHazards.flowers_on(self)
+	for cell: Vector2i in _tiles:
+		var object_id: StringName = _tiles[cell].object_id
+		if object_id == &"":
+			continue
+		var object_def := ContentDB.object(object_id)
+		if object_def != null and object_def.counts_as_flower:
+			flowers.append(cell)
+	return flowers
+
+
+## How many of what the object at `cell` made are waiting there (honey in
+## the hive), or 0.
+func made_at(cell: Vector2i) -> int:
+	var t := tile(cell)
+	return t.made_ready if t != null else 0
+
+
+## Take what the object at `cell` made out of it, and return how many there
+## were (0 if none). Giving them to the player is GameState's business
+## (collect_from_object), which also announces it.
+func empty_object(cell: Vector2i) -> int:
+	var t := tile(cell)
+	if t == null or t.made_ready <= 0:
+		return 0
+	var amount := t.made_ready
+	t.made_ready = 0
+	t.made_days = 0
+	return amount
 
 
 ## Rain (DECISIONS 046): every tile of tilled soil is watered, as if by the

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ObjectDef" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/object_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/bee_hive.tscn" id="2_scene"]
+[ext_resource type="Resource" path="res://data/tools/bee_hive.tres" id="3_item"]
+[ext_resource type="Resource" path="res://data/produce/honey.tres" id="4_honey"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"bee_hive"
+display_name = "Bee hive"
+scene = ExtResource("2_scene")
+item = ExtResource("3_item")
+makes = ExtResource("4_honey")
+makes_every_days = 3
+makes_amount = 1
+makes_in_seasons = Array[StringName]([&"spring", &"summer", &"autumn"])
+flower_radius = 4
+flower_bonus = 1

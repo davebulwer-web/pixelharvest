@@ -106,7 +106,8 @@ scripts/             Game code
   farm/              The farm's data and layout, the farmhouse with its bed and its
                      stove and cooking menu (Stove, CookMenu; DECISIONS 056), the
                      farm's effects, the night's hazards (FarmHazards) and the
-                     morning's crows
+                     morning's crows; the greenhouse's room and plot (Greenhouse,
+                     which extends main.gd, and GreenhouseLayout; DECISIONS 057)
   town/              The town, its map, shop interiors and fronts, people, notice board (Stage 7),
                      the river and the bridge to the Woods
   woods/             The Woods: their map, the day's forage (Forage, ForageSpot; DECISIONS 052)
@@ -134,13 +135,15 @@ data/                Content resources (.tres), indexed by ContentDB
                      bait, and the lures: LureDef, DECISIONS 055)
   tools/             ToolDef — tools, seeds and sprinklers (all things you use)
   decorations/       ToolDef — decorations for the farm, placed like sprinklers (DECISIONS 039)
-  objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers, decorations)
+  objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers, decorations,
+                     bee hives: an object can make something, like honey; DECISIONS 057)
   upgrades/          UpgradeDef — bought once: tool tiers, energy, fields
   seasons/           SeasonTheme — each season's name, look and weather odds (crops list
                      their own seasons)
   weather/           WeatherDef — sunny, rain, storm, heatwave, snow, frost: what each does,
                      looks and sounds like (DECISIONS 046)
-  locations/         LocationDef — the farm, the farmhouse, the town, each shop (and where its door is)
+  locations/         LocationDef — the farm, the farmhouse, the greenhouse, the town, each shop
+                     (and where its door is)
   shops/             ShopDef — a shopkeeper, their words, and what the counter offers
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers)
   events/            CalendarEvent — what happens on which days (market day) and its stalls

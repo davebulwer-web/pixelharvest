@@ -11,5 +11,5 @@ display_name = "Ivy"
 sprite = ExtResource("2_sprite")
 location = &"town"
 spots = Array[Vector2i]([Vector2i(19, 7), Vector2i(22, 7), Vector2i(17, 6)])
-lines = Array[String](["This glasshouse grew oranges once. Oranges! In this valley.", "Perennials are the patient gardener's friend. Plant once, pick for years.", "The old farm fed the whole valley when I was young. It's good to see it working again.", "A flower among the vegetables keeps the aphids honest. My mother taught me that.", "Mind the frost at the end of autumn, dear. The tender ones won't forgive you."])
+lines = Array[String](["This glasshouse grew oranges once. Oranges! In this valley.", "Perennials are the patient gardener's friend. Plant once, pick for years.", "The old farm fed the whole valley when I was young. It's good to see it working again.", "A flower among the vegetables keeps the aphids honest. My mother taught me that.", "Mind the frost at the end of autumn, dear. The tender ones won't forgive you.", "Bees love a flower bed. Put a hive near flowers and they'll give you twice the honey."])
 requires_unlock = ExtResource("3_unlock")

@@ -74,6 +74,13 @@ extends Resource
 ## it. Null: the stove works from the start.
 @export var kitchen_unlock: UnlockDef
 
+## --- The greenhouse (DECISIONS 057) -----------------------------------------
+
+## The location whose room holds the greenhouse's plot (DECISIONS 057): a
+## second FarmData, under glass, where seasons and weather don't reach.
+## GameState.plot_at() gives it for this location, and the farm's for the farm.
+@export var greenhouse_location: StringName = &"greenhouse"
+
 ## --- Difficulty (DECISIONS 040) -------------------------------------------
 
 ## The difficulties offered at new game, in the order the menu lists them.

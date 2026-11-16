@@ -2302,3 +2302,90 @@ dish is two `.tres` files and an icon; teaching it is one line on a request.
 minnow and two potatoes; Stage 20 should look at energy per gold across the dishes.
 Placeholder art: the stove (lit and cold) and ten dish icons, drawn by a script in
 the palette until Pixellab.
+
+---
+
+## 057 — The greenhouse is a second plot under glass, and bee hives are objects that make honey
+
+**Decision.** Stage 17 session 1 adds the farm's greenhouse (ROADMAP 5.8, section 8) and
+bee hives (section 9). **Save version 18** (the greenhouse's plot; a hive's honey in the
+making). Fertilisers, the sickle's tiers and the brass sprinkler are session 2.
+
+- *The old greenhouse stands on the farm from the start*, west of the farmhouse (door at
+  cell 2,11; 80 × 48, five tiles by three). It's a `LocationDef` like the farmhouse, so
+  `FarmLayout` makes its ground BUILDING terrain and the farm builds it from data. Until
+  it's mended it shows a broken picture (new `LocationDef.locked_exterior`) and its door
+  is shut (`requires_unlock`, the unlock `farm_greenhouse`) with a line that points the
+  player towards someone who knows glasshouses. `Building` swaps the picture the moment
+  the unlock arrives, and winter has a snowy roof for it (`SeasonTheme.object_sprites`).
+- *Ivy mends it* with a fourth request, **A glasshouse of your own** (`ivy_greenhouse`):
+  after her first planting (so from autumn in year 1), 30 timber and 800g for the
+  glazier → `farm_greenhouse` and five strawberry seeds ("strawberries in the snow").
+  ROADMAP 5.8 had the restoration itself open the greenhouse; her thanks line already
+  promised "an idea for your farm", and a separate step keeps her own glasshouse in town
+  hers. The cost is a number in the `.tres`, for Stage 20 to tune.
+- *Inside is a plot that is a second FarmData* (`GameState.greenhouse`, built by
+  `GreenhouseLayout`: 8 tiles wide, 6 deep, a walkway round it, the door at the bottom).
+  It starts dug over. `FarmData.under_glass` marks it. Because it's a FarmData, every
+  tool, crop rule, sprinkler, hive and the trowel work on it unchanged: the player now
+  asks `GameState.plot_here()` (the farm's plot on the farm, the greenhouse's in the
+  greenhouse, null elsewhere) instead of naming the farm, and so do harvesting, pulling
+  weeds, picking things up and collecting honey.
+- *Under glass, the seasons and weather don't reach.* Any seed can be planted whatever the
+  season (`GameState.tool_usable_here()`: the player and the hotbar ask it instead of the
+  seed directly). In the night (`TimeSystem._grow_greenhouse`) the plot grows with no
+  season (nothing rests, nothing withers at the turn) and no weather (no heatwave thirst,
+  no rain to water it, no storm, no frost), then giants and sprinklers as outside. No
+  crows, aphids or weeds get in: `FarmHazards` is simply never run on it. Thirst still
+  applies, so the can is still needed, and the morning's thirst warning counts both plots.
+- *The greenhouse scene extends the farm's* (`greenhouse.gd` extends `main.gd`). `main.gd`
+  now draws `plot` (whatever `_plot()` returns) and its `_ready` calls a few functions the
+  greenhouse replaces: the surroundings (the glass room and the door instead of the
+  farm's buildings and town gate), the season's tileset and overlay, the season's look of
+  objects. So every crop, wilting tint, aphid, giant and object is drawn by one piece of
+  code. The room has its own placeholder tileset (`greenhouse_tileset.tres`: brick paving,
+  glass wall); the soil keeps spring's ground tiles all year. The evening light reaches in
+  through the glass (it has a Daylight like the farm).
+- *Bee hives* are placed like sprinklers (a `ToolDef` with `PlaceObjectAction`, at
+  Marlow's for 500g from summer day 1, unlock `bees_on_sale`). An `ObjectDef` can now
+  **make** something: `makes` (honey), `makes_every_days` (3), `makes_amount` (1),
+  `makes_in_seasons` (spring to autumn; all year under glass), and `flower_radius` /
+  `flower_bonus` (a flower within 4 tiles adds a jar). Flowers are the aphids' flowers (a
+  crop tagged `flower`, past the seed) plus objects with `counts_as_flower` (the flower
+  bed). `FarmData.run_makers()` runs every night on both plots, after the sprinklers; the
+  tile keeps `made_days` and `made_ready`. A full hive makes no more until emptied.
+- *Collecting:* E at a hive with honey takes it all (`GameState.collect_from_object`,
+  EventBus `object_made` and `object_emptied`, the harvest sound); a jar floats over a
+  full hive (a "Ready" child in its scene, which `PlacedObject` shows and hides); E at an
+  empty hive picks it up, as for any placed object, and its days start again. The
+  morning summary says when the bees have made honey. Honey sells for 80g.
+- *v17 → v18*: an empty greenhouse plot (written out in the step, not built by today's
+  code), and the greenhouse's five by three cells on the farm become BUILDING. As version
+  7 did for the farmhouse, nothing there is lost: crops go back in the bag as their seeds
+  (a tree as its sapling, also one reaching in from outside), sprinklers and decorations
+  as themselves. `tests/saves/v17_example.json` was made by the real v17 build, with
+  crops, a sprinkler and a scarecrow standing where the greenhouse now goes.
+
+Options considered: the greenhouse as Ivy's restored glasshouse in town (no farm cells to
+clear, but the roadmap and Ivy's own words put it on the farm); a greenhouse that appears
+only once mended (it would land on crops mid-game, with no warning); a placeable
+greenhouse (a building as an item is a much bigger change). For the plot: a new kind of
+tile store beside FarmData (every tool would need teaching about it), or a flag on farm
+tiles saying "under glass" inside the farm's own map (the greenhouse would then be a hole
+in the farm, and the room couldn't have walls). For hives: honey kept in the hive's scene
+(lost when the farm scene is rebuilt each morning, and never saved), or a separate
+"hives" list in GameState (two records of where a hive stands). Picking a hive up with
+honey in it was ruled out: E always collects first.
+
+**Why.** The greenhouse is winter's main farming (ROADMAP section 3) and Ivy's reward;
+reusing FarmData means the whole crop system works in it with no second copy. Bees are
+passive income that rewards flowers in the layout. Rule 3 holds: another maker (a
+mushroom log, say) is an ObjectDef with `makes`, and a different greenhouse is a
+LocationDef and a layout.
+
+**Cost.** `main.gd` is now also the greenhouse's base, so a change to how the farm draws
+reaches the greenhouse too (usually what's wanted). A few cells beside the farmhouse are
+taken from older farms (their contents returned). Honey is only sold for now; recipes or
+requests can use it later. Placeholder art: the greenhouse (mended, broken, winter), its
+inside tiles, the hive, its icon and honey, drawn by a script in the palette until
+Pixellab.

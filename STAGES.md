@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 16 — kitchen and cooking.** Session 1 (recipes as data, the farmhouse stove, eating from the hotbar, Mabel's kitchen lessons and recipe book, Wren's grilled fish; save version 17) is built, waiting for Dave to try it. Then Stage 16's Pixellab art (stove, ten dishes), and Stage 17 (greenhouse, bees and late tools). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 17 — greenhouse, bees and late tools.** Session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is built, waiting for Dave to try it. Session 2 is fertilisers, the sickle's tiers and the brass sprinkler. Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -838,7 +838,7 @@ Energy food only (narrows DECISIONS 006; no selling chains).
       recipe book; E at the lit stove opening the menu, pausing, Space cooking, Esc
       closing; the cold stove; save and load; saves v1–v16, and v16 with the leek pies
       done), rendered the stove lit, the menu and a dish on the hotbar
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (committed as "Stage 16", 2026-11-16)
 
 **Art**
 
@@ -846,9 +846,49 @@ Energy food only (narrows DECISIONS 006; no selling chains).
 
 ## Stage 17 — Greenhouse, bees and late tools · 2 sessions + art · Sonnet
 
-- [ ] Greenhouse building with an indoor plot that ignores seasons (Ivy's line)
-- [ ] Bee hives and honey; fertilisers; the sickle's tiers; the brass sprinkler
-- [ ] Pixellab: greenhouse (outside, winter, inside), hive, honey, sickle, fertiliser, sprinkler
+**Session 1 — the greenhouse and bees** (2026-11-16, DECISIONS 057, save version 18)
+
+- [x] The farm's old greenhouse, west of the farmhouse: broken and shut from the start
+      (`LocationDef.locked_exterior`), mended by Ivy's fourth request, **A glasshouse of
+      your own** (after her first planting: 30 timber and 800g → `farm_greenhouse` and
+      five strawberry seeds). A snowy roof in winter
+- [x] Inside: an 8 × 6 plot, dug over, with a walkway round it (`GreenhouseLayout`). A
+      second FarmData (`GameState.greenhouse`, `under_glass`): every tool, seed,
+      sprinkler, hive and the trowel work in it; any seed goes in whatever the season;
+      no rain, frost, storms, heatwave, crows, aphids or weeds; nothing dies at the
+      season's turn; thirst still counts. `GameState.plot_here()`,
+      `tool_usable_here()`; `greenhouse.gd` extends `main.gd`
+- [x] Bee hives (Marlow's, 500g, from summer day 1): placed like a sprinkler; a jar of
+      honey every 3 nights from spring to autumn (all year under glass), two with a
+      flower within 4 tiles (a flowering crop or a flower bed). E collects (a jar shows
+      over a full hive), E at an empty hive picks it up. Honey sells for 80g; the
+      morning summary says when there's honey. `ObjectDef.makes`, `FarmData.run_makers()`
+- [x] Save version 18 (the greenhouse's plot; honey in the making). v17 → v18 clears the
+      greenhouse's cells on older farms and gives back what stood there;
+      `tests/saves/v17_example.json`
+- [x] Verified in the sandbox: headless import and run clean, 159 harness checks (the
+      layout and the footprint on a new farm; the shut door and broken picture; Ivy's
+      request, its cost and reward, the picture mended at once; walking in; strawberries
+      planted in winter with Space, and not on the farm; watering, the wet soil drawn;
+      the walls untouched by the hoe; nights in the greenhouse, no rain inside, growing to
+      ripe in winter, the thirst warning; the season's turn killing nothing; harvesting
+      with E; hives on sale only at Marlow's from summer; placing, three nights, the
+      flower bed's bonus, a full hive waiting, collecting, picking up, sleeping in winter,
+      working under glass, a tulip's bonus; save and load; saves v1–v17, and v17's
+      greenhouse cells given back), rendered the broken and mended greenhouse (and in
+      winter), the plot planted, a full greenhouse in winter and the honey jar over hives
+- [ ] Dave confirms it plays correctly on Windows
+
+**Session 2 — late tools**
+
+- [ ] Fertilisers (growth, and mulch that keeps soil wet a night longer)
+- [ ] The sickle and its tiers (Brann's line: fibre); the brass sprinkler (Brann's last
+      request, winter)
+
+**Art**
+
+- [ ] Pixellab: greenhouse (outside, broken, winter, inside), hive, honey, sickle,
+      fertiliser, brass sprinkler
 
 ## Stage 18 — Festivals · 1–2 sessions · Sonnet
 

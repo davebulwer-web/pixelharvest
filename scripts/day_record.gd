@@ -39,6 +39,9 @@ var taken_by_crows: Array[StringName] = []
 var giants: Array[StringName] = []
 ## Fish landed, by fish id -> how many (DECISIONS 054).
 var caught: Dictionary[StringName, int] = {}
+## What hives (or anything else that makes things) made overnight, by item
+## id -> how many are waiting to be collected (DECISIONS 057).
+var made: Dictionary[StringName, int] = {}
 ## Gold in the purse when the night's sales were done.
 var gold_at_end: int = 0
 

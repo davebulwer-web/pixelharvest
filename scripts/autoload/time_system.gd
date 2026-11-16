@@ -21,6 +21,9 @@ extends Node
 ##      crows, aphids, weeds, bare soil going back to grass (DECISIONS 045,
 ##      048). Then ripe blocks of melons or pumpkins may go giant (DECISIONS
 ##      048). Then sprinklers water, last, so the morning has wet soil round them.
+##      The greenhouse's plot grows too, under glass (DECISIONS 057): no
+##      season, no weather and no hazards reach it, only thirst. Then bee
+##      hives on either plot work a night towards their honey.
 ##   3. The calendar moves on and energy refills.
 ##   4. If that started a new season: crops that can't grow in it die, the
 ##      undergrowth chopped in the Woods grows back (DECISIONS 053), and
@@ -102,6 +105,8 @@ func end_day() -> void:
 	_run_hazards()
 	GameState.farm.form_giants(rng)
 	GameState.farm.run_sprinklers()
+	_grow_greenhouse()
+	_run_makers()
 	var season_turned := GameState.advance_calendar()
 	EventBus.energy_changed.emit(GameState.energy, GameState.max_energy)
 	if season_turned:
@@ -133,6 +138,29 @@ func _run_hazards() -> void:
 			GameState.has_unlock(rules.crows_start) and not storm, rng,
 			today.flattens_tall_crops if today != null else 0.0,
 			GameState.has_unlock(rules.pests_start))
+
+
+## The greenhouse's night (part of step 2, DECISIONS 057): its crops grow
+## or get thirsty as the farm's do, but as if there were no season (nothing
+## rests) and no weather (no heatwave thirst, no crop that loves the rain).
+## Then giants and sprinklers, as outside. Nothing else of the night gets in:
+## no crows, aphids, weeds or storms, no rain, no frost, and the season's
+## turn kills nothing in there (step 4 only withers the farm).
+func _grow_greenhouse() -> void:
+	var plot := GameState.greenhouse
+	if plot == null:
+		return
+	plot.advance_day(GameState.difficulty.grow_time_multiplier, GameState.thirst_deadline(), 1, &"", &"")
+	plot.form_giants(rng)
+	plot.run_sprinklers()
+
+
+## Bee hives (DECISIONS 057) on the farm and in the greenhouse work tonight
+## towards their honey, in the season of the day that has just ended.
+func _run_makers() -> void:
+	for plot in GameState.plots():
+		if plot != null:
+			plot.run_makers(GameState.season_id())
 
 
 ## Step 4c: the new day's weather, and what it does to the farm at once.

@@ -7,7 +7,9 @@ extends CharacterBody2D
 ##
 ## Away from the farm (the town, a shop, the farmhouse) `can_farm` is switched
 ## off by the scene: tools and harvesting are about the farm's tiles, which
-## aren't there.
+## aren't there. The greenhouse leaves it on: its plot is farmed just like the
+## farm, and GameState.plot_here() says which plot the tools are working on
+## (DECISIONS 057).
 ##
 ## The node origin sits at the character's FEET, not the centre of the sprite.
 ## The AnimatedSprite2D is offset upward to achieve that. This matters for two
@@ -131,11 +133,12 @@ func target_cells() -> Array[Vector2i]:
 ## would. So an upgrade is never worse than what it replaced.
 func _use_tool() -> void:
 	var tool := GameState.selected_tool()
-	if tool == null or tool.action == null or not tool.action.usable_in_season(GameState.season_id()):
+	var plot := GameState.plot_here()
+	if tool == null or tool.action == null or plot == null or not GameState.tool_usable_here(tool):
 		return
 	var usable: Array[Vector2i] = []
 	for cell in target_cells():
-		if tool.action.can_use(GameState.farm, cell):
+		if tool.action.can_use(plot, cell):
 			usable.append(cell)
 	if usable.is_empty():
 		return
@@ -150,7 +153,7 @@ func _use_tool() -> void:
 		# one takes it off the hotbar, and GameState moves the selection along.
 		if tool.consumed_on_use and not GameState.inventory.remove(tool):
 			break
-		tool.action.apply(GameState.farm, cell)
+		tool.action.apply(plot, cell)
 
 
 ## The same, away from the farm: the tool asks `tool_place` (the Woods)
@@ -178,8 +181,9 @@ func _use_tool_away() -> void:
 
 ## E: harvest a ready crop by hand, pull up weeds (DECISIONS 045), or use
 ## whatever stands on the tile ahead (the shipping bin, a sprinkler to pick it
-## up, a shopkeeper to talk to, the bed). Harvesting is free — the work was in
-## growing it. Weeding costs a little energy.
+## up, a hive's honey to collect, a shopkeeper to talk to, the bed).
+## Harvesting is free — the work was in growing it. Weeding costs a little
+## energy.
 ##
 ## Anything usable joins the "interactable" group and offers occupies(cell)
 ## and interact(), so this never grows a list of things it knows about.
