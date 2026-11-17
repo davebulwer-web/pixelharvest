@@ -74,6 +74,25 @@ extends Resource
 ## it. Null: the stove works from the start.
 @export var kitchen_unlock: UnlockDef
 
+## --- The workbench (DECISIONS 063) ------------------------------------------
+
+## What the farm's workbench waits for: earned by mending it, which teaches
+## the old farmer's first plans (RecipeDef.taught_by_unlock). Null: it works
+## from the start.
+@export var workbench_unlock: UnlockDef
+
+## What mending it takes from the bag: its missing leg is propped up on
+## stones. Null or 0: mending it is free.
+@export var workbench_mend_item: ItemDef
+@export var workbench_mend_count: int = 3
+
+## --- Where to sell (DECISIONS 063) -----------------------------------------
+
+## How the shipping bin takes being flooded with one thing in a night: full
+## price for so many, then less for each one after (DemandDef). Each shop that
+## buys has its own (ShopDef.demand). Null: the bin never drops its price.
+@export var bin_demand: DemandDef
+
 ## --- The greenhouse (DECISIONS 057) -----------------------------------------
 
 ## The location whose room holds the greenhouse's plot (DECISIONS 057): a

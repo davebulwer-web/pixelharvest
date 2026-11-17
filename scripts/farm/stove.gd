@@ -58,7 +58,7 @@ func interact() -> void:
 	if not GameState.kitchen_open():
 		EventBus.message_posted.emit("The old stove is cold. Mabel the baker could show you how to cook")
 		return
-	if GameState.recipes.is_empty():
+	if GameState.known_recipes(&"stove").is_empty():
 		EventBus.message_posted.emit("The stove's lit, but you don't know any recipes yet")
 		return
 	used.emit()

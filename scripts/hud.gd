@@ -231,7 +231,16 @@ func _on_items_shipped(count: int, value: int) -> void:
 	if count == 0:
 		_show_message("Nothing to ship — the bin takes produce")
 	else:
-		_show_message("Shipped %d for %dg — paid overnight" % [count, value])
+		var text := "Shipped %d for %dg — paid overnight" % [count, value]
+		# Where to sell (DECISIONS 063): say when the bin has had plenty of
+		# something, so the rest is worth a walk to another buyer.
+		var plenty: Array[String] = []
+		for item in GameState.shipping_bin.items():
+			if Economy.bin_flooded(item):
+				plenty.append(QuestGoal.plural(item.display_name, 2).to_lower())
+		if not plenty.is_empty():
+			text += ". The bin's had plenty of %s tonight: more pay less" % " and ".join(plenty)
+		_show_message(text)
 
 
 func _on_item_bought(item_id: StringName, amount: int, cost: int) -> void:

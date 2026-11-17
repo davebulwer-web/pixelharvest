@@ -10,3 +10,4 @@ display_name = "Honey"
 description = "A jar of honey from your own bees. Flowers near the hive make more of it."
 icon = ExtResource("2_icon")
 sell_price = 80
+tags = Array[StringName]([&"baking"])

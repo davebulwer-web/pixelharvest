@@ -145,10 +145,12 @@ signal ice_hole_cut(location_id: StringName, cell: Vector2i)
 
 # --- Cooking (DECISIONS 056) -------------------------------------------------
 
-## A recipe was learned (a request's reward).
+## A recipe was learned (a request's reward, or an unlock's: the workbench).
 signal recipe_learned(recipe_id: StringName)
 ## A dish was cooked at the stove.
 signal dish_cooked(recipe_id: StringName, dish_id: StringName)
+## Something was made at the workbench (DECISIONS 063): `amount` of `item_id`.
+signal item_made(recipe_id: StringName, item_id: StringName, amount: int)
 ## A dish was eaten, giving back `energy` (what it actually gave, after the
 ## maximum).
 signal dish_eaten(dish_id: StringName, energy: float)

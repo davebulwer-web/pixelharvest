@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RecipeDef" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/recipe_def.gd" id="1_def"]
+[ext_resource type="Resource" path="res://data/produce/bait.tres" id="2_item"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="3_item"]
+[ext_resource type="Resource" path="res://data/produce/fibre.tres" id="4_in"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"bait"
+made_at = &"workbench"
+item = ExtResource("2_item")
+makes = 4
+ingredients = Dictionary[ExtResource("3_item"), int]({
+ExtResource("4_in"): 2
+})

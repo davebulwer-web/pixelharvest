@@ -16,7 +16,7 @@ extends RefCounted
 ##   ~~~~~~~~~~~~~~~~~~~~~ the river ~~~~~~~~~~~~~~~~~~~~~ [=] bridge to the Woods
 ##        trees  (glasshouse) trees  ~~pond~~ ||
 ##                                    ~~~~~~~~ ||  angler
-##    *  [Seeds]  *  |  * [General] *   * [Smith] * ||  path to the pond
+##    *  [Seeds]  *  |  * [General][Bakery][Smith] * ||  path to the pond
 ##   ==================== road ==========================  -> the Lane
 ##          fence           #  square  #
 ##       * * garden * *    #   bench    #
@@ -79,13 +79,12 @@ const OBJECTS: Dictionary = {
 	# front, and lamps between the shops.
 	Vector2i(5, 12): &"flower_bed",
 	Vector2i(11, 12): &"flower_bed",
+	# Mabel's bakery (DECISIONS 063) fills the gap between the general store
+	# and the forge, so that stretch has no flower beds or lamp of its own.
 	Vector2i(17, 12): &"flower_bed",
-	Vector2i(23, 12): &"flower_bed",
-	Vector2i(28, 12): &"flower_bed",
 	Vector2i(34, 12): &"flower_bed",
 	Vector2i(2, 12): &"lamp_post",
 	Vector2i(14, 12): &"lamp_post",
-	Vector2i(26, 12): &"lamp_post",
 	Vector2i(38, 12): &"lamp_post",
 
 	# The garden west of the square: a fence along the top and bottom, flower
@@ -107,7 +106,7 @@ const OBJECTS: Dictionary = {
 	# off the road, the square and the paths.
 	Vector2i(2, 3): &"tree", Vector2i(6, 5): &"tree", Vector2i(10, 3): &"tree",
 	Vector2i(14, 6): &"tree", Vector2i(17, 3): &"tree", Vector2i(23, 5): &"tree",
-	Vector2i(27, 3): &"tree", Vector2i(28, 7): &"tree", Vector2i(39, 8): &"tree",
+	Vector2i(27, 3): &"tree", Vector2i(39, 8): &"tree",
 	Vector2i(1, 9): &"tree", Vector2i(1, 19): &"tree", Vector2i(2, 23): &"tree",
 	Vector2i(12, 23): &"tree", Vector2i(13, 19): &"tree", Vector2i(28, 18): &"tree",
 	Vector2i(30, 22): &"tree", Vector2i(33, 17): &"tree", Vector2i(36, 20): &"tree",

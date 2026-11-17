@@ -101,7 +101,13 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##  22 — finds while clearing (DECISIONS 061): how many times each find has
 ##       turned up ("finds": find id -> count). Older games have found
 ##       nothing.
-const CURRENT_VERSION := 22
+##  23 — the workbench (DECISIONS 063): it stands on the farm by the
+##       farmhouse, saved as an object like the shipping bin ("object":
+##       "workbench"), put on the nearest free cell if something's on its
+##       own; and its plans are recipes, in "recipes" like the dishes, so a
+##       game that has already finished a request that now teaches one is
+##       given it. No new fields.
+const CURRENT_VERSION := 23
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -340,6 +346,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_20_to_21(data["game"])
 			21:
 				_upgrade_21_to_22(data["game"])
+			22:
+				_upgrade_22_to_23(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -829,3 +837,100 @@ func _v21_debris(cell: Vector2i) -> String:
 ## there to find things under.
 func _upgrade_21_to_22(game: Dictionary) -> void:
 	game["finds"] = {}
+
+
+## Version 22 -> 23: the workbench (DECISIONS 063).
+##
+## A new game has the workbench at V23_WORKBENCH, against the farmhouse's
+## east wall. In an older game that cell may be dug, planted or have
+## something standing on it, and none of that is taken away: the bench goes
+## on the first of V23_WORKBENCH_CELLS that's bare grass or path, and if
+## every one of those is in use, on the nearest bare cell of the old ground.
+## It starts one leg short, as in a new game.
+##
+## Its plans are recipes (made_at &"workbench"), taught by requests; a game
+## that has already finished one of those requests is given its plans
+## (V23_TAUGHT_BY_DONE, frozen here like version 17's).
+const V23_WORKBENCH := Vector2i(11, 11)
+const V23_WORKBENCH_CELLS: Array[Vector2i] = [
+	Vector2i(11, 11), Vector2i(11, 10), Vector2i(11, 9), Vector2i(11, 8),
+	Vector2i(14, 11), Vector2i(14, 13), Vector2i(12, 13), Vector2i(11, 13),
+]
+const V23_OLD_GROUND := Rect2i(0, 0, 30, 20)
+const V23_TAUGHT_BY_DONE: Dictionary = {
+	"blacksmith_prove_it": ["stone_wall"],
+	"child_strawberries": ["bird_box"],
+	"ivy_planting": ["garden_flower_bed"],
+	"wren_worms": ["bait"],
+	"ivy_autumn_set": ["mulch"],
+	"ivy_timber": ["log_pile"],
+}
+
+
+func _upgrade_22_to_23(game: Dictionary) -> void:
+	var farm: Variant = game.get("farm")
+	if typeof(farm) == TYPE_DICTIONARY and typeof(farm.get("tiles")) == TYPE_ARRAY:
+		var by_cell := {}
+		for entry: Variant in farm["tiles"]:
+			if typeof(entry) == TYPE_DICTIONARY:
+				by_cell[Vector2i(int(entry.get("x", -999)), int(entry.get("y", -999)))] = entry
+		var spot := _v23_workbench_spot(by_cell)
+		if spot != Vector2i(-1, -1):
+			var entry: Dictionary = by_cell.get(spot, {})
+			if entry.is_empty():
+				entry = {"x": float(spot.x), "y": float(spot.y)}
+				farm["tiles"].append(entry)
+			entry["object"] = "workbench"
+	var recipes: Variant = game.get("recipes")
+	if typeof(recipes) != TYPE_DICTIONARY:
+		recipes = {}
+	var quests: Variant = game.get("quests")
+	if typeof(quests) == TYPE_DICTIONARY:
+		for quest_id: String in V23_TAUGHT_BY_DONE:
+			var entry: Variant = quests.get(quest_id)
+			if typeof(entry) == TYPE_DICTIONARY and entry.get("state") == "done":
+				for recipe_id: String in V23_TAUGHT_BY_DONE[quest_id]:
+					if not recipes.has(recipe_id):
+						recipes[recipe_id] = 0
+	game["recipes"] = recipes
+
+
+## Where the workbench goes in an older game: the first free cell of
+## V23_WORKBENCH_CELLS, or else the free cell of the old ground nearest the
+## farmhouse door. (-1, -1) only if the whole old ground is in use.
+func _v23_workbench_spot(by_cell: Dictionary) -> Vector2i:
+	for cell in V23_WORKBENCH_CELLS:
+		if _v23_is_bare(by_cell, cell):
+			return cell
+	var best := Vector2i(-1, -1)
+	var best_distance := INF
+	for y in range(V23_OLD_GROUND.position.y, V23_OLD_GROUND.end.y):
+		for x in range(V23_OLD_GROUND.position.x, V23_OLD_GROUND.end.x):
+			var cell := Vector2i(x, y)
+			var distance := Vector2(cell).distance_to(Vector2(V23_WORKBENCH))
+			if distance < best_distance and _v23_is_bare(by_cell, cell):
+				best = cell
+				best_distance = distance
+	return best
+
+
+## True if `cell` is grass or path with nothing on it, nothing dug or
+## planted, and no tree or giant spreading over it from a corner to its
+## front-left (they grow right and back from their corner; version 18's
+## V18_CROP_SPANS says which crops are wider than a tile, giants are 3).
+func _v23_is_bare(by_cell: Dictionary, cell: Vector2i) -> bool:
+	var entry: Dictionary = by_cell.get(cell, {})
+	if not entry.is_empty():
+		if String(entry.get("terrain", "GRASS")) not in ["GRASS", "PATH"]:
+			return false
+		if entry.has("object") or entry.get("tilled", false) or entry.has("crop"):
+			return false
+	for dy in range(0, 3):
+		for dx in range(0, 3):
+			var corner: Dictionary = by_cell.get(cell + Vector2i(-dx, dy), {})
+			if not corner.has("crop"):
+				continue
+			var span: int = 3 if corner.get("giant", false) else int(V18_CROP_SPANS.get(String(corner["crop"]), 1))
+			if dx < span and dy < span:
+				return false
+	return true

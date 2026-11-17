@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="QuestDef" load_steps=13 format=3]
+[gd_resource type="Resource" script_class="QuestDef" load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
 [ext_resource type="Script" path="res://scripts/quests/deliver_each_goal.gd" id="2_r"]
@@ -11,6 +11,8 @@
 [ext_resource type="Resource" path="res://data/tools/mulch.tres" id="9_r"]
 [ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="10_r"]
 [ext_resource type="Resource" path="res://data/unlocks/mulch_on_sale.tres" id="11_r"]
+[ext_resource type="Script" path="res://scripts/resources/recipe_def.gd" id="80_recipedef"]
+[ext_resource type="Resource" path="res://data/recipes/mulch.tres" id="81_plan"]
 
 [sub_resource type="Resource" id="Resource_goal"]
 script = ExtResource("2_r")
@@ -24,7 +26,7 @@ giver = &"ivy"
 goal = SubResource("Resource_goal")
 offer_lines = Array[String](["Oh! I didn't hear you come up. I'm Ivy. I kept this glasshouse, a long time ago, when the old farm grew for the whole valley.", "I've come back to see what's left. Not much, as you can see.", "Would you bring me what the valley grows now? One each of beetroot, cabbage, pumpkin and cranberry. I'd like to taste the old soil again."])
 reminder_line = "Beetroot, cabbage, pumpkin and cranberry, dear. One of each."
-thanks_lines = Array[String](["Oh, that takes me back. The soil's still good, then.", "Take this apple sapling. I grew it from the old orchard's last tree. Plant it where it has room to spread, and it will feed you every year.", "And a few bags of my leaf mould. Spread it on the soil and water it: it stays damp a night longer. Marlow can get you more, I'll tell him.", "One day I'd like this glasshouse whole again. It will need timber, and the Woods are the place for that. When that bridge is built, come and see me."])
+thanks_lines = Array[String](["Oh, that takes me back. The soil's still good, then.", "Take this apple sapling. I grew it from the old orchard's last tree. Plant it where it has room to spread, and it will feed you every year.", "And a few bags of my leaf mould. Spread it on the soil and water it: it stays damp a night longer. Marlow can get you more, I'll tell him.", "One day I'd like this glasshouse whole again. It will need timber, and the Woods are the place for that. When that bridge is built, come and see me.", "Oh, and you needn't buy leaf mould forever. Rot down your nettles and brambles: ten handfuls of fibre make a bag. I've written it out for your workbench."])
 reward_gold = 200
 reward_items = Dictionary[ExtResource("3_r"), int]({
 ExtResource("8_r"): 1,
@@ -33,3 +35,4 @@ ExtResource("9_r"): 10
 reward_unlocks = Array[ExtResource("10_r")]([ExtResource("11_r")])
 first_day = 59
 seasons = Array[StringName]([&"autumn"])
+reward_recipes = Array[ExtResource("80_recipedef")]([ExtResource("81_plan")])

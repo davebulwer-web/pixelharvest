@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="GameRules" load_steps=31 format=3]
+[gd_resource type="Resource" script_class="GameRules" load_steps=36 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/game_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_itemdef"]
@@ -30,6 +30,16 @@
 [ext_resource type="Resource" path="res://data/tools/trowel.tres" id="23_trowel"]
 [ext_resource type="Resource" path="res://data/fishing_rules.tres" id="25_fishing"]
 [ext_resource type="Resource" path="res://data/unlocks/farmhouse_kitchen.tres" id="26_kitchen"]
+[ext_resource type="Resource" path="res://data/locations/bakery.tres" id="31_bakery"]
+[ext_resource type="Resource" path="res://data/unlocks/workbench_mended.tres" id="32_bench"]
+[ext_resource type="Resource" path="res://data/produce/stone.tres" id="33_stone"]
+[ext_resource type="Script" path="res://scripts/resources/demand_def.gd" id="34_demand"]
+
+[sub_resource type="Resource" id="Demand_bin"]
+script = ExtResource("34_demand")
+full_price_count = 40
+drop_per_extra = 0.01
+lowest_rate = 0.6
 
 [resource]
 script = ExtResource("1_rules")
@@ -41,7 +51,7 @@ ExtResource("4_can"): 1,
 ExtResource("23_trowel"): 1,
 ExtResource("5_seeds"): 10
 })
-locations = Array[ExtResource("6_locdef")]([ExtResource("7_farm"), ExtResource("13_town"), ExtResource("14_seeds"), ExtResource("15_general"), ExtResource("16_smith"), ExtResource("17_house"), ExtResource("24_woods"), ExtResource("27_greenhouse"), ExtResource("28_lane"), ExtResource("29_pip"), ExtResource("30_dot")])
+locations = Array[ExtResource("6_locdef")]([ExtResource("7_farm"), ExtResource("13_town"), ExtResource("14_seeds"), ExtResource("15_general"), ExtResource("16_smith"), ExtResource("17_house"), ExtResource("24_woods"), ExtResource("27_greenhouse"), ExtResource("28_lane"), ExtResource("29_pip"), ExtResource("30_dot"), ExtResource("31_bakery")])
 starting_location = &"farmhouse"
 home_location = &"farmhouse"
 seasons = Array[ExtResource("8_theme")]([ExtResource("9_spring"), ExtResource("10_summer"), ExtResource("11_autumn"), ExtResource("12_winter")])
@@ -53,6 +63,10 @@ late_warning_minutes = 1440
 hazards = ExtResource("22_hazards")
 fishing = ExtResource("25_fishing")
 kitchen_unlock = ExtResource("26_kitchen")
+workbench_unlock = ExtResource("32_bench")
+workbench_mend_item = ExtResource("33_stone")
+workbench_mend_count = 3
+bin_demand = SubResource("Demand_bin")
 greenhouse_location = &"greenhouse"
 finds_per_day = 1
 difficulties = Array[ExtResource("18_diffdef")]([ExtResource("19_relaxed"), ExtResource("20_standard"), ExtResource("21_hard")])

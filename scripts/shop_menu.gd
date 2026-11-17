@@ -83,7 +83,10 @@ func _sell_item(item: ItemDef) -> void:
 	var gold := Economy.sell_to_shop(item, _shop)
 	if gold > 0:
 		_fill(item)
-		_show_note("Sold for %dg" % gold, UiStyle.GOLD)
+		var note := "Sold for %dg" % gold
+		if Economy.shop_flooded(item, _shop):
+			note += ". %s has plenty of %s now" % [_shop.keeper_name, QuestGoal.plural(item.display_name, 2)]
+		_show_note(note, UiStyle.GOLD)
 
 
 # --- Building the panel ------------------------------------------------------
@@ -190,21 +193,33 @@ func _fill(keep_focus_on: Resource) -> void:
 	_sell_box.visible = _shop.buys_produce
 	if _shop.buys_produce:
 		for item in GameState.inventory.items():
-			if Economy.sell_price(item) <= 0:
+			if not Economy.shop_buys(item, _shop):
 				continue
 			var amount := GameState.inventory.count(item)
-			var total := Economy.store_price(item, _shop) * amount
+			var total := Economy.store_total(item, _shop, amount)
+			var each := Economy.store_price(item, _shop)
 			var detail := "Sell all %d for %dg. The shipping bin on the farm pays full price, but only overnight." \
 					% [amount, total]
 			if _shop.produce_pay_rate > 1.0:
 				detail = "Sell all %d for %dg, more than the shipping bin pays (%dg)." \
-						% [amount, total, Economy.sell_price(item) * amount]
+						% [amount, total, Economy.bin_pays(item, amount)]
+			# Where to sell (DECISIONS 063): a buyer who has had plenty of
+			# something today pays less for more, until the morning.
+			var full := Economy.full_store_price(item, _shop)
+			if Economy.shop_flooded(item, _shop):
+				detail += " %s has had plenty of %s today: %dg each now, %dg again tomorrow." \
+						% [_shop.keeper_name, QuestGoal.plural(item.display_name, 2), each, full]
+			elif total < full * amount:
+				detail += " Only so many fetch full price: %s pays less for each after %d today." \
+						% [_shop.keeper_name, _shop.demand.full_price_count]
 			var button := _add_button(_sells, item, item.icon,
-					"%s x%d   %dg each" % [item.display_name, amount, Economy.store_price(item, _shop)],
+					"%s x%d   %dg each" % [item.display_name, amount, each],
 					0, detail)
+			if Economy.shop_flooded(item, _shop):
+				button.text += "  (plenty today)"
 			button.pressed.connect(_sell_item.bind(item))
 		if _sells.get_child_count() == 0:
-			_add_none(_sells, "No produce to sell")
+			_add_none(_sells, "Nothing %s buys" % _shop.keeper_name if not _shop.buys_tags.is_empty() else "No produce to sell")
 
 	_gold_label.text = "%dg" % GameState.gold
 	_show_detail("")

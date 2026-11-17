@@ -18,12 +18,27 @@ extends Node
 ## Nothing comes back out of the bin. If that turns out to be annoying in play,
 ## "take back" is a small addition here.
 ##
+## Where to sell (DECISIONS 063): every buyer pays its own rate (the bin
+## 100% overnight, Marlow 80% now, Rosa 125% on market day, Mabel 110% for
+## fruit), and every buyer drops its price on one thing once it has had
+## plenty of it that day (DemandDef). The bin's count is simply what's in it;
+## each counter's is kept here, by buyer and item, and forgotten overnight. It
+## isn't saved: the game saves in the morning, when every count is nothing.
+##
+
+## What each shop has bought today: shop id -> {item id -> count}.
+var _bought_today: Dictionary = {}
 
 
 func _ready() -> void:
 	# day_ended is step 1 of the overnight sequence (time_system.gd), so the
 	# bin is settled before the farm grows or the game saves.
 	EventBus.day_ended.connect(_on_day_ended)
+	# Every morning every buyer pays full price again; so does a new game
+	# started part way through a day (Ctrl+N), or a save loaded.
+	EventBus.day_started.connect(func(_d: int, _s: int, _y: int) -> void: _bought_today.clear())
+	EventBus.new_game_started.connect(func() -> void: _bought_today.clear())
+	EventBus.game_loaded.connect(func() -> void: _bought_today.clear())
 
 
 func buy_price(item: ItemDef) -> int:
@@ -124,22 +139,53 @@ func buy(item: ItemDef, amount: int = 1) -> bool:
 	return true
 
 
-## What `shop` pays for one of `item` across the counter: the usual price
-## times the shop's rate, never less than 1 for something sellable.
-func store_price(item: ItemDef, shop: ShopDef) -> int:
+## True if `shop` buys `item` across the counter at all: it buys produce,
+## this is a kind it takes (ShopDef.buys_tags), and it has a sell price.
+func shop_buys(item: ItemDef, shop: ShopDef) -> bool:
+	return shop != null and shop.takes(item) and sell_price(item) > 0
+
+
+## What `shop` pays for one of `item` at its full rate: the usual price times
+## the shop's rate, never less than 1 for something sellable.
+func full_store_price(item: ItemDef, shop: ShopDef) -> int:
 	if sell_price(item) <= 0:
 		return 0
 	return maxi(1, roundi(sell_price(item) * shop.produce_pay_rate))
 
 
+## What `shop` pays for the next one of `item` across the counter today: its
+## full rate, or less once it has had plenty of them today (DemandDef).
+func store_price(item: ItemDef, shop: ShopDef) -> int:
+	return DemandDef.total_for(shop.demand, full_store_price(item, shop), bought_today(item, shop), 1)
+
+
+## What `shop` would pay for `amount` of `item` together, now.
+func store_total(item: ItemDef, shop: ShopDef, amount: int) -> int:
+	return DemandDef.total_for(shop.demand, full_store_price(item, shop), bought_today(item, shop), amount)
+
+
+## How many of `item` `shop` has bought today.
+func bought_today(item: ItemDef, shop: ShopDef) -> int:
+	var counts: Dictionary = _bought_today.get(shop.id, {})
+	return int(counts.get(item.id, 0))
+
+
+## True if `shop` has had so many of `item` today that it pays less for more.
+func shop_flooded(item: ItemDef, shop: ShopDef) -> bool:
+	return DemandDef.is_flooded(shop.demand, bought_today(item, shop))
+
+
 ## Sell everything the player carries of `item` to `shop`, for gold now.
-## Returns the gold paid, 0 if the shop doesn't buy or there was none.
+## Returns the gold paid, 0 if the shop doesn't buy it or there was none.
 func sell_to_shop(item: ItemDef, shop: ShopDef) -> int:
 	var amount := GameState.inventory.count(item)
-	if not shop.buys_produce or amount <= 0 or sell_price(item) <= 0:
+	if amount <= 0 or not shop_buys(item, shop):
 		return 0
-	var gold := store_price(item, shop) * amount
+	var gold := store_total(item, shop, amount)
 	GameState.inventory.remove(item, amount)
+	var counts: Dictionary = _bought_today.get(shop.id, {})
+	counts[item.id] = int(counts.get(item.id, 0)) + amount
+	_bought_today[shop.id] = counts
 	GameState.add_gold(gold)
 	EventBus.items_sold_to_shop.emit(item.id, amount, gold)
 	return gold
@@ -149,7 +195,8 @@ func sell_to_shop(item: ItemDef, shop: ShopDef) -> int:
 ## many items went in.
 func ship_all() -> int:
 	var shipped := 0
-	var value := 0
+	# What this lot adds to tonight's pay, after the bin's drop for plenty.
+	var before := bin_value()
 	for item in GameState.inventory.items():
 		if sell_price(item) <= 0:
 			continue
@@ -157,17 +204,27 @@ func ship_all() -> int:
 		GameState.inventory.remove(item, amount)
 		GameState.shipping_bin.add(item, amount)
 		shipped += amount
-		value += sell_price(item) * amount
-	EventBus.items_shipped.emit(shipped, value)
+	EventBus.items_shipped.emit(shipped, bin_value() - before)
 	return shipped
 
 
-## What the bin will pay tonight, at today's prices.
+## What the bin will pay tonight, at today's prices: full price for the
+## first so many of each thing, less for the rest (GameRules.bin_demand).
 func bin_value() -> int:
 	var value := 0
 	for item in GameState.shipping_bin.items():
-		value += sell_price(item) * GameState.shipping_bin.count(item)
+		value += bin_pays(item, GameState.shipping_bin.count(item))
 	return value
+
+
+## What the bin pays tonight for `count` of `item` in it.
+func bin_pays(item: ItemDef, count: int) -> int:
+	return DemandDef.total_for(GameState.RULES.bin_demand, sell_price(item), 0, count)
+
+
+## True if the bin already holds so many of `item` that more pays less.
+func bin_flooded(item: ItemDef) -> bool:
+	return DemandDef.is_flooded(GameState.RULES.bin_demand, GameState.shipping_bin.count(item))
 
 
 func _on_day_ended(_day: int) -> void:

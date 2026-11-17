@@ -105,10 +105,13 @@ scripts/             Game code
                      Audio, DayReport, Fishing, Festivals, Allotments…)
   farm/              The farm's data and layout, the farmhouse with its bed and its
                      stove and cooking menu (Stove, CookMenu; DECISIONS 056), the
+                     workbench by the farmhouse, which uses the same menu for its
+                     plans (Workbench; DECISIONS 063), the
                      farm's effects, the night's hazards (FarmHazards) and the
                      morning's crows; the greenhouse's room and plot (Greenhouse,
                      which extends main.gd, and GreenhouseLayout; DECISIONS 057)
-  town/              The town, its map, shop interiors and fronts, people, notice board (Stage 7),
+  town/              The town, its map, shop interiors and fronts (Mabel's bakery is one:
+                     DECISIONS 063), people, notice board (Stage 7),
                      the river and the bridge to the Woods
   woods/             The Woods: their map, the day's forage (Forage, ForageSpot; DECISIONS 052)
                      and fallen logs (FallenLogs, FallenLog; DECISIONS 053)
@@ -158,7 +161,9 @@ data/                Content resources (.tres), indexed by ContentDB
   locations/         LocationDef — the farm, the farmhouse, the greenhouse, the Lane, the town,
                      the Woods, each shop (and where its door is, or its ways out: exits),
                      and homes seen from outside (door_words; DECISIONS 061)
-  shops/             ShopDef — a shopkeeper, their words, and what the counter offers
+  shops/             ShopDef — a shopkeeper, their words, and what the counter offers; what
+                     it buys (buys_tags) and how its price drops for plenty (DemandDef,
+                     DECISIONS 063; the bin's is in game_rules.tres)
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers)
   events/            CalendarEvent — what happens on which days (market day) and its stalls,
                      and the festivals: host, contest, rivals, prizes, decorations (DECISIONS 059)
@@ -177,9 +182,11 @@ data/                Content resources (.tres), indexed by ContentDB
   fish/              FishDef — fish: items, with the water, seasons, hours and weather
                      they bite in, their size and fight (DECISIONS 054)
   dishes/            ToolDef with an EatAction — food: eaten from the hotbar for
-                     energy, never sold (DECISIONS 056)
+                     energy, never sold (DECISIONS 056); the bakery's sold by Mabel
+                     (DECISIONS 063)
   recipes/           RecipeDef — what goes into each dish; known recipes are taught by
-                     requests and cooked at the farmhouse stove (DECISIONS 056)
+                     requests and cooked at the farmhouse stove (DECISIONS 056); and the
+                     workbench's plans, made_at the workbench (DECISIONS 063)
   finds/             FindDef — what now and then turns up while clearing the farm's new
                      ground: what it gives, earns or leaves standing (DECISIONS 061)
 tests/saves/         Old-version save files, for proving save upgrades still work

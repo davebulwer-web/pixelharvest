@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"workbench_mended"
+display_name = "the old workbench mended"
+announcement = "The old workbench by the farmhouse stands level again, the old farmer's plans pinned above it. E at it to make things from stone, timber and fibre."

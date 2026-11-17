@@ -410,6 +410,10 @@ func unlock(unlock_def: UnlockDef) -> void:
 		return
 	unlocks.append(unlock_def.id)
 	EventBus.unlocked.emit(unlock_def.id)
+	# Some recipes are known as soon as their unlock is (DECISIONS 063).
+	for recipe in ContentDB.recipes():
+		if recipe.taught_by_unlock == unlock_def:
+			learn_recipe(recipe)
 
 
 ## Earn every unlock the calendar has reached by today, if what it `needs`
@@ -629,6 +633,10 @@ func _festival_log_from_save(data: Variant) -> void:
 # The stove in the farmhouse cooks once the kitchen is open
 # (RULES.kitchen_unlock, from Mabel's lessons); a dish on the hotbar is eaten
 # with Space, anywhere.
+#
+# The workbench (DECISIONS 063) works the same way: its plans are RecipeDefs
+# made_at &"workbench", known in the same list, and it makes things once it's
+# mended (RULES.workbench_unlock, earned by propping its leg on stones).
 
 ## Recipes known: recipe id -> times cooked (0: known, not cooked yet).
 var recipes: Dictionary = {}
@@ -637,6 +645,38 @@ var recipes: Dictionary = {}
 ## True if the farmhouse kitchen is open: Mabel has shown the farmer how.
 func kitchen_open() -> bool:
 	return has_unlock(RULES.kitchen_unlock)
+
+
+## True if the farm's workbench is mended, so it makes things.
+func workbench_open() -> bool:
+	return has_unlock(RULES.workbench_unlock)
+
+
+## True if `place` (RecipeDef.PLACES) can make things today.
+func can_make_at(place: StringName) -> bool:
+	match place:
+		&"stove":
+			return kitchen_open()
+		&"workbench":
+			return workbench_open()
+	return false
+
+
+## Mend the workbench: its missing leg propped up on RULES.workbench_mend_count
+## of RULES.workbench_mend_item (stones), taken from the bag. Earns
+## RULES.workbench_unlock, which teaches the old farmer's first plans. Returns
+## false and takes nothing if it's mended already or the bag is short.
+func mend_workbench() -> bool:
+	if workbench_open():
+		return false
+	var item := RULES.workbench_mend_item
+	var count := RULES.workbench_mend_count
+	if item != null and count > 0:
+		if inventory.count(item) < count:
+			return false
+		inventory.remove(item, count)
+	unlock(RULES.workbench_unlock)
+	return true
 
 
 func knows_recipe(recipe_id: StringName) -> bool:
@@ -652,29 +692,36 @@ func learn_recipe(recipe: RecipeDef) -> void:
 	EventBus.recipe_learned.emit(recipe.id)
 
 
-## The recipes known, by the dish's name, for the stove's menu.
-func known_recipes() -> Array[RecipeDef]:
+## The recipes known, by the product's name, for the stove's or the
+## workbench's menu: only those made at `place` (RecipeDef.PLACES), or every
+## one with &"".
+func known_recipes(place: StringName = &"stove") -> Array[RecipeDef]:
 	var result: Array[RecipeDef] = []
 	for id: StringName in recipes:
 		var recipe := ContentDB.recipe(id)
-		if recipe != null:
+		if recipe != null and (place == &"" or recipe.made_at == place):
 			result.append(recipe)
 	result.sort_custom(func(a: RecipeDef, b: RecipeDef) -> bool: return a.display_name() < b.display_name())
 	return result
 
 
-## Cook `recipe` once: take what goes in from the bag and put the dish in.
-## Returns false and changes nothing if the kitchen isn't open, the recipe
-## isn't known, or something's missing (RecipeDef.missing says what).
+## Cook `recipe` once (or make it, at the workbench): take what goes in from
+## the bag and put what it makes in. Returns false and changes nothing if
+## where it's made isn't open, the recipe isn't known, or something's missing
+## (RecipeDef.missing says what).
 func cook(recipe: RecipeDef) -> bool:
-	if recipe == null or recipe.dish == null or not kitchen_open() or not knows_recipe(recipe.id):
+	if recipe == null or recipe.product() == null or not knows_recipe(recipe.id):
 		return false
-	if not recipe.can_cook(inventory):
+	if not can_make_at(recipe.made_at) or not recipe.can_cook(inventory):
 		return false
 	recipe.take_from(inventory)
-	inventory.add(recipe.dish, maxi(1, recipe.makes))
+	var made := recipe.product()
+	inventory.add(made, maxi(1, recipe.makes))
 	recipes[recipe.id] = int(recipes[recipe.id]) + 1
-	EventBus.dish_cooked.emit(recipe.id, recipe.dish.id)
+	if recipe.is_plan():
+		EventBus.item_made.emit(recipe.id, made.id, maxi(1, recipe.makes))
+	else:
+		EventBus.dish_cooked.emit(recipe.id, made.id)
 	return true
 
 

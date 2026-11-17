@@ -192,7 +192,7 @@ func _build_surroundings() -> void:
 
 ## The keys, printed to Godot's Output panel when the farm opens.
 func _print_help() -> void:
-	print("--- Pixel Harvest · Stage 19 (the Lane and the bigger farm, session 2) ---")
+	print("--- Pixel Harvest · Stage 20 (early days, session 2) ---")
 	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
 	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
 	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler")
@@ -236,6 +236,12 @@ func _print_help() -> void:
 	print("seeds come up a stage ahead; mulch (from Ivy) keeps watered soil wet a night longer.")
 	print("Brann's sickle (for 30 fibre, autumn) cuts weeds and ripe crops; he makes it wider.")
 	print("His last request, in winter, is the brass sprinkler: 24 tiles round.")
+	print("On the Lane, Dot has errands to run and the allotment slate has odd jobs, paid on the spot.")
+	print("The old workbench by the farmhouse is one leg short: E at it with 3 stones mends it.")
+	print("Then E at it makes things from stone, timber and fibre: plans come from people.")
+	print("Every buyer pays less once it has had plenty of one thing that day: spread a big")
+	print("harvest between the bin, Marlow, Rosa and Mabel. Back to full price by morning.")
+	print("Mabel's bakery (from spring day 5, 7 AM - 2 PM) sells food for energy and buys fruit.")
 	print("-------------------------------")
 
 

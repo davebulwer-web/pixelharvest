@@ -1,9 +1,14 @@
 class_name RecipeDef
 extends Resource
 ##
-## RecipeDef — how to cook one dish at the farmhouse stove (DECISIONS 056):
-## what goes in, and what comes out. One .tres in data/recipes/ per recipe;
-## ContentDB finds them.
+## RecipeDef — how to cook one dish at the farmhouse stove (DECISIONS 056),
+## or make one thing at the workbench (DECISIONS 063): what goes in, and what
+## comes out. One .tres in data/recipes/ per recipe; ContentDB finds them.
+##
+## Where it's made is `made_at`: &"stove" (a dish, `dish`) or &"workbench"
+## (anything else, `item`: a fence, a scarecrow, bait). Both kinds are known
+## the same way and kept in the same list (GameState.recipes), so a workbench
+## plan is taught by a request exactly as a dish is, and saved the same way.
 ##
 ## A recipe is something the farmer *knows*, not something they carry: Mabel
 ## teaches the first three, her recipe book more, Wren one. Which are known
@@ -17,16 +22,33 @@ extends Resource
 ##
 ## Cooking is free and instant: no energy, no time. Its cost is the produce
 ## that could have been sold instead, which is the trade the stage is about
-## (food for energy, not food for gold).
+## (food for energy, not food for gold). Making something at the workbench is
+## the same: its cost is the stone, timber and fibre that went in.
 ##
 ## Nothing in this file may touch an autoload (it is plain data): it's given
 ## the bag to look in.
 ##
 
+## The places something can be made: the farmhouse stove and the farm's
+## workbench.
+const PLACES: Array[StringName] = [&"stove", &"workbench"]
+
 @export var id: StringName
 
-## The dish it makes: a ToolDef with an EatAction, in data/dishes/.
+## Where it's made: one of PLACES.
+@export var made_at: StringName = &"stove"
+
+## The dish it makes, at the stove: a ToolDef with an EatAction, in data/dishes/.
 @export var dish: ToolDef
+
+## What it makes at the workbench, when it isn't a dish: a decoration, bait,
+## a bag of mulch. Any item.
+@export var item: ItemDef
+
+## A recipe can be known as soon as an unlock is earned, rather than taught by
+## a request: mending the workbench teaches the old farmer's first plans.
+## Null: only a request teaches it (QuestDef.reward_recipes).
+@export var taught_by_unlock: UnlockDef
 
 ## How many helpings one cooking makes.
 @export var makes: int = 1
@@ -45,9 +67,20 @@ extends Resource
 @export var any_what: String = ""
 
 
-## The dish's name, which is what the farmer calls the recipe.
+## What one making of it gives: the dish, or the workbench's item.
+func product() -> ItemDef:
+	return dish if dish != null else item
+
+
+## The product's name, which is what the farmer calls the recipe.
 func display_name() -> String:
-	return dish.display_name if dish != null else String(id)
+	var made := product()
+	return made.display_name if made != null else String(id)
+
+
+## True for a workbench plan rather than a dish.
+func is_plan() -> bool:
+	return made_at == &"workbench"
 
 
 ## True if `bag` holds everything that goes in.

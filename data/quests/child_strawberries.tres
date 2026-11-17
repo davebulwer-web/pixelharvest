@@ -1,8 +1,10 @@
-[gd_resource type="Resource" script_class="QuestDef" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="QuestDef" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_def"]
 [ext_resource type="Script" path="res://scripts/quests/harvest_goal.gd" id="2_goal"]
 [ext_resource type="Resource" path="res://data/crops/strawberry.tres" id="3_crop"]
+[ext_resource type="Script" path="res://scripts/resources/recipe_def.gd" id="80_recipedef"]
+[ext_resource type="Resource" path="res://data/recipes/bird_box.tres" id="81_plan"]
 
 [sub_resource type="Resource" id="Resource_goal"]
 script = ExtResource("2_goal")
@@ -17,8 +19,9 @@ giver = &"child"
 goal = SubResource("Resource_goal")
 offer_lines = Array[String](["Have you seen the seed cart? Fennel's got STRAWBERRY seeds!", "Mum says they cost too much to try. If you grow some, will you come and tell me when you've picked three? Then I'll know they're real."])
 reminder_line = "Have you picked them yet? Are they really red?"
-thanks_lines = Array[String](["Three strawberries! So they ARE real!", "I saved up my pocket money for whoever grew them. It's all yours."])
+thanks_lines = Array[String](["Three strawberries! So they ARE real!", "I saved up my pocket money for whoever grew them. It's all yours.", "And I drew you how to make a bird box! Dad showed me. Three bits of wood and some string. You've got a workbench, haven't you?"])
 reward_gold = 200
 first_day = 1
 seasons = Array[StringName]([&"spring"])
 on_event = &"market_day"
+reward_recipes = Array[ExtResource("80_recipedef")]([ExtResource("81_plan")])

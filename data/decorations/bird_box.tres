@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ToolDef" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/tools/place_decoration_action.gd" id="2_action"]
+[ext_resource type="Texture2D" path="res://assets/sprites/decorations/bird_box.png" id="3_icon"]
+
+[sub_resource type="Resource" id="Resource_action"]
+script = ExtResource("2_action")
+object_id = &"bird_box"
+
+[resource]
+script = ExtResource("1_def")
+id = &"bird_box"
+display_name = "Bird box"
+description = "A bird box on a post, made the way Pip showed you. Something will nest in it come spring. Made at the workbench."
+icon = ExtResource("3_icon")
+action = SubResource("Resource_action")
+consumed_on_use = true

@@ -5,20 +5,27 @@ extends CanvasLayer
 ## what goes in and what's in the bag, and what each dish gives back.
 ## Choose one and it's cooked, once per press.
 ##
+## The workbench (DECISIONS 063) uses the same menu with `place` set to
+## &"workbench": it lists the plans known instead, and what each makes.
+##
 ## It looks and works like the shop's counter (ShopMenu): the game is paused
 ## while it's open, WASD or arrows to choose, Space or Enter to cook, Esc to
 ## leave. A recipe short of something stays in the list, dimmed; choosing it
 ## says what's missing. The cooking itself is GameState.cook(); this only
 ## draws the list and passes on presses.
 ##
-## The farmhouse builds it in code (no scene of its own), and it keeps running
-## while the game is paused (process_mode ALWAYS).
+## The farmhouse (and the workbench) builds it in code (no scene of its
+## own), and it keeps running while the game is paused (process_mode ALWAYS).
 ##
 
 const PANEL_WIDTH := 520
 
 ## Recipes are listed in two columns, so a long list still fits the screen.
 const COLUMNS := 2
+
+## Which recipes it lists and makes: &"stove" or &"workbench"
+## (RecipeDef.PLACES). Set before it's added to the tree.
+var place: StringName = &"stove"
 
 var _list: GridContainer
 var _detail: Label
@@ -63,7 +70,11 @@ func close() -> void:
 func _cook(recipe: RecipeDef) -> void:
 	if GameState.cook(recipe):
 		_fill(recipe)
-		_show_note("Cooked %s. It's on your hotbar: Space to eat" % recipe.display_name().to_lower(), UiStyle.GOLD)
+		if recipe.is_plan():
+			var count := maxi(1, recipe.makes)
+			_show_note("Made %d %s. In your bag" % [count, QuestGoal.plural(recipe.display_name(), count)], UiStyle.GOLD)
+		else:
+			_show_note("Cooked %s. It's on your hotbar: Space to eat" % recipe.display_name().to_lower(), UiStyle.GOLD)
 	else:
 		_show_note("Still need %s" % recipe.missing(GameState.inventory), UiStyle.WARNING)
 
@@ -90,12 +101,12 @@ func _build() -> void:
 	panel.add_child(column)
 
 	var title := Label.new()
-	title.text = "The stove"
+	title.text = "The workbench" if place == &"workbench" else "The stove"
 	UiStyle.style_label(title, 12)
 	column.add_child(title)
 
 	var heading := Label.new()
-	heading.text = "Recipes you know"
+	heading.text = "Plans you know" if place == &"workbench" else "Recipes you know"
 	UiStyle.style_label(heading, 10, UiStyle.TEXT_DIM)
 	column.add_child(heading)
 
@@ -129,26 +140,36 @@ func _fill(keep_focus_on: RecipeDef) -> void:
 
 	var bag := GameState.inventory
 	var focus: Button = null
-	for recipe in GameState.known_recipes():
-		var dish := recipe.dish
-		var energy := roundi((dish.action as EatAction).energy) if dish.action is EatAction else 0
-		var text := "%s   +%d" % [recipe.display_name(), energy]
-		var detail := "%s: +%d energy, you have %d. Needs %s." % [recipe.display_name(), energy,
-				bag.count(dish), recipe.ingredients_text(bag)]
+	for recipe in GameState.known_recipes(place):
+		var made := recipe.product()
+		var text: String
+		var detail: String
+		if recipe.is_plan():
+			text = "%s   x%d" % [recipe.display_name(), maxi(1, recipe.makes)]
+			detail = "%s: you have %d. Needs %s." % [recipe.display_name(), bag.count(made),
+					recipe.ingredients_text(bag)]
+			if made.description != "":
+				detail += " " + made.description
+		else:
+			var dish := made as ToolDef
+			var energy := roundi((dish.action as EatAction).energy) if dish.action is EatAction else 0
+			text = "%s   +%d" % [recipe.display_name(), energy]
+			detail = "%s: +%d energy, you have %d. Needs %s." % [recipe.display_name(), energy,
+					bag.count(dish), recipe.ingredients_text(bag)]
 		if recipe.makes > 1:
 			detail += " Makes %d." % recipe.makes
-		var button := _add_button(dish.icon, text, detail, recipe.can_cook(bag))
+		var button := _add_button(made.icon, text, detail, recipe.can_cook(bag))
 		button.pressed.connect(_cook.bind(recipe))
 		_buttons[button] = recipe
 		if focus == null or recipe == keep_focus_on:
 			focus = button
 	if _buttons.is_empty():
 		var none := Label.new()
-		none.text = "No recipes yet"
+		none.text = "No plans yet" if place == &"workbench" else "No recipes yet"
 		UiStyle.style_label(none, 10, UiStyle.TEXT_DIM)
 		_list.add_child(none)
 	_show_detail("")
-	_show_note("Space / Enter: cook one     Esc: leave", UiStyle.TEXT_DIM)
+	_show_note("Space / Enter: %s one     Esc: leave" % ("make" if place == &"workbench" else "cook"), UiStyle.TEXT_DIM)
 	if focus != null:
 		focus.grab_focus()
 

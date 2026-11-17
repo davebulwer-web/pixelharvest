@@ -52,6 +52,11 @@ const PATH_LENGTH := 14
 ## can never be tilled, so the bin can't end up sitting on a crop.
 const SHIPPING_BIN := Vector2i(13, 12)
 
+## The old farmer's workbench, under a lean-to against the farmhouse's east
+## wall, faced from the path below it (DECISIONS 063). The save upgrade to
+## version 23 puts it here too, or as near as it can.
+const WORKBENCH := Vector2i(11, 11)
+
 const TREE_CELLS: Array[Vector2i] = [
 	Vector2i(4, 4), Vector2i(7, 3), Vector2i(5, 8),
 	Vector2i(19, 6), Vector2i(23, 10), Vector2i(26, 14),
@@ -77,6 +82,7 @@ static func build_default() -> FarmData:
 			if not OLD_GROUND.has_point(cell):
 				farm.tile(cell).object_id = debris_for(cell)
 	farm.tile(SHIPPING_BIN).object_id = &"shipping_bin"
+	farm.tile(WORKBENCH).object_id = &"workbench"
 	_place_buildings(farm)
 	_overgrow_fields(farm)
 	return farm

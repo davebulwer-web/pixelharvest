@@ -51,6 +51,16 @@ extends Resource
 @export var buys_produce: bool = false
 @export_range(0.0, 2.0, 0.05) var produce_pay_rate: float = 0.8
 
+## Only things with one of these tags, if any are listed: Mabel's bakery buys
+## fruit and what she bakes with (&"fruit", &"baking"), and nothing else.
+## Empty: anything with a sell price (DECISIONS 063).
+@export var buys_tags: Array[StringName] = []
+
+## How this buyer takes being flooded with one thing in a day: full price for
+## so many, then less for each one after, back by morning (DemandDef,
+## DECISIONS 063). Null: the price never drops.
+@export var demand: DemandDef
+
 ## --- Opening hours (DECISIONS 035) --------------------------------------------
 ## Minutes after midnight, like game_rules.tres: 9 AM is 540, 5 PM is 1020.
 ## The door is locked outside these hours; if the shop closes while you're
@@ -58,6 +68,19 @@ extends Resource
 ## Leave both at 0 for a shop that never closes.
 @export var opens_at: int = 0
 @export var closes_at: int = 0
+
+
+## True if the shop would buy `item` across the counter (it still needs a
+## sell price: Economy checks that).
+func takes(item: ItemDef) -> bool:
+	if not buys_produce or item == null:
+		return false
+	if buys_tags.is_empty():
+		return true
+	for tag in buys_tags:
+		if item.has_tag(tag):
+			return true
+	return false
 
 
 ## True if the shop keeps hours at all.

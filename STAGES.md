@@ -1065,18 +1065,44 @@ session 2 the workbench, where to sell and the bakery (Sonnet: patterns that exi
       axe not, leaving and coming back; the letter handed to the mayor in town; save round
       trip; saves v1–v21), and rendered Dot at her gate, both her choices, the slate's
       jobs, the beds being weeded, watered and dug, and the request log
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-17)
+
+**Session 2 (2026-11-17) — the workbench, where to sell, the bakery (DECISIONS 063, save version 23)**
+
+- [x] **The workbench** by the farmhouse's east wall, one leg short: E with 3 stones props it
+      level and teaches the old farmer's plans (fence, hay bale, scarecrow). A plan is a
+      `RecipeDef` made at the workbench (`made_at`, `item`, `taught_by_unlock`), known and
+      saved with the dishes; the stove's menu doubles as the "Plans you know" menu
+- [x] Nine plans from stone, timber and fibre; six taught by people as rewards on requests
+      that already exist (Brann: stone wall; Pip: bird box; Ivy: flower bed, mulch, log
+      pile; Wren: bait). New decorations: stone wall, bird box, log pile. Nothing made for
+      profit
+- [x] **Where to sell:** every buyer pays less once it has had plenty of one thing that day,
+      back to full by morning (`DemandDef`: the bin 40 then down to 60%; Marlow 20 then down
+      to 50%; Rosa 15 then 60%; Mabel 6 then 50%). The shop menu shows "(plenty today)";
+      the HUD says when the bin has had plenty. Buyers can be choosy (`ShopDef.buys_tags`)
+- [x] **Mabel's bakery** (96 × 96, between Marlow's and the forge), shut until spring day 5,
+      then 7 AM – 2 PM: bread roll, cheese scone, fruit loaf, pasty (+20 to +60 energy,
+      22–55g); she buys fruit, honey and pumpkins at 110%
+- [x] Save version 23: the workbench on the farm (beside it if its cell is in use), plans
+      for requests already done; `tests/saves/v22_example.json`
+- [x] Verified in the sandbox: headless import and run clean, 226 harness checks (the nine
+      plans and the ten dishes; the bench placed once, not tillable; mending with too few
+      and enough stones; the first plans; making fences, a scarecrow, a flower bed with any
+      flower; unknown plans refused; the stove still waits for the kitchen; reward text and
+      a request teaching a plan; the demand sums; Marlow, Rosa, the bin and Mabel flooding
+      separately and resetting by morning; Mabel refusing parsnips; the bakery locked,
+      stocked, its hours, buying and eating a roll; a made wall picked back up; save round
+      trip; saves v1–v22, the v22 bench moved past a crop and a sprinkler; a night with the
+      bin paid and a v23 save), walked into the bakery locked and unlocked, and rendered
+      the bench broken and mended, its menu before and after making fences, the bin's
+      "plenty" message, the town with the bakery, the bakery's counter before and after
+      plenty, Marlow's "(plenty today)" and the morning summary
 - [ ] Dave confirms it plays correctly on Windows
-
-**Session 2 — the workbench, where to sell, the bakery (save version 23)**
-
-- [ ] The workbench in the farm's shed: about ten recipes from stone, timber, fibre,
-      shells; recipes taught by people; no machines that make goods for profit
-- [ ] Where to sell: buyers that pay differently, and a buyer's price drops when flooded
-- [ ] Mabel's bakery: energy food for gold from day 5
 
 ## Stage 21 — The Cove · 2 sessions · Opus, then Sonnet
 
-ROADMAP 13.2 and 13.3 (#5, #6). Save version 23.
+ROADMAP 13.2 and 13.3 (#5, #6). Save version 24.
 
 - [ ] The Cove (56 × 36): harbour, pier, beach, cliffs, lighthouse; the coast road from
       the town and the cliff path from the Lane's signpost

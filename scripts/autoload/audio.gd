@@ -160,6 +160,7 @@ func _listen() -> void:
 	EventBus.fish_escaped.connect(func(_id: StringName) -> void: play(&"nope"))
 	# Cooking (DECISIONS 056): the pan at the stove, and a dish eaten.
 	EventBus.dish_cooked.connect(func(_r: StringName, _d: StringName) -> void: play(&"sizzle"))
+	EventBus.item_made.connect(func(_r: StringName, _i: StringName, _n: int) -> void: play(&"chop"))
 	EventBus.dish_eaten.connect(func(_d: StringName, _e: float) -> void: play(&"eat"))
 	EventBus.object_placed.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"place"))
 	EventBus.object_removed.connect(func(_c: Vector2i, _id: StringName) -> void: _farm_sound(&"pick_up"))

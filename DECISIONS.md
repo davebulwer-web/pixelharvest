@@ -2754,3 +2754,75 @@ jobs done) isn't counted yet: it would be a save change. Job and errand pay is a
 guess for Stage 26's balance. Turning Dot down hides her errands for the day; the slate can
 be read again any time.
 
+## 063 — The workbench's plans are recipes, every buyer drops its price for plenty, and Mabel's bakery is a shop
+
+**Decision.** Stage 20 session 2 (ROADMAP 13.3 #7, #8, #9) gives stone, timber and fibre a
+use, makes where you sell matter, and lets gold buy energy from day 5. **Save version 23**
+(the workbench on the farm, and plans for requests already done).
+
+- *The workbench is a farm object.* `ObjectDef` `workbench` (scene `scenes/farm/workbench.tscn`,
+  script `Workbench`) stands at (11, 11), against the farmhouse's east wall, faced from the
+  path below; like the shipping bin it's in `FarmData`, answers E, and is never picked up.
+  It starts **one leg short**: E with 3 stones (`GameRules.workbench_mend_item`/`_count`)
+  props it level (`GameState.mend_workbench`), which earns `GameRules.workbench_unlock`
+  (`workbench_mended`). So the first stones off the new ground have a use on day 1, and the
+  old farmer's notebook ("once the workbench has a new leg") pays off.
+- *A plan is a recipe.* `RecipeDef` gains `made_at` (`&"stove"` or `&"workbench"`,
+  `RecipeDef.PLACES`), `item` (what a workbench plan makes; `product()` is the dish or the
+  item) and `taught_by_unlock` (known as soon as that unlock is earned). Plans are kept in
+  `GameState.recipes` with the dishes, so they're taught, saved and counted exactly like
+  them; `known_recipes(place)` sorts them out, `cook()` checks the place is open
+  (`can_make_at`: the kitchen, the bench) and emits `item_made` for a plan (the "chop" sound).
+  The stove's `CookMenu` takes a `place` and becomes the workbench's "Plans you know" menu.
+  A request's reward line says "the plans for a bird box".
+- *Nine plans.* Mending the bench teaches the old farmer's three: fence ×2 (2 timber),
+  hay bale (8 fibre), scarecrow (4 timber, 6 fibre). People teach the rest, as rewards on
+  requests that already exist: Brann's test, stone wall ×2 (4 stone); Pip's strawberries,
+  bird box (3 timber, 1 fibre); Ivy's first planting, flower bed (6 stone, any flower);
+  Wren's worms, bait ×4 (2 fibre); Ivy's autumn basket, mulch (10 fibre); Ivy's timber, log
+  pile (6 timber). Three new decorations (stone wall, bird box, log pile) are made only here.
+  Nothing made at the bench makes goods for sale (DECISIONS 006 stands).
+- *Every buyer drops its price for plenty* (`DemandDef`: `full_price_count`, `drop_per_extra`,
+  `lowest_rate`). A buyer pays its full rate for the first so many of one item in a day,
+  then each one after pays a little less, down to a floor; by morning it's back to full.
+  Each buyer counts each item on its own. The bin: 40 at full, then 1% less each, floor 60%
+  (`GameRules.bin_demand`; the bin's count is just what's in it). Marlow (80%): 20, 2%, 50%.
+  Rosa (125%): 15, 3%, 60%. Mabel (110%): 6, 5%, 50%. Counter counts live in `Economy`
+  (`bought_today`), cleared at `day_started`, a new game or a load; never saved, since the
+  game saves in the morning. The shop menu says "(plenty today)" and what it'll pay
+  tomorrow; the HUD says when the bin has had plenty of something.
+- *Buyers can be choosy.* `ShopDef.buys_tags`: Mabel takes only `fruit` and `baking` (a new
+  tag on honey and pumpkins). `Economy.shop_buys` asks it; the menu lists only what she'd take.
+- *Mabel's bakery* is a shop like the others (`LocationDef` `bakery`, `ShopDef` `bakery`,
+  the shared interior), 96 × 96 at the new building size with its two-cell door at (25, 12),
+  in the gap between Marlow's and Brann's (the flower beds, lamp and tree that stood there
+  went). Shut with a card in the window until `mabel_arrives` (spring day 5), then open
+  7 AM – 2 PM. She sells four foods (dishes with a `buy_price`, `sold_only_by` the bakery):
+  bread roll +20 (22g), cheese scone +30 (30g), fruit loaf +45 (42g), pasty +60 (55g). Food
+  you cook stays the better deal; this is energy for gold before you can cook.
+- *v22 → v23.* The workbench goes on (11, 11), or if that cell is dug, planted, built on or
+  has something standing there, the first bare cell of a short list beside the farmhouse and
+  bin, and failing those the bare cell of the old ground nearest it; nothing in an older game
+  is moved or lost. It starts broken. A game that has finished one of the six requests is
+  given its plan (`V23_TAUGHT_BY_DONE`, frozen). `tests/saves/v22_example.json` is the v21
+  example brought up by the real v22 build, with a parsnip and a sprinkler put where the
+  bench goes (so the upgrade has to look further) and Pip's strawberries done.
+
+Options considered: a separate `PlanDef` beside `RecipeDef` (the ingredients, "any flower",
+the known list, the menu and the save would all have been written twice); the bench inside a
+new shed building (an interior scene and a building footprint on saved ground for one
+object); recipes known from day 4 by the calendar (the ROADMAP's day 4; mending it with
+stones gives the same timing to anyone who has cleared a little, and a reason to); a global
+"market saturation" across all buyers (simpler, but then walking to a second buyer wouldn't
+help, which is the point); counting the flood in gold rather than items (a pumpkin would
+flood a buyer that eight radishes don't).
+
+**Why.** ROADMAP 13.3: the early game's spare energy needs more uses, clearing needs to pay
+in something besides space, and a big harvest should be worth a walk. The bakery turns gold
+into energy before the kitchen, which makes gold and energy a real trade from week 1.
+
+**Cost.** Placeholder art (the bench mended and broken, three decorations, the bakery, four
+foods; `art/build_stage20_s2_placeholders.py`). Mabel is in the square and behind her counter
+at once until Stage 22's schedules. The bakery's room is the shared shop interior. The
+ROADMAP's crab pot (Stage 21, Tam), rain barrel, compost bin and path stones aren't plans yet.
+Every price and every demand number is a first guess for Stage 26.

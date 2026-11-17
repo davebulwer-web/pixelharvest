@@ -128,16 +128,29 @@ func reward_text() -> String:
 	for unlock in reward_unlocks:
 		if unlock != null and unlock.display_name != "":
 			parts.append(unlock.display_name)
+	# Dishes are recipes; workbench things are plans (DECISIONS 063).
 	var dishes: Array[String] = []
+	var plans: Array[String] = []
 	for recipe in reward_recipes:
 		if recipe != null:
-			dishes.append(recipe.display_name().to_lower())
+			(plans if recipe.is_plan() else dishes).append(recipe.display_name().to_lower())
 	if dishes.size() == 1:
 		parts.append("the recipe for %s" % dishes[0])
 	elif dishes.size() > 1:
 		parts.append("the recipes for %s and %s" % [", ".join(dishes.slice(0, dishes.size() - 1)), dishes[-1]])
+	if plans.size() == 1:
+		parts.append("the plans for %s" % _a(plans[0]))
+	elif plans.size() > 1:
+		parts.append("the plans for %s and %s" % [", ".join(plans.slice(0, plans.size() - 1)), plans[-1]])
 	if parts.is_empty():
 		return ""
 	if parts.size() == 1:
 		return parts[0]
 	return ", ".join(parts.slice(0, parts.size() - 1)) + " and " + parts[-1]
+
+
+## "a bird box", "an apple", "bait" stays "bait" (DECISIONS 063: plan names).
+static func _a(word: String) -> String:
+	if word in ["bait", "mulch"]:
+		return word
+	return ("an " if "aeiou".contains(word.left(1)) else "a ") + word

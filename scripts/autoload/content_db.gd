@@ -740,6 +740,10 @@ func _check_unlocks() -> void:
 				continue
 			given[reward.id] = true
 		_is_unknown_unlock(each.requires_unlock, each.resource_path, "waits for")
+	# Mending the workbench earns its unlock (DECISIONS 063).
+	if not _is_unknown_unlock(RULES.workbench_unlock, RULES.resource_path, "gives"):
+		if RULES.workbench_unlock != null:
+			given[RULES.workbench_unlock.id] = true
 	# A find can earn one too (DECISIONS 061): the rusty tool head.
 	for each: FindDef in _finds.values():
 		if each.gives_unlock != null:
@@ -904,19 +908,39 @@ const FISH_WATERS: Array[StringName] = [&"pond", &"river", &"stream"]
 
 
 ## Recipes and dishes (DECISIONS 056): every recipe makes a real dish from
-## real things, a kind it asks for exists, and every dish can be cooked.
+## real things, a kind it asks for exists, and every dish can be cooked or
+## bought. Workbench plans (DECISIONS 063) make a real item, not a dish, and
+## something must teach each one.
 func _check_recipes() -> void:
 	var cooked: Dictionary = {}  # dish id -> true
+	var taught: Dictionary = {}  # recipe id -> true, by a request
+	for each: QuestDef in _quests.values():
+		for recipe in each.reward_recipes:
+			if recipe != null:
+				taught[recipe.id] = true
 	for each: RecipeDef in _recipes.values():
 		var where := each.resource_path
-		if each.dish == null or item(each.dish.id) != each.dish:
+		if each.made_at not in RecipeDef.PLACES:
+			push_error("ContentDB: '%s' is made at '%s', which isn't one of %s" % [where, each.made_at, RecipeDef.PLACES])
+		if not taught.has(each.id) and each.taught_by_unlock == null:
+			push_warning("ContentDB: '%s' isn't taught by any request or unlock, so it's never known" % where)
+		if each.taught_by_unlock != null and unlock(each.taught_by_unlock.id) != each.taught_by_unlock:
+			push_error("ContentDB: '%s' is taught by an unlock that isn't in data/unlocks/" % where)
+		if each.is_plan():
+			if each.item == null or item(each.item.id) != each.item:
+				push_error("ContentDB: '%s' makes something that isn't an item in data/" % where)
+			elif each.item is ToolDef and (each.item as ToolDef).action is EatAction:
+				push_warning("ContentDB: '%s' makes food at the workbench; food belongs at the stove" % where)
+			if each.dish != null:
+				push_warning("ContentDB: '%s' is a workbench plan with a dish; the dish is ignored" % where)
+		elif each.dish == null or item(each.dish.id) != each.dish:
 			push_error("ContentDB: '%s' makes a dish that isn't in %s" % [where, DISHES_DIR])
 		elif not each.dish.action is EatAction:
 			push_error("ContentDB: '%s' makes '%s', which can't be eaten (no EatAction)" % [where, each.dish.id])
 		else:
 			cooked[each.dish.id] = true
 		if each.ingredients.is_empty() and each.any_tag == &"":
-			push_warning("ContentDB: '%s' needs nothing, so it's free food" % where)
+			push_warning("ContentDB: '%s' needs nothing, so it's free" % where)
 		for thing: ItemDef in each.ingredients:
 			if thing == null or item(thing.id) != thing:
 				push_error("ContentDB: '%s' needs something that isn't an item in data/" % where)
@@ -931,8 +955,8 @@ func _check_recipes() -> void:
 		var energy := (dish.action as EatAction).energy
 		if energy <= 0.0:
 			push_warning("ContentDB: '%s' gives no energy" % dish.resource_path)
-		if not cooked.has(dish.id):
-			push_warning("ContentDB: no recipe makes '%s', so it can only be given" % dish.id)
+		if not cooked.has(dish.id) and dish.buy_price <= 0:
+			push_warning("ContentDB: no recipe makes '%s' and nobody sells it, so it can only be given" % dish.id)
 		if dish.sell_price > 0:
 			push_warning("ContentDB: '%s' sells for gold, but food is for energy only (DECISIONS 056)" % dish.resource_path)
 
