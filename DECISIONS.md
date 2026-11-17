@@ -2900,3 +2900,67 @@ for the ground, the three buildings, the tide board and ten icons
 there yet (session 2). Most of the map's bottom half is open sea until there's something to
 fish it with. Storms only come in summer and autumn, so driftwood does too. Every sea forage
 price is a first guess for Stage 26.
+
+## 065 — Tam has a counter of his own, the handline is a rod for the sea, the tide sets the wait, and crab pots are kept by GameState
+
+**Decision.** Stage 21 session 2 (ROADMAP 13.3 #5, #6, #8) brings Tam to the Cove, sea
+fishing off the pier and crab pots. **Save version 24** (the pots). Placeholder art.
+
+- *Tam is a person with a counter.* `CharacterDef.counter` (a `ShopDef` kept inside his
+  .tres, id `tam_catch`) lets someone who stands outdoors buy and sell without a shop to
+  walk into. The Cove builds him like any townsperson (`tam.tres`, `location` cove, from
+  `tam_arrives`, spring day 7) and hands the conversation to `ShopCounter`, which now takes
+  the giver's id and their lines: `serve(shop, giver, lines)`. So his requests, the "!" and
+  "?" and the menu all work as a shopkeeper's do, and his requests are his
+  (`giver = &"tam"`). He buys `fish` and `sea` (`buys_tags`) at 100%, paid now: the bin's
+  price without the wait, so a walk to the Cove beats Marlow (80%) for the sea's things.
+  15 of a kind at full price, 3% less each after, floor 50%. Dot's errands can be to him.
+- *Three requests.* Tam's bait bucket (day 7): 3 rockpool finds, any mix → the handline.
+  Tam's three from the sea (day 10): catch 3 fish in the sea → 50g, a crab pot and its
+  plans. Crabs for the city: 3 brown crabs → 200g.
+- *The handline is a rod limited to the sea.* `FishAction.waters` (empty: any water)
+  makes it the same tool script with a different .tres: no new branch in Fishing. Wren's
+  rod can fish the sea too. The fine rod's tier only shortens the wait when the rod is
+  what's being cast (`Fishing.wait_factor` checks the held tool).
+- *Where the sea can be fished.* `CoveLayout.water_at(cell, tide_out)`: sea next to the
+  pier, the quay or the breakwater, so the line goes in from somewhere you'd stand. At high
+  tide the covered wet sand beside the breakwater counts too.
+- *The tide sets the wait, and a fish can wait for the tide.* `FishingRules.sea_waters`
+  ([&"sea"]) never freezes, and its wait is ×0.7 with the tide in and ×1.4 with it out
+  (`tide_wait_multiplier`), worked out from `Tides` like everything else about the tide.
+  `FishDef.only_at_high_tide` (the bass); `FishDef.bites` and `ContentDB.fish_biting` take
+  `tide_in`, defaulting to true so fresh water is unchanged.
+- *Eleven sea fish*, one .tres each, chosen so every season has several and the evenings
+  have their own (whiting, the conger eel after dark).
+- *Crab pots.* A pot is a `ToolDef` used like a seed (`consumed_on_use`), with a new
+  `SetPotAction` that asks the place `pot_wanted_at`/`set_pot` (rule 5: the tool never
+  knows where the pier is). Pots go in the sea either side or off the end of the pier
+  (`CoveLayout.pot_cells`, 22 cells, never on the tidal shore). Once set a pot is
+  GameState's (`crab_pots`: location → cell → the day baited, 0 if not), because it stays
+  put for good and has to be saved; `CrabPot` nodes only draw it, redrawn on
+  `EventBus.crab_pot_changed`. E on a pot: hauls it if it has had its night (2 energy),
+  else baits it, else says it's fishing, else (empty, nothing to bait it with) it comes back
+  up into the bag. Hauling baits it again from the bag. `CrabPotRules`
+  (`data/crab_pot_rules.tres`, on `GameRules.crab_pots`): the bait in the order it's used
+  (winkles, Wren's bait, mussels, shrimps), a day to fill, the catch by weight (shore crab
+  10, brown crab 8, lobster 2) and a 20% chance of a second. The catch is rolled from the
+  cell and the day it was baited, so a reload can't reroll it.
+- *v23 → v24.* `crab_pots: []`. Nobody had a pot before Tam. `tests/saves/v23_example.json`
+  is the v22 example brought up by the real v23 build.
+
+Options considered: Tam as a market-stall keeper (a `ShopDef` id as his giver, as Brann
+is): his requests and his line of the day would have lived on a shop, and a stall needs a
+picture and an event; a `counter` on a person keeps him a person. A separate handline
+`ToolAction` (a second copy of the cast). Crab pots as `ObjectDef`s on a plot (the Cove has
+no `FarmData`, and giving it one for 22 cells would be a far bigger change than a small
+dictionary). Rolling the catch at dawn and storing it (a save field for what is only ever
+a function of the day). Bait as any item with a "crab_bait" tag (a list in the rules says
+the order it's used in, which a tag can't).
+
+**Why.** ROADMAP 13.3: the Cove needs something to do at high tide as well as low (the
+pier), a small daily round (the pots), and a buyer that makes the walk pay (Tam).
+
+**Cost.** Placeholder art (Tam, eleven fish, the handline, the pot and its floats, two
+crabs; `art/build_stage21_s2_placeholders.py`). Tam is on the quay day and night until
+Stage 22's schedules. A pot can't be moved except by emptying it with no bait in the bag.
+Every price, weight and wait is a first guess for Stage 26.

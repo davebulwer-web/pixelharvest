@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="FishDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/fish_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/fish/garfish.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"garfish"
+display_name = "Garfish"
+description = "Long and needle-nosed, with green bones. Leaps when it's hooked."
+icon = ExtResource("2_icon")
+sell_price = 30
+tags = Array[StringName]([&"fish", &"sea"])
+waters = Array[StringName]([&"sea"])
+seasons = Array[StringName]([&"spring", &"summer"])
+bites_from = 360
+bites_until = 1200
+weight = 6
+min_size = 50
+max_size = 80
+fight = 3

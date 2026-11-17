@@ -57,8 +57,8 @@ const QUAY := Rect2i(0, 14, 20, 6)
 ## The harbour: always sea, sheltered by the breakwater.
 const HARBOUR := Rect2i(0, 20, 18, 16)
 
-## The pier, out from the quay into the harbour (sea fishing comes with
-## Tam's handline, Stage 21 session 2).
+## The pier, out from the quay into the harbour: fished from with Tam's
+## handline, and crab pots are dropped off it (DECISIONS 065).
 const PIER := Rect2i(8, 20, 2, 10)
 
 ## The breakwater: rocks between the harbour and the beach.
@@ -194,10 +194,44 @@ static func pool_cells() -> Array[Vector2i]:
 	return result
 
 
-## The kind of water at `cell`, for the fishing rod: none yet. Sea fishing
-## comes with Tam's handline (Stage 21 session 2); until then nothing bites.
-static func water_at(_cell: Vector2i) -> StringName:
+## The kind of water at `cell` for a line (DECISIONS 065): &"sea" where
+## the sea comes up to the pier, the quay or the breakwater, the places you
+## stand to fish, with the tide out or in; &"" anywhere else. (The open sea
+## further out is sea too, but out of reach: you fish the water in front of
+## where you stand.)
+static func water_at(cell: Vector2i, tide_out: bool) -> StringName:
+	if not is_sea(cell, tide_out):
+		return &""
+	for step: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+		var beside := cell + step
+		if PIER.has_point(beside) or BREAKWATER.has_point(beside) or QUAY.has_point(beside):
+			return &"sea"
 	return &""
+
+
+## True if a crab pot can be dropped at `cell` (DECISIONS 065): sea beside
+## the pier, at any tide (never on the shore the tide uncovers, where the
+## pot would sit on the sand).
+static func is_pot_cell(cell: Vector2i) -> bool:
+	if not inside(cell) or is_tidal(cell) or not is_sea(cell, true):
+		return false
+	# Beside the pier, or off its end (the pier is then just above).
+	for step: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP]:
+		if PIER.has_point(cell + step):
+			return true
+	return false
+
+
+## Every cell a crab pot can go, along both sides and off the end of the
+## pier, always in the same order.
+static func pot_cells() -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	for y in range(PIER.position.y, PIER.end.y + 1):
+		for x in range(PIER.position.x - 1, PIER.end.x + 1):
+			var cell := Vector2i(x, y)
+			if is_pot_cell(cell):
+				result.append(cell)
+	return result
 
 
 ## Everything standing in the Cove, by cell, naming an ObjectDef: the tide

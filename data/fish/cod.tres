@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="FishDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/fish_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/fish/cod.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"cod"
+display_name = "Cod"
+description = "Big-headed, mottled and heavy. A winter fish: Tam says the cold brings them in."
+icon = ExtResource("2_icon")
+sell_price = 80
+tags = Array[StringName]([&"fish", &"sea"])
+waters = Array[StringName]([&"sea"])
+seasons = Array[StringName]([&"winter"])
+bites_from = 360
+bites_until = 1560
+weight = 4
+min_size = 40
+max_size = 80
+fight = 4

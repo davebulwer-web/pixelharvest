@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/catch_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/quests/tam_rockpools.tres" id="3_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="4_r"]
+[ext_resource type="Resource" path="res://data/tools/crab_pot.tres" id="5_r"]
+[ext_resource type="Script" path="res://scripts/resources/recipe_def.gd" id="6_r"]
+[ext_resource type="Resource" path="res://data/recipes/crab_pot.tres" id="7_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+amount = 3
+water = &"sea"
+where = "the sea"
+
+[resource]
+script = ExtResource("1_r")
+id = &"tam_sea_fish"
+title = "Tam's three from the sea"
+giver = &"tam"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["How's that handline treating you? Caught anything yet?", "Land three fish from the sea, any three, and come and tell me. Keep them, or sell them to me: I'm not proud.", "Fish it with the tide in. Low water, the fish go out with it."])
+reminder_line = "Three from the sea. Off the pier, at high water, is best."
+thanks_lines = Array[String](["Three! The sea's taken to you.", "Here's something to work while you're not fishing: one of my crab pots, and how to make more. Timber for the frame and fibre for the netting, at that bench of yours.", "Bait it, lower it off the pier, and haul it up the next day. Crabs, and now and then a lobster, if you're lucky."])
+reward_gold = 50
+reward_items = Dictionary[ExtResource("4_r"), int]({
+ExtResource("5_r"): 1
+})
+reward_recipes = Array[ExtResource("6_r")]([ExtResource("7_r")])
+requires = ExtResource("3_r")
+first_day = 10

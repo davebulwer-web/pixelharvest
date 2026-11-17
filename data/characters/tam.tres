@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="CharacterDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/character_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/cove/tam.png" id="2_sprite"]
+[ext_resource type="Resource" path="res://data/unlocks/tam_arrives.tres" id="3_unlock"]
+[ext_resource type="Script" path="res://scripts/resources/shop_def.gd" id="4_shop"]
+[ext_resource type="Script" path="res://scripts/resources/demand_def.gd" id="5_demand"]
+
+[sub_resource type="Resource" id="Demand_plenty"]
+script = ExtResource("5_demand")
+full_price_count = 15
+drop_per_extra = 0.03
+lowest_rate = 0.5
+
+[sub_resource type="Resource" id="Counter_tam"]
+script = ExtResource("4_shop")
+id = &"tam_catch"
+display_name = "Tam's catch"
+keeper_name = "Tam"
+keeper_sprite = ExtResource("2_sprite")
+buys_produce = true
+produce_pay_rate = 1.0
+buys_tags = Array[StringName]([&"fish", &"sea"])
+demand = SubResource("Demand_plenty")
+
+[resource]
+script = ExtResource("1_def")
+id = &"tam"
+display_name = "Tam"
+sprite = ExtResource("2_sprite")
+location = &"cove"
+spots = Array[Vector2i]([Vector2i(12, 16)])
+lines = Array[String](["Fish, shellfish, a bucket of winkles: if it came out of the sea, I'll buy it. Better than Marlow pays, and today.", "High water's when the pier fishes. Low water, you want to be in the rockpools, not on the end of a line.", "Fifteen of a kind I can send up to the city at a fair price. After that I'm only feeding the gulls.", "My father fished this cove, and his. The sea doesn't care who you are, but it rewards the patient.", "Tide's a clock you can't wind. Read the board by the path and plan your day by it.", "A good crab pot wants bait that stinks. Winkles, mussels, a tin of Marlow's bait. Crabs aren't fussy."])
+requires_unlock = ExtResource("3_unlock")
+counter = SubResource("Counter_tam")

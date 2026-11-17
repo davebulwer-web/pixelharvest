@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="FishDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/fish_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/fish/plaice.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"plaice"
+display_name = "Plaice"
+description = "A flatfish with orange spots, lying on the sand off the pier."
+icon = ExtResource("2_icon")
+sell_price = 35
+tags = Array[StringName]([&"fish", &"sea"])
+waters = Array[StringName]([&"sea"])
+seasons = Array[StringName]([&"spring", &"summer"])
+bites_from = 360
+bites_until = 1560
+weight = 8
+min_size = 25
+max_size = 45
+fight = 2

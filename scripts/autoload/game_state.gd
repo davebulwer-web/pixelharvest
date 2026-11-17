@@ -148,6 +148,7 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	finds = {}
 	finds_on_day = 0
 	finds_today = 0
+	crab_pots = {}
 	# Anything the calendar opens on day 1 is there from the start.
 	open_due_unlocks()
 	location = RULES.starting_location
@@ -588,6 +589,164 @@ func _fish_log_from_save(data: Variant) -> void:
 			push_warning("Save's fish log has a fish '%s' the game doesn't know; it's been removed" % key)
 			continue
 		fish_log[StringName(key)] = {"caught": int(entry.get("caught", 0)), "biggest": int(entry.get("biggest", 0))}
+
+
+# --- Crab pots (DECISIONS 065) -------------------------------------------------
+# A crab pot is made at the workbench (Tam's plans) and dropped off the
+# Cove's pier (the Cove's scene says where one can go, CoveLayout). It stays
+# there for good, so it's kept here and saved (save version 24): which cells
+# have one, and the day each was last baited (0: not baited). A baited pot
+# fills overnight (RULES.crab_pots.days_to_fill); E on it then hauls it up,
+# empties it into the bag and baits it again from the bag if it can. What's
+# in it is rolled from the cell and the day it was baited (CrabPotRules), so
+# a reload can't change it. With nothing to bait it, E on an empty pot pulls
+# it back up into the bag.
+
+## Crab pots set: location id -> {cell: the day_number it was baited, or 0}.
+var crab_pots: Dictionary = {}
+
+
+## True if there's a crab pot at `cell` in `location_id`.
+func has_crab_pot(location_id: StringName, cell: Vector2i) -> bool:
+	return crab_pots.has(location_id) and crab_pots[location_id].has(cell)
+
+
+## The cells with a crab pot in `location_id`, in the order they were set.
+func crab_pots_in(location_id: StringName) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	cells.assign(crab_pots.get(location_id, {}).keys())
+	return cells
+
+
+## The day_number the pot at `cell` was baited, 0 if it isn't, -1 if
+## there's no pot there.
+func crab_pot_baited_on(location_id: StringName, cell: Vector2i) -> int:
+	if not has_crab_pot(location_id, cell):
+		return -1
+	return int(crab_pots[location_id][cell])
+
+
+## True if the pot at `cell` is baited and has had its night: ready to haul.
+func crab_pot_ready(location_id: StringName, cell: Vector2i) -> bool:
+	var baited := crab_pot_baited_on(location_id, cell)
+	var rules := RULES.crab_pots
+	return baited > 0 and rules != null and day_number() >= baited + maxi(1, rules.days_to_fill)
+
+
+## How many pots in `location_id` are ready to haul, for the Cove's welcome.
+func crab_pots_ready_in(location_id: StringName) -> int:
+	var count := 0
+	for cell in crab_pots_in(location_id):
+		if crab_pot_ready(location_id, cell):
+			count += 1
+	return count
+
+
+## Set a crab pot at `cell` (the pot has already left the bag: it's used
+## like a seed), baited at once if the bag has bait. False, setting nothing,
+## if there's one there already.
+func set_crab_pot(location_id: StringName, cell: Vector2i) -> bool:
+	if has_crab_pot(location_id, cell):
+		return false
+	if not crab_pots.has(location_id):
+		crab_pots[location_id] = {}
+	crab_pots[location_id][cell] = 0
+	var text := "You lower the crab pot off the pier."
+	var bait := _bait_crab_pot(location_id, cell)
+	text += " " + (_baited_text(bait) if bait != null
+			else "It needs bait in it before it'll catch anything: E with some in your bag.")
+	EventBus.crab_pot_changed.emit(location_id, cell)
+	EventBus.message_posted.emit(text)
+	return true
+
+
+## E on the crab pot at `cell`: haul it up if it's ready, else bait it, else
+## say it's still fishing, else (empty, and nothing to bait it with) pull it
+## back up into the bag. False if there's no pot there, or hauling it needs
+## more energy than there is.
+func use_crab_pot(location_id: StringName, cell: Vector2i) -> bool:
+	var baited := crab_pot_baited_on(location_id, cell)
+	if baited < 0:
+		return false
+	var rules := RULES.crab_pots
+	if crab_pot_ready(location_id, cell):
+		if not try_spend_energy(rules.haul_energy * difficulty.energy_cost_multiplier):
+			EventBus.message_posted.emit("Too tired to haul the pot up")
+			return false
+		var caught := rules.catch_for(cell, baited)
+		crab_pots[location_id][cell] = 0
+		var names: Array[String] = []
+		for item in caught:
+			inventory.add(item)
+			names.append(item.display_name.to_lower())
+		EventBus.crab_pot_hauled.emit(location_id, cell, caught.map(func(i: ItemDef) -> StringName: return i.id))
+		var text := "You haul up the pot: %s!" % " and ".join(names) if not names.is_empty() \
+				else "You haul up the pot: empty, and the bait's gone."
+		var bait := _bait_crab_pot(location_id, cell)
+		text += " " + (_baited_text(bait, true) if bait != null else "No bait left to set it again.")
+		EventBus.crab_pot_changed.emit(location_id, cell)
+		EventBus.message_posted.emit(text)
+		return true
+	if baited > 0:
+		EventBus.message_posted.emit("The pot's baited and down. Leave it overnight.")
+		return true
+	var bait := _bait_crab_pot(location_id, cell)
+	if bait != null:
+		EventBus.crab_pot_changed.emit(location_id, cell)
+		EventBus.message_posted.emit(_baited_text(bait))
+		return true
+	# Empty, and nothing to bait it with: back into the bag, to set elsewhere.
+	crab_pots[location_id].erase(cell)
+	if crab_pots[location_id].is_empty():
+		crab_pots.erase(location_id)
+	var pot := ContentDB.item(rules.pot_item) if rules.pot_item != &"" else null
+	if pot != null:
+		inventory.add(pot)
+	EventBus.crab_pot_changed.emit(location_id, cell)
+	EventBus.message_posted.emit("Nothing to bait it with, so you pull the empty pot back up.")
+	return true
+
+
+## Put bait from the bag in the pot at `cell`, baited today. The bait used,
+## or null if the bag has none (and the pot stays as it was).
+func _bait_crab_pot(location_id: StringName, cell: Vector2i) -> ItemDef:
+	var rules := RULES.crab_pots
+	var bait := rules.bait_in(inventory) if rules != null else null
+	if bait == null:
+		return null
+	inventory.remove(bait, 1)
+	crab_pots[location_id][cell] = day_number()
+	return bait
+
+
+func _baited_text(bait: ItemDef, again: bool = false) -> String:
+	var left := inventory.count(bait)
+	return "Baited it%s with %s (%d left). Come back tomorrow." % [" again" if again else "",
+			bait.display_name.to_lower(), left]
+
+
+## [{"location": "cove", "x": 7, "y": 22, "baited": 31}]: plain values.
+func _crab_pots_to_save() -> Array:
+	var data: Array = []
+	for location_id: StringName in crab_pots:
+		for cell: Vector2i in crab_pots[location_id]:
+			data.append({"location": String(location_id), "x": cell.x, "y": cell.y,
+					"baited": int(crab_pots[location_id][cell])})
+	return data
+
+
+func _crab_pots_from_save(data: Variant) -> void:
+	crab_pots = {}
+	if typeof(data) != TYPE_ARRAY:
+		return
+	for entry: Variant in data:
+		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("location")) != TYPE_STRING:
+			continue
+		var location_id := StringName(entry["location"])
+		if not crab_pots.has(location_id):
+			crab_pots[location_id] = {}
+		crab_pots[location_id][Vector2i(int(entry.get("x", 0)), int(entry.get("y", 0)))] = \
+				maxi(0, int(entry.get("baited", 0)))
 
 
 # --- Festivals (DECISIONS 059) -------------------------------------------------
@@ -1140,6 +1299,7 @@ func to_save() -> Dictionary:
 		"recipes": _recipes_to_save(),
 		"festivals": festival_log.duplicate(true),
 		"finds": _finds_to_save(),
+		"crab_pots": _crab_pots_to_save(),
 	}
 
 
@@ -1243,6 +1403,8 @@ func load_from_save(data: Dictionary) -> void:
 	_festival_log_from_save(data["festivals"])
 	# What has turned up while clearing (save version 22).
 	_finds_from_save(data["finds"])
+	# Crab pots set off the Cove's pier (save version 24).
+	_crab_pots_from_save(data["crab_pots"])
 	unlocks = []
 	for id: Variant in data["unlocks"]:
 		if StringName(id) not in unlocks:

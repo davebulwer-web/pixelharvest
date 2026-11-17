@@ -74,6 +74,11 @@ extends Resource
 ## (the rockpools never uncover).
 @export var tides: TideRules
 
+## --- Crab pots (DECISIONS 065) -------------------------------------------------
+
+## What baits a crab pot, what it catches and how soon: data/crab_pot_rules.tres.
+@export var crab_pots: CrabPotRules
+
 ## --- Cooking (DECISIONS 056) ------------------------------------------------
 
 ## What opens the farmhouse kitchen, so the stove cooks: Mabel's lessons give

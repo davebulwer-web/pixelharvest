@@ -261,10 +261,12 @@ func recipes() -> Array[RecipeDef]:
 
 
 ## The fish that bite in `water` at `location_id` on a day of `season_id`, at
-## `minutes` on the clock, with `weather_id`, in the same order as fish().
+## `minutes` on the clock, with `weather_id` and the tide in or out
+## (`tide_in`, for the sea: DECISIONS 065), in the same order as fish().
 func fish_biting(water: StringName, location_id: StringName, season_id: StringName, minutes: int,
-		weather_id: StringName) -> Array[FishDef]:
-	return fish().filter(func(f: FishDef) -> bool: return f.bites(water, location_id, season_id, minutes, weather_id))
+		weather_id: StringName, tide_in: bool = true) -> Array[FishDef]:
+	return fish().filter(func(f: FishDef) -> bool:
+		return f.bites(water, location_id, season_id, minutes, weather_id, tide_in))
 
 
 ## The crop whose harvest is `item`, or null if nothing grows it (fibre).
@@ -641,6 +643,12 @@ func _check() -> void:
 			push_warning("ContentDB: '%s' has no sprite, so they can't be seen" % where)
 		if each.lines.is_empty():
 			push_warning("ContentDB: '%s' has no lines, so talking to them does nothing" % where)
+		# A counter of their own (DECISIONS 065: Tam on the quay) is a shop
+		# with no door; its id keeps the day's purchases apart from others'.
+		if each.counter != null:
+			if each.counter.id == &"" or each.counter.id in shop_ids or character(each.counter.id) != null:
+				push_error("ContentDB: '%s' has a counter whose id '%s' is empty or already a shop's or a character's"
+						% [where, each.counter.id])
 
 	for each: UpgradeDef in _upgrades.values():
 		var where := each.resource_path
@@ -910,7 +918,8 @@ func _check_forage() -> void:
 
 ## Fish (DECISIONS 054): each kind must live in a real kind of water, bite in
 ## a real season and some stretch of the day, and be worth something.
-const FISH_WATERS: Array[StringName] = [&"pond", &"river", &"stream"]
+## The sea is the Cove's (DECISIONS 065).
+const FISH_WATERS: Array[StringName] = [&"pond", &"river", &"stream", &"sea"]
 
 
 ## Recipes and dishes (DECISIONS 056): every recipe makes a real dish from
@@ -991,6 +1000,8 @@ func _check_fish() -> void:
 			push_error("ContentDB: '%s' has a max_size smaller than its min_size" % where)
 		if each.sell_price <= 0:
 			push_warning("ContentDB: '%s' sells for nothing, so the bin won't take it" % where)
+		if each.only_at_high_tide and &"sea" not in each.waters:
+			push_warning("ContentDB: '%s' waits for high tide but doesn't live in the sea, where the tide is" % where)
 
 
 ## Festivals (DECISIONS 059): a host who lives where the festival is, its

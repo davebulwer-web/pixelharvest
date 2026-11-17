@@ -23,7 +23,8 @@ extends ItemDef
 ##
 
 ## The kinds of water it lives in: &"pond" (the farm's and the town's),
-## &"river" (along the top of the town) or &"stream" (in the Woods).
+## &"river" (along the top of the town), &"stream" (in the Woods) or &"sea"
+## (off the Cove's pier, quay and breakwater, DECISIONS 065).
 @export var waters: Array[StringName] = [&"pond"]
 
 ## Only in these locations, by id, for a fish that lives in one place only
@@ -59,16 +60,24 @@ extends ItemDef
 ## many good pulls land it.
 @export_range(1, 5) var fight: int = 1
 
+## Only while the tide is in (DECISIONS 065): the bass comes in over the
+## rocks with the flood. Only means anything in the sea; elsewhere there's
+## no tide and it's ignored.
+@export var only_at_high_tide: bool = false
+
 
 ## True if it would bite in `water` at `location_id`, on a day of
-## `season_id` at `minutes` with `weather_id`.
+## `season_id` at `minutes` with `weather_id`, with the tide in or out
+## (`tide_in`; only the sea has a tide, so the default suits every other water).
 func bites(water: StringName, location_id: StringName, season_id: StringName, minutes: int,
-		weather_id: StringName) -> bool:
+		weather_id: StringName, tide_in: bool = true) -> bool:
 	if weight <= 0 or water not in waters or season_id not in seasons:
 		return false
 	if not found_in.is_empty() and location_id not in found_in:
 		return false
 	if minutes < bites_from or minutes >= bites_until:
+		return false
+	if only_at_high_tide and not tide_in:
 		return false
 	return only_in_weather.is_empty() or weather_id in only_in_weather
 

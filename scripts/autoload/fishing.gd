@@ -28,6 +28,12 @@ extends Node
 ## What shortens the wait, in order: the rod's tier (Wren's fine rod), then a
 ## lure that works today (kept, never used up), or else bait (used up).
 ##
+## The sea (DECISIONS 065), off the Cove's pier, quay and breakwater, is
+## fished with Tam's handline (or the rod). It never freezes, and its tide
+## sets the wait: fish bite sooner with the tide in, slower with it out
+## (FishingRules.tide_wait_multiplier), and a few (the bass) only come in
+## with the tide.
+##
 ## Which fish bites is decided when it bites: one of the FishDefs biting in
 ## that water, in that place, this season, at this hour, in today's weather,
 ## chosen by weight. Its fight (1 to 5) sets the bar: data/fishing_rules.tres
@@ -129,10 +135,17 @@ func fish_on_line() -> FishDef:
 
 
 ## True if every water is frozen in `season_id` (winter): the rod cuts a
-## hole before it can cast.
+## hole before it can cast. Except the sea: see is_frozen_water().
 func is_frozen(season_id: StringName) -> bool:
 	var rules: FishingRules = GameState.RULES.fishing
 	return rules != null and season_id in rules.frozen_seasons
+
+
+## True if `water` is frozen in `season_id`: fresh water in winter, never
+## the sea (DECISIONS 065).
+func is_frozen_water(season_id: StringName, water: StringName) -> bool:
+	var rules: FishingRules = GameState.RULES.fishing
+	return is_frozen(season_id) and not rules.is_sea(water)
 
 
 ## True if a hole has been cut in the ice at `cell` in `location_id` today.
@@ -154,13 +167,19 @@ func clear_holes() -> void:
 
 
 ## How long the float waits as things stand, as a multiple of the rules'
-## wait, and what's on the hook: the rod's tier, then a lure that works in
-## today's season or else bait. Doesn't use anything up: see _bait_up().
-func wait_factor(through_ice: bool) -> float:
+## wait, and what's on the hook: the rod's tier (only when it's the rod
+## being cast, not Tam's handline), the ice, the tide (in the sea), then a
+## lure that works in today's season or else bait. Doesn't use anything up:
+## see _bait_up().
+func wait_factor(through_ice: bool, water: StringName = &"") -> float:
 	var rules: FishingRules = GameState.RULES.fishing
-	var multiplier := rules.rod_wait_multiplier(_rod_tier())
+	var multiplier := 1.0
+	var held := GameState.selected_tool()
+	if held != null and held.id == rules.rod_tool:
+		multiplier *= rules.rod_wait_multiplier(_rod_tier())
 	if through_ice:
 		multiplier *= rules.ice_wait_multiplier
+	multiplier *= rules.tide_wait_multiplier(water, tide_in(water))
 	var lure := lure_today()
 	if lure != null:
 		multiplier *= lure.wait_multiplier
@@ -194,10 +213,21 @@ func _rod_tier() -> int:
 
 
 ## The fish that would bite in `water` at `location_id` right now: today's
-## season, the clock's time and today's weather. In ContentDB's order.
+## season, the clock's time, today's weather and, in the sea, the tide. In
+## ContentDB's order.
 func biting_now(water: StringName, location_id: StringName) -> Array[FishDef]:
 	var weather_id: StringName = GameState.weather.id if GameState.weather != null else &""
-	return ContentDB.fish_biting(water, location_id, GameState.season_id(), GameState.minutes, weather_id)
+	return ContentDB.fish_biting(water, location_id, GameState.season_id(), GameState.minutes, weather_id,
+			tide_in(water))
+
+
+## True if the tide is in, for `water`: the sea's is worked out from the
+## clock (Tides, DECISIONS 064); every other water counts as "in".
+func tide_in(water: StringName) -> bool:
+	var rules: FishingRules = GameState.RULES.fishing
+	if not rules.is_sea(water):
+		return true
+	return not Tides.is_out()
 
 
 # --- Casting ---------------------------------------------------------------------
@@ -207,7 +237,7 @@ func _on_line_cast(cell: Vector2i, water: StringName, wait_multiplier: float) ->
 		return
 	var rules: FishingRules = GameState.RULES.fishing
 	var location := GameState.location
-	var through_ice := is_frozen(GameState.season_id())
+	var through_ice := is_frozen_water(GameState.season_id(), water)
 	if through_ice:
 		cell = _ice_cell(cell)
 	# On bare ice the rod's Space cuts a hole instead (the energy is the
@@ -223,7 +253,7 @@ func _on_line_cast(cell: Vector2i, water: StringName, wait_multiplier: float) ->
 	_size = 0
 	_cast_frame = Engine.get_process_frames()
 	var wait := _dice.randf_range(rules.wait_min_seconds, rules.wait_max_seconds) * wait_multiplier \
-			* wait_factor(through_ice)
+			* wait_factor(through_ice, water)
 	_bait_up()
 	_timer = wait
 	_state = State.WAITING

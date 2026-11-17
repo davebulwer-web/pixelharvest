@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="CrabPotRules" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/crab_pot_rules.gd" id="1_rules"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_itemdef"]
+[ext_resource type="Resource" path="res://data/forage/winkles.tres" id="3_winkles"]
+[ext_resource type="Resource" path="res://data/produce/bait.tres" id="4_bait"]
+[ext_resource type="Resource" path="res://data/forage/mussels.tres" id="5_mussels"]
+[ext_resource type="Resource" path="res://data/forage/shrimp.tres" id="6_shrimp"]
+[ext_resource type="Resource" path="res://data/forage/shore_crab.tres" id="7_shore_crab"]
+[ext_resource type="Resource" path="res://data/produce/brown_crab.tres" id="8_brown_crab"]
+[ext_resource type="Resource" path="res://data/produce/lobster.tres" id="9_lobster"]
+
+[resource]
+script = ExtResource("1_rules")
+bait = Array[ExtResource("2_itemdef")]([ExtResource("3_winkles"), ExtResource("4_bait"), ExtResource("5_mussels"), ExtResource("6_shrimp")])
+days_to_fill = 1
+catches = Dictionary[ExtResource("2_itemdef"), int]({
+ExtResource("7_shore_crab"): 10,
+ExtResource("8_brown_crab"): 8,
+ExtResource("9_lobster"): 2
+})
+second_catch_chance = 0.2
+pot_item = &"crab_pot"
+haul_energy = 2.0

@@ -61,6 +61,14 @@ extends Resource
 ## (Wren's "ice and patience".)
 @export var ice_wait_multiplier: float = 1.5
 
+## Salt water (DECISIONS 065): the Cove's sea. It never freezes, so the
+## frozen seasons leave it open water, and the tide sets how soon fish bite
+## there: sooner with the tide in (the pier fishes best at high water),
+## slower with it out.
+@export var sea_waters: Array[StringName] = [&"sea"]
+@export var high_tide_wait_multiplier: float = 0.7
+@export var low_tide_wait_multiplier: float = 1.4
+
 ## Lures (DECISIONS 055): kept in the bag, never used up. Any of these that
 ## works in today's season shortens the wait by its own multiplier, and
 ## the bait stays in its tin.
@@ -72,6 +80,18 @@ extends Resource
 ## the fine_rod upgrade, as the wide hoe is.)
 @export var rod_tool: StringName = &"fishing_rod"
 @export var rod_tier_wait_multipliers: Array[float] = [0.6]
+
+
+## True if `water` is salt water, which has a tide and never freezes.
+func is_sea(water: StringName) -> bool:
+	return water in sea_waters
+
+
+## How much the tide changes the wait in `water`: nothing in fresh water.
+func tide_wait_multiplier(water: StringName, tide_in: bool) -> float:
+	if not is_sea(water):
+		return 1.0
+	return high_tide_wait_multiplier if tide_in else low_tide_wait_multiplier
 
 
 ## Value number `fight` (1 to 5) of `values`, or its last if it's short.

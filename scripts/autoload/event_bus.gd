@@ -143,6 +143,12 @@ signal fish_escaped(fish_id: StringName)
 ## stays open until the night freezes it over.
 signal ice_hole_cut(location_id: StringName, cell: Vector2i)
 
+## A crab pot (DECISIONS 065) was set, baited, hauled or pulled up at `cell`
+## in `location_id`: the map showing it redraws it from GameState.
+signal crab_pot_changed(location_id: StringName, cell: Vector2i)
+## A crab pot was hauled up full: what was in it, by item id.
+signal crab_pot_hauled(location_id: StringName, cell: Vector2i, item_ids: Array)
+
 # --- Cooking (DECISIONS 056) -------------------------------------------------
 
 ## A recipe was learned (a request's reward, or an unlock's: the workbench).

@@ -122,7 +122,8 @@ scripts/             Game code
                      leave them (AllotmentBeds, AllotmentWeed; DECISIONS 062)
   cove/              The Cove: its map (CoveLayout: the harbour, the beach, the shore the
                      tide uncovers), the tides worked out from the clock (Tides), the
-                     harbour's tide board (DECISIONS 064)
+                     harbour's tide board (DECISIONS 064); Tam on the quay, the sea off
+                     the pier, and the crab pots' floats (CrabPot; DECISIONS 065)
   exits.gd           Exits: builds a place's ways out from LocationDef.exits (ExitDef;
                      DECISIONS 060)
   items/             Inventory
@@ -132,7 +133,9 @@ scripts/             Game code
                      chopping, which also works in the Woods: DECISIONS 053; the
                      fishing rod's cast: DECISIONS 054; eating a dish, which is
                      used on the farmer, not a tile: DECISIONS 056; feeding the
-                     soil and the sickle's cut: DECISIONS 058)
+                     soil and the sickle's cut: DECISIONS 058; Tam's handline is the
+                     rod's cast for the sea only, and a crab pot is lowered off the
+                     pier: DECISIONS 065)
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
   festivals/         ContestRule scripts: what a festival's contest judges (best item,
                      biggest fish; DECISIONS 059)
@@ -147,7 +150,9 @@ data/                Content resources (.tres), indexed by ContentDB
   tide_rules.tres    When the Cove's tide is out: the period, the first low tide and the
                      window either side (TideRules, DECISIONS 064)
   fishing_rules.tres The wait, the strike and the reel bar's numbers, the ice, the lures and
-                     the fine rod (FishingRules, DECISIONS 054, 055)
+                     the fine rod (FishingRules, DECISIONS 054, 055); the sea and its tide
+                     (DECISIONS 065)
+  crab_pot_rules.tres What baits a crab pot and what it catches (CrabPotRules, DECISIONS 065)
   crops/             CropDef — how each plant grows and looks, and its rules (trellis,
                      perennial, hardy…; DECISIONS 047; giants and 2 × 2 trees, 048)
   produce/           ItemDef — what a harvest gives, and its sell price (and fibre, timber,
@@ -169,7 +174,8 @@ data/                Content resources (.tres), indexed by ContentDB
   shops/             ShopDef — a shopkeeper, their words, and what the counter offers; what
                      it buys (buys_tags) and how its price drops for plenty (DemandDef,
                      DECISIONS 063; the bin's is in game_rules.tres)
-  characters/        CharacterDef — townsfolk you can talk to (not shopkeepers)
+  characters/        CharacterDef — townsfolk you can talk to (not shopkeepers); one can
+                     have a counter of their own (Tam, DECISIONS 065)
   events/            CalendarEvent — what happens on which days (market day) and its stalls,
                      and the festivals: host, contest, rivals, prizes, decorations (DECISIONS 059)
   quests/            QuestDef — requests from townsfolk or shopkeepers: who asks, for what,
@@ -187,7 +193,8 @@ data/                Content resources (.tres), indexed by ContentDB
                      (DECISIONS 052); rockpool forage only at low tide, and driftwood
                      picked up as timber (DECISIONS 064)
   fish/              FishDef — fish: items, with the water, seasons, hours and weather
-                     they bite in, their size and fight (DECISIONS 054)
+                     they bite in, their size and fight (DECISIONS 054); sea fish, some only
+                     at high tide (DECISIONS 065)
   dishes/            ToolDef with an EatAction — food: eaten from the hotbar for
                      energy, never sold (DECISIONS 056); the bakery's sold by Mabel
                      (DECISIONS 063)

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="FishDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/fish_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/fish/whiting.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"whiting"
+display_name = "Whiting"
+description = "A slim grey cod's cousin. Bites well on autumn and winter evenings."
+icon = ExtResource("2_icon")
+sell_price = 25
+tags = Array[StringName]([&"fish", &"sea"])
+waters = Array[StringName]([&"sea"])
+seasons = Array[StringName]([&"autumn", &"winter"])
+bites_from = 900
+bites_until = 1560
+weight = 10
+min_size = 25
+max_size = 40
+fight = 2

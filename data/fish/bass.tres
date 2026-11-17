@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="FishDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/fish_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/fish/bass.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"bass"
+display_name = "Sea bass"
+description = "Silver and spiny, the prize of the shore. Comes in over the rocks with the tide."
+icon = ExtResource("2_icon")
+sell_price = 75
+tags = Array[StringName]([&"fish", &"sea"])
+waters = Array[StringName]([&"sea"])
+seasons = Array[StringName]([&"spring", &"summer", &"autumn"])
+bites_from = 360
+bites_until = 1560
+weight = 5
+min_size = 35
+max_size = 70
+fight = 4
+only_at_high_tide = true

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/quests/tam_sea_fish.tres" id="3_r"]
+[ext_resource type="Resource" path="res://data/produce/brown_crab.tres" id="4_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+item = ExtResource("4_r")
+amount = 3
+
+[resource]
+script = ExtResource("1_r")
+id = &"tam_crabs"
+title = "Crabs for the city"
+giver = &"tam"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["There's a restaurant in the city wants brown crabs, and I've not the pots to keep up.", "Bring me three brown crabs out of your pots and I'll pay you what they pay me. Better than I'd give you over the counter."])
+reminder_line = "Three brown crabs. The big ones, with the black-tipped claws."
+thanks_lines = Array[String](["Lovely. They'll go up on the evening cart.", "There's your share. I'll be wanting more of those."])
+reward_gold = 200
+requires = ExtResource("3_r")

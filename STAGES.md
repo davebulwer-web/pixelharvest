@@ -1146,16 +1146,48 @@ version 24.
       the shelf at high and low tide, the sand bar, the tide board's message, the cliff
       path, driftwood after a summer storm, the Cove in winter, the Lane's cliff path and
       the town's west end, and the whole Cove at both tides
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-17)
+
+**Session 2 (2026-11-17) — Tam, sea fishing and crab pots (DECISIONS 065, save version 24)**
+
+- [x] **Tam** on the quay from spring day 7 (`tam_arrives`; placeholder sprite): a
+      `CharacterDef` with a counter of his own (`CharacterDef.counter`, a `ShopDef`), so
+      talking to him is a shop counter's conversation (`ShopCounter.serve(shop, giver,
+      lines)`): his requests, then what he buys. He buys fish and anything from the sea
+      (`buys_tags` fish, sea) at the bin's price, paid now (Marlow pays 80%); 15 of a kind
+      at full price, then down to 50%. Dot's errands can now be to Tam
+- [x] Tam's requests: bring 3 rockpool finds → **his handline**; from day 10, catch 3
+      fish from the sea → 50g, a crab pot and its plans; then 3 brown crabs → 200g
+- [x] **Sea fishing**: the handline is a `FishAction` limited to the sea (`waters`); the rod
+      fishes it too. `CoveLayout.water_at(cell, tide_out)` gives &"sea" beside the pier,
+      the quay and the breakwater. The sea never freezes; the tide sets the wait (×0.7 in,
+      ×1.4 out: `FishingRules`); the fine rod's speed is the rod's only
+- [x] **Eleven sea fish** (placeholder icons): mackerel, pollack, sea bass (high tide
+      only: `FishDef.only_at_high_tide`), whiting, cod, plaice, dab, garfish, ballan
+      wrasse, gurnard, conger eel (after dark); something bites in every season
+- [x] **Crab pots**: a plan at the workbench (3 timber, 5 fibre), lowered with Space off
+      either side or the end of the pier (`SetPotAction`, `CoveLayout.pot_cells`), baited
+      from the bag (winkles, Wren's bait, mussels, shrimps); E the next day hauls it up
+      (2 energy): shore crab, brown crab or now and then a lobster, rolled from the cell and
+      the day (`CrabPotRules`, `data/crab_pot_rules.tres`), and baits it again. An empty
+      pot with nothing to bait it comes back up into the bag. Floats show empty, baited
+      and ready; the Cove says on arrival how many are ready
+- [x] Save version 24: the pots (`crab_pots`); `tests/saves/v23_example.json`
+- [x] Verified in the sandbox: headless import and run clean, 411 harness checks (the
+      eleven fish: waters, seasons, icons, tags, the bass and the tide, none in fresh
+      water and no fresh fish in the sea; the handline's waters; every Cove cell at both
+      tides for water_at, the 22 pot cells; winter sea open, the tide's waits, the fine rod
+      only with the rod; Tam absent until day 7, all three requests start to finish, the
+      sea-fish count ignoring a pond fish; his counter: what he buys, his price over
+      Marlow's, plenty after 15 and Marlow unaffected; 59 days of Dot's errands, 20 to
+      Tam, none before day 7; pots: set, twice refused, baiting order, not ready the same
+      day, ready the next, the haul's items and energy, baited again, pulled up when bare,
+      the catch the same twice, 800 rolls of the catch, a save round trip; saves v1–v23
+      loaded and a v24 written; in the scene: Tam, the floats, setting a pot with the
+      tool, the handline's cursor cells), and played it by keyboard in a rendered Cove:
+      cast the handline off the pier at high tide, struck and reeled in a fish, set a pot,
+      hauled a ready one with E, talked to Tam and sold him three mackerel
 - [ ] Dave confirms it plays correctly on Windows
-
-**Session 2 — Tam, sea fishing and crab pots (save version 24)**
-
-- [ ] Tam at the harbour from spring day 7: bring 3 rockpool finds → his handline (sea
-      fishing from the pier and the breakwater; `CoveLayout.water_at` gives &"sea")
-- [ ] Sea fish (`FishDef`s in the sea; high tide fishes best, as ROADMAP 13.3 #5 says)
-- [ ] Crab pots: Tam's plan for the workbench (day 10), dropped off the pier with bait,
-      emptied next day (saved: save version 24)
-- [ ] Tam buys fish and sea forage at a better price than Marlow (`ShopDef.buys_tags`)
 
 ## Stage 22 — The tavern and people on the move · 2 sessions · Opus
 

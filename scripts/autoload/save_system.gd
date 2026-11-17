@@ -107,7 +107,10 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       own; and its plans are recipes, in "recipes" like the dishes, so a
 ##       game that has already finished a request that now teaches one is
 ##       given it. No new fields.
-const CURRENT_VERSION := 23
+##  24 — crab pots (DECISIONS 065): the pots set off the Cove's pier
+##       ("crab_pots": a list of {"location", "x", "y", "baited"}, the day
+##       each was baited or 0). Older games have set none.
+const CURRENT_VERSION := 24
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -134,6 +137,7 @@ const REQUIRED_FIELDS: Dictionary = {
 	"greenhouse": TYPE_DICTIONARY,
 	"festivals": TYPE_ARRAY,
 	"finds": TYPE_DICTIONARY,
+	"crab_pots": TYPE_ARRAY,
 }
 
 ## Saving is switched on by load_or_new_game(), i.e. only when the game was
@@ -348,6 +352,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_21_to_22(data["game"])
 			22:
 				_upgrade_22_to_23(data["game"])
+			23:
+				_upgrade_23_to_24(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -934,3 +940,9 @@ func _v23_is_bare(by_cell: Dictionary, cell: Vector2i) -> bool:
 			if dx < span and dy < span:
 				return false
 	return true
+
+
+## Version 23 -> 24: crab pots (DECISIONS 065). Nobody had a crab pot to
+## set before Tam came to the Cove, so an older game has none.
+func _upgrade_23_to_24(game: Dictionary) -> void:
+	game["crab_pots"] = []

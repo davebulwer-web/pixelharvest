@@ -17,13 +17,26 @@ extends Node2D
 ## back up to the strand line. The strand line's forage (shells, sea glass,
 ## weed, driftwood after a storm) is there whatever the tide.
 ##
+## Tam (DECISIONS 065), from spring day 7, stands on the quay: a CharacterDef
+## who lives here, with a counter of his own (CharacterDef.counter), so
+## talking to him is a shop counter's conversation (ShopCounter): his
+## requests first, then the menu where he buys fish and sea forage. The sea
+## beside the pier, the quay and the breakwater can be fished
+## (CoveLayout.water_at: &"sea"), with his handline or the rod, and crab pots
+## are lowered off the pier (pot_wanted_at, set_pot); each pot set is drawn
+## as a CrabPot float from GameState, and redrawn when crab_pot_changed says.
+## A tile outline shows where the held line or pot would go.
+##
 ##   Cove
 ##   ├── Ground      (TileMapLayer, the same seasonal tilesets as the farm)
 ##   ├── SpawnPoints (Marker2Ds, made by Exits: "from_town", "from_lane")
-##   ├── Entities    (y-sorted: player, buildings, the tide board, trees, forage)
+##   ├── Entities    (y-sorted: player, buildings, the tide board, trees, forage,
+##   │                Tam, the crab pots' floats)
 ##   ├── Weather     (the season's and the day's overlays, as on the farm)
 ##   ├── Daylight    (the time-of-day tint, as on the farm)
-##   └── Hud         (the same HUD scene as the farm)
+##   ├── Hud         (the same HUD scene as the farm)
+##   ├── Dialogue    (the dialogue box: Tam)
+##   └── ShopMenu    (Tam's counter: what he buys)
 ##
 
 const TILE_PX := 16
@@ -34,6 +47,21 @@ const COVE_ID := &"cove"
 @onready var _player: Player = $Entities/Player
 @onready var _spawns: Node2D = $SpawnPoints
 @onready var _weather: Node = $Weather
+@onready var _dialogue = $Dialogue
+@onready var _menu = $ShopMenu
+
+## Talking to someone with a counter of their own (Tam) goes through this,
+## as a shopkeeper's does.
+var _counter: ShopCounter
+
+## The outline on the sea the held line or crab pot would go into.
+var _cursor: Node2D
+
+## The "!" or "?" over each person's head here, by character id.
+var _markers: Dictionary = {}  # StringName -> Label
+
+## The crab pots' floats, by cell (DECISIONS 065).
+var _pots: Dictionary = {}  # Vector2i -> CrabPot
 
 ## Whether the tide was out when the shore was last drawn.
 var _tide_out := false
@@ -61,13 +89,29 @@ func _ready() -> void:
 	_place_strand_forage()
 	if _tide_out:
 		_place_pool_forage()
+	_place_people()
+	_place_pots()
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
 	EventBus.weather_changed.connect(func(_w: StringName) -> void: SeasonLook.apply_overlay(_weather))
 	EventBus.time_changed.connect(func(_minutes: int) -> void: _check_tide())
 	_limit_camera()
-	# Say what the tide's doing on the way in.
-	EventBus.message_posted.emit.call_deferred(Tides.now_text())
+	_cursor = preload("res://scripts/tile_cursor.gd").new()
+	_cursor.name = "TileCursor"
+	add_child(_cursor)
+	move_child(_cursor, _entities.get_index())
+	_counter = ShopCounter.new(_dialogue, _menu)
+	EventBus.npc_talked_to.connect(_on_talked_to)
+	EventBus.crab_pot_changed.connect(_on_crab_pot_changed)
+	for signal_ref: Signal in [EventBus.quest_started, EventBus.quest_completed, EventBus.item_added,
+			EventBus.item_removed]:
+		signal_ref.connect(func(_a = null, _b = null) -> void: _refresh_markers())
+	EventBus.quest_progressed.connect(func(_id: StringName, _p: int, _n: int) -> void: _refresh_markers())
+	EventBus.quest_expired.connect(func(_id: StringName, _t: String) -> void: _refresh_markers())
+	_dialogue.chosen.connect(func(_i: int) -> void: _refresh_markers.call_deferred())
+	_refresh_markers()
+	# Say what the tide's doing on the way in, and if any pots want hauling.
+	EventBus.message_posted.emit.call_deferred(_arrival_text())
 
 
 func _base_of(cell: Vector2i) -> Vector2:
@@ -172,10 +216,107 @@ func _wade_ashore() -> bool:
 	return false
 
 
-## The fishing rod asks this: nothing bites here until Tam's handline
-## (CoveLayout.water_at).
+## The handline and the rod ask this (DECISIONS 065): &"sea" off the pier,
+## the quay and the breakwater, as the tide stands now (CoveLayout.water_at).
 func water_at(cell: Vector2i) -> StringName:
-	return CoveLayout.water_at(cell)
+	return CoveLayout.water_at(cell, _tide_out)
+
+
+# --- Tam (DECISIONS 065) ----------------------------------------------------------
+
+## An Npc for everyone who lives in the Cove and has arrived (Tam, from
+## spring day 7), each with a request marker.
+func _place_people() -> void:
+	for person in ContentDB.characters_in(COVE_ID):
+		if person.spots.is_empty() or not GameState.has_unlock(person.requires_unlock):
+			continue
+		var npc := Npc.create(person.id, person.sprite, person.spot_on(GameState.day))
+		_entities.add_child(npc)
+		_markers[person.id] = npc.add_quest_marker()
+
+
+func _refresh_markers() -> void:
+	for id: StringName in _markers:
+		_markers[id].text = Quests.marker_for(id)
+
+
+## Someone here was spoken to. With a counter of their own (Tam), it's a
+## shop counter's conversation: requests, then the menu. Otherwise their
+## requests, or their line for the day.
+func _on_talked_to(npc_id: StringName) -> void:
+	var person := ContentDB.character(npc_id)
+	if person == null or person.location != COVE_ID:
+		return
+	if person.counter != null:
+		_counter.serve(person.counter, person.id, person.lines)
+		return
+	var lines := Quests.talk(npc_id)
+	if lines.is_empty() and person.line_on(GameState.day) != "":
+		lines = [person.line_on(GameState.day)]
+	if not lines.is_empty():
+		_dialogue.say(person.display_name, lines)
+
+
+# --- Crab pots (DECISIONS 065) ----------------------------------------------------
+# The crab pot in the bag asks these (SetPotAction), as the hoe asks the
+# Lane about the allotments.
+
+func pot_wanted_at(cell: Vector2i) -> bool:
+	return CoveLayout.is_pot_cell(cell) and not GameState.has_crab_pot(COVE_ID, cell)
+
+
+func set_pot(cell: Vector2i) -> void:
+	GameState.set_crab_pot(COVE_ID, cell)
+
+
+## A float for every pot set here.
+func _place_pots() -> void:
+	for cell in GameState.crab_pots_in(COVE_ID):
+		_add_pot(cell)
+
+
+func _add_pot(cell: Vector2i) -> void:
+	var pot := CrabPot.create(COVE_ID, cell)
+	_entities.add_child(pot)
+	_pots[cell] = pot
+
+
+## A pot was set, baited, hauled or pulled up: show it as it is now.
+func _on_crab_pot_changed(location_id: StringName, cell: Vector2i) -> void:
+	if location_id != COVE_ID:
+		return
+	var there := GameState.has_crab_pot(COVE_ID, cell)
+	if _pots.has(cell):
+		if there:
+			_pots[cell].refresh()
+			return
+		_pots[cell].queue_free()
+		_pots.erase(cell)
+	elif there:
+		_add_pot(cell)
+
+
+## What's said on the way in: the tide, and any pots waiting to be hauled.
+func _arrival_text() -> String:
+	var text := Tides.now_text()
+	var ready := GameState.crab_pots_ready_in(COVE_ID)
+	if ready == 1:
+		text += " One of your crab pots is ready to haul."
+	elif ready > 1:
+		text += " %d of your crab pots are ready to haul." % ready
+	return text
+
+
+func _physics_process(_delta: float) -> void:
+	# Outline the sea the held line or pot would go into, only where it would.
+	var cells: Array[Vector2i] = []
+	var tool := GameState.selected_tool()
+	if tool != null and tool.action != null and tool.action.usable_in_season(GameState.season_id()) \
+			and not Fishing.is_busy():
+		for cell in _player.target_cells():
+			if tool.action.can_use_away(self, cell):
+				cells.append(cell)
+	_cursor.set_cells(cells)
 
 
 ## Put the player where LocationManager asked: "from_town" or "from_lane",

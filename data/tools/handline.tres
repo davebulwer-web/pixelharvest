@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ToolDef" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/tools/fish_action.gd" id="2_action"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/handline.png" id="3_icon"]
+
+[sub_resource type="Resource" id="Resource_action"]
+script = ExtResource("2_action")
+bite_wait_multiplier = 1.0
+farm_water = &"pond"
+waters = Array[StringName]([&"sea"])
+
+[resource]
+script = ExtResource("1_def")
+id = &"handline"
+display_name = "Handline"
+description = "Tam's old handline: a wooden frame, a line and a weight. Sea fishing only: face the sea from the pier, the quay or the breakwater and Space to drop it in. Fish bite best with the tide in."
+icon = ExtResource("3_icon")
+energy_cost = 2.0
+action = SubResource("Resource_action")

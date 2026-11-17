@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="GameRules" load_steps=41 format=3]
+[gd_resource type="Resource" script_class="GameRules" load_steps=42 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/game_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_itemdef"]
@@ -39,6 +39,7 @@
 [ext_resource type="Resource" path="res://data/locations/tam_shed.tres" id="37_tam"]
 [ext_resource type="Resource" path="res://data/locations/rosa_cottage.tres" id="38_rosa"]
 [ext_resource type="Resource" path="res://data/locations/lighthouse.tres" id="39_lighthouse"]
+[ext_resource type="Resource" path="res://data/crab_pot_rules.tres" id="40_crab_pots"]
 
 [sub_resource type="Resource" id="Demand_bin"]
 script = ExtResource("34_demand")
@@ -68,6 +69,7 @@ late_warning_minutes = 1440
 hazards = ExtResource("22_hazards")
 fishing = ExtResource("25_fishing")
 tides = ExtResource("35_tides")
+crab_pots = ExtResource("40_crab_pots")
 kitchen_unlock = ExtResource("26_kitchen")
 workbench_unlock = ExtResource("32_bench")
 workbench_mend_item = ExtResource("33_stone")

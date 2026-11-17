@@ -26,6 +26,7 @@ var _opens_after: ShopDef = null
 
 ## The keeper whose orders are being chosen between, and those orders.
 var _asking: ShopDef = null
+var _asking_giver: StringName = &""
 var _offers: Array[QuestDef] = []
 
 
@@ -36,8 +37,15 @@ func _init(dialogue, menu) -> void:
 	_dialogue.chosen.connect(_on_order_chosen)
 
 
-## The player spoke to `shop`'s keeper.
-func serve(shop: ShopDef) -> void:
+## The player spoke to `shop`'s keeper. Requests and orders are asked of
+## `giver`, the keeper's id for the Quests service: the shop's own id for a
+## shopkeeper, or a person's CharacterDef id when the counter is theirs
+## (Tam on the quay, CharacterDef.counter; DECISIONS 065), and then `lines`
+## are what they say when they've nothing to ask (the shop's greetings, if
+## it has any, come first).
+func serve(shop: ShopDef, giver: StringName = &"", lines: Array[String] = []) -> void:
+	if giver == &"":
+		giver = shop.id
 	if not shop.is_open_at(GameState.minutes):
 		_opens_after = null
 		var closed_lines: Array[String] = [
@@ -49,29 +57,31 @@ func serve(shop: ShopDef) -> void:
 	# A keeper with a request to make, remind you of or take in says that
 	# instead of their greeting (DECISIONS 044), and the menu opens after, as
 	# usual: Brann can ask you to prove yourself and still sell you a hoe.
-	var about_requests := Quests.talk(shop.id)
+	var about_requests := Quests.talk(giver)
 	if not about_requests.is_empty():
 		_opens_after = shop
 		_dialogue.say(shop.keeper_name, about_requests)
 		return
-	var offers := Quests.orders_on_offer(shop.id)
+	var offers := Quests.orders_on_offer(giver)
 	if not offers.is_empty():
 		_opens_after = null
 		_asking = shop
+		_asking_giver = giver
 		_offers = offers
 		var answers: Array[String] = []
 		for order in offers:
 			answers.append(Quests.order_choice_text(order))
 		answers.append("Not this time")
-		_dialogue.ask(shop.keeper_name, Quests.choice_line(shop.id), answers)
+		_dialogue.ask(shop.keeper_name, Quests.choice_line(giver), answers)
 		return
-	if shop.greetings.is_empty():
+	var greetings: Array[String] = shop.greetings if not shop.greetings.is_empty() else lines
+	if greetings.is_empty():
 		_menu.open(shop)
 		return
 	# One greeting a day: the same line all day, a new one tomorrow.
 	_opens_after = shop
-	var lines: Array[String] = [shop.greetings[GameState.day % shop.greetings.size()]]
-	_dialogue.say(shop.keeper_name, lines)
+	var said: Array[String] = [greetings[GameState.day % greetings.size()]]
+	_dialogue.say(shop.keeper_name, said)
 
 
 ## The player picked one of the keeper's orders, or none (the last answer).
@@ -79,14 +89,16 @@ func _on_order_chosen(index: int) -> void:
 	if _asking == null:
 		return  # someone else's question
 	var shop := _asking
+	var giver := _asking_giver
 	var offers := _offers
 	_asking = null
+	_asking_giver = &""
 	_offers = []
 	_opens_after = shop
 	if index < offers.size():
 		_dialogue.say(shop.keeper_name, Quests.take(offers[index]))
 		return
-	Quests.decline(shop.id)
+	Quests.decline(giver)
 	var lines: Array[String] = ["Another time, then."]
 	_dialogue.say(shop.keeper_name, lines)
 

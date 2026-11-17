@@ -37,6 +37,14 @@ extends Resource
 ## here from the start.
 @export var requires_unlock: UnlockDef
 
+## Someone who buys (or sells) where they stand, outdoors, with no shop to
+## walk into (DECISIONS 065): Tam on the quay buys fish and anything from the
+## sea. Talking to them is a shop counter's conversation (ShopCounter), with
+## their requests first, as a shopkeeper's are, then the counter's menu. The
+## counter's greetings are what they say; with none, their `lines`. Its id
+## must differ from every character's and shop's. Null: they only talk.
+@export var counter: ShopDef
+
 
 ## Where they stand on `day`.
 func spot_on(day: int) -> Vector2i:

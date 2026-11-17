@@ -200,7 +200,10 @@ func _fill(keep_focus_on: Resource) -> void:
 			var each := Economy.store_price(item, _shop)
 			var detail := "Sell all %d for %dg. The shipping bin on the farm pays full price, but only overnight." \
 					% [amount, total]
-			if _shop.produce_pay_rate > 1.0:
+			if is_equal_approx(_shop.produce_pay_rate, 1.0):
+				# Tam (DECISIONS 065): the bin's price, but now.
+				detail = "Sell all %d for %dg: what the shipping bin pays, but today." % [amount, total]
+			elif _shop.produce_pay_rate > 1.0:
 				detail = "Sell all %d for %dg, more than the shipping bin pays (%dg)." \
 						% [amount, total, Economy.bin_pays(item, amount)]
 			# Where to sell (DECISIONS 063): a buyer who has had plenty of
