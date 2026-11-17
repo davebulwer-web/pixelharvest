@@ -79,6 +79,20 @@ deferred (`DECISIONS.md` 006); the Resource architecture leaves room if they're 
 Until the town exists, buying and selling happens through a menu and a shipping bin on the
 farm, so the full loop is playable from Stage 4 onward.
 
+From Stage 19 (`ROADMAP.md` section 13, agreed 2026-11-17) the world is a loop of five
+places, spaced so that travel time is a real cost:
+
+- **The farm**, grown to 48 × 32, overgrown at the start: clearing it is early work.
+- **The Lane** between farm and town: hedgerows, allotments (odd jobs), Pip's cottage,
+  Dot the carrier (errands, later cart rides).
+- **The town**, grown to 48 × 32 for larger buildings: the shops, Mabel's bakery, the
+  tavern (evenings), the town hall and people's homes.
+- **The Cove** (open from day 1): harbour, beach, rockpools at low tide, sea fishing
+  (Tam's handline in week 1).
+- **The Woods** across the bridge (from summer).
+
+People have homes and daily schedules, and walk between places.
+
 ## Difficulty
 
 A `DifficultyDef` resource chosen at new game: multipliers on sale prices, seed costs,
@@ -96,6 +110,11 @@ original scope:
 - **Cooking**, as food that restores energy only (no processing chains for profit).
 - **Bees** and a **greenhouse**.
 - **Festivals** and an almanac of collections.
+
+And from section 13 (2026-11-17): a small **workbench** (things to make from stone,
+timber and fibre; no machines that make goods for profit), **odd jobs and errands** for
+early income, **tides**, a **tavern**, buyers whose price drops when flooded, and bought
+food (bread, tavern meals) as a gold-for-energy trade.
 
 ## Explicitly out of scope
 

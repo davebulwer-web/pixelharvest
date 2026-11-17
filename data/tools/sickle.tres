@@ -7,6 +7,7 @@
 
 [sub_resource type="Resource" id="Resource_action"]
 script = ExtResource("2_action")
+clears = Array[StringName]([&"bramble", &"nettles"])
 
 [sub_resource type="Resource" id="ToolTier_1"]
 script = ExtResource("4_tier")
@@ -26,7 +27,7 @@ width = 3
 script = ExtResource("1_def")
 id = &"sickle"
 display_name = "Sickle"
-description = "Space cuts weeds (for fibre) and picks ripe crops. Brann can make it wider."
+description = "Space cuts weeds, brambles and nettles (for fibre) and picks ripe crops. Brann can make it wider."
 icon = ExtResource("3_icon")
 energy_cost = 1.0
 action = SubResource("Resource_action")

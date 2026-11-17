@@ -25,10 +25,15 @@ extends ToolAction
 
 
 func can_use(farm: FarmData, cell: Vector2i) -> bool:
-	return timber != null and farm.can_chop(cell)
+	return clears_at(farm, cell) or (timber != null and farm.can_chop(cell))
 
 
+## A stump on the farm's new ground (DECISIONS 060) comes out whole; what it
+## gives is the stump's own (ObjectDef.clears_to), not the thicket's timber.
 func apply(farm: FarmData, cell: Vector2i) -> void:
+	if clears_at(farm, cell):
+		farm.clear_debris(cell)
+		return
 	farm.chop(cell, timber.id, timber_from_thicket)
 
 

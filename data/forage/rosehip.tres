@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ForageDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/forage_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/forage/rosehip.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"rosehip"
+display_name = "Rosehips"
+description = "Bright red hips from the dog rose, left on the hedge into winter."
+icon = ExtResource("2_icon")
+sell_price = 12
+tags = Array[StringName]([&"fruit"])
+seasons = Array[StringName]([&"winter"])
+found_in = Array[StringName]([&"lane"])
+weight = 12

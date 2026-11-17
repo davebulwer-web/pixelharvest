@@ -11,4 +11,5 @@ description = "Broad leaves that smell of garlic. It carpets the shady places in
 icon = ExtResource("2_icon")
 sell_price = 15
 seasons = Array[StringName]([&"spring"])
+found_in = Array[StringName]([&"woods", &"lane"])
 weight = 12

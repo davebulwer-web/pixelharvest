@@ -106,6 +106,8 @@ func _ready() -> void:
 	EventBus.crop_dug_up.connect(_on_crop_dug_up)
 	# Whatever the axe chops gives timber (DECISIONS 053).
 	EventBus.wood_chopped.connect(_on_wood_chopped)
+	# Debris cleared from the farm gives stone, timber or fibre (DECISIONS 060).
+	EventBus.debris_cleared.connect(_on_debris_cleared)
 	# The sickle cut a ripe crop: pick it as E would (DECISIONS 058).
 	EventBus.crop_cut.connect(func(cell: Vector2i) -> void: harvest(cell))
 	weather_rng.randomize()
@@ -765,6 +767,30 @@ func pull_weeds(cell: Vector2i) -> bool:
 		EventBus.message_posted.emit("Too tired to pull weeds")
 		return false
 	return plot.pull_weeds(cell)
+
+
+## E on brambles or nettles (DECISIONS 060): pull them up by hand, for the
+## debris's hand_energy (scaled by the difficulty, like a tool). Returns
+## false if there's nothing here that comes away by hand, or not enough
+## energy left.
+func clear_by_hand(cell: Vector2i) -> bool:
+	var plot := plot_here()
+	var debris := plot.debris_at(cell) if plot != null else null
+	if debris == null or not debris.clear_by_hand:
+		return false
+	if not try_spend_energy(debris.hand_energy * difficulty.energy_cost_multiplier):
+		EventBus.message_posted.emit("Too tired to clear the %s" % debris.display_name.to_lower())
+		return false
+	return plot.clear_debris(cell)
+
+
+## Whatever was cleared gives what its ObjectDef says (stones give stone).
+func _on_debris_cleared(_cell: Vector2i, object_id: StringName) -> void:
+	var debris := ContentDB.object(object_id)
+	if debris == null or debris.clears_to == null or debris.clears_to_amount <= 0:
+		return
+	inventory.add(debris.clears_to, debris.clears_to_amount)
+	EventBus.message_posted.emit("+%d %s" % [debris.clears_to_amount, debris.clears_to.display_name.to_lower()])
 
 
 func _on_weeds_pulled(_cell: Vector2i) -> void:

@@ -9,7 +9,7 @@ extends Node
 ## small lookups.
 ##
 ## How a trip works:
-##   1. Something calls go_to(&"town", &"from_farm").
+##   1. Something calls go_to(&"town", &"from_lane").
 ##   2. GameState.location is updated, so the move is part of saved state.
 ##   3. The current scene is freed and the new location's scene loaded.
 ##   4. The new scene, in its _ready, asks take_arrival_point() where to put
@@ -49,6 +49,11 @@ func go_to(location_id: StringName, arrival_point: StringName = &"") -> void:
 ## game_rules.tres doesn't list.
 func current() -> LocationDef:
 	return _locations.get(GameState.location)
+
+
+## The location with this id, or null.
+func find(location_id: StringName) -> LocationDef:
+	return _locations.get(location_id)
 
 
 ## Every location, in game_rules.tres order. The town uses it to find the

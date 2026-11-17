@@ -17,7 +17,7 @@ extends RefCounted
 ##        trees  (glasshouse) trees  ~~pond~~ ||
 ##                                    ~~~~~~~~ ||  angler
 ##    *  [Seeds]  *  |  * [General] *   * [Smith] * ||  path to the pond
-##   ==================== road ==========================  -> farm
+##   ==================== road ==========================  -> the Lane
 ##          fence           #  square  #
 ##       * * garden * *    #   bench    #
 ##          fence          #  (fountain)#  mayor
@@ -33,10 +33,9 @@ extends RefCounted
 
 const SIZE := Vector2i(40, 24)
 
-## The two-tile-wide road along the whole town, and where it leaves the east
-## edge for the farm.
+## The two-tile-wide road along the whole town. Where it leaves the east edge
+## for the Lane is town.tres's exits (DECISIONS 060).
 const ROAD_ROWS: Array[int] = [13, 14]
-const FARM_GATE: Array[Vector2i] = [Vector2i(40, 13), Vector2i(40, 14)]
 
 ## The paved square south of the road, with the fountain in the middle.
 const SQUARE := Rect2i(15, 15, 11, 7)
@@ -60,10 +59,6 @@ const WOODS_GATE: Array[Vector2i] = [Vector2i(37, -1), Vector2i(38, -1)]
 ## Where the farmer stands on coming back from the Woods: at the town end of
 ## the bridge, in pixels.
 const ARRIVAL_FROM_WOODS := Vector2(608, 44)
-
-## Where the farmer stands on arriving from the farm: in the middle of the
-## road, in pixels (the road is rows 13 and 14).
-const ARRIVAL_FROM_FARM := Vector2(616, 228)
 
 ## Everything standing in the town, by the cell it stands on, naming an
 ## ObjectDef in data/objects/. The object's picture sits on the bottom of its
@@ -121,16 +116,17 @@ const OBJECTS: Dictionary = {
 
 
 ## The ground tile (an atlas coordinate, see GroundTiles) for every cell of the
-## town and its border, given the cells shop doors stand on and whether the
-## bridge to the Woods is open. A door cell is path, so the doorstep reads as
-## one with the road.
-static func build(door_cells: Array[Vector2i], bridge_open: bool = false) -> Dictionary:
+## town and its border, given the cells shop doors stand on, the gap cells of
+## the town's exits (drawn as path) and whether the bridge to the Woods is
+## open. A door cell is path, so the doorstep reads as one with the road.
+static func build(door_cells: Array[Vector2i], gap_cells: Array[Vector2i] = [],
+		bridge_open: bool = false) -> Dictionary:
 	var tiles: Dictionary = {}
 	for y in range(-1, SIZE.y + 1):
 		for x in range(-1, SIZE.x + 1):
 			var cell := Vector2i(x, y)
 			tiles[cell] = _tile_for(cell, door_cells)
-	for cell in FARM_GATE:
+	for cell in gap_cells:
 		tiles[cell] = GroundTiles.path_for(cell)
 	if bridge_open:
 		for y in range(BRIDGE.position.y, BRIDGE.end.y):

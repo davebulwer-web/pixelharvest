@@ -1,7 +1,8 @@
 class_name LocationDef
 extends Resource
 ##
-## LocationDef — one place the player can be: the farm now, the town in Stage 7.
+## LocationDef — one place the player can be: the farm, the Lane, the town,
+## the Woods, a shop or the farmhouse.
 ##
 ## A location is just an id and the scene that shows it. All of its *state*
 ## lives in GameState (the farm's in FarmData), never in the scene, so the scene
@@ -68,3 +69,10 @@ extends Resource
 ## greenhouse, broken until Ivy's request mends it. Null: the building looks
 ## the same locked or not (Brann's forge).
 @export var locked_exterior: Texture2D
+
+## --- Ways out (DECISIONS 060) ---------------------------------------------------
+## For an outdoor map: the roads from here to the places next door, each a gap
+## in the edge, where it leads, and where you stand coming back in that way.
+## Exits (scripts/exits.gd) builds them, so a new road is data, not code.
+## Buildings don't need these: their door is `door_cell` on their outside.
+@export var exits: Array[ExitDef] = []

@@ -5,11 +5,19 @@ extends ToolAction
 ## (DECISIONS 045) it digs the weeds out instead, crop or no crop: one swing,
 ## one job, so hoeing weedy grass takes a second swing to till it.
 ##
+## It also breaks up the stones on the farm's overgrown ground (DECISIONS
+## 060): which debris, in the hoe's .tres (`clears`). A stone cleared is
+## grass, and the next swing tills it.
+##
 
 func can_use(farm: FarmData, cell: Vector2i) -> bool:
-	return farm.has_weeds(cell) or farm.can_till(cell)
+	return farm.has_weeds(cell) or clears_at(farm, cell) or farm.can_till(cell)
 
 
 func apply(farm: FarmData, cell: Vector2i) -> void:
-	if not farm.pull_weeds(cell):
-		farm.till(cell)
+	if farm.pull_weeds(cell):
+		return
+	if clears_at(farm, cell):
+		farm.clear_debris(cell)
+		return
+	farm.till(cell)

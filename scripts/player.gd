@@ -179,7 +179,8 @@ func _use_tool_away() -> void:
 		tool.action.apply_away(tool_place, cell)
 
 
-## E: harvest a ready crop by hand, pull up weeds (DECISIONS 045), or use
+## E: harvest a ready crop by hand, pull up weeds (DECISIONS 045) or
+## brambles and nettles (DECISIONS 060), or use
 ## whatever stands on the tile ahead (the shipping bin, a sprinkler to pick it
 ## up, a hive's honey to collect, a shopkeeper to talk to, the bed).
 ## Harvesting is free — the work was in growing it. Weeding costs a little
@@ -189,7 +190,8 @@ func _use_tool_away() -> void:
 ## and interact(), so this never grows a list of things it knows about.
 func _interact() -> void:
 	var cell := target_cell()
-	if can_farm and (GameState.harvest(cell) or GameState.pull_weeds(cell)):
+	if can_farm and (GameState.harvest(cell) or GameState.pull_weeds(cell)
+			or GameState.clear_by_hand(cell)):
 		return
 	for node in get_tree().get_nodes_in_group(&"interactable"):
 		if node.occupies(cell):

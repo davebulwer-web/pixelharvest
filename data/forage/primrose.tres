@@ -12,4 +12,5 @@ icon = ExtResource("2_icon")
 sell_price = 20
 tags = Array[StringName]([&"flower"])
 seasons = Array[StringName]([&"spring"])
+found_in = Array[StringName]([&"woods", &"lane"])
 weight = 10

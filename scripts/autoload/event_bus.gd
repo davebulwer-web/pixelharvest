@@ -196,6 +196,12 @@ signal plot_unlocked(plot_id: StringName)
 signal object_placed(cell: Vector2i, object_id: StringName)
 signal object_removed(cell: Vector2i, object_id: StringName)
 
+## Debris on the farm was cleared (DECISIONS 060): stones hoed, a stump dug
+## out, brambles or nettles cut or pulled. `object_id` is what it was;
+## GameState puts what it gives (stone, timber, fibre) in the bag. It was
+## also announced as object_removed.
+signal debris_cleared(cell: Vector2i, object_id: StringName)
+
 ## An object that makes something finished a batch overnight (DECISIONS 057):
 ## `amount` of `item_id` waits in it (honey in a bee hive) until collected.
 signal object_made(cell: Vector2i, object_id: StringName, item_id: StringName, amount: int)

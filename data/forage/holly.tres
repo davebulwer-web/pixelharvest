@@ -11,4 +11,5 @@ description = "Spiky leaves and red berries. The town likes it for lantern night
 icon = ExtResource("2_icon")
 sell_price = 20
 seasons = Array[StringName]([&"winter"])
+found_in = Array[StringName]([&"woods", &"lane"])
 weight = 10

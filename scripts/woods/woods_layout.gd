@@ -27,17 +27,10 @@ extends RefCounted
 ##
 ## Bigger than the town (40 × 24) so it feels like a place to explore, as
 ## ROADMAP Stage 14 suggests. The way in is the bottom of the south path, from
-## the new bridge at the top of the town's pond path.
+## the new bridge at the top of the town's pond path (woods.tres's exits).
 ##
 
 const SIZE := Vector2i(48, 32)
-
-## The gap in the south edge that leads back over the bridge to the town.
-const TOWN_GATE: Array[Vector2i] = [Vector2i(23, 32), Vector2i(24, 32)]
-
-## Where the farmer stands on arriving from the town, in pixels: on the south
-## path, just inside the edge.
-const ARRIVAL_FROM_TOWN := Vector2(384, 492)
 
 ## The paths, each two tiles wide.
 const PATHS: Array[Rect2i] = [
@@ -87,14 +80,16 @@ const TREE_SPACING := 2
 
 
 ## The ground tile (an atlas coordinate, see GroundTiles) for every cell of
-## the Woods and its border.
-static func build() -> Dictionary:
+## the Woods and its border, given the gap cells of the Woods' exits (the
+## way back to town at the bottom of the south path: woods.tres, DECISIONS
+## 060), drawn as path.
+static func build(gap_cells: Array[Vector2i] = []) -> Dictionary:
 	var tiles: Dictionary = {}
 	for y in range(-1, SIZE.y + 1):
 		for x in range(-1, SIZE.x + 1):
 			var cell := Vector2i(x, y)
 			tiles[cell] = _tile_for(cell)
-	for cell in TOWN_GATE:
+	for cell in gap_cells:
 		tiles[cell] = GroundTiles.path_for(cell)
 	return tiles
 

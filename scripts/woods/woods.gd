@@ -16,7 +16,7 @@ extends Node2D
 ##   Woods
 ##   ├── Ground      (TileMapLayer, the same seasonal tilesets as the farm)
 ##   ├── Footbridge  (the planks over the stream, drawn over the ground)
-##   ├── SpawnPoints (Marker2Ds, made here: one for the way in from town)
+##   ├── SpawnPoints (Marker2Ds, made by Exits: one for the way in from town)
 ##   ├── TileCursor  (made here: the tile the axe would chop, when it would)
 ##   ├── Entities    (y-sorted: player, trees, forage, fallen logs)
 ##   ├── Effects     (made here: FarmEffects, the axe's wood chips)
@@ -27,7 +27,6 @@ extends Node2D
 
 const TILE_PX := 16
 const WOODS_ID := &"woods"
-const TOWN_ID := &"town"
 
 @onready var _ground: TileMapLayer = $Ground
 @onready var _footbridge: Sprite2D = $Footbridge
@@ -49,7 +48,8 @@ func _ready() -> void:
 	_player.can_farm = false
 	_player.tool_place = self
 	SeasonLook.apply_ground(_ground)
-	var tiles := WoodsLayout.build()
+	var woods := LocationManager.find(WOODS_ID)
+	var tiles := WoodsLayout.build(Exits.gap_cells(woods))
 	for cell: Vector2i in tiles:
 		GroundTiles.draw(_ground, cell, tiles[cell])
 	# Undergrowth chopped down this season is grass until the season turns.
@@ -66,11 +66,11 @@ func _ready() -> void:
 	# The footbridge's picture covers its cells, which are path underneath.
 	_footbridge.position = Vector2(WoodsLayout.FOOTBRIDGE.position * TILE_PX)
 
-	_add_spawn(&"from_town", WoodsLayout.ARRIVAL_FROM_TOWN)
+	# The way back over the bridge to town: woods.tres's exits (DECISIONS 060).
+	Exits.add(self, woods, _spawns)
 	_place_objects()
 	_place_forage()
 	_place_logs()
-	_add_town_gate()
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
 	EventBus.weather_changed.connect(func(_w: StringName) -> void: SeasonLook.apply_overlay(_weather))
@@ -79,13 +79,6 @@ func _ready() -> void:
 
 func _base_of(cell: Vector2i) -> Vector2:
 	return Vector2(cell.x * TILE_PX + TILE_PX / 2.0, (cell.y + 1) * TILE_PX)
-
-
-func _add_spawn(point_name: StringName, at: Vector2) -> void:
-	var marker := Marker2D.new()
-	marker.name = String(point_name)
-	marker.position = at
-	_spawns.add_child(marker)
 
 
 ## Stand every tree from WoodsLayout.objects(). Each is an ObjectDef, so it
@@ -176,13 +169,6 @@ func chop(cell: Vector2i, item_id: StringName, amount: int) -> void:
 	else:
 		return
 	EventBus.wood_chopped.emit(WOODS_ID, cell, what, item_id, amount)
-
-
-## The way back: the gap in the south edge, over the bridge into town.
-func _add_town_gate() -> void:
-	var top_left: Vector2i = WoodsLayout.TOWN_GATE[0]
-	var rect := Rect2(top_left * TILE_PX, Vector2(TILE_PX * WoodsLayout.TOWN_GATE.size(), TILE_PX))
-	add_child(ExitZone.create(rect, TOWN_ID, &"from_woods"))
 
 
 func _place_player() -> void:

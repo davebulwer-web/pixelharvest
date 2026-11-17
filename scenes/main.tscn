@@ -21,9 +21,6 @@ tile_set = ExtResource("2_tileset")
 [node name="default" type="Marker2D" parent="SpawnPoints"]
 position = Vector2(232, 208)
 
-[node name="from_town" type="Marker2D" parent="SpawnPoints"]
-position = Vector2(24, 212)
-
 [node name="TileCursor" type="Node2D" parent="."]
 script = ExtResource("4_cursor")
 

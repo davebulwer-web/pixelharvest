@@ -11,5 +11,6 @@ description = "A handful from the brambles. Mind the thorns."
 icon = ExtResource("2_icon")
 sell_price = 15
 seasons = Array[StringName]([&"autumn"])
+found_in = Array[StringName]([&"woods", &"lane"])
 weight = 12
 tags = Array[StringName]([&"fruit"])

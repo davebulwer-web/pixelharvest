@@ -35,6 +35,22 @@ func usable_in_season(_season_id: StringName) -> bool:
 	return true
 
 
+# --- Clearing the farm (DECISIONS 060) -----------------------------------------
+# The farm's new ground starts covered in debris (stones, stumps, brambles,
+# nettles: ObjectDefs). A tool says which of them it clears, by ObjectDef id,
+# in its .tres; the hoe, the axe and the sickle ask clears_at() alongside
+# their usual jobs. What clearing gives is the debris's own business.
+
+## The debris this tool clears, by ObjectDef id (&"stones" for the hoe).
+## Empty for a tool that clears nothing.
+@export var clears: Array[StringName] = []
+
+
+## True if there's debris at `cell` that this tool clears.
+func clears_at(farm: FarmData, cell: Vector2i) -> bool:
+	return not clears.is_empty() and farm.can_clear(cell, clears)
+
+
 # --- Away from the farm (DECISIONS 053) ----------------------------------------
 # The axe is the first tool that works somewhere other than the farm: in the
 # Woods. Those places have no FarmData, so they're asked through `place`, the

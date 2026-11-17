@@ -11,4 +11,5 @@ description = "A hazelnut, fallen and ripe. The squirrels missed this one."
 icon = ExtResource("2_icon")
 sell_price = 20
 seasons = Array[StringName]([&"autumn"])
+found_in = Array[StringName]([&"woods", &"lane"])
 weight = 10

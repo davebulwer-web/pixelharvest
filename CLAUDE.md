@@ -112,6 +112,10 @@ scripts/             Game code
                      the river and the bridge to the Woods
   woods/             The Woods: their map, the day's forage (Forage, ForageSpot; DECISIONS 052)
                      and fallen logs (FallenLogs, FallenLog; DECISIONS 053)
+  lane/              The Lane between the farm and the town: its map (LaneLayout), its
+                     hedgerow forage, the signpost (DECISIONS 060)
+  exits.gd           Exits: builds a place's ways out from LocationDef.exits (ExitDef;
+                     DECISIONS 060)
   items/             Inventory
   fishing/           FishingLine: the float, the line and the reel bar (DECISIONS 054)
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
@@ -140,14 +144,15 @@ data/                Content resources (.tres), indexed by ContentDB
                      fertilisers (FertiliserDef: what fed soil does; DECISIONS 058)
   decorations/       ToolDef — decorations for the farm, placed like sprinklers (DECISIONS 039)
   objects/           ObjectDef — things standing on the farm (tree, bin, sprinklers, decorations,
-                     bee hives: an object can make something, like honey; DECISIONS 057)
+                     bee hives: an object can make something, like honey; DECISIONS 057;
+                     debris on the new ground, cleared for what it gives: DECISIONS 060)
   upgrades/          UpgradeDef — bought once: tool tiers, energy, fields
   seasons/           SeasonTheme — each season's name, look and weather odds (crops list
                      their own seasons)
   weather/           WeatherDef — sunny, rain, storm, heatwave, snow, frost: what each does,
                      looks and sounds like (DECISIONS 046)
-  locations/         LocationDef — the farm, the farmhouse, the greenhouse, the town, each shop
-                     (and where its door is)
+  locations/         LocationDef — the farm, the farmhouse, the greenhouse, the Lane, the town,
+                     the Woods, each shop (and where its door is, or its ways out: exits)
   shops/             ShopDef — a shopkeeper, their words, and what the counter offers
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers)
   events/            CalendarEvent — what happens on which days (market day) and its stalls,
@@ -173,7 +178,7 @@ assets/sprites/      Character and object art from Pixellab (town/ holds the sho
                      farm/ the farmhouse and its furniture, decorations/ the farm's decorations,
                      forage/ the wild things' icons, woods/ the Woods' own pieces,
                      fish/ the fish's icons, fishing/ the float,
-                     dishes/ the dishes' icons)
+                     dishes/ the dishes' icons, lane/ the Lane's pieces)
 assets/tilesets/     Ground and world tilesets
 assets/audio/        Sound effects (sfx/*.wav), music (music/*.ogg: farm, town, woods) and the weather's loops
                      (ambience/*.ogg), made by art/build_sounds.py

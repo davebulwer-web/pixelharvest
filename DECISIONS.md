@@ -2546,3 +2546,84 @@ can't tell; it needs a giant item or a giant counted in the log (session 2). The
 year review at lantern night is Stage 19. Placeholder art: the flags, the two show
 tables, the contest sign, the festival lanterns and the four prizes, drawn by a script
 in the palette until Pixellab. Balance (rival ranges, prize gold) is for Stage 20.
+
+## 060 — Ways out are data, the Lane joins the farm to the town, and the farm grows with debris to clear
+
+**Decision.** Stage 19 session 1 starts ROADMAP section 13 (agreed 2026-11-17): the first
+new place (the Lane), the farm grown to 48 × 32 with overgrown new ground, and the
+mechanism every later place will use to join the map. Placeholder art. **Save version 21**
+(the farm's new ground).
+
+- *Exits are data.* A new `ExitDef` (`to`, the gap's `cells` just outside the edge, the
+  `arrival` cell just inside) and `LocationDef.exits`. `Exits.add()` turns each into an
+  `ExitZone` and a spawn point; `Exits.gap_cells()` tells the map which edge cells to draw
+  as path. One naming rule means the two ends of a road never name each other's spawn
+  points: leaving `here` for `to` arrives at "from_<here>" in `to`, and an exit to `to`
+  makes "from_<to>" here. The farm (gate → the Lane), the Lane (west → town, east → farm),
+  the town (east → the Lane) and the Woods (south → town) all use it; `FarmLayout.TOWN_GATE`,
+  `TownLayout.FARM_GATE`/`ARRIVAL_FROM_FARM` and `WoodsLayout.TOWN_GATE`/`ARRIVAL_FROM_TOWN`
+  are gone, and the farm scene's hand-placed "from_town" marker with them. The town's
+  bridge to the Woods stays its own code: its zone and picture change with the unlock.
+  `LocationManager.find(id)` added.
+- *The Lane* (`lane.tres`, `scenes/lane.tscn`, `scripts/lane/`): 64 × 24, between the farm
+  and the town (the farm gate now opens onto it). `LaneLayout` is a map function like the
+  Woods': the lane two tiles wide end to end, a hedgerow each side (THICKET ground tiles,
+  so solid) with gaps for what comes later (the allotments' path; Pip's and Dot's in
+  session 2; the cliff path), the allotments north of the lane (fence and eight beds,
+  drawn as tilled ground, for Stage 20's odd jobs), a stream near the farm end with a ford
+  where the lane crosses, sparse trees, and a signpost at the top of the cliff path (E
+  reads it: the path has slipped, someone will have to mend it; the Cove is Stage 21). It
+  plays the farm's tune (the same stream, so it carries on from the farm). Tools are off;
+  the rod finds no fish in the stream yet (`water_at` says none). A `Signpost` scene with
+  its words on the scene is a small reusable interactable.
+- *Hedgerows* reuse foraging (DECISIONS 052) unchanged: `lane.tres` has
+  `forage_per_day = 6`, and the spots are the lane-side verges along both hedges.
+  Primroses, wild garlic, elderflower, blackberries, hazelnuts and holly now have
+  `found_in = [woods, lane]`; three new hedgerow-only kinds (wild raspberries in summer,
+  sloes in autumn, rosehips in winter; tag `fruit`) give every season at least two.
+- *The farm grows to 48 × 32.* The old farm (`FarmLayout.OLD_GROUND`, 30 × 20) keeps
+  every cell where it was, so saves still line up; the new ground east and south starts
+  overgrown. Each new tile rolls once (from the cell, so always the same) against
+  `FarmLayout.DEBRIS_ODDS`: stones 10%, nettles 8%, brambles 8%, stumps 4%, trees 2%, about
+  a third of the ground (about 300 pieces).
+- *Debris is an object.* Stones, a stump, brambles and nettles are `ObjectDef`s with a new
+  "Debris" group: `clears_to` and `clears_to_amount` (stone ×2, timber ×3, fibre ×1, fibre
+  ×1), `clear_by_hand` and `hand_energy` (brambles 4, nettles 3). They stand on a tile as
+  `object_id`, so they need nothing new in `FarmTile` or the save, block tilling and
+  placing, and keep weeds off. Which tool clears what is on the tool: a new
+  `ToolAction.clears` (ObjectDef ids) in each tool's `.tres` (the hoe: stones; the axe:
+  stumps; the sickle: brambles and nettles), and those three actions ask `clears_at()`
+  alongside their usual jobs. The swing costs what the tool's swing costs (the hoe's 2, the
+  axe's 4); a wide tier clears a row. E pulls up brambles and nettles
+  (`GameState.clear_by_hand`, before the interactables). `FarmData.clear_debris()` removes
+  it and announces `object_removed` and a new `debris_cleared`; GameState puts what it
+  gives in the bag. Trees on the new ground are ordinary trees and stay.
+- *New item:* stone (sell 1g), for Stage 20's workbench.
+- *v20 → v21*: the farm's tiles inside the old 30 × 20 and its west and north cliffs (with
+  the gate) are kept; the old east and south cliffs are replaced by new ground and new
+  cliffs ring 48 × 32. The sizes, odds and dice are frozen in the step (`V21_*`), today
+  identical to `FarmLayout`'s, so an old farm's new ground is exactly a new game's.
+  `tests/saves/v20_example.json` is the v19 example brought up by the real v20 build.
+
+Options considered: debris as new terrain kinds (like THICKET): one per kind in the enum
+and the tileset, and no picture standing up off the ground; debris as a new field on
+`FarmTile`: a save change for something `object_id` already holds. Which tool clears what
+on the debris (`ObjectDef.cleared_by` tool ids): a tool's action doesn't know its own id,
+so it would have to be passed through every call; on the tool it sits beside the axe's
+timber numbers and needs no change to the interface (rule 5). The ROADMAP's "stones, 4
+energy": kept at the hoe's own swing cost (2), as about 300 pieces of debris are already
+several days of energy; Stage 26 balances it. A bigger farm generated afresh for old
+saves from today's `FarmLayout`: against rule 4 (a step must mean the same thing for
+ever), hence the frozen copy.
+
+**Why.** Dave's complaint (ROADMAP 13.1): nothing to do after 9 AM, and the farm and town
+too close. Clearing is the energy sink spring was missing; the Lane puts distance and
+something to pick on the way between home and the shops; exits as data make the Cove,
+the coast road and the cliff path one `.tres` entry each.
+
+**Cost.** Finds while clearing, the building size rule, and Pip's cottage and Dot's yard
+are session 2. The Lane is placeholder (the hedge is the thicket tile, the allotment beds
+the tilled tile). Placeholder sprites for the debris, stone, the three new forage icons
+and the signpost are drawn by `art/build_stage19_placeholders.py` in the palette until
+Pixellab (Stage 23). The stream doesn't fish yet. Travel times aren't measured yet
+(session 2).

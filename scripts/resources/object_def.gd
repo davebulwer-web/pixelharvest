@@ -65,3 +65,24 @@ extends Resource
 ## True for an object that counts as a flower to the bees (the flower bed).
 ## Flowering crops (an item tagged &"flower") count without this.
 @export var counts_as_flower: bool = false
+
+## --- Debris (DECISIONS 060) --------------------------------------------------
+## Stones, stumps, brambles and nettles on the farm's overgrown new ground:
+## things standing on a tile that clearing takes away for good, leaving grass
+## to farm. Which tools clear which debris is the tool's business
+## (ToolAction.clears: the hoe breaks up stones, the axe takes out stumps, the
+## sickle cuts brambles and nettles); E clears what comes away by hand.
+
+## What clearing it gives, and how many: stone, timber, fibre. Null: nothing.
+@export var clears_to: ItemDef
+@export var clears_to_amount: int = 1
+
+## True if E pulls it up by hand (brambles, nettles), for `hand_energy`
+## (scaled by the difficulty, like a tool's swing).
+@export var clear_by_hand: bool = false
+@export var hand_energy: float = 0.0
+
+
+## True for debris: something clearing takes away, by a tool or by hand.
+func is_debris() -> bool:
+	return clears_to != null or clear_by_hand

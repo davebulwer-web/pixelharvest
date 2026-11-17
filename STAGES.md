@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 18 — festivals.** Session 1 (the flower show, the fishing contest, the harvest fair and lantern night: a host, a contest with rivals and prizes, decorations; save version 20) is built, waiting for Dave to try it. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 19 — the Lane and the bigger farm** (ROADMAP section 13, agreed 2026-11-17; the stages from 19 on were rewritten by it, see below). Session 1 (ways out as data, the Lane between the farm and the town with its hedgerows, the farm grown to 48 × 32 with overgrown new ground to clear; save version 21) is built, waiting for Dave to try it. Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -945,7 +945,7 @@ Energy food only (narrows DECISIONS 006; no selling chains).
       decorations; save and load; saves v1–v19), rendered the square on flower show day,
       the mayor's question and results, the pond on contest day, the fair, lantern night
       and the prizes on the farm at night
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-17)
 
 **Session 2 (if wanted)**
 
@@ -958,18 +958,119 @@ Energy food only (narrows DECISIONS 006; no selling chains).
 - [ ] Pixellab: festival decorations (flags, show tables, contest sign, lanterns), the
       trophies (bird bath, angler's cup, harvest fair cup, paper lantern)
 
-## Stage 19 — Almanac, year review, life in town · 1–2 sessions · Sonnet
+## Stages 19–26 — a bigger world and a fuller early game
 
-- [ ] The collections book (crops, fish, forage, recipes)
+Agreed by Dave on 2026-11-17: `ROADMAP.md` section 13 (13.6 is the stage table). They
+replace the old Stage 19 (almanac, year review, life in town) and Stage 20 (balance and
+release): "life in town" moved into Stage 22, the rest of the old 19 is Stage 25 and the
+old 20 is Stage 26. The font and UI theme, and the portraits, can run alongside in an art
+thread; building art waits for Stage 19's size rule, walk cycles for Stage 22.
+
+## Stage 19 — The Lane and the bigger farm · 2 sessions · Opus
+
+ROADMAP 13.2 and 13.3 (#1, #2). Placeholder art at the new building size; no Pixellab.
+
+**Session 1 (2026-11-17) — ways out as data, the Lane, the farm grows (DECISIONS 060, save version 21)**
+
+- [x] Exits are data: `ExitDef` (where it leads, the gap's cells, where you arrive) on
+      `LocationDef.exits`, built by `Exits`; the farm, the Lane, the town and the Woods
+      use it (the town's bridge to the Woods stays its own, as it changes with the unlock)
+- [x] **The Lane** (64 × 24) between the farm and the town: the lane itself, hedgerows
+      both sides with gaps, the allotments (fenced beds, for Stage 20's odd jobs), a
+      stream with a ford, trees, and a signpost where the cliff path to the Cove will go
+      (shut until Stage 21). Farm gate → Lane → town; it plays the farm's tune
+- [x] **Hedgerow forage** from day 1: 6 spots a morning along the lane's verges, with
+      the existing `ForageDef`s (`found_in` gains `lane`): primroses and wild garlic,
+      elderflower and new wild raspberries, blackberries, hazelnuts and new sloes, holly
+      and new rosehips
+- [x] **The farm grows to 48 × 32.** The old 30 × 20 stays at the same cells; the new
+      ground east and south is overgrown: stones (the hoe; 2 stone), stumps (the axe; 3
+      timber), brambles (E, 4 energy, or the sickle; fibre), nettles (E, 3 energy, or the
+      sickle; fibre), and a few trees. Debris is an `ObjectDef` with `clears_to`; a tool
+      says what it clears (`ToolAction.clears`). New item: stone
+- [x] Save version 21: the farm's new ground and cliffs, laid exactly as a new game's;
+      `tests/saves/v20_example.json` (the v19 example brought up by the real v20 build)
+- [x] Verified in the sandbox: headless import and run clean, 304 harness checks (the
+      new farm's size, border, gate and old cells; debris on new ground only; clearing
+      with each tool and by hand, energy, what each gives, too tired, not from town; trees
+      not clearable; save round trip; saves v1–v20 upgraded, new ground matching a new
+      game's, v20's old cells kept; the Lane's forage in all four seasons; walking farm →
+      Lane → town → Lane → farm and Woods → town, arriving at the right spots; the
+      signpost; picking hedgerow forage; a night's sleep and a v21 save), rendered both
+      ends and the middle of the Lane, the allotments, the signpost, the farm's new ground
+      and the town's east end
+- [ ] Dave confirms it plays correctly on Windows
+
+**Session 2**
+
+- [ ] Finds while clearing: an old seed tin, a rusty tool head for Brann, pages of the old
+      farmer's notebook, the cover of a buried well (ROADMAP 13.3 #1)
+- [ ] The building size rule (13.5): door opening at least 24 × 36 px on a two-tile door
+      cell, buildings about 1.5 × today's; placeholder exteriors at that size
+- [ ] The Lane's buildings as exteriors: Pip's family's cottage and Dot's yard (through
+      the hedge gaps), each door saying who lives there
+- [ ] Check the travel times against ROADMAP 13.2 (farmhouse → town square about 50 game
+      minutes) and anything Dave wants changed after walking the Lane
+
+## Stage 20 — Early days · 2 sessions · Opus, then Sonnet
+
+ROADMAP 13.3 (#3, #4, #7, #8, #9) and the first fortnight rewritten. Save version 22.
+
+- [ ] Odd jobs at the allotments (paid on the spot)
+- [ ] Dot's errands (a parcel somewhere by a time), Dot on the Lane from day 1
+- [ ] The workbench in the farm's shed: about ten recipes from stone, timber, fibre,
+      shells; recipes taught by people; no machines that make goods for profit
+- [ ] Where to sell: buyers that pay differently, and a buyer's price drops when flooded
+- [ ] Mabel's bakery: energy food for gold from day 5
+
+## Stage 21 — The Cove · 2 sessions · Opus, then Sonnet
+
+ROADMAP 13.2 and 13.3 (#5, #6). Save version 23.
+
+- [ ] The Cove (56 × 36): harbour, pier, beach, cliffs, lighthouse; the coast road from
+      the town and the cliff path from the Lane's signpost
+- [ ] Tides worked out from the date; rockpools and the sand bar at low tide; driftwood
+      after storms; today's low tide on the notice board and in the morning summary
+- [ ] Tam at the harbour; his handline in week 1 (sea fishing from the pier); crab pots
+- [ ] Sea fish and sea forage
+
+## Stage 22 — The tavern and people on the move · 2 sessions · Opus
+
+ROADMAP 13.3 (#10, #11) and 13.4. Probably no save change.
+
+- [ ] Nell's tavern (4 PM – 1 AM): rumours, the chalkboard, darts night, a hot meal
+- [ ] Nell, Dot and Tam's questlines; homes for everyone (exteriors)
+- [ ] Weekdays; `ScheduleDef` per person; people walk between spots (`AStarGrid2D`);
+      off-screen positions worked out from the clock; the request log says where a giver
+      usually is
+
+## Stage 23 — Art: the world · 2–3 art sessions · cloud env (Pixellab)
+
+- [ ] Every building at the new size with varied sloping roofs (farmhouse, shops,
+      greenhouse, bakery, tavern, town hall, mayor's house, homes, Dot's yard, Tam's shed,
+      Rosa's cottage, lighthouse), winter versions by script
+- [ ] The Lane and Cove tilesets; the Stage 12–18 art backlog (and Stage 19's debris,
+      stone, hedgerow forage and signpost)
+
+## Stage 24 — Art: people and the UI · 1 code + 2 art sessions · Sonnet + cloud env
+
+- [ ] A pixel font (monogram for text; Pixel Operator Bold or Pixelify Sans for headings)
+      and a UI `Theme` with nine-patch panels (can run alongside, any time)
+- [ ] Portraits in the dialogue box: 13 people × 3 expressions (can run alongside)
+- [ ] Walk cycles for every person (after Stage 22)
+
+## Stage 25 — Almanac and year review · 1–2 sessions · Sonnet
+
+The old Stage 19 without "life in town". Save version 24.
+
+- [ ] The collections book (crops, fish, sea fish, forage, sea forage, recipes)
 - [ ] The mayor's year review and title at lantern night; year-2 content
-- [ ] Optional: townsfolk walk between spots on a schedule (Pixellab walk cycles)
 
-## Stage 20 — Balance and release · 2 sessions · Opus for balance
+## Stage 26 — Balance and release · 2 sessions · Opus for balance
 
-Stage 9's second half, moved here.
+The old Stage 20 (Stage 9's second half).
 
-- [ ] Title screen, settings (with volume), save slots
-- [ ] Full balance pass across a simulated year. Includes the clock: Dave finds it seems
-      slow (2026-11-15). Check its pace (`seconds_per_ten_minutes`, 7 now) against a real
-      day's work, and that it ticks steadily through the day
+- [ ] Title screen, settings (with volume), save slots, credits (the fonts named)
+- [ ] Full balance pass across a simulated year, including the clock now that travel is
+      longer (`seconds_per_ten_minutes`, 5 now; 6 may suit the bigger map)
 - [ ] Windows export, itch.io page

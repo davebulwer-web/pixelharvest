@@ -38,8 +38,8 @@ extends Node2D
 ##   Town
 ##   ├── Ground      (TileMapLayer, same seasonal tilesets as the farm)
 ##   ├── Bridge      (the bridge over the river to the Woods, whole or broken)
-##   ├── SpawnPoints (Marker2Ds, made here: one per door, one for the farm gate,
-##   │                one for the bridge)
+##   ├── SpawnPoints (Marker2Ds, made here: one per door, one for the road east
+##   │                to the Lane (made by Exits, DECISIONS 060), one for the bridge)
 ##   ├── Entities    (y-sorted: player, trees, decoration, shop fronts, people,
 ##   │                market stalls and their keepers)
 ##   ├── Weather     (the season's and the day's overlays — rain, snow — as on the farm)
@@ -51,7 +51,6 @@ extends Node2D
 
 const TILE_PX := 16
 const TOWN_ID := &"town"
-const FARM_ID := &"farm"
 const WOODS_ID := &"woods"
 
 ## The bridge's pictures: whole (the Woods are open) and broken (not yet).
@@ -109,7 +108,8 @@ func _ready() -> void:
 	SeasonLook.apply_ground(_ground)
 	var bridge_open := _woods_open()
 	_bridge_open = bridge_open
-	var tiles := TownLayout.build(door_cells, bridge_open)
+	var town := LocationManager.find(TOWN_ID)
+	var tiles := TownLayout.build(door_cells, Exits.gap_cells(town), bridge_open)
 	for cell: Vector2i in tiles:
 		GroundTiles.draw(_ground, cell, tiles[cell])
 	_cursor = preload("res://scripts/tile_cursor.gd").new()
@@ -121,15 +121,15 @@ func _ready() -> void:
 		_entities.add_child(Building.create(def))
 		_add_spawn(StringName("from_%s" % def.id), Vector2(
 				def.door_cell.x * TILE_PX + TILE_PX / 2.0, (def.door_cell.y + 2) * TILE_PX - 2))
-	_add_spawn(&"from_farm", TownLayout.ARRIVAL_FROM_FARM)
 	_add_spawn(&"from_woods", TownLayout.ARRIVAL_FROM_WOODS)
+	# The road east to the Lane (and on to the farm): town.tres's exits.
+	Exits.add(self, town, _spawns)
 	_add_bridge(bridge_open)
 	_place_objects()
 	_place_festival_decorations()
 	_mark_notice_board()
 	_place_townsfolk()
 	_place_stalls()
-	_add_farm_gate()
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
 	EventBus.weather_changed.connect(func(_w: StringName) -> void: SeasonLook.apply_overlay(_weather))
@@ -314,23 +314,16 @@ func _add_bridge(open: bool) -> void:
 		_add_zone(Rect2(bank * TILE_PX, Vector2(width, TILE_PX / 2.0)), WOODS_ID, &"from_town")
 
 
-## The way back: the gap beyond the east end of the road.
-func _add_farm_gate() -> void:
-	var top_left: Vector2i = TownLayout.FARM_GATE[0]
-	var rect := Rect2(top_left * TILE_PX, Vector2(TILE_PX, TILE_PX * TownLayout.FARM_GATE.size()))
-	_add_zone(rect, FARM_ID, &"from_town")
-
-
 func _add_zone(rect: Rect2, to: StringName, arrival: StringName) -> void:
 	add_child(ExitZone.create(rect, to, arrival))
 
 
 func _place_player() -> void:
 	var point := LocationManager.take_arrival_point()
-	var spawn := _spawns.get_node_or_null(NodePath(String(point)) if point != &"" else ^"from_farm") as Marker2D
+	var spawn := _spawns.get_node_or_null(NodePath(String(point)) if point != &"" else ^"from_lane") as Marker2D
 	if spawn == null:
 		push_warning("Town has no spawn point '%s'" % point)
-		spawn = _spawns.get_node(^"from_farm")
+		spawn = _spawns.get_node(^"from_lane")
 	_player.position = spawn.position
 
 

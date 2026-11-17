@@ -14,10 +14,14 @@ extends ToolAction
 ##
 
 func can_use(farm: FarmData, cell: Vector2i) -> bool:
-	return farm.has_weeds(cell) or farm.can_harvest(cell)
+	return farm.has_weeds(cell) or clears_at(farm, cell) or farm.can_harvest(cell)
 
 
+## Brambles and nettles on the farm's new ground (DECISIONS 060) are cut
+## like weeds: a wide sickle clears a row of them in one swing.
 func apply(farm: FarmData, cell: Vector2i) -> void:
 	farm.pull_weeds(cell)
+	if clears_at(farm, cell):
+		farm.clear_debris(cell)
 	if farm.can_harvest(cell):
 		EventBus.crop_cut.emit(cell)

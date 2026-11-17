@@ -1,8 +1,15 @@
-[gd_resource type="Resource" script_class="LocationDef" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="LocationDef" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
 [ext_resource type="AudioStream" path="res://assets/audio/music/woods.ogg" id="2_music"]
 [ext_resource type="Resource" path="res://data/unlocks/woods_open.tres" id="3_unlock"]
+[ext_resource type="Script" path="res://scripts/resources/exit_def.gd" id="9_exit"]
+
+[sub_resource type="Resource" id="Exit_town"]
+script = ExtResource("9_exit")
+to = &"town"
+cells = Array[Vector2i]([Vector2i(23, 32), Vector2i(24, 32)])
+arrival = Vector2i(24, 30)
 
 [resource]
 script = ExtResource("1_def")
@@ -14,3 +21,4 @@ requires_unlock = ExtResource("3_unlock")
 locked_message = "The old bridge to the Woods is down. Until it's mended there's no way across the river."
 forage_per_day = 10
 fallen_logs_per_day = 3
+exits = Array[ExtResource("9_exit")]([SubResource("Exit_town")])

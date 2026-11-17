@@ -14,8 +14,9 @@ extends Node2D
 ##   Farm
 ##   ├── Ground     (TileMapLayer, z_index -1, NOT y-sorted — always underfoot)
 ##   ├── SpawnPoints (Marker2Ds where LocationManager can put an arriving player:
-##   │               "default", "from_town" just inside the gate, and one
-##   │               "from_<id>" in front of each building's door, made here)
+##   │               "default", "from_lane" just inside the gate (made by
+##   │               Exits, DECISIONS 060), and one "from_<id>" in front of
+##   │               each building's door, made here)
 ##   ├── TileCursor (outline on the tile the player is facing; drawn under entities)
 ##   ├── Entities   (y-sorted — player, trees and crops sort against each other
 ##   │               by their node origin, which for all of them sits at their base)
@@ -29,8 +30,10 @@ extends Node2D
 ##   └── Hud        (scenes/hud.tscn, shared with the town — CanvasLayer 2, fixed to
 ##                   the screen, not the world)
 ##
-## The way to the town is the gap at the west end of the path (FarmLayout.TOWN_GATE):
-## an ExitZone is added there, and walking into it goes to the town.
+## The way off the farm is the gap at the west end of the path: since Stage 19
+## it leads to the Lane, and from there to the town (DECISIONS 060). Where it
+## is and where it goes is the farm's LocationDef's `exits`; Exits adds the
+## zone and the spawn point for coming back.
 ##
 ## The farmhouse (Stage 7) is a Building like the town's shops: a LocationDef
 ## whose door is on the farm. Walking into its door goes inside, where the bed
@@ -72,10 +75,6 @@ const TRUNK_SIZE := Vector2(10, 8)
 
 ## Aphids on a crop (DECISIONS 048): a picture laid over the crop's tile.
 const PESTS_TEXTURE: Texture2D = preload("res://assets/sprites/farm/aphids.png")
-
-## Where the town is, and which spawn point in the town the farm gate leads to.
-const TOWN_ID := &"town"
-const TOWN_ARRIVAL := &"from_farm"
 
 
 @onready var _ground: TileMapLayer = $Ground
@@ -181,21 +180,25 @@ func _plot() -> FarmData:
 
 
 ## What surrounds the plot: on the farm, its buildings and the gate to the
-## town. The greenhouse builds its room instead.
+## Lane. The greenhouse builds its room instead.
 func _build_surroundings() -> void:
 	_add_buildings()
-	_add_town_gate()
+	Exits.add(self, LocationManager.find(LocationManager.FARM_ID), $SpawnPoints)
 
 
 ## The keys, printed to Godot's Output panel when the farm opens.
 func _print_help() -> void:
-	print("--- Pixel Harvest · Stage 12 (crops with rules) ---")
+	print("--- Pixel Harvest · Stage 19 (the Lane and the bigger farm) ---")
 	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
 	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
 	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler")
 	print("or a decoration. Decorations (Marlow's store) go down with Space, like sprinklers.")
-	print("Walk out of the gate at the west end of the path to reach the town: seeds,")
-	print("supplies and upgrades are bought from the shopkeepers there. E talks to them.")
+	print("Walk out of the gate at the west end of the path onto the Lane, and along it")
+	print("to the town: seeds, supplies and upgrades are bought from the shopkeepers there.")
+	print("E talks to them. E picks up what's growing in the Lane's hedgerows.")
+	print("The farm's new ground (east and south) is overgrown: the hoe breaks up stones,")
+	print("E pulls up brambles and nettles (or the sickle cuts them), and the axe digs out")
+	print("stumps. Clearing gives stone, fibre and timber, and leaves ground to farm.")
 	print("Go to bed in the farmhouse (E at the bed) to end the day; the bin sells")
 	print("overnight and sprinklers water at dawn. You wake up at home.")
 	print("Seasons last %d days. Seeds only go in during their own seasons, and crops"
@@ -247,15 +250,8 @@ func _add_buildings() -> void:
 		$SpawnPoints.add_child(marker)
 
 
-## The way out to the town: the gate cells at the west end of the path.
-func _add_town_gate() -> void:
-	var top_left: Vector2i = FarmLayout.TOWN_GATE[0]
-	var rect := Rect2(top_left * TILE_PX, Vector2(TILE_PX, TILE_PX * FarmLayout.TOWN_GATE.size()))
-	add_child(ExitZone.create(rect, TOWN_ID, TOWN_ARRIVAL))
-
-
 ## Put the player at the spawn point LocationManager asked for, if any.
-## Arriving from the town names "from_town", just inside the gate.
+## Arriving from the Lane names "from_lane", just inside the gate.
 func _place_player() -> void:
 	var point := LocationManager.take_arrival_point()
 	if point == &"":

@@ -92,7 +92,13 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       farmer took part in ("festivals": a list of {"event", "year",
 ##       "day", "place", and for a contest "entry" and "score"}). Older
 ##       games have taken part in none.
-const CURRENT_VERSION := 20
+##  21 — the Lane and the bigger farm (DECISIONS 060): the farm grows from
+##       30 × 20 to 48 × 32. Its old cells stay where they were; the new
+##       ground east and south of them is grass with debris standing on it
+##       (stones, stumps, brambles, nettles, a few trees), saved as objects
+##       like any other ("object"), and the cliffs move out to the new edge.
+##       No new fields.
+const CURRENT_VERSION := 21
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -326,6 +332,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_18_to_19(data["game"])
 			19:
 				_upgrade_19_to_20(data["game"])
+			20:
+				_upgrade_20_to_21(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -750,3 +758,61 @@ func _upgrade_18_to_19(game: Dictionary) -> void:
 ## before they existed, so the log starts empty.
 func _upgrade_19_to_20(game: Dictionary) -> void:
 	game["festivals"] = []
+
+
+## Version 20 -> 21: the bigger farm (DECISIONS 060). Every farm until now
+## was 30 × 20 with a ring of cliff round it. It becomes 48 × 32: the old
+## cells (and the west and north cliffs, with the gate in them) are kept
+## exactly as they were; the old east and south cliffs give way to new
+## ground, grass with debris standing on some of it, and new cliffs ring the
+## new edge. The sizes, the odds and the dice are frozen here, not read from
+## FarmLayout, so this step means the same thing however the layout changes
+## later (today they match FarmLayout, so an upgraded farm's new ground looks
+## just like a new game's).
+const V21_OLD_SIZE := Vector2i(30, 20)
+const V21_SIZE := Vector2i(48, 32)
+const V21_DEBRIS_ODDS: Array = [
+	["stones", 0.10],
+	["nettles", 0.08],
+	["bramble", 0.08],
+	["stump", 0.04],
+	["tree", 0.02],
+]
+
+
+func _upgrade_20_to_21(game: Dictionary) -> void:
+	var farm: Dictionary = game.get("farm", {})
+	var tiles: Array = []
+	for entry: Dictionary in farm.get("tiles", []):
+		var x := int(entry.get("x", -999))
+		var y := int(entry.get("y", -999))
+		# The old farm, and its west and north cliffs (x or y of -1).
+		if x >= -1 and y >= -1 and x < V21_OLD_SIZE.x and y < V21_OLD_SIZE.y:
+			tiles.append(entry)
+	for y in range(-1, V21_SIZE.y + 1):
+		for x in range(-1, V21_SIZE.x + 1):
+			if x < V21_OLD_SIZE.x and y < V21_OLD_SIZE.y:
+				continue
+			var entry := {"x": float(x), "y": float(y)}
+			if x < 0 or y < 0 or x >= V21_SIZE.x or y >= V21_SIZE.y:
+				entry["terrain"] = "CLIFF"
+			else:
+				var debris := _v21_debris(Vector2i(x, y))
+				if debris != "":
+					entry["object"] = debris
+			tiles.append(entry)
+	farm["tiles"] = tiles
+	farm["width"] = float(V21_SIZE.x)
+	farm["height"] = float(V21_SIZE.y)
+	game["farm"] = farm
+
+
+## What stood on `cell` of the new ground in version 21: a V21_DEBRIS_ODDS
+## kind, or "".
+func _v21_debris(cell: Vector2i) -> String:
+	var roll := float(absi(hash([cell, 21, "farm_debris"])) % 1000) / 1000.0
+	for entry: Array in V21_DEBRIS_ODDS:
+		roll -= entry[1]
+		if roll < 0.0:
+			return entry[0]
+	return ""

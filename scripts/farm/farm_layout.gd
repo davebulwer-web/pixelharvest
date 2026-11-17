@@ -18,17 +18,35 @@ extends RefCounted
 ## written here: each field's upgrade .tres knows its own area, and this
 ## overgrows whatever those areas say. Adding a field is one data file.
 ##
+## Since Stage 19 (DECISIONS 060) the farm is 48 × 32. The farm as it was
+## (30 × 20, OLD_GROUND) is the top-left corner, at the same cells, so old
+## saves still line up; the new ground east and south of it starts
+## overgrown with debris (stones, stumps, brambles, nettles, and a few
+## trees), which is the first thing there is to spend energy on.
+##
 
-const FARM_SIZE := Vector2i(30, 20)
+const FARM_SIZE := Vector2i(48, 32)
+
+## The farm as it was until Stage 19: the farmhouse, the pond, the fields
+## and the path. Everything else inside FARM_SIZE is the new ground.
+const OLD_GROUND := Rect2i(0, 0, 30, 20)
+
+## What stands on each tile of the new ground at the start: each kind with
+## its chance, rolled once per tile (the same roll every time, from the
+## cell). About a third of the new ground has something on it. The kinds
+## are ObjectDef ids (data/objects/); a tree there stays for good.
+## The save upgrade to version 21 (save_system.gd) has its own frozen copy
+## of these numbers, so changing them here only changes new games.
+const DEBRIS_ODDS: Array = [
+	[&"stones", 0.10],
+	[&"nettles", 0.08],
+	[&"bramble", 0.08],
+	[&"stump", 0.04],
+	[&"tree", 0.02],
+]
 const POND := Rect2i(21, 3, 5, 4)
 const PATH_ROW := 12
 const PATH_LENGTH := 14
-
-## The gap in the cliffs at the west end of the path, the way out to the town
-## (Stage 7): two cells tall so the player needn't line up exactly. It's part
-## of the farm's map, so it's saved with it: saves from before Stage 7 have it
-## opened by the version 6 upgrade (save_system.gd).
-const TOWN_GATE: Array[Vector2i] = [Vector2i(-1, PATH_ROW), Vector2i(-1, PATH_ROW + 1)]
 
 ## The end of the path, right beside where the player wakes up. A path cell
 ## can never be tilled, so the bin can't end up sitting on a crop.
@@ -53,6 +71,11 @@ static func build_default() -> FarmData:
 			farm.set_tile(cell, t)
 	for cell in TREE_CELLS:
 		farm.tile(cell).object_id = &"tree"
+	for y in FARM_SIZE.y:
+		for x in FARM_SIZE.x:
+			var cell := Vector2i(x, y)
+			if not OLD_GROUND.has_point(cell):
+				farm.tile(cell).object_id = debris_for(cell)
 	farm.tile(SHIPPING_BIN).object_id = &"shipping_bin"
 	_place_buildings(farm)
 	_overgrow_fields(farm)
@@ -90,8 +113,30 @@ static func _overgrow_fields(farm: FarmData) -> void:
 					t.terrain = FarmTile.Terrain.THICKET
 
 
+## What stands on `cell` of the new ground at the start: a DEBRIS_ODDS kind,
+## or nothing.
+static func debris_for(cell: Vector2i) -> StringName:
+	var roll := float(absi(hash([cell, 21, "farm_debris"])) % 1000) / 1000.0
+	for entry: Array in DEBRIS_ODDS:
+		roll -= entry[1]
+		if roll < 0.0:
+			return entry[0]
+	return &""
+
+
+## The gaps in the cliffs that lead off the farm (the gate at the west end
+## of the path, to the Lane): the farm's exits (data/locations/farm.tres,
+## DECISIONS 060). They're part of the farm's map, so they're saved with it:
+## saves from before Stage 7 have the gate opened by the version 6 upgrade.
+static func gate_cells() -> Array[Vector2i]:
+	for def: LocationDef in GameState.RULES.locations:
+		if def.id == LocationManager.FARM_ID:
+			return Exits.gap_cells(def)
+	return []
+
+
 static func _terrain_for(cell: Vector2i) -> FarmTile.Terrain:
-	if cell in TOWN_GATE:
+	if cell in gate_cells():
 		return FarmTile.Terrain.PATH
 	var outside := (
 		cell.x < 0 or cell.y < 0

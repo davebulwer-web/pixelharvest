@@ -1,6 +1,9 @@
 # Pixel Harvest — content roadmap (proposal)
 
-**Status: agreed by Dave on 2026-11-15, all recommendations in section 12 accepted.** The
+**Status: sections 1–12 agreed by Dave on 2026-11-15, all recommendations in section 12 accepted.
+Section 13 (2026-11-17: a bigger world and a fuller early game) agreed by Dave on 2026-11-17,
+all three recommendations in 13.7 accepted. It adds Stages 19–24 and renumbers the old 19 and
+20 as 25 and 26; STAGES.md takes them at the start of Stage 19.** The
 stages are now in `STAGES.md` (10 to 20). Nothing here is built yet; each reversal of an
 earlier decision gets its own `DECISIONS.md` entry when it's built.
 
@@ -512,3 +515,253 @@ fewer crops.
 9. **Stage order:** 10 → 20 as in section 10. (Recommended: yes; 14–19 can be reordered.)
 
 `STAGES.md` and `DESIGN.md` were updated to match on 2026-11-15. Next: Stage 10.
+
+---
+
+## 13. Revision (2026-11-17): a bigger world and a fuller early game
+
+**Status: agreed by Dave on 2026-11-17 (all three decisions in 13.7 as recommended).** Written after Dave's note of 2026-11-17: the middle
+and late game are coming on, but in the early game there is nothing to do after about 9 AM.
+Nothing below is built. Stage 18 (festivals) is untouched. Sections 1–12 above stay as the
+record of the first plan; where this section disagrees, this section wins once agreed.
+
+### 13.1 What's actually wrong with the early game
+
+Read from the data, not guessed:
+
+| Problem | Where it comes from |
+|---|---|
+| **Energy never runs out in spring.** 100 energy; hoeing is 2 a tile, watering 1. Ten parsnips cost about 30 energy on day 1 and about 10 a day after. 90 energy a day has nowhere to go. | `game_rules.tres`, `hoe.tres`, `watering_can.tres` |
+| **Gold is the only brake, and you can't earn it without waiting.** You start with 100g and 10 seeds. Until the first crop is pulled there is no way to make money. | Every income source is a crop (or, later, fish and forage) |
+| **Everything that isn't farming arrives in summer.** The Woods open on day 29, the rod on day 30, cooking later still. Spring has the farm, the town, one request at a time and market day. | `woods_open` (day 29), `wren_worms` (day 30) |
+| **Time doesn't matter.** Farmhouse to Hollis is about 42 tiles, about 19 game minutes. Nothing has a time window except shop hours, so there's never a reason to be anywhere at a particular time. | DECISIONS 051's own measurement |
+| **The world is two rooms.** Farm (30 × 20) and town (40 × 24) touch each other; the Woods are the only other outdoor place. | `FarmLayout`, `TownLayout`, `WoodsLayout` |
+
+**On map size (revisits DECISIONS 051).** 051 said a bigger map alone wouldn't fill the day,
+and that's still true: at 4.4 tiles a second, even doubling every map adds well under an
+hour of walking to a 20-hour day. But Dave is right that it *feels* like the map, and the
+reason is that size is what makes **distance a cost**, and a cost is what makes a choice.
+The fix is a bigger map **plus things to do at the far ends that only happen at certain
+times** (tides, errands with a deadline, people who are only somewhere in the morning, a
+tavern that opens in the evening). Then "it's 40 minutes to the cove and low tide is at 11"
+is a real decision. Neither half works without the other.
+
+### 13.2 The bigger world
+
+Five outdoor places instead of three, arranged as a loop so there are two ways round:
+
+```
+                         WOODS 48 × 32
+                        (Wren's cottage)
+                               │  old bridge (opens summer 1)
+                               │
+ COVE 56 × 36 ── coast road ── TOWN 48 × 32 ──── THE LANE 64 × 24 ──── FARM 48 × 32
+ harbour, pier, beach,         shops, bakery,      hedgerows, allotments,  overgrown
+ rockpools, Tam, Rosa          tavern, homes       Pip's cottage, Dot      at the start
+      │                                                  │
+      └──────────────────── cliff path ──────────────────┘
+                     (from the Lane's signpost)
+```
+
+| Place | Size (tiles) | Opens | What's there | Why it's there |
+|---|---|---|---|---|
+| **Farm** | 48 × 32 (was 30 × 20) | day 1 | The current farm stays in the top-left corner at the same cells; the new ground is east and south, **overgrown**: stones, stumps, brambles, nettles. The bought fields stay as they are. | Clearing your own land is the first energy sink (13.3). Keeping the old cells where they are means old saves still line up. |
+| **The Lane** (new) | 64 × 24 | day 1 | A country lane between farm and town: **hedgerows** (daily forage), the **allotments** (odd jobs), **Pip's family cottage**, **Dot the carrier's yard** (errands, later a cart that takes you places), a ford over a stream (fishing later), a signpost where the cliff path leaves for the Cove. | Spaces farm and town apart and fills the gap with things to do on the way. |
+| **Town** | 48 × 32 (was 40 × 24) | day 1 | Everything that's there now, rebuilt round larger buildings (13.5), plus **Mabel's bakery**, **the tavern**, the town hall and the mayor's house, a row of homes (Hollis and Marlow live over their shops, Brann behind the forge). Coast road leaves from the west edge. | Bigger buildings need more room; the tavern and bakery give the evening and the early game a use. |
+| **The Cove** (new) | 56 × 36 | day 1 (the beach); the harbour's jobs open over spring | A small harbour (Tam's fish shed, the pier, Rosa's cottage: she and Fennel's cart come by boat on market day), a sandy beach, **rockpools that only show at low tide**, cliffs, a lighthouse to restore later. | The seaside staple: a second kind of fishing, tides, beachcombing. |
+| **The Woods** | 48 × 32 | summer 1 (unchanged) | As now, plus Wren's cottage at the edge. | — |
+
+**Travel times** at today's pace (4.4 tiles a second, 5 real seconds per 10 game minutes,
+so one tile is about half a game minute):
+
+| Trip | Now | Proposed |
+|---|---|---|
+| Farmhouse → town square | ~42 tiles, ~19 game min | ~110 tiles, **~50 game min** (~25 real s) |
+| Farmhouse → beach | — | ~90 tiles, **~40 game min** |
+| Town → Cove harbour | — | ~60 tiles, ~25 game min |
+| Town → Woods glade | ~45 tiles | unchanged |
+
+So a trip to town and back is now nearly two hours of the day, and the town, the Cove and
+the Woods can't all be done in one day early on. **That's the point.** Later, Dot sells
+rides on her cart between signposts (farm gate, the Lane, town, the Cove) for a few gold,
+and the town hall can fund a footbridge shortcut: buying back travel time is a
+progression in the same spirit as sprinklers buying back watering (DESIGN.md: *the chore
+you used to do by hand becomes automatic*).
+
+**Technical notes.**
+- Exits become data: today each layout has its own gate constants (`TownLayout.FARM_GATE`,
+  `WOODS_GATE`…). A new place needs a generic exit: a `LocationDef.exits` list (edge cells →
+  target location + arrival point). Built once in Stage 19, then every place uses it.
+- The farm grows without moving any existing cell, so `FarmData` keys still match. The
+  new ground's debris is new saved state: **save version 21**.
+- Homes are **exteriors only** to start (the door says "Pip's family live here"). Interiors
+  only where you do something inside: the bakery and the tavern. Home interiors can come
+  after release if wanted.
+
+### 13.3 Early-game days: something to do every day
+
+The goal: from day 1, the 90 spare energy and the 18 spare hours both have more uses than
+you can fit, and each use pays in a different currency (gold, materials, unlocks, people),
+so the player chooses. Each idea says whether it's a genre staple or our own twist.
+
+| # | Mechanic | What you do | Costs | Pays | Staple or twist |
+|---|---|---|---|---|---|
+| 1 | **Clearing the farm** | Stones (hoe, 4 energy), stumps (axe), brambles and nettles (sickle or by hand). Clearing now and then **turns up something**: an old seed tin, a rusty tool head Brann will mend, a page of the old farmer's notebook (a hint or a recipe), the cover of a buried well. | Energy | Stone (new), timber, fibre, finds | Staple, with our twist: the finds tell the farm's story and feed requests |
+| 2 | **Hedgerows** on the Lane | A few forage spots refill each morning along the hedges, from day 1: spring nettles, wild garlic, primroses, elderflower; summer raspberries; autumn blackberries, sloes, hazelnuts; winter rosehips, holly. Uses the existing `ForageDef` (`found_in` gets `&"lane"`). | Time | A little gold, quest and cooking items | Staple (foraging), but on your way rather than a trip |
+| 3 | **Odd jobs at the allotments** | Allotment holders pin small jobs on the shed: *weed plot 3*, *water the bean rows before noon*, *dig over plot 5*. You do them with your own tools on their ground, paid on the spot. | Energy and time | Gold now (the only early income that isn't a crop), and a little goodwill that opens seeds or plots | **Twist.** Reuses tools you already have in a new place; worth most in spring, fades as your own farm grows |
+| 4 | **Dot's errands** | The carrier needs a parcel taken somewhere **by a time**: *"This to Tam at the harbour before 2 PM"*, *"Mabel's flour sacks to the tavern by opening."* Each errand also introduces someone's home. | Time (a route across the map) | Gold, then the cart rides | **Twist.** Makes the bigger map the activity |
+| 5 | **Tides at the Cove** | The tide turns twice a day, a little later each day (worked out from the date, like market day). At **low tide** the rockpools and the sand bar open: crabs, shrimps, mussels, shells, sea glass. At **high tide** the pier fishes best. After a storm, driftwood (timber) washes up. The notice board and the morning summary give today's low tide. | Time, and being there at the right hour | Sea forage, timber, sea fish | **Twist** (not in Stardew): a daily time window that moves |
+| 6 | **Crab pots** | Craft one (13.3, #7), drop it off the pier with bait, empty it next day. A small daily round at the Cove. | Bait, a walk | Crabs, now and then a find | Staple |
+| 7 | **The workbench** | A bench in the farm's shed. Recipes (taught by people, like cooking's `RecipeDef`): fence, path stones, scarecrow, crab pot, compost bin (turns weeds and fibre into mulch overnight), rain barrel (fills the can without walking to water), bird box, a bench. Uses stone, timber, fibre, shells. | Materials (so clearing and gathering matter) | Things you'd otherwise buy, and a few you can only make | Staple, kept small: ~10 recipes, no machines that make goods for profit (DECISIONS 006 stands) |
+| 8 | **Where to sell** | Each buyer pays differently, and **flooding one buyer drops their price** for the rest of the day (back by morning). Bin: 100%, overnight. Marlow: 80%, on the spot. Rosa on market day: 125%. The tavern's chalkboard: 2–3 things wanted today at 150%, small quantities. Tam: fish and sea forage at a better price than Marlow. | Time (walking to the better buyer) | More gold for the same harvest | **Twist** on a staple: demand makes spreading crops and buyers worth it |
+| 9 | **Buying energy** | Mabel's bakery sells bread and pies from day 5 (energy food before your own kitchen); the tavern sells a hot meal in the evening. | Gold | Energy | Our own: gold ↔ energy becomes a real trade early |
+| 10 | **Evenings** | The tavern opens 4 PM – 1 AM. Who's in depends on the day. Rumours (tomorrow's good forage spot, where a big fish was seen), the chalkboard, a darts night once a week for a small prize, the mayor and others drinking. | Time you'd otherwise sleep away | Tips, people, a reason to stay up | Partly staple (Stardew's saloon), but with jobs and rumours in it |
+| 11 | **People who are somewhere** | With schedules (13.4), a request is handed in where the person *is*: Mabel's at the bakery till 2, then home; Tam's on the pier at dawn; Pip plays by the ford after 3. | Planning a route | Requests done | Staple |
+
+**A spring day 3, before and after.** Today: water 10 parsnips (10 minutes), walk to town,
+see the market, go to bed at noon. Proposed: water (10 min, 10 energy); clear the patch by
+the shed (40 energy, 6 stone, an old seed tin); take Dot's parcel to the harbour by 2 PM,
+picking the hedgerow on the way; low tide's at 12:40, so stay for the rockpools; it's too
+far to get to the market before Rosa packs up at 5, so sell the shrimps to Tam instead;
+back up the cliff path, weed allotment plot 3 for 30g at 6 PM; tavern for the chalkboard,
+home by midnight with 5 energy left. Tomorrow the tide's 50 minutes later and the market
+isn't on, so the day looks different.
+
+**The first fortnight, rewritten** (replaces the first rows of section 3's spring):
+
+| When | What happens |
+|---|---|
+| Day 1 | Wake on an overgrown farm with a hoe, a can, a trowel and 10 parsnip seeds. The mayor's welcome letter says to come and see him; the Lane's hedgerows and the beach are open. Dot stops you on the Lane and offers the first errand (to the mayor). |
+| Day 2–3 | First pull request as now. **Allotment jobs** open. First market day. Tides on the notice board. |
+| Day 4 | The old farmer's notebook turns up while clearing → **workbench** recipes (fence, path, scarecrow). |
+| Day 5 | **Mabel's bakery opens** (energy food for gold) and Mabel's first request. |
+| Day 6 | Weeds (as now). |
+| Day 7 | **Tam at the harbour**: bring 3 rockpool finds → a **handline** (sea fishing from the pier, a simpler rod). Wren's river rod stays in summer. |
+| Day 8 | Brann's forge opens (as now); board jobs (as now). **The tavern** opens its evenings. |
+| Day 10 | **Crab pot** recipe from Tam. |
+| Day 12 | Dot's cart rides (first signpost pair: farm gate ↔ town). |
+| Day 15 onwards | As section 3 (crows, Hollis's line, the bridge…). |
+
+### 13.4 People: homes, schedules, portraits
+
+**Who lives where.** Mayor Bramble: the mayor's house by the town hall. Mabel: over the
+bakery. Pip: the cottage on the Lane, with a parent who keeps an allotment. Wren: the
+cottage at the Woods' edge; on certain days fishes the pier. Ivy (from autumn): a cottage
+on the Lane by the allotments, which suits a retired gardener. Hollis and Marlow: over their
+shops. Brann: behind the forge. Rosa: the Cove. Fennel: arrives by boat on market day.
+**Three new people:** **Nell** who keeps the tavern, **Dot** the carrier, **Tam** at the
+harbour. Each gets a short questline in the style of section 5.
+
+**Schedules (data).** A new `ScheduleDef` per person: for a weekday, a season or a weather,
+a list of *(time, place, spot)*. "Mabel: 6 AM bakery; 2 PM home; 7 PM tavern (Fridays);
+rain: stays home." The game needs **weekdays** for this (Monday to Sunday from the day
+number, worked out like market day; no save change).
+- In the place you're in, people **walk** between spots along paths (Godot's `AStarGrid2D`
+  over the layout's walkable cells).
+- Elsewhere they aren't simulated: where they are is *worked out from the clock* when you
+  arrive, so a person can't get "lost" off-screen and nothing new is saved.
+- The request log says where the giver usually is at this time, so the bigger map never
+  hides a hand-in.
+
+**Portraits.** The dialogue box gets a portrait frame on the left: one bust per person
+(about 64 × 64), with 2–3 expressions (neutral, happy, worried). Shopkeepers too.
+
+### 13.5 Art
+
+Pixellab credits are not a constraint (Dave, 2026-11-17), so the plan below replaces the
+"keep generations down" notes in section 11.
+
+**Bigger buildings, sloping roofs.** The farmer is drawn in 56 px cells and is wider than
+today's doors (shop fronts are 80 × 64 with a 32 px door cell, but the opening drawn in it
+is narrower). New rule for every exterior, set in Stage 19 so maps are laid out for it even
+on placeholder art:
+- **Door opening at least 24 px wide and 36 px tall**, centred on a two-tile door cell, so
+  the player visibly fits.
+- **Buildings about 1.5 × today's size**: a shop front about 128 × 112 (8 × 7 tiles), the
+  farmhouse about 144 × 128, homes 96–112 px wide, the tavern the biggest in town.
+- **Roofs take 40–50% of the height and slope visibly.** A mix, so the street isn't a row
+  of boxes: gabled (end to the street), hipped, thatched (Pip's cottage, the tavern),
+  catslide/lean-to (Dot's yard, Tam's shed), a slate roof with dormers (town hall), and
+  chimneys. Winter versions by script, as the farmhouse's roof today (DECISIONS 034).
+- Every building is redone, not only the new ones: farmhouse, three shops, greenhouse, and
+  the new bakery, tavern, town hall, mayor's house, three homes, Dot's yard, Tam's shed,
+  Rosa's cottage, lighthouse.
+
+**Tilesets.** The Lane (hedges, allotment beds, ford), the Cove (sand, wet sand, rockpools
+at two tide states, cliffs, pier planks, sea with a wave edge), plus the art backlog
+already waiting from Stages 12–18 (Woods tileset, crops, fish, dishes, forage, festival
+pieces).
+
+**Walk cycles.** 4 directions × 6–8 frames for every person (13 with the new three), the
+same layout as the farmer (`farmer.png`: rotations, then a walk row per direction). Dave
+already makes animations in Pixellab; the sheets drop in as grids of frames
+(`SheetAnimation`, DECISIONS 034).
+
+**Portraits.** 13 people × 3 expressions, ~64 × 64, from each person's sprite as the style
+reference so they match.
+
+**A pixel font.** Today's text is Godot's default font, smooth and modern next to the
+pixel art. Options that are safe to ship on itch.io:
+
+| Font | Licence | Look | Use |
+|---|---|---|---|
+| **monogram** (datagoblin) | CC0, no credit needed | Small, round, friendly, monospace; has accents | **Recommended** for dialogue and menus at 640 × 360 |
+| Pixel Operator (Jayvee Enaguas) | CC0 (check the bundled readme) | Clean, slightly taller, has bold | Good second choice; bold for headings |
+| Pixelify Sans (Google Fonts) | SIL Open Font Licence | Softer, more modern | Titles and the logo |
+| Kenney Fonts (Kenney) | CC0 | Chunky, game-y | Big numbers (gold, clock) |
+| m5x7 / m6x11 (Daniel Linssen) | Free to use; check the licence file before shipping | Very popular in indie games | Alternative to monogram |
+
+Recommendation: **monogram for text, Pixel Operator Bold or Pixelify Sans for headings**,
+set once in a Godot `Theme` (with a nine-patch panel for the dialogue box and menus), so
+every screen changes at once. Fonts go in `assets/fonts/` with their licence files, and the
+credits screen (Stage 26) names them even where CC0 doesn't require it.
+
+### 13.6 The revised stages
+
+Stage 18 (festivals) carries on as it is. The old Stage 19 (almanac, year review, life in
+town) is split: "life in town" moves into Stage 22; the rest becomes Stage 25. The old
+Stage 20 (balance and release) becomes Stage 26.
+
+| Stage | Name | Sessions | Model | Save | Pixellab |
+|---|---|---|---|---|---|
+| **19** | **The Lane and the bigger farm** | 2 | Opus | v21 (farm debris, farm size) | none (placeholder at the new building size) |
+| **20** | **Early days** (jobs, errands, workbench, where to sell, bakery) | 2 | Opus, then Sonnet | v22 (crafting recipes known, the day's jobs) | none |
+| **21** | **The Cove** (tides, rockpools, sea fishing, crab pots, Tam) | 2 | Opus, then Sonnet | v23 (crab pots, sea fish in the log) | none |
+| **22** | **The tavern and people on the move** (Nell, Dot, homes, weekdays, schedules, walking) | 2 | Opus | maybe none (schedules are worked out from the clock) | none |
+| **23** | **Art: the world** (every building at the new size with roof variety; Lane and Cove tilesets; the Stage 12–18 backlog) | 2–3 art | cloud env | — | lots |
+| **24** | **Art: people and the UI** (portraits, walk cycles, the font and a UI theme) | 1 code + 2 art | Sonnet + cloud env | — | lots |
+| **25** | **Almanac and year review** (old 19 without life in town; the almanac now includes sea fish and sea forage) | 1–2 | Sonnet | v24 (collections) | a few |
+| **26** | **Balance and release** (old 20; checks the clock again now that travel is longer: 6 s per 10 min may suit the bigger map better) | 2 | Opus | — | title screen |
+
+**What to do first.** Stage 19, then 20: they fix Dave's main complaint (nothing to do
+after 9 AM) and they set the building size that the art needs. Two parts can safely run
+**alongside** the code stages in a separate art thread, because nothing depends on them:
+the **font and UI theme** (a small code session, could even come first; it's the cheapest
+visible improvement) and the **portraits**. Building art waits for Stage 19's size rule;
+walk cycles wait for Stage 22's schedules.
+
+**Rules that still apply** (CLAUDE.md): one stage per session; every new kind of thing
+(an exit, a job, a tide, a schedule, a workbench recipe) is a Resource and a small script
+once, then data forever; no balance numbers in scripts (tides, prices, demand drop, job
+pay all in `.tres`); every save change bumps the version with a migration and a
+`tests/saves/vNN_example.json` from the real previous build; Godot headless + xvfb in the
+sandbox before anything is delivered; Dave tests with F5 and commits himself.
+
+**DESIGN.md changes when this is agreed:** the World section gets the Lane, the Cove and
+the tavern; the scope list gains the workbench (no goods-for-profit machines), odd jobs and
+errands, and tides; "Explicitly out of scope" keeps animals, combat, mining, gifts and
+marriage.
+
+### 13.7 Decisions for Dave
+
+1. **Grow the farm** to 48 × 32 with an overgrown start (save change), or keep it at 30 × 20
+   and put clearing work elsewhere? (Recommended: grow it.)
+2. **The Cove from day 1** with a handline from Tam in week 1 (Wren's rod stays in summer
+   as the river rod)? Or the Cove later? (Recommended: day 1; it's the best fix for spring.)
+3. **Order:** world and early game first (19–22), with the font and portraits alongside,
+   then building art? (Recommended: yes.)
+
+**Answered 2026-11-17:** grow the farm (overgrown, 48 × 32); the Cove from day 1 with Tam's
+handline in week 1; world and early game first, with the font and portraits alongside.
+
+Everything else in this section is a recommendation Dave can change while it's built.

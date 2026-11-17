@@ -11,12 +11,13 @@ script = ExtResource("2_action")
 timber = ExtResource("4_timber")
 timber_from_thicket = 1
 timber_from_log = 3
+clears = Array[StringName]([&"stump"])
 
 [resource]
 script = ExtResource("1_def")
 id = &"axe"
 display_name = "Axe"
-description = "Chops thicket, a tile at a time, for timber: on the farm it clears the ground. In the Woods, undergrowth and fallen logs."
+description = "Chops thicket, a tile at a time, for timber: on the farm it clears the ground, and digs out old stumps. In the Woods, undergrowth and fallen logs."
 icon = ExtResource("3_icon")
 buy_price = 150
 energy_cost = 4.0

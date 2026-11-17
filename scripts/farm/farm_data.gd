@@ -451,6 +451,41 @@ func chop(cell: Vector2i, item_id: StringName, amount: int) -> bool:
 	return true
 
 
+# --- Debris (DECISIONS 060) --------------------------------------------------
+# The farm's new ground starts covered in stones, stumps, brambles and nettles:
+# objects (object_id) whose ObjectDef says they're debris. Clearing one takes
+# it away for good and leaves grass.
+
+## True if what stands at `cell` is one of `kinds` (ObjectDef ids): debris a
+## tool clears (ToolAction.clears).
+func can_clear(cell: Vector2i, kinds: Array[StringName]) -> bool:
+	var t := tile(cell)
+	return t != null and t.object_id != &"" and t.object_id in kinds
+
+
+## The debris at `cell`, or null if there's none (or something that isn't
+## debris, like a tree or a sprinkler).
+func debris_at(cell: Vector2i) -> ObjectDef:
+	var t := tile(cell)
+	if t == null or t.object_id == &"":
+		return null
+	var def := ContentDB.object(t.object_id)
+	return def if def != null and def.is_debris() else null
+
+
+## Clear the debris at `cell`: it's gone, and the tile is open grass.
+## Announced as object_removed (the farm takes the picture away) and
+## debris_cleared (GameState puts what it gives in the bag). Returns false
+## if there was no debris there.
+func clear_debris(cell: Vector2i) -> bool:
+	if debris_at(cell) == null:
+		return false
+	var object_id := tile(cell).object_id
+	remove_object(cell)
+	EventBus.debris_cleared.emit(cell, object_id)
+	return true
+
+
 # --- Overnight ---------------------------------------------------------------
 
 ## The first part of the night on the farm: each watered crop gets one day
