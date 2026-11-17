@@ -2,7 +2,7 @@ class_name CalendarEvent
 extends Resource
 ##
 ## CalendarEvent — something that happens on particular days of the calendar:
-## market day, and later fairs and festivals (DECISIONS 037).
+## market day, and the four festivals (DECISIONS 037, 059).
 ##
 ## An event is worked out from the date, never stored: it happens on day
 ## `first_day` of the game and then every `every_days` days after, counting
@@ -13,6 +13,12 @@ extends Resource
 ## (an ordinary ShopDef, so it has a keeper, greetings, hours and stock) and
 ## where its stall stands. The town builds whatever stalls today's events
 ## have, so a second market, or a third stall, is a data change.
+##
+## A festival (DECISIONS 059) is an event with a `host`: someone who stands
+## at `host_cell` all day and runs it. They may hold a contest (`contest`:
+## a judge, rivals and prizes), hand everyone a keepsake (`gift_items`), or
+## both. The festival's dressing (bunting, the show table, lanterns) is
+## `decorations`, objects set up on the event's map for the day.
 ##
 ## Nothing in this file may touch an autoload: ContentDB loads it while the
 ## autoloads are still starting.
@@ -43,6 +49,38 @@ extends Resource
 ## fall. Null: it happens from the start. happens_on() below is only the
 ## date; GameState.events_on() asks this too.
 @export var requires_unlock: UnlockDef
+
+@export_group("Festival")
+
+## Who runs it (a CharacterDef id): they stand at `host_cell` all day, and
+## you talk to them to enter its contest or be given its gift. &"": it isn't
+## a festival.
+@export var host: StringName = &""
+
+## Where the host stands while it's on.
+@export var host_cell: Vector2i
+
+## What the host says about the day, before anything else, each time you
+## speak to them (a festival with no contest: lantern night).
+@export var host_lines: Array[String] = []
+
+## The judging, or null for no contest.
+@export var contest: ContestDef
+
+## Given to the farmer by the host, once on the day: lantern night's lantern.
+@export var gift_items: Dictionary[ItemDef, int] = {}
+
+## What the host says as they hand the gift over.
+@export var gift_line: String = ""
+
+## The festival's dressing: ObjectDef ids by the cell each stands on, put
+## up on the event's map for the day, like the town's own objects.
+@export var decorations: Dictionary[Vector2i, StringName] = {}
+
+
+## True if someone runs it (a festival), rather than only setting up stalls.
+func is_festival() -> bool:
+	return host != &""
 
 
 ## True if the date alone says this happens on `day_number`

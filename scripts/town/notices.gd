@@ -123,13 +123,17 @@ static func _event_notice(event: CalendarEvent) -> String:
 		var hours := _event_hours(event)
 		if hours != "":
 			text += " Open %s." % hours
+		# A festival's contest (DECISIONS 059): when the judge decides.
+		var judging := Festivals.judging_text(event)
+		if judging != "":
+			text += " " + judging
 		return text
 	var number := GameState.day_number() + ahead
 	var length := GameState.RULES.days_per_season
 	var when := "tomorrow" if ahead == 1 else "in %d days" % ahead
-	return "Next %s: %s, %s day %d. %s" % [event.display_name.to_lower(), when,
+	return ("Next %s: %s, %s day %d. %s %s" % [event.display_name.to_lower(), when,
 			GameState.season_name(GameState.season_id_on(number)).to_lower(),
-			posmod(number - 1, length) + 1, event.description]
+			posmod(number - 1, length) + 1, event.description, Festivals.judging_text(event)]).strip_edges()
 
 
 ## The hours of an event's first stall that keeps hours ("8 AM – 2 PM"), or "".

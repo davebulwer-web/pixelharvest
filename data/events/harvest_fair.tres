@@ -1,0 +1,82 @@
+[gd_resource type="Resource" script_class="CalendarEvent" load_steps=17 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/calendar_event.gd" id="1_event"]
+[ext_resource type="Script" path="res://scripts/resources/stall_def.gd" id="2_stall"]
+[ext_resource type="Script" path="res://scripts/resources/contest_def.gd" id="3_r"]
+[ext_resource type="Script" path="res://scripts/resources/contest_rival.gd" id="4_r"]
+[ext_resource type="Script" path="res://scripts/resources/contest_prize.gd" id="5_r"]
+[ext_resource type="Script" path="res://scripts/festivals/best_item_rule.gd" id="6_r"]
+[ext_resource type="Resource" path="res://data/decorations/fair_trophy.tres" id="7_r"]
+
+[sub_resource type="Resource" id="Resource_rule"]
+script = ExtResource("6_r")
+grown_only = true
+
+[sub_resource type="Resource" id="Resource_rival0"]
+script = ExtResource("4_r")
+name = "Farmer Giles"
+entry = "marrow"
+min_score = 140
+max_score = 260
+
+[sub_resource type="Resource" id="Resource_rival1"]
+script = ExtResource("4_r")
+name = "Mrs Pell"
+entry = "cabbage"
+min_score = 100
+max_score = 200
+
+[sub_resource type="Resource" id="Resource_rival2"]
+script = ExtResource("4_r")
+name = "the Harker twins"
+entry = "pumpkin"
+min_score = 180
+max_score = 290
+
+[sub_resource type="Resource" id="Resource_rival3"]
+script = ExtResource("4_r")
+name = "Old Tom"
+entry = "leek"
+min_score = 80
+max_score = 150
+
+[sub_resource type="Resource" id="Resource_prize0"]
+script = ExtResource("5_r")
+gold = 500
+items = Dictionary[Resource, int]({ExtResource("7_r"): 1})
+
+[sub_resource type="Resource" id="Resource_prize1"]
+script = ExtResource("5_r")
+gold = 250
+
+[sub_resource type="Resource" id="Resource_prize2"]
+script = ExtResource("5_r")
+gold = 100
+
+[sub_resource type="Resource" id="Resource_contest"]
+script = ExtResource("3_r")
+rule = SubResource("Resource_rule")
+judged_at = 900
+rivals = Array[ExtResource("4_r")]([SubResource("Resource_rival0"), SubResource("Resource_rival1"), SubResource("Resource_rival2"), SubResource("Resource_rival3")])
+prizes = Array[ExtResource("5_r")]([SubResource("Resource_prize0"), SubResource("Resource_prize1"), SubResource("Resource_prize2")])
+invite_lines = Array[String](["The harvest fair! The finest thing grown in the valley this year takes the cup.", "One crop each, judged at three o'clock, on what it's worth. Big and rare does well."])
+question = "What will you enter?"
+nothing_line = "You've nothing grown on you. Bring me the best of your harvest, before three."
+entered_line = "Now that's a fine {entry}. On the table it goes. Judging's at {time}."
+waiting_line = "Your {entry} is on the table ({score}). Judging's at {time}."
+results_line = "The harvest fair results!"
+
+[resource]
+script = ExtResource("1_event")
+id = &"harvest_fair"
+display_name = "Autumn harvest fair"
+first_day = 77
+every_days = 112
+seasons = Array[StringName]([&"autumn"])
+location = &"town"
+description = "The best crop of the year wins a cup. Bring your finest to Mayor Bramble in the square."
+stalls = Array[ExtResource("2_stall")]([])
+host = &"mayor"
+host_cell = Vector2i(21, 16)
+contest = SubResource("Resource_contest")
+decorations = Dictionary[Vector2i, StringName]({Vector2i(15, 17): &"festival_flag", Vector2i(25, 17): &"festival_flag_blue", Vector2i(23, 16): &"show_table_harvest"})

@@ -173,6 +173,12 @@ func _listen() -> void:
 	EventBus.quest_started.connect(func(_id: StringName) -> void: play(&"chime"))
 	EventBus.quest_progressed.connect(func(_id: StringName, _p: int, _n: int) -> void: play(&"chime"))
 	EventBus.quest_completed.connect(func(_id: StringName) -> void: play(&"quest_done"))
+	# Festivals (DECISIONS 059): entering chimes; a place at the judging
+	# sounds like a request done, nothing to show like a fish lost.
+	EventBus.festival_entered.connect(func(_e: StringName, _w: String) -> void: play(&"chime"))
+	EventBus.festival_judged.connect(func(_e: StringName, place: int, _w: String) -> void:
+		play(&"quest_done" if place > 0 else &"nope"))
+	EventBus.festival_gift_given.connect(func(_e: StringName) -> void: play(&"quest_done"))
 	EventBus.tool_selected.connect(func(_id: StringName) -> void: play(&"tick"))
 	EventBus.energy_exhausted.connect(func() -> void: play(&"collapse"))
 	EventBus.day_ended.connect(func(_d: int) -> void: play(&"sleep"))

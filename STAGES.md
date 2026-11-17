@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 17 — greenhouse, bees and late tools.** Session 2 (fertilisers: growth feed and mulch; Brann's sickle with its tiers and his brass sprinkler; save version 19) is built, waiting for Dave to try it; then Stage 17 is done bar its Pixellab art, and Stage 18 (festivals) is next. Session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 18 — festivals.** Session 1 (the flower show, the fishing contest, the harvest fair and lantern night: a host, a contest with rivals and prizes, decorations; save version 20) is built, waiting for Dave to try it. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -909,7 +909,7 @@ Energy food only (narrows DECISIONS 006; no selling chains).
       watering all 24 tiles, picked up with E; Ivy's basket giving mulch; save and load;
       saves v1–v18), rendered fed, mulched and plain soil on the farm and in the
       greenhouse, the brass sprinkler's wet square and the great sickle's cursor
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (committed and pushed as "Stage 17", 2026-11-16)
 
 **Art**
 
@@ -918,8 +918,45 @@ Energy food only (narrows DECISIONS 006; no selling chains).
 
 ## Stage 18 — Festivals · 1–2 sessions · Sonnet
 
-- [ ] Spring flower show, summer fishing contest, autumn harvest fair, winter lantern night
-- [ ] Pixellab: festival decorations, trophy
+**Session 1 — the four festivals** (2026-11-16, DECISIONS 059, save version 20)
+
+- [x] Festivals are `CalendarEvent`s with a host (who stands at the festival all day), a
+      contest (`ContestDef`: a rule, rivals, prizes, judged at a set time), a keepsake
+      and decorations for the day; the `Festivals` autoload runs them
+- [x] **Spring flower show** (spring 24, the mayor, judged 2 PM): your best flower, +10
+      points for each flower bed on your farm (up to 5); 1st 250g and a bird bath
+- [x] **Summer fishing contest** (summer 14, Wren at the pond, judged 2 PM): sign up, then
+      the biggest fish from the town pond; 1st 400g and an angler's cup. Replaces Wren's
+      one-day request (its file is deleted by hand)
+- [x] **Autumn harvest fair** (autumn 21, the mayor, judged 3 PM): your best crop by value;
+      1st 500g and the harvest fair cup
+- [x] **Lantern night** (winter 28, the mayor): lanterns round the square, and a paper
+      lantern (it glows) for your farm
+- [x] Notice board and morning summary say when judging is; the night's summary lists
+      your place
+- [x] Save version 20 (the festival log, for the year review); `tests/saves/v19_example.json`
+- [x] Verified in the sandbox: headless import and run clean, 106 harness checks (the
+      dates; hosts and their spots; no flowers, then the best three offered with the
+      flower beds' points; turning it down; entering, the tulip taken, the waiting line;
+      judging at 2 PM and not before; the prize and the log; results read out; same dice
+      same day; the notices; the contest needing a rod, signing up, only town-pond fish
+      after signing up counting, a later fish not; signed up with nothing; the fair's
+      choices (no honey or fish), judged at the day's end; the lantern given once;
+      decorations; save and load; saves v1–v19), rendered the square on flower show day,
+      the mayor's question and results, the pond on contest day, the fair, lantern night
+      and the prizes on the farm at night
+- [ ] Dave confirms it plays correctly on Windows
+
+**Session 2 (if wanted)**
+
+- [ ] "A giant pumpkin wins the fair outright" (needs a giant counted in the log, or a
+      giant item)
+- [ ] Anything Dave wants changed after playing a festival (rivals' scores, prizes, places)
+
+**Art**
+
+- [ ] Pixellab: festival decorations (flags, show tables, contest sign, lanterns), the
+      trophies (bird bath, angler's cup, harvest fair cup, paper lantern)
 
 ## Stage 19 — Almanac, year review, life in town · 1–2 sessions · Sonnet
 

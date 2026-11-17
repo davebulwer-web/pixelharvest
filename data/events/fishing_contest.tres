@@ -1,7 +1,69 @@
-[gd_resource type="Resource" script_class="CalendarEvent" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="CalendarEvent" load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/calendar_event.gd" id="1_event"]
 [ext_resource type="Script" path="res://scripts/resources/stall_def.gd" id="2_stall"]
+[ext_resource type="Script" path="res://scripts/resources/contest_def.gd" id="3_r"]
+[ext_resource type="Script" path="res://scripts/resources/contest_rival.gd" id="4_r"]
+[ext_resource type="Script" path="res://scripts/resources/contest_prize.gd" id="5_r"]
+[ext_resource type="Script" path="res://scripts/festivals/biggest_fish_rule.gd" id="6_r"]
+[ext_resource type="Resource" path="res://data/tools/fishing_rod.tres" id="7_r"]
+[ext_resource type="Resource" path="res://data/decorations/angler_trophy.tres" id="8_r"]
+[ext_resource type="Resource" path="res://data/produce/bait.tres" id="9_r"]
+
+[sub_resource type="Resource" id="Resource_rule"]
+script = ExtResource("6_r")
+location = &"town"
+water = &"pond"
+rod = ExtResource("7_r")
+
+[sub_resource type="Resource" id="Resource_rival0"]
+script = ExtResource("4_r")
+name = "Old Sam"
+entry = "perch"
+min_score = 22
+max_score = 34
+
+[sub_resource type="Resource" id="Resource_rival1"]
+script = ExtResource("4_r")
+name = "Wren's cousin Hal"
+entry = "tench"
+min_score = 26
+max_score = 40
+
+[sub_resource type="Resource" id="Resource_rival2"]
+script = ExtResource("4_r")
+name = "the miller's boy"
+entry = "roach"
+min_score = 15
+max_score = 26
+
+[sub_resource type="Resource" id="Resource_prize0"]
+script = ExtResource("5_r")
+gold = 400
+items = Dictionary[Resource, int]({ExtResource("8_r"): 1})
+
+[sub_resource type="Resource" id="Resource_prize1"]
+script = ExtResource("5_r")
+gold = 200
+items = Dictionary[Resource, int]({ExtResource("9_r"): 10})
+
+[sub_resource type="Resource" id="Resource_prize2"]
+script = ExtResource("5_r")
+gold = 80
+
+[sub_resource type="Resource" id="Resource_contest"]
+script = ExtResource("3_r")
+rule = SubResource("Resource_rule")
+judged_at = 840
+rivals = Array[ExtResource("4_r")]([SubResource("Resource_rival0"), SubResource("Resource_rival1"), SubResource("Resource_rival2")])
+prizes = Array[ExtResource("5_r")]([SubResource("Resource_prize0"), SubResource("Resource_prize1"), SubResource("Resource_prize2")])
+invite_lines = Array[String](["Contest day! Once a year, the town pond. The biggest fish landed here by two o'clock wins.", "Any kind counts. Sign up with me first, then only what you catch after counts."])
+question = "Will you fish the contest?"
+sign_up_choice = "Sign me up"
+nothing_line = "You'll need a rod. Come and see me another day and we'll sort one out."
+entered_line = "You're signed up. Biggest fish from this pond by {time}. Good luck!"
+waiting_line = "Your biggest so far: {entry} ({score}). Weigh-in at {time}."
+results_line = "The weigh-in!"
 
 [resource]
 script = ExtResource("1_event")
@@ -11,5 +73,9 @@ first_day = 42
 every_days = 112
 seasons = Array[StringName]([&"summer"])
 location = &"town"
-description = "Wren's contest at the town pond, all day. Bring a rod and see Wren."
+description = "Wren's contest at the town pond: sign up with Wren, and the biggest fish landed there before 2 PM wins."
 stalls = Array[ExtResource("2_stall")]([])
+host = &"angler"
+host_cell = Vector2i(33, 6)
+contest = SubResource("Resource_contest")
+decorations = Dictionary[Vector2i, StringName]({Vector2i(30, 7): &"festival_flag", Vector2i(34, 7): &"festival_flag_blue", Vector2i(32, 7): &"contest_sign"})

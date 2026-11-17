@@ -2465,3 +2465,84 @@ at its price, and whether it should go at the season's turn. Placeholder art: th
 bags, their soil looks, the sickle and the brass sprinkler, drawn by a script in the
 palette until Pixellab. No new sounds: fertiliser uses the sowing sound, the sickle the
 weeding and harvest sounds.
+
+## 059 — Festivals are calendar events with a host, and a contest is a rule, rivals and prizes
+
+**Decision.** Stage 18 session 1 adds the four festivals of ROADMAP section 3 (the spring
+flower show, the summer fishing contest, the autumn harvest fair and lantern night), on
+placeholder art. **Save version 20** (the festival log).
+
+- *A festival is a `CalendarEvent` with a host.* New fields on the event, under a
+  "Festival" group: `host` (a CharacterDef id) and `host_cell` (where they stand all day,
+  instead of their usual spot), `host_lines`, a `contest`, `gift_items` with a
+  `gift_line` (a keepsake handed over once on the day), and `decorations` (ObjectDef ids
+  by cell, put up on the event's map for the day, like the town's own objects). Dates
+  work as they always have: each festival is `first_day` and every 112 days (once a
+  year): flower show day 24 (spring 24, which is also a market day), fishing contest day
+  42 (summer 14), harvest fair day 77 (autumn 21), lantern night day 112 (winter 28).
+- *A contest is a `ContestDef`*: a `ContestRule` (what can be entered and how it scores),
+  `judged_at` (minutes; entries close then), `rivals` (`ContestRival`: a name, what they
+  bring, a score range) and `prizes` (`ContestPrize`: gold and items, first place
+  first), plus the host's words (`invite_lines`, `question`, `nothing_line`,
+  `entered_line`, `waiting_line`, `results_line`, with {entry}, {score} and {time}
+  filled in). Rules follow the QuestGoal pattern, one small script per kind in
+  `scripts/festivals/`: **BestItemRule** (hand one thing over; it scores its own sell
+  price, before difficulty; filtered by `tag` and/or `grown_only`; optional points for
+  `bonus_object`s standing on the farm, `bonus_each` up to `bonus_most`) and
+  **BiggestFishRule** (sign up, then the biggest fish landed in `location`'s `water`
+  before the judging; needs the `rod`). A rule touches no autoload: the Festivals
+  service counts the bonus objects and says whether an item is grown.
+- *The Festivals autoload* (after Fishing) runs the day: what the host says
+  (`talk`, then `question_for` the best three things in the bag that the rule accepts,
+  or "Sign me up", with "Not yet" last), entering (`answer`: the item leaves the bag),
+  the judging as the clock reaches `judged_at` (or as the day ends, if the farmer has
+  gone to bed first), the prize given at once with a HUD message, and the results read
+  out by the host afterwards (3rd, 2nd, 1st, and your place if lower). Rivals' scores
+  come from dice seeded by the festival and the date, so a day always turns out the
+  same. A tie goes to the farmer. Signed up and caught nothing: no place. The town asks
+  `Festivals.spot_for` where a host stands, and talking to a host goes to Festivals
+  first unless they're waiting for a request you can hand in now; markers: "!" for a
+  contest still open (or a gift waiting), "?" once your result is in and unheard.
+- *The four festivals.* **Flower show** (mayor, judged 2 PM): any flower (tag `flower`),
+  +10 points per garden flower bed on the farm up to +50 ("tulips and the flower bed
+  matter"); four rivals scoring 25–70; prizes 250g and a **bird bath**, 120g, 50g.
+  **Fishing contest** (Wren at the pond, judged 2 PM): biggest fish from the town pond
+  after signing up; rivals 15–40 cm; 400g and an **angler's cup**, 200g and 10 bait, 80g.
+  **Harvest fair** (mayor, judged 3 PM): anything a crop gives; rivals 80–290; 500g and
+  the **harvest fair cup**, 250g, 100g. **Lantern night** (mayor, evening): no contest;
+  lanterns round the square glow after dark, and the mayor gives each farmer a **paper
+  lantern** (a decoration that glows) once on the night. Prize decorations have no price
+  (rewards only), like the sundial.
+- *Wren's one-day request "The summer contest" (DECISIONS 055) is gone*: the festival
+  replaces it (it gave 300g for any 25 cm fish). Its file, `data/quests/wren_contest.tres`,
+  has to be deleted by hand. An old save that had done it keeps the entry in its request
+  log, which does nothing.
+- *The day.* The notice board's event page says when judging is ("Judging at 2 PM."),
+  today and ahead; the morning summary says "… today!" with the judging time; the night's
+  summary lists the result in gold ("Spring flower show: 1st place, 250g and a bird
+  bath"). New EventBus signals `festival_entered`, `festival_judged`,
+  `festival_gift_given`; sounds reuse the chime, the request-done jingle and "nope".
+- *v19 → v20*: `GameState.festival_log` (saved as "festivals"): a list of
+  `{"event", "year", "day", "place"}` plus `"entry"` and `"score"` for a contest, for the
+  year review and almanac (Stage 19). Older games have taken part in nothing.
+  `tests/saves/v19_example.json` is the v18 example brought up by the real v19 build.
+
+Options considered: festivals as requests (`QuestDef` with `on_event`, as the contest hook
+was): one prize, no rivals and no judging, so no; a separate `FestivalDef` beside the
+calendar: a second way of saying "on this day", where the event already has dates,
+location, unlocks and the notice board; judging on hand-in (no suspense, and the fishing
+contest can't work that way); the prize kept until you talk to the judge (a prize missed
+by going home early). Real rivals' entries from the town's own people: the townsfolk
+named in contests are off-screen, so they need no art or schedules yet.
+
+**Why.** The roadmap asks for four set-piece days, each a small activity on existing
+systems; a contest that's a rule plus data lets each be a `.tres`, and a new kind (a
+cooking contest, say) one small script. Seeded dice keep the result the same for a day
+whatever the player does with their time, like the orders (DECISIONS 050).
+
+**Cost.** Entries live only for the day (a save is always dawn). The harvest fair's
+"a giant pumpkin wins outright" isn't in: a giant gives ordinary pumpkins, so the fair
+can't tell; it needs a giant item or a giant counted in the log (session 2). The mayor's
+year review at lantern night is Stage 19. Placeholder art: the flags, the two show
+tables, the contest sign, the festival lanterns and the four prizes, drawn by a script
+in the palette until Pixellab. Balance (rival ranges, prize gold) is for Stage 20.

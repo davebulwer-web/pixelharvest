@@ -102,7 +102,7 @@ icon.svg
 scenes/              .tscn scene files
 scripts/             Game code
   autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem,
-                     Audio, DayReport, Fishing…)
+                     Audio, DayReport, Fishing, Festivals…)
   farm/              The farm's data and layout, the farmhouse with its bed and its
                      stove and cooking menu (Stove, CookMenu; DECISIONS 056), the
                      farm's effects, the night's hazards (FarmHazards) and the
@@ -121,6 +121,8 @@ scripts/             Game code
                      used on the farmer, not a tile: DECISIONS 056; feeding the
                      soil and the sickle's cut: DECISIONS 058)
   upgrades/          UpgradeEffect scripts (tool tier, max energy, field)
+  festivals/         ContestRule scripts: what a festival's contest judges (best item,
+                     biggest fish; DECISIONS 059)
   quests/            QuestGoal scripts (deliver, deliver any of, deliver one of each,
                      harvest, sell, give gold, grow a giant, deliver with a fee, catch
                      fish) and the saved QuestLog
@@ -148,7 +150,8 @@ data/                Content resources (.tres), indexed by ContentDB
                      (and where its door is)
   shops/             ShopDef — a shopkeeper, their words, and what the counter offers
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers)
-  events/            CalendarEvent — what happens on which days (market day) and its stalls
+  events/            CalendarEvent — what happens on which days (market day) and its stalls,
+                     and the festivals: host, contest, rivals, prizes, decorations (DECISIONS 059)
   quests/            QuestDef — requests from townsfolk or shopkeepers: who asks, for what,
                      and the reward
   difficulties/      DifficultyDef — chosen at new game: multipliers on prices, energy, growing

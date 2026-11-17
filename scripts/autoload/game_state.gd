@@ -142,6 +142,7 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	cleared = {}
 	fish_log = {}
 	recipes = {}
+	festival_log = []
 	# Anything the calendar opens on day 1 is there from the start.
 	open_due_unlocks()
 	location = RULES.starting_location
@@ -573,6 +574,49 @@ func _fish_log_from_save(data: Variant) -> void:
 		fish_log[StringName(key)] = {"caught": int(entry.get("caught", 0)), "biggest": int(entry.get("biggest", 0))}
 
 
+# --- Festivals (DECISIONS 059) -------------------------------------------------
+# What happened at each festival the farmer took part in (saved, save version
+# 20): the place they came in a contest and what they entered, or a keepsake
+# received. The Festivals service writes it; the year review and the almanac
+# (Stage 19) read it. Kept as plain dictionaries, as they're saved.
+
+## One entry per festival taken part in, oldest first:
+## {"event": "flower_show", "year": 1, "day": 24, "place": 1,
+##  "entry": "tulip", "score": 65}. "place" is 0 for a festival with no
+## contest (lantern night's lantern), and "entry" and "score" are left out.
+var festival_log: Array[Dictionary] = []
+
+
+## Write down that the farmer took part in `event_id` today.
+func record_festival(event_id: StringName, place: int, entry_id: StringName = &"", score: int = 0) -> void:
+	var entry := {"event": String(event_id), "year": year, "day": day_number(), "place": place}
+	if entry_id != &"":
+		entry["entry"] = String(entry_id)
+		entry["score"] = score
+	festival_log.append(entry)
+
+
+## How many times the farmer has come first at `event_id`.
+func festival_wins(event_id: StringName) -> int:
+	return festival_log.filter(func(e: Dictionary) -> bool:
+		return e.get("event", "") == String(event_id) and int(e.get("place", 0)) == 1).size()
+
+
+func _festival_log_from_save(data: Variant) -> void:
+	festival_log = []
+	if typeof(data) != TYPE_ARRAY:
+		return
+	for entry: Variant in data:
+		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("event")) != TYPE_STRING:
+			continue
+		var kept := {"event": entry["event"], "year": int(entry.get("year", 1)), "day": int(entry.get("day", 1)),
+				"place": int(entry.get("place", 0))}
+		if typeof(entry.get("entry")) == TYPE_STRING:
+			kept["entry"] = entry["entry"]
+			kept["score"] = int(entry.get("score", 0))
+		festival_log.append(kept)
+
+
 # --- Cooking and eating (DECISIONS 056) ---------------------------------------
 # Recipes are data (RecipeDef, data/recipes/); dishes are ToolDefs with an
 # EatAction (data/dishes/). All that's kept here is which recipes the farmer
@@ -942,6 +986,7 @@ func to_save() -> Dictionary:
 		"cleared": _cleared_to_save(),
 		"fish_log": _fish_log_to_save(),
 		"recipes": _recipes_to_save(),
+		"festivals": festival_log.duplicate(true),
 	}
 
 
@@ -1033,6 +1078,8 @@ func load_from_save(data: Dictionary) -> void:
 	_fish_log_from_save(data["fish_log"])
 	# The recipes known, and how often each has been cooked (save version 17).
 	_recipes_from_save(data["recipes"])
+	# Festivals taken part in (save version 20).
+	_festival_log_from_save(data["festivals"])
 	unlocks = []
 	for id: Variant in data["unlocks"]:
 		if StringName(id) not in unlocks:

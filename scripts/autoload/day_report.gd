@@ -47,6 +47,8 @@ func _ready() -> void:
 	EventBus.shipment_sold.connect(func(gold: int) -> void: today.bin_sales += gold)
 	EventBus.items_sold_to_shop.connect(func(_id: StringName, _n: int, gold: int) -> void: today.shop_sales += gold)
 	EventBus.quest_completed.connect(func(id: StringName) -> void: today.quests_done.append(id))
+	# A festival's judging (DECISIONS 059): at its hour, or as the day ends.
+	EventBus.festival_judged.connect(_on_festival_judged)
 	# Requests run out in the night (DECISIONS 050), before day_started.
 	EventBus.quest_expired.connect(func(_id: StringName, title: String) -> void: today.quests_expired.append(title))
 	# Overnight ones arrive before day_started closes the record, so the
@@ -86,6 +88,18 @@ func _on_day_started(_day: int, _season: int, _year: int) -> void:
 	today.gold_at_end = GameState.gold
 	_finished = today
 	_start_record()
+
+
+func _on_festival_judged(event_id: StringName, place: int, prize: String) -> void:
+	var event := ContentDB.event(event_id)
+	var name := event.display_name if event != null else String(event_id)
+	if place <= 0:
+		today.festival_results.append("%s: nothing to show" % name)
+		return
+	var text := "%s: %s place" % [name, ContestDef.place_text(place)]
+	if prize != "":
+		text += ", " + prize
+	today.festival_results.append(text)
 
 
 func _on_crop_harvested(_cell: Vector2i, crop_id: StringName, amount: int) -> void:

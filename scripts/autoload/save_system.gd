@@ -88,7 +88,11 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       mulch has kept it wet; both left out when there's none). Ivy's
 ##       autumn basket now also gives mulch, so an older game that has
 ##       finished it is given the mulch and Marlow's mulch on sale.
-const CURRENT_VERSION := 19
+##  20 — festivals (DECISIONS 059): what happened at each festival the
+##       farmer took part in ("festivals": a list of {"event", "year",
+##       "day", "place", and for a contest "entry" and "score"}). Older
+##       games have taken part in none.
+const CURRENT_VERSION := 20
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -113,6 +117,7 @@ const REQUIRED_FIELDS: Dictionary = {
 	"fish_log": TYPE_DICTIONARY,
 	"recipes": TYPE_DICTIONARY,
 	"greenhouse": TYPE_DICTIONARY,
+	"festivals": TYPE_ARRAY,
 }
 
 ## Saving is switched on by load_or_new_game(), i.e. only when the game was
@@ -319,6 +324,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_17_to_18(data["game"])
 			18:
 				_upgrade_18_to_19(data["game"])
+			19:
+				_upgrade_19_to_20(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -737,3 +744,9 @@ func _upgrade_18_to_19(game: Dictionary) -> void:
 					break
 			if not found:
 				inventory.append({"id": item_id, "count": float(count)})
+
+
+## Version 19 -> 20: festivals (DECISIONS 059). Nobody had taken part in one
+## before they existed, so the log starts empty.
+func _upgrade_19_to_20(game: Dictionary) -> void:
+	game["festivals"] = []

@@ -119,6 +119,8 @@ static func news_for(r: DayRecord) -> Array[String]:
 	for title in r.quests_expired:
 		news.append("Out of time: %s. That request has gone." % title)
 	news.append_array(Quests.order_news_today())
+	# Today's festivals (DECISIONS 059).
+	news.append_array(Festivals.news_today())
 	var names: Array[String] = []
 	for giver in Quests.givers_new_today():
 		names.append(Quests.giver_name(giver))
@@ -300,6 +302,13 @@ func _build() -> void:
 		done.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		UiStyle.style_label(done, 10, UiStyle.GOLD)
 		column.add_child(done)
+
+	for result in record.festival_results:
+		var placed := Label.new()
+		placed.text = result
+		placed.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		UiStyle.style_label(placed, 10, UiStyle.GOLD)
+		column.add_child(placed)
 
 	var news := news_for(record)
 	if not news.is_empty():

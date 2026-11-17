@@ -96,6 +96,7 @@ func _ready() -> void:
 	_check_orders()
 	_check_forage()
 	_check_fish()
+	_check_festivals()
 	_check_recipes()
 	print("ContentDB: %d crops, %d items (%d forage, %d fish, %d dishes), %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers, %d order patterns, %d recipes"
 			% [_crops.size(), _items.size(), forage().size(), fish().size(), dishes().size(), _objects.size(), _upgrades.size(), _characters.size(),
@@ -887,3 +888,47 @@ func _check_fish() -> void:
 			push_error("ContentDB: '%s' has a max_size smaller than its min_size" % where)
 		if each.sell_price <= 0:
 			push_warning("ContentDB: '%s' sells for nothing, so the bin won't take it" % where)
+
+
+## Festivals (DECISIONS 059): a host who lives where the festival is, its
+## decorations real objects, and a contest with a rule and something to win.
+func _check_festivals() -> void:
+	for each: CalendarEvent in _events.values():
+		var where := each.resource_path
+		if not each.is_festival():
+			if each.contest != null or not each.gift_items.is_empty():
+				push_error("ContentDB: '%s' has a contest or a gift but no host to run it" % where)
+			continue
+		var host_def := character(each.host)
+		if host_def == null or host_def.location != each.location:
+			push_error("ContentDB: '%s' is hosted by '%s', who isn't a character in %s"
+					% [where, each.host, each.location])
+		for cell: Vector2i in each.decorations:
+			var placed := object(each.decorations[cell])
+			if placed == null or placed.scene == null:
+				push_error("ContentDB: '%s' puts up '%s', which isn't an object with a scene in %s"
+						% [where, each.decorations[cell], OBJECTS_DIR])
+		for item: ItemDef in each.gift_items:
+			if item == null:
+				push_error("ContentDB: '%s' gives an item that doesn't exist" % where)
+		var contest := each.contest
+		if contest == null:
+			if each.gift_items.is_empty() and each.host_lines.is_empty():
+				push_warning("ContentDB: '%s' has a host with nothing to do: no contest, gift or lines" % where)
+			continue
+		if contest.rule == null:
+			push_error("ContentDB: '%s' has a contest with no rule, so nothing can be entered" % where)
+		if contest.prizes.is_empty():
+			push_warning("ContentDB: '%s' has a contest with no prizes" % where)
+		if contest.invite_lines.is_empty():
+			push_warning("ContentDB: '%s' has a contest whose host says nothing before asking" % where)
+		for prize in contest.prizes:
+			if prize == null:
+				push_error("ContentDB: '%s' has an empty prize" % where)
+				continue
+			for item: ItemDef in prize.items:
+				if item == null:
+					push_error("ContentDB: '%s' has a prize item that doesn't exist" % where)
+		for rival in contest.rivals:
+			if rival == null or rival.max_score < rival.min_score:
+				push_error("ContentDB: '%s' has a rival with no scores, or a max below the min" % where)

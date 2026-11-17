@@ -233,6 +233,19 @@ signal quest_expired(quest_id: StringName, title: String)
 ## calendar overnight (DECISIONS 043). The day's summary lists it.
 signal unlocked(unlock_id: StringName)
 
+# --- Festivals (DECISIONS 059) ---------------------------------------------
+
+## The farmer entered a festival's contest: handed `entry` over (the flower
+## show's tulip), or signed up for the fishing contest ("a place").
+signal festival_entered(event_id: StringName, entry: String)
+
+## A contest the farmer entered has been judged: they came `place` (1 is
+## first) and won `prize` (in words: "250g and a bird bath", or "").
+signal festival_judged(event_id: StringName, place: int, prize: String)
+
+## A festival's host gave the farmer its keepsake (lantern night's lantern).
+signal festival_gift_given(event_id: StringName)
+
 ## Something the player should be told, in the HUD's message line.
 signal message_posted(text: String)
 

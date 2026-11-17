@@ -29,6 +29,12 @@ extends Node2D
 ## they have something to ask, a "?" that you have what they asked for.
 ## Shopkeepers can ask too (DECISIONS 044): their ShopCounter asks Quests.
 ##
+## Festivals (DECISIONS 059): on a festival day its host stands at the
+## festival (Festivals.spot_for), its decorations are put up like the town's
+## own objects, and talking to the host goes to the Festivals service first
+## (entering the contest, the results, the keepsake), unless they're waiting
+## for a request you can hand in.
+##
 ##   Town
 ##   ├── Ground      (TileMapLayer, same seasonal tilesets as the farm)
 ##   ├── Bridge      (the bridge over the river to the Woods, whole or broken)
@@ -86,6 +92,11 @@ var _markers: Dictionary = {}  # StringName -> Label
 var _board_offers: Array[QuestDef] = []
 var _asking_at_board: Array[QuestDef] = []
 
+## A festival's host with a question to ask once their lines are read (what
+## to enter), and the host whose question is up (DECISIONS 059).
+var _festival_to_ask: StringName = &""
+var _festival_asking: StringName = &""
+
 
 func _ready() -> void:
 	_player.can_farm = false
@@ -114,6 +125,7 @@ func _ready() -> void:
 	_add_spawn(&"from_woods", TownLayout.ARRIVAL_FROM_WOODS)
 	_add_bridge(bridge_open)
 	_place_objects()
+	_place_festival_decorations()
 	_mark_notice_board()
 	_place_townsfolk()
 	_place_stalls()
@@ -126,7 +138,9 @@ func _ready() -> void:
 	EventBus.npc_talked_to.connect(_on_npc_talked_to)
 	EventBus.notice_board_read.connect(_on_notice_board_read)
 	_dialogue.finished.connect(func() -> void: _offer_board_job())
+	_dialogue.finished.connect(func() -> void: _ask_festival_question())
 	_dialogue.chosen.connect(_on_board_job_chosen)
+	_dialogue.chosen.connect(_on_festival_answer)
 	# Turning orders down takes the "!" away (Rosa's or the board's).
 	_dialogue.chosen.connect(func(_i: int) -> void: _refresh_markers.call_deferred())
 	EventBus.time_changed.connect(func(_m: int) -> void: _pack_up_closed_stalls())
@@ -134,6 +148,10 @@ func _ready() -> void:
 			EventBus.item_removed]:
 		signal_ref.connect(func(_a = null, _b = null) -> void: _refresh_markers())
 	EventBus.quest_progressed.connect(func(_id: StringName, _p: int, _n: int) -> void: _refresh_markers())
+	# A festival's "!" goes once you've entered, and "?" comes with the results.
+	EventBus.festival_entered.connect(func(_e: StringName, _w: String) -> void: _refresh_markers())
+	EventBus.festival_judged.connect(func(_e: StringName, _p: int, _w: String) -> void: _refresh_markers())
+	EventBus.festival_gift_given.connect(func(_e: StringName) -> void: _refresh_markers())
 	# A gift of gold is ready when the purse is full enough (DECISIONS 049).
 	EventBus.gold_changed.connect(func(_g: int, _d: int) -> void: _refresh_markers())
 	_refresh_markers()
@@ -154,16 +172,28 @@ func _add_spawn(point_name: StringName, at: Vector2) -> void:
 ## is an ObjectDef, so it wears its season's picture if the season has one.
 func _place_objects() -> void:
 	for cell: Vector2i in TownLayout.OBJECTS:
-		var id: StringName = TownLayout.OBJECTS[cell]
-		var def := ContentDB.object(id)
-		if def == null or def.scene == null:
-			push_warning("Town can't place '%s' at %s: no data/objects/ file with that id and a scene"
-					% [id, cell])
+		_stand_object(cell, TownLayout.OBJECTS[cell])
+
+
+## Today's festivals' decorations, put up for the day (DECISIONS 059).
+func _place_festival_decorations() -> void:
+	for event in GameState.events_today():
+		if event.location != TOWN_ID:
 			continue
-		var node: Node2D = def.scene.instantiate()
-		node.position = _base_of(cell)
-		_entities.add_child(node)
-		SeasonLook.skin_object(node, id)
+		for cell: Vector2i in event.decorations:
+			_stand_object(cell, event.decorations[cell])
+
+
+func _stand_object(cell: Vector2i, id: StringName) -> void:
+	var def := ContentDB.object(id)
+	if def == null or def.scene == null:
+		push_warning("Town can't place '%s' at %s: no data/objects/ file with that id and a scene"
+				% [id, cell])
+		return
+	var node: Node2D = def.scene.instantiate()
+	node.position = _base_of(cell)
+	_entities.add_child(node)
+	SeasonLook.skin_object(node, id)
 
 
 ## An Npc for everyone who lives in town, at today's spot. Anyone waiting
@@ -174,7 +204,9 @@ func _place_townsfolk() -> void:
 			continue  # ContentDB has already said so
 		if not GameState.has_unlock(person.requires_unlock):
 			continue
-		var npc := Npc.create(person.id, person.sprite, person.spot_on(GameState.day))
+		# A festival's host stands at the festival all day (DECISIONS 059).
+		var cell := Festivals.spot_for(person.id, person.spot_on(GameState.day))
+		var npc := Npc.create(person.id, person.sprite, cell)
 		_entities.add_child(npc)
 		_markers[person.id] = npc.add_quest_marker()
 
@@ -186,10 +218,12 @@ func _mark_notice_board() -> void:
 			_markers[Quests.BOARD] = Npc.quest_marker_on(board, board.MARKER_HEIGHT)
 
 
-## Ask the Quests service what each townsperson's marker should say now.
+## Ask what each townsperson's marker should say now: a festival's host
+## about the festival first, then the Quests service.
 func _refresh_markers() -> void:
 	for id: StringName in _markers:
-		_markers[id].text = Quests.marker_for(id)
+		var text := Festivals.marker_for(id)
+		_markers[id].text = text if text != "" else Quests.marker_for(id)
 
 
 ## Today's market stalls, if any: every stall of every calendar event on
@@ -319,6 +353,14 @@ func _on_npc_talked_to(npc_id: StringName) -> void:
 	var person := ContentDB.character(npc_id)
 	if person == null or person.location != TOWN_ID:
 		return
+	# A festival's host talks about the festival, unless you've brought
+	# something they asked for (DECISIONS 059).
+	var in_hand := Quests.active_for(npc_id)
+	if (in_hand == null or not Quests.is_ready(in_hand)) and Festivals.has_something_for(npc_id):
+		var festival_lines := Festivals.talk(npc_id)
+		_festival_to_ask = npc_id if not Festivals.question_for(npc_id).is_empty() else &""
+		_dialogue.say(person.display_name, festival_lines)
+		return
 	var about_requests := Quests.talk(npc_id)
 	if not about_requests.is_empty():
 		_dialogue.say(person.display_name, about_requests)
@@ -370,3 +412,30 @@ func _on_board_job_chosen(index: int) -> void:
 	if lines.size() > 1:
 		lines = lines.slice(1)
 	_dialogue.say("Notice board", lines)
+
+
+# --- Festivals (DECISIONS 059) -------------------------------------------------
+
+## After the host's lines: what will you enter?
+func _ask_festival_question() -> void:
+	var npc_id := _festival_to_ask
+	_festival_to_ask = &""
+	if npc_id == &"":
+		return
+	var question := Festivals.question_for(npc_id)
+	if question.is_empty():
+		return
+	var person := ContentDB.character(npc_id)
+	_festival_asking = npc_id
+	var answers: Array[String] = []
+	answers.assign(question["answers"])
+	_dialogue.ask(person.display_name if person != null else "", question["question"], answers)
+
+
+func _on_festival_answer(index: int) -> void:
+	var npc_id := _festival_asking
+	_festival_asking = &""
+	if npc_id == &"":
+		return  # someone else's question
+	var person := ContentDB.character(npc_id)
+	_dialogue.say(person.display_name if person != null else "", Festivals.answer(npc_id, index))

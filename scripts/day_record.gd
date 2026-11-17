@@ -25,6 +25,10 @@ var quests_done: Array[StringName] = []
 ## Requests that ran out tonight, by title (DECISIONS 050): orders are
 ## cleared away by morning, so their names are kept rather than their ids.
 var quests_expired: Array[String] = []
+
+## How the farmer did at today's festival contests (DECISIONS 059), in
+## words: "Flower show: 1st place, 250g and a bird bath".
+var festival_results: Array[String] = []
 ## What opened up, by UnlockDef id: from requests handed in during the day,
 ## and from the calendar overnight (DECISIONS 043).
 var unlocked: Array[StringName] = []
@@ -64,5 +68,5 @@ func net() -> int:
 func is_quiet() -> bool:
 	return harvested.is_empty() and planted == 0 and watered == 0 \
 			and income() == 0 and spent == 0 and quests_done.is_empty() and unlocked.is_empty() \
-		and quests_expired.is_empty() \
+		and quests_expired.is_empty() and festival_results.is_empty() \
 		and weeds_pulled == 0 and lost.is_empty() and giants.is_empty() and caught.is_empty()
