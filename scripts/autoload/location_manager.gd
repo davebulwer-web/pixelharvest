@@ -78,12 +78,17 @@ func buildings_on(location_id: StringName) -> Array[LocationDef]:
 
 ## Why the player can't go into `location_id` right now, in words for the
 ## HUD, or "" if they can: a building that hasn't opened up yet (DECISIONS
-## 043), or a shop outside its opening hours (DECISIONS 035). A door asks this
+## 043), a shop outside its opening hours (DECISIONS 035), or a home with
+## no inside (DECISIONS 061). A door asks this
 ## before it takes the player through, and the building shuts its doorway.
 func closed_message(location_id: StringName) -> String:
 	var location: LocationDef = _locations.get(location_id)
 	if location == null:
 		return ""
+	# A home seen only from outside (DECISIONS 061): its door is always shut
+	# and says who lives there.
+	if not location.has_inside():
+		return location.door_words if location.door_words != "" else "Nobody answers."
 	if not GameState.has_unlock(location.requires_unlock):
 		if location.locked_message != "":
 			return location.locked_message

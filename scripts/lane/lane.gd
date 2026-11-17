@@ -4,15 +4,19 @@ extends Node2D
 ## and the town, with hedgerows to pick from on the way past.
 ##
 ## Like the Woods it owns no game state. It draws a fixed map (LaneLayout),
-## stands the fence, the signpost and the trees on it, lays out today's
-## hedgerow forage (Forage.spots_today, the same as the Woods' mushrooms),
-## and builds its two ends from its LocationDef's exits (Exits): west to the
-## town, east to the farm. Tools are off here, as in town.
+## stands the fence, the signpost, Dot's cart and the trees on it, builds
+## every building whose door is on the Lane (Pip's family's cottage and
+## Dot's yard, DECISIONS 061: homes seen from outside, whose doors say who
+## lives there), lays out today's hedgerow forage (Forage.spots_today, the
+## same as the Woods' mushrooms), and builds its two ends from its
+## LocationDef's exits (Exits): west to the town, east to the farm. Tools
+## are off here, as in town.
 ##
 ##   Lane
 ##   ├── Ground      (TileMapLayer, the same seasonal tilesets as the farm)
 ##   ├── SpawnPoints (Marker2Ds, made by Exits: "from_town", "from_farm")
-##   ├── Entities    (y-sorted: player, trees, the fence, the signpost, forage)
+##   ├── Entities    (y-sorted: player, buildings, trees, the fence, the
+##   │                signpost, the cart, forage)
 ##   ├── Weather     (the season's and the day's overlays, as on the farm)
 ##   ├── Daylight    (the time-of-day tint, as on the farm)
 ##   └── Hud         (the same HUD scene as the farm)
@@ -33,10 +37,15 @@ func _ready() -> void:
 	_player.tool_place = self
 	var location := LocationManager.find(LANE_ID)
 	SeasonLook.apply_ground(_ground)
-	var tiles := LaneLayout.build(Exits.gap_cells(location))
+	var buildings := LocationManager.buildings_on(LANE_ID)
+	var door_cells: Array[Vector2i] = []
+	for def in buildings:
+		door_cells.append_array(Building.door_cells(def))
+	var tiles := LaneLayout.build(Exits.gap_cells(location), door_cells)
 	for cell: Vector2i in tiles:
 		GroundTiles.draw(_ground, cell, tiles[cell])
 	Exits.add(self, location, _spawns)
+	_add_buildings(buildings)
 	_place_objects()
 	_place_forage()
 	_place_player()
@@ -47,6 +56,19 @@ func _ready() -> void:
 
 func _base_of(cell: Vector2i) -> Vector2:
 	return Vector2(cell.x * TILE_PX + TILE_PX / 2.0, (cell.y + 1) * TILE_PX)
+
+
+## Every building with its door on the Lane (DECISIONS 061), as the town
+## builds its shops. One that can be gone into gets a spawn point on its
+## doorstep for coming back out; a home seen only from outside needs none.
+func _add_buildings(buildings: Array[LocationDef]) -> void:
+	for def in buildings:
+		_entities.add_child(Building.create(def))
+		if def.has_inside():
+			var marker := Marker2D.new()
+			marker.name = "from_%s" % def.id
+			marker.position = Building.doorstep(def)
+			_spawns.add_child(marker)
 
 
 ## Stand everything from LaneLayout.objects(). Each is an ObjectDef, so it

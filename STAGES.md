@@ -999,22 +999,39 @@ ROADMAP 13.2 and 13.3 (#1, #2). Placeholder art at the new building size; no Pix
       signpost; picking hedgerow forage; a night's sleep and a v21 save), rendered both
       ends and the middle of the Lane, the allotments, the signpost, the farm's new ground
       and the town's east end
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-17: "feels much more
+      like a world now")
+
+**Session 2 (2026-11-17) — finds, the building size, Pip's and Dot's (DECISIONS 061, save version 22)**
+
+- [x] Finds while clearing (`FindDef`, data/finds/): five pages of the old farmer's
+      notebook, a rusty tool head (Brann fits a handle for 50g from day 8: the old
+      farmer's axe), an old seed tin each season, the cover of a buried well (leaves the
+      old well standing); rolled from the cell and the day, at most one a day, shown in a
+      dialogue box on the farm
+- [x] The building size rule (art/STYLE.md): door opening at least 24 × 36 px in the
+      middle of the bottom row, buildings about 1.5 × the old, varied roofs; `Building`
+      handles even widths (the doorway on two whole cells)
+- [x] The Lane's buildings as exteriors at the new size (placeholder, 128 × 96): Pip's
+      family's thatched cottage (north gap) and Dot's catslide shed and yard with her cart
+      (south gap); their doors say who lives there (`LocationDef.door_words`)
+- [x] Travel time measured walking: farmhouse door → town square 40 game minutes
+      (20.8 real seconds); left for Stage 26's look at the clock
+- [x] Save version 22 (finds); `tests/saves/v21_example.json`
+- [x] Verified in the sandbox: headless import and run clean, 484 harness checks (the
+      finds' order, days, seasons, debris kinds, limits, dice and pages; a simulated
+      spring of clearing; the seed tin's seeds; the tool head, its unlock and Brann's
+      request start to finish; the well left standing; save round trip; saves v1–v21; the
+      buildings' footprints, doorways and door words; the old buildings unmoved; no trees
+      on the plots; walking up to both doors and along their paths; the walk to town), and
+      rendered a find's dialogue after a real hoe swing, the old well, Pip's cottage with
+      the farmer at the door, and Dot's yard
 - [ ] Dave confirms it plays correctly on Windows
-
-**Session 2**
-
-- [ ] Finds while clearing: an old seed tin, a rusty tool head for Brann, pages of the old
-      farmer's notebook, the cover of a buried well (ROADMAP 13.3 #1)
-- [ ] The building size rule (13.5): door opening at least 24 × 36 px on a two-tile door
-      cell, buildings about 1.5 × today's; placeholder exteriors at that size
-- [ ] The Lane's buildings as exteriors: Pip's family's cottage and Dot's yard (through
-      the hedge gaps), each door saying who lives there
-- [ ] Check the travel times against ROADMAP 13.2 (farmhouse → town square about 50 game
-      minutes) and anything Dave wants changed after walking the Lane
 
 ## Stage 20 — Early days · 2 sessions · Opus, then Sonnet
 
-ROADMAP 13.3 (#3, #4, #7, #8, #9) and the first fortnight rewritten. Save version 22.
+ROADMAP 13.3 (#3, #4, #7, #8, #9) and the first fortnight rewritten. Save version 23
+(Stage 19 session 2 took 22, so every later version in ROADMAP 13.6 is one higher).
 
 - [ ] Odd jobs at the allotments (paid on the spot)
 - [ ] Dot's errands (a parcel somewhere by a time), Dot on the Lane from day 1

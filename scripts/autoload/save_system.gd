@@ -98,7 +98,10 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       (stones, stumps, brambles, nettles, a few trees), saved as objects
 ##       like any other ("object"), and the cliffs move out to the new edge.
 ##       No new fields.
-const CURRENT_VERSION := 21
+##  22 — finds while clearing (DECISIONS 061): how many times each find has
+##       turned up ("finds": find id -> count). Older games have found
+##       nothing.
+const CURRENT_VERSION := 22
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -124,6 +127,7 @@ const REQUIRED_FIELDS: Dictionary = {
 	"recipes": TYPE_DICTIONARY,
 	"greenhouse": TYPE_DICTIONARY,
 	"festivals": TYPE_ARRAY,
+	"finds": TYPE_DICTIONARY,
 }
 
 ## Saving is switched on by load_or_new_game(), i.e. only when the game was
@@ -334,6 +338,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_19_to_20(data["game"])
 			20:
 				_upgrade_20_to_21(data["game"])
+			21:
+				_upgrade_21_to_22(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -816,3 +822,10 @@ func _v21_debris(cell: Vector2i) -> String:
 		if roll < 0.0:
 			return entry[0]
 	return ""
+
+
+## Version 21 -> 22: finds while clearing (DECISIONS 061). Nothing has
+## turned up yet in an older game; its new ground's debris is all still
+## there to find things under.
+func _upgrade_21_to_22(game: Dictionary) -> void:
+	game["finds"] = {}

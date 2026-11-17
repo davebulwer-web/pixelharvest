@@ -24,6 +24,24 @@ Do not change these after Stage 1 without an entry in `DECISIONS.md`.
 | Dithering | None. Flat colour areas with hard-edged shading |
 | Background | Transparent for sprites; opaque for tilesets |
 
+## Buildings — the size rule (Stage 19, DECISIONS 061)
+
+Every building exterior, from Stage 19 on (placeholders included), and every building
+redrawn in Stage 23:
+
+| Rule | Value |
+|---|---|
+| Door opening | At least **24 px wide and 36 px tall**, so the farmer (about 16 × 37 in a 48 px cell) visibly fits |
+| Doorway | In the **middle of the picture's bottom row**: the game makes a two-tile (32 px) gap there, the only part of the picture you can walk into |
+| Width | A whole number of tiles. **Even** (128, 144…) is preferred: the doorway then sits on the door cell and the one to its right, so a two-tile path leads straight in. Odd (the old 80 px) centres it on the door cell |
+| Size | About 1.5 × the old 80 × 64: shops about 128 × 112, the farmhouse about 144 × 128, homes 96–128 wide, the tavern the biggest in town |
+| Roof | 40–50% of the height, sloping visibly, and varied: gabled, hipped, thatch (Pip's cottage, the tavern), catslide (Dot's yard, Tam's shed), slate with dormers (the town hall), chimneys |
+| Front | Faces the camera (south). A building north of a path is reached straight up; one south of it needs a path round to its front |
+| Winter | A snowy-roof version by script, as the farmhouse's (DECISIONS 034) |
+
+The first two at this size are placeholders: Pip's family's cottage and Dot's shed on the
+Lane (128 × 96), drawn by `art/build_stage19_s2_placeholders.py`.
+
 ## Palette — derived, 41 colours
 
 `art/palette.png` is the single source of truth. It is **derived from the art**, not

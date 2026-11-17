@@ -13,24 +13,31 @@ extends RefCounted
 ##
 ## The map, roughly (64 × 24 tiles, about three screens long):
 ##
-##      trees           trees               trees            ~~  trees
-##    | fence ---------------------- |                       ~~
-##    | [bed] [bed] || [bed] [bed]   |                       ~~
-##    | ======== cross path ======== |                       ~~
-##    | [bed] [bed] || [bed] [bed]   |                       ~~
+##      trees           trees             /Pip's \         ~~  trees
+##    | fence ---------------------- |   | cottage|        ~~
+##    | [bed] [bed] || [bed] [bed]   |   |__[ ]___|        ~~
+##    | ======== cross path ======== |        ||           ~~
+##    | [bed] [bed] || [bed] [bed]   |        ||           ~~
 ##   #######hedge#### ## ##################### ## ###########~~########
 ##  =====================================the lane========================== farm
 ##  town                                                     (ford)
-##   ###########hedge########## || ######################## ##~~########
-##        trees      meadow    ||   (signpost)       trees   ~~   trees
+##   ###########hedge########## || ################## ## ####~~########
+##        trees      meadow    ||   (signpost) /Dot's\ ||    ~~   trees
+##                             ||              | shed | ||cart~~
+##                             ||              |_[  ]_|_||   ~~
 ##                             || cliff path south (the Cove, Stage 21)
 ##
 ##   (# hedge, = path, ~~ the stream, [bed] the allotments' beds)
 ##
-## The gaps in the hedges are where things will come in later stages: the
-## allotments' path (odd jobs, Stage 20), a gate to Pip's family's cottage
-## and one to Dot's yard (Stage 19 session 2), and the cliff path down to
+## The gaps in the hedges lead to what's off the lane: the allotments' path
+## (odd jobs, Stage 20), Pip's family's cottage to the north and Dot the
+## carrier's yard to the south (DECISIONS 061), and the cliff path down to
 ## the Cove (Stage 21). Until then the cliff path stops at a signpost.
+##
+## The two buildings are LocationDefs with their door on the Lane
+## (data/locations/pip_cottage.tres, dot_yard.tres), built by lane.gd like the
+## town's shops. This file only keeps their plots clear of trees and lays the
+## paths to their doors: if a door cell moves, its path here moves with it.
 ##
 
 const SIZE := Vector2i(64, 24)
@@ -63,6 +70,22 @@ const ALLOTMENT_PATHS: Array[Rect2i] = [
 const CLIFF_PATH := Rect2i(20, 15, 2, 6)
 const SIGNPOST := Vector2i(22, 18)
 
+## Pip's family's cottage (DECISIONS 061): its plot north of the lane's
+## second north gap, kept clear of trees, and the path from the gap to its
+## door (pip_cottage.tres: door cell (40, 7), a 128 × 96 picture, so the
+## doorway is cells 40 and 41 and the cottage covers x 37–44, rows 2–7).
+const PIP_PLOT := Rect2i(36, 1, 10, 8)
+const PIP_PATHS: Array[Rect2i] = [Rect2i(40, 8, 2, 1)]
+
+## Dot the carrier's yard (DECISIONS 061): south of the lane's second south
+## gap. The shed faces south, like every building, so the path runs down
+## beside it and round to its doors (dot_yard.tres: door cell (41, 21), a
+## 128 × 96 picture, so the doorway is cells 41 and 42 and the shed covers x
+## 38–45, rows 16–21). Her cart stands in the yard east of the path.
+const DOT_PLOT := Rect2i(37, 15, 17, 9)
+const DOT_PATHS: Array[Rect2i] = [Rect2i(46, 15, 2, 8), Rect2i(40, 22, 6, 1)]
+const DOT_CART := Vector2i(50, 19)
+
 ## The stream: two tiles wide, running the whole height of the Lane near the
 ## farm end, shallow where the lane crosses it (the ford, drawn as path).
 const STREAM_X := 54
@@ -75,14 +98,15 @@ const TREE_CHANCE := 0.55
 
 
 ## The ground tile (an atlas coordinate, see GroundTiles) for every cell of
-## the Lane and its border, given the gap cells of its exits (drawn as path).
-static func build(gap_cells: Array[Vector2i]) -> Dictionary:
+## the Lane and its border, given the gap cells of its exits and the cells of
+## its buildings' doorways (both drawn as path).
+static func build(gap_cells: Array[Vector2i], door_cells: Array[Vector2i] = []) -> Dictionary:
 	var tiles: Dictionary = {}
 	for y in range(-1, SIZE.y + 1):
 		for x in range(-1, SIZE.x + 1):
 			var cell := Vector2i(x, y)
 			tiles[cell] = _tile_for(cell)
-	for cell in gap_cells:
+	for cell in gap_cells + door_cells:
 		tiles[cell] = GroundTiles.path_for(cell)
 	return tiles
 
@@ -113,12 +137,13 @@ static func _in_any(cell: Vector2i, rects: Array[Rect2i]) -> bool:
 
 
 ## True for a path cell: the lane (and the ford, where it crosses the
-## stream), the allotments' paths and the cliff path.
+## stream), the allotments' paths, the paths to Pip's and Dot's doors and
+## the cliff path.
 static func is_path(cell: Vector2i) -> bool:
 	if not inside(cell):
 		return false
 	return cell.y in ROAD_ROWS or _in_any(cell, ALLOTMENT_PATHS) or CLIFF_PATH.has_point(cell) \
-			or _in_gap(cell)
+			or _in_gap(cell) or _in_any(cell, PIP_PATHS) or _in_any(cell, DOT_PATHS)
 
 
 ## True for the cells of a gap in either hedge: path, joining the lane to
@@ -155,7 +180,8 @@ static func water_at(_cell: Vector2i) -> StringName:
 
 
 ## Everything standing on the Lane, by cell, naming an ObjectDef: the
-## allotments' fence, the signpost and the trees. Worked out the same way
+## allotments' fence, the signpost, Dot's cart and the trees. (Pip's cottage
+## and Dot's shed aren't objects: they're buildings, from their LocationDefs.) Worked out the same way
 ## every time, so nothing about it needs saving.
 static func objects() -> Dictionary:
 	var result: Dictionary = {}  # Vector2i -> StringName
@@ -166,6 +192,7 @@ static func objects() -> Dictionary:
 		result[Vector2i(ALLOTMENTS.position.x, y)] = &"fence"
 		result[Vector2i(ALLOTMENTS.end.x - 1, y)] = &"fence"
 	result[SIGNPOST] = &"signpost"
+	result[DOT_CART] = &"cart"
 	for block_y in range(0, SIZE.y, TREE_SPACING):
 		for block_x in range(0, SIZE.x, TREE_SPACING):
 			var block := Vector2i(block_x, block_y)
@@ -177,13 +204,13 @@ static func objects() -> Dictionary:
 	return result
 
 
-## Open grass where a tree may stand: inside, not path, hedge, water or the
-## allotments, not in the row beside a path or a hedge (so neither is hidden
-## under a canopy), and clear of the signpost.
+## Open grass where a tree may stand: inside, not path, hedge, water, the
+## allotments or Pip's and Dot's plots, not in the row beside a path or a
+## hedge (so neither is hidden under a canopy), and clear of the signpost.
 static func _is_meadow(cell: Vector2i) -> bool:
 	if not inside(cell) or is_path(cell) or is_stream(cell) or is_hedge(cell):
 		return false
-	if ALLOTMENTS.grow(1).has_point(cell):
+	if ALLOTMENTS.grow(1).has_point(cell) or PIP_PLOT.has_point(cell) or DOT_PLOT.has_point(cell):
 		return false
 	if absi(cell.y - NORTH_HEDGE_ROW) <= 1 or absi(cell.y - SOUTH_HEDGE_ROW) <= 1:
 		return false

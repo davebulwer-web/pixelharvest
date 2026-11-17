@@ -202,6 +202,11 @@ signal object_removed(cell: Vector2i, object_id: StringName)
 ## also announced as object_removed.
 signal debris_cleared(cell: Vector2i, object_id: StringName)
 
+## Something turned up while clearing debris at `cell` (DECISIONS 061): the
+## find `find_id`, for the `nth` time. GameState has already given what it
+## gives; the farm shows what it says.
+signal found_while_clearing(find_id: StringName, cell: Vector2i, nth: int)
+
 ## An object that makes something finished a batch overnight (DECISIONS 057):
 ## `amount` of `item_id` waits in it (honey in a bee hive) until collected.
 signal object_made(cell: Vector2i, object_id: StringName, item_id: StringName, amount: int)

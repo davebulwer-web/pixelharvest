@@ -11,9 +11,19 @@ extends StaticBody2D
 ## cell_base), which makes the picture's bottom edge sit on the ground and
 ## lets the player walk behind a roof but in front of a doorstep.
 ##
-## The picture is solid except the doorway, which is two tiles wide (32px, the
-## door cell and half of each neighbour): wide enough that the player doesn't
-## have to line up to the pixel. That gap is the ExitZone into the shop.
+## The picture is solid except the doorway, which is two tiles wide (32px):
+## wide enough that the player doesn't have to line up to the pixel. That gap
+## is the ExitZone into the shop. Where it sits depends on the picture's
+## width (DECISIONS 061): an odd number of tiles (the shops' 80 px, five
+## tiles) is centred on the door cell, so the doorway is the door cell and
+## half of each neighbour; an even number (the new size: Pip's cottage, 128
+## px, eight tiles) has the doorway on the door cell and the one to its
+## right, so a two-tile path leads straight in. art/STYLE.md has the size
+## rule (door opening at least 24 × 36 px, buildings about 1.5 × the old).
+##
+## A home with no inside (DECISIONS 061: Pip's family's cottage) is built the
+## same way, but its door is always shut and stepping up to it says who lives
+## there (LocationManager.closed_message gives its door_words).
 ##
 ## A shop with opening hours (DECISIONS 035) also has a closed door: a solid
 ## block across the top of the doorway, switched on whenever the shop is
@@ -40,7 +50,7 @@ var _def: LocationDef
 static func create(def: LocationDef) -> Building:
 	var building := Building.new()
 	building.name = String(def.id)
-	building.position = Vector2(def.door_cell.x * TILE_PX + TILE_PX / 2.0, (def.door_cell.y + 1) * TILE_PX)
+	building.position = origin(def)
 
 	var texture := def.exterior
 	var width := float(texture.get_width())
@@ -108,12 +118,45 @@ func _update_picture() -> void:
 
 
 ## The cells the building's picture covers, on the map it stands on: centred on
-## the door cell, with the door in the bottom row. The farm uses this to keep
-## those cells out of the hoe's reach (FarmLayout); nothing is saved from it.
+## the doorway, with the door in the bottom row. The farm uses this to keep
+## those cells out of the hoe's reach (FarmLayout), and the Lane to keep its
+## trees off them; nothing is saved from it.
 static func footprint(def: LocationDef) -> Rect2i:
 	var cells_wide := ceili(def.exterior.get_width() / float(TILE_PX))
 	var cells_tall := ceili(def.exterior.get_height() / float(TILE_PX))
-	return Rect2i(def.door_cell.x - cells_wide / 2, def.door_cell.y - cells_tall + 1, cells_wide, cells_tall)
+	# Odd: the door cell is the middle one. Even: the door cell is the left
+	# of the middle two.
+	var left := def.door_cell.x - cells_wide / 2 + (1 if cells_wide % 2 == 0 else 0)
+	return Rect2i(left, def.door_cell.y - cells_tall + 1, cells_wide, cells_tall)
+
+
+## True if the doorway is on the door cell and the one to its right (a
+## picture an even number of tiles wide), false if it's centred on the door
+## cell (odd).
+static func _door_between_cells(def: LocationDef) -> bool:
+	return ceili(def.exterior.get_width() / float(TILE_PX)) % 2 == 0
+
+
+## The cells of the doorway's floor: the door cell, and the one to its right
+## when the doorway is between them. A map draws them, and the cells in front
+## of them, as path.
+static func door_cells(def: LocationDef) -> Array[Vector2i]:
+	if _door_between_cells(def):
+		return [def.door_cell, def.door_cell + Vector2i.RIGHT]
+	return [def.door_cell]
+
+
+## Where the building stands, in pixels on its map: the bottom-middle of
+## its doorway, which is the bottom-middle of its picture.
+static func origin(def: LocationDef) -> Vector2:
+	var x: float = def.door_cell.x * TILE_PX + (float(TILE_PX) if _door_between_cells(def) else TILE_PX / 2.0)
+	return Vector2(x, (def.door_cell.y + 1) * TILE_PX)
+
+
+## Where someone coming back out of the building stands: on the doorstep,
+## just below the doorway, facing the map.
+static func doorstep(def: LocationDef) -> Vector2:
+	return origin(def) + Vector2(0, TILE_PX - 2)
 
 
 func _add_wall(rect: Rect2) -> CollisionShape2D:

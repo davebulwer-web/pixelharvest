@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="LocationDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lane/dot_yard.png" id="2_ext"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"dot_yard"
+display_name = "Dot's yard"
+outside = &"lane"
+door_cell = Vector2i(41, 21)
+exterior = ExtResource("2_ext")
+door_words = "Dot the carrier's shed. A slate on the door says: \"Out on my rounds. Back by dusk.\""

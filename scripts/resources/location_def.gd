@@ -4,7 +4,9 @@ extends Resource
 ## LocationDef — one place the player can be: the farm, the Lane, the town,
 ## the Woods, a shop or the farmhouse.
 ##
-## A location is just an id and the scene that shows it. All of its *state*
+## A location is just an id and the scene that shows it. A home seen only
+## from outside (Pip's family's cottage on the Lane; DECISIONS 061) has no
+## scene: its door says who lives there instead (`door_words`). All of its *state*
 ## lives in GameState (the farm's in FarmData), never in the scene, so the scene
 ## can be thrown away when the player leaves and rebuilt when they come back.
 ##
@@ -35,12 +37,26 @@ extends Resource
 ## isn't a building.
 @export var outside: StringName = &""
 
-## The door's cell on that map, and the picture of the building. The picture's
-## bottom-middle sits on the bottom of the door cell, so the door is the
-## middle tile of its bottom row (80×64 for the shops: five tiles wide, with a
-## 32px doorway).
+## The door's cell on that map, and the picture of the building. The doorway
+## is two tiles wide (32 px) in the middle of the picture's bottom row
+## (Building). A picture an odd number of tiles wide (the shops' 80 × 64,
+## five tiles) is centred on the door cell, so the doorway takes in half of
+## each neighbour; one an even number wide (the new size, DECISIONS 061:
+## Pip's cottage, 128 × 96) has its doorway on the door cell and the cell to
+## its right, so a two-tile path leads straight in. art/STYLE.md has the
+## building size rule.
 @export var door_cell: Vector2i
 @export var exterior: Texture2D
+
+## For a building with no inside (`scene_path` empty): what its door says
+## when the player walks up to it, e.g. "Pip's family live here." The door
+## stays shut. Homes are seen from outside only for now (ROADMAP 13.2).
+@export_multiline var door_words: String = ""
+
+
+## True for a building that can't be gone into: a home seen from outside.
+func has_inside() -> bool:
+	return scene_path != ""
 
 ## Set for a shop interior: who runs it and what it offers.
 @export var shop: ShopDef

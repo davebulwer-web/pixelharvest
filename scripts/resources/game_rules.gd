@@ -81,6 +81,13 @@ extends Resource
 ## GameState.plot_at() gives it for this location, and the farm's for the farm.
 @export var greenhouse_location: StringName = &"greenhouse"
 
+## --- Finds while clearing (DECISIONS 061) -------------------------------------
+
+## The most finds (FindDef, data/finds/) that can turn up in one day's
+## clearing. Each find's own chance says how likely it is; this keeps a long
+## day's clearing from emptying the list, so they come one at a time.
+@export var finds_per_day: int = 1
+
 ## --- Difficulty (DECISIONS 040) -------------------------------------------
 
 ## The difficulties offered at new game, in the order the menu lists them.

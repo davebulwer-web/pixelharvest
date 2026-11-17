@@ -2627,3 +2627,69 @@ the tilled tile). Placeholder sprites for the debris, stone, the three new forag
 and the signpost are drawn by `art/build_stage19_placeholders.py` in the palette until
 Pixellab (Stage 23). The stream doesn't fish yet. Travel times aren't measured yet
 (session 2).
+
+## 061 — Finds while clearing are data, buildings get a size rule, and homes are doors that talk
+
+**Decision.** Stage 19 session 2 finishes the Lane and the bigger farm (ROADMAP 13.2, 13.3 #1,
+13.5). Placeholder art. **Save version 22** (the finds).
+
+- *Finds are a Resource.* A new `FindDef` (data/finds/): what it's `found_under` (debris
+  ids, empty for any), its `chance`, how many `times` it can turn up, its `first_day` and
+  `seasons`, what it says (`words`, and for one that turns up more than once, the next of
+  its `pages` each time), what it `gives` (items), the unlock it earns (`gives_unlock`) and
+  an object it leaves where it was dug up (`leaves_object`). When debris is cleared,
+  `GameState` rolls the finds in file order, from the cell and the day (the same clearing
+  on the same day always finds the same thing), the first to come up winning, and at most
+  `GameRules.finds_per_day` (1) a day, so they come one at a time rather than in a heap on
+  the first long day. `EventBus.found_while_clearing` tells the farm, which shows the words
+  in a dialogue box (the farm scene now has one, as the town does).
+- *The six finds:* five pages of the old farmer's notebook (from day 3; they hint at the
+  axe head, the well and Stage 20's workbench), a rusty tool head (once, from day 2), an old
+  seed tin each in spring, summer and autumn (potato, tomato, pumpkin seeds; twice each), and
+  the cover of a buried well (once, from day 5, under stones or brambles), which leaves the
+  old well standing there (an object whose E says something, like the Lane's signpost). A
+  simulated spring of clearing 20 pieces a day turned up the tool head on day 2, the first
+  page on day 3, a seed tin on day 4 and the well on day 9.
+- *The rusty tool head is Brann's.* It earns `tool_head_found`, which a new request waits
+  for: from day 8, Brann knows his father's mark on it and fits a new handle for 50 gold
+  (`CommissionGoal`), giving the old farmer's axe. So clearing can pay for the tool that
+  clears stumps. Someone who has bought Marlow's axe already gets a spare (he says so).
+- *The building size rule* is in art/STYLE.md: a door opening at least 24 × 36 px in the
+  middle of the bottom row, buildings about 1.5 × the old size, roofs 40–50% and varied.
+  `Building` now handles a picture an even number of tiles wide: its two-tile doorway sits on
+  the door cell and the one to its right, so a two-wide path leads straight in (an odd width
+  is centred on the door cell, as before, so the farmhouse and the shops don't move).
+  `Building.origin()`, `doorstep()` and `door_cells()` replace the sums the town and the farm
+  each did for their doors' spawn points and doorsteps.
+- *Homes are doors that talk.* Pip's family's cottage and Dot's yard are `LocationDef`s with
+  their door on the Lane, like the shops on the town, but no `scene_path`: a new
+  `door_words` says who lives there, and `LocationManager.closed_message` gives those words,
+  so the door stays shut and stepping up to it says them. ContentDB allows a location with
+  no scene only if it has an outside and door words. `LaneLayout` keeps their plots clear of
+  trees and lays the paths from the hedge gaps to their doors; Dot's shed faces south like
+  every building, so its path runs down beside it and round to the front. Her cart stands
+  in the yard (an object whose E says something).
+- *Travel time,* measured walking in the sandbox: the farmhouse door to the town square is
+  20.8 real seconds, **40 game minutes** (ROADMAP 13.2 aimed at about 50). The town's
+  growth to 48 wide (with the bakery and tavern) will add about 4. Left as it is: Stage 26
+  looks at the clock's pace once everything is in.
+
+Options considered: finds as a field on each debris `ObjectDef` (a list of what's under
+stones): a find under several kinds would be written several times, and the once-only and
+per-day rules would have nowhere to live. Finds rolled with the global dice: not
+repeatable, so not testable, and a reload would re-roll. A home as its own kind of
+resource (HomeDef): a second way of putting a building on a map, when `LocationDef`
+already has the door, the picture and the outside; a home that later gets an inside only
+needs its `scene_path`. Moving the existing shops and farmhouse to the new size now: their
+art is real Pixellab art, and a placeholder at the new size would be a step back; they're
+redrawn at the new size in Stage 23, when the town grows to fit them.
+
+**Why.** ROADMAP 13.3 #1: clearing should now and then turn something up that tells the
+farm's story and feeds requests. 13.5: the farmer is wider than today's doors; the rule
+has to exist before any building art is made.
+
+**Cost.** The notebook's pages can't be read again yet (Stage 20's workbench may give the
+notebook a use). A find's "+N" items show on the HUD under the dialogue box. The old well
+does nothing but talk; mending it could come later. Save version 22, so Stage 20's change
+becomes 23 and later stages shift by one. `tests/saves/v21_example.json` is the v20 example
+brought up by the real v21 build.

@@ -96,9 +96,10 @@ static func _place_buildings(farm: FarmData) -> void:
 				if t != null:
 					t.terrain = FarmTile.Terrain.BUILDING
 					t.object_id = &""
-		var doorstep := farm.tile(def.door_cell + Vector2i.DOWN)
-		if doorstep != null and doorstep.terrain == FarmTile.Terrain.GRASS:
-			doorstep.terrain = FarmTile.Terrain.PATH
+		for door in Building.door_cells(def):
+			var doorstep := farm.tile(door + Vector2i.DOWN)
+			if doorstep != null and doorstep.terrain == FarmTile.Terrain.GRASS:
+				doorstep.terrain = FarmTile.Terrain.PATH
 
 
 ## Turn the grass in every buyable field into thicket. Ponds, paths and trees

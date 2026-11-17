@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="LocationDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lane/pip_cottage.png" id="2_ext"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"pip_cottage"
+display_name = "Pip's cottage"
+outside = &"lane"
+door_cell = Vector2i(40, 7)
+exterior = ExtResource("2_ext")
+door_words = "Pip's family live here. Nobody answers: Pip will be off in town, and Pip's mum has a plot at the allotments."

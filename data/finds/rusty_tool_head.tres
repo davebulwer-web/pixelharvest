@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="FindDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/find_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_item"]
+[ext_resource type="Resource" path="res://data/produce/rusty_tool_head.tres" id="3_head"]
+[ext_resource type="Resource" path="res://data/unlocks/tool_head_found.tres" id="4_unlock"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"rusty_tool_head"
+display_name = "A rusty tool head"
+found_under = Array[StringName]([&"stones", &"bramble", &"nettles"])
+chance = 0.05
+times = 1
+first_day = 2
+words = Array[String](["Something metal in the roots: an axe head, rusted brown, with no handle.", "The steel underneath looks good. Brann at the forge might know whose it was, once he's back from the city."])
+gives = Dictionary[ExtResource("2_item"), int]({
+ExtResource("3_head"): 1
+})
+gives_unlock = ExtResource("4_unlock")

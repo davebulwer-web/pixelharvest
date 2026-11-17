@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="TileSet" path="res://assets/tilesets/ground_tileset.tres" id="2_tileset"]
@@ -8,6 +8,7 @@
 
 [ext_resource type="PackedScene" path="res://scenes/daylight.tscn" id="9_daylight"]
 [ext_resource type="Script" path="res://scripts/farm/farm_effects.gd" id="10_effects"]
+[ext_resource type="Script" path="res://scripts/dialogue_box.gd" id="11_dialogue"]
 
 [node name="Farm" type="Node2D"]
 script = ExtResource("1_main")
@@ -38,3 +39,8 @@ script = ExtResource("10_effects")
 [node name="Daylight" parent="." instance=ExtResource("9_daylight")]
 
 [node name="Hud" parent="." instance=ExtResource("5_hud")]
+
+[node name="Dialogue" type="CanvasLayer" parent="."]
+process_mode = 3
+layer = 4
+script = ExtResource("11_dialogue")

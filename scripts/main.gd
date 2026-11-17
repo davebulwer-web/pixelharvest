@@ -27,8 +27,10 @@ extends Node2D
 ##   │               HUD; DECISIONS 046)
 ##   ├── Daylight   (scenes/daylight.tscn: tints the world by the clock — dusk,
 ##   │               night — and by the season's light_tint; DECISIONS 036)
-##   └── Hud        (scenes/hud.tscn, shared with the town — CanvasLayer 2, fixed to
-##                   the screen, not the world)
+##   ├── Hud        (scenes/hud.tscn, shared with the town — CanvasLayer 2, fixed to
+##   │               the screen, not the world)
+##   └── Dialogue   (the dialogue box, as in town: what a find while clearing
+##                   says, DECISIONS 061)
 ##
 ## The way off the farm is the gap at the west end of the path: since Stage 19
 ## it leads to the Lane, and from there to the town (DECISIONS 060). Where it
@@ -155,6 +157,8 @@ func _ready() -> void:
 		_place_object(cell)
 	)
 	EventBus.object_removed.connect(func(cell: Vector2i, _id: StringName) -> void: _remove_object(cell))
+	# Something turned up while clearing the new ground (DECISIONS 061).
+	EventBus.found_while_clearing.connect(_show_find)
 	# A field bought: its thicket is grass now. Rare enough to redraw it all.
 	EventBus.plot_unlocked.connect(func(_id: StringName) -> void: _draw_all())
 	# Overnight, many cells change at once (all the soil dries), so rather
@@ -188,7 +192,7 @@ func _build_surroundings() -> void:
 
 ## The keys, printed to Godot's Output panel when the farm opens.
 func _print_help() -> void:
-	print("--- Pixel Harvest · Stage 19 (the Lane and the bigger farm) ---")
+	print("--- Pixel Harvest · Stage 19 (the Lane and the bigger farm, session 2) ---")
 	print("WASD/arrows move. Space uses the item on the highlighted tile(s).")
 	print("Tab / Q move along the hotbar: tools, seeds, sprinklers.")
 	print("E harvests a ready crop, ships produce at the bin, or picks up a sprinkler")
@@ -199,6 +203,8 @@ func _print_help() -> void:
 	print("The farm's new ground (east and south) is overgrown: the hoe breaks up stones,")
 	print("E pulls up brambles and nettles (or the sickle cuts them), and the axe digs out")
 	print("stumps. Clearing gives stone, fibre and timber, and leaves ground to farm.")
+	print("Now and then something turns up while clearing: a seed tin, a page of the old")
+	print("farmer's notebook... On the Lane, Pip's family's cottage and Dot's yard are through the hedge gaps.")
 	print("Go to bed in the farmhouse (E at the bed) to end the day; the bin sells")
 	print("overnight and sprinklers water at dawn. You wake up at home.")
 	print("Seasons last %d days. Seeds only go in during their own seasons, and crops"
@@ -239,6 +245,21 @@ func _process(_delta: float) -> void:
 	_cursor.set_cells(_player.target_cells())
 
 
+## A find while clearing (DECISIONS 061): what it says, in the dialogue box,
+## headed with what it is. Deferred, so the box opens after the swing that
+## found it has finished, not in the middle of it. A scene without a box
+## (the greenhouse has no debris, but just in case) says it on the HUD.
+func _show_find(find_id: StringName, _cell: Vector2i, nth: int) -> void:
+	var found := ContentDB.find(find_id)
+	if found == null:
+		return
+	var box := get_node_or_null(^"Dialogue")
+	if box != null:
+		box.say.call_deferred(found.display_name, found.lines_for(nth))
+	else:
+		EventBus.message_posted.emit("Found: %s" % found.display_name)
+
+
 ## Every building with its door on the farm (the farmhouse), and a spawn point
 ## in front of each door for coming back out.
 func _add_buildings() -> void:
@@ -246,7 +267,7 @@ func _add_buildings() -> void:
 		_entities.add_child(Building.create(def))
 		var marker := Marker2D.new()
 		marker.name = "from_%s" % def.id
-		marker.position = Vector2(def.door_cell.x * TILE_PX + TILE_PX / 2.0, (def.door_cell.y + 2) * TILE_PX - 2)
+		marker.position = Building.doorstep(def)
 		$SpawnPoints.add_child(marker)
 
 

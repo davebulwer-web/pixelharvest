@@ -145,6 +145,9 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	fish_log = {}
 	recipes = {}
 	festival_log = []
+	finds = {}
+	finds_on_day = 0
+	finds_today = 0
 	# Anything the calendar opens on day 1 is there from the start.
 	open_due_unlocks()
 	location = RULES.starting_location
@@ -784,13 +787,82 @@ func clear_by_hand(cell: Vector2i) -> bool:
 	return plot.clear_debris(cell)
 
 
-## Whatever was cleared gives what its ObjectDef says (stones give stone).
-func _on_debris_cleared(_cell: Vector2i, object_id: StringName) -> void:
+## Whatever was cleared gives what its ObjectDef says (stones give stone),
+## and now and then something turns up under it (DECISIONS 061).
+func _on_debris_cleared(cell: Vector2i, object_id: StringName) -> void:
 	var debris := ContentDB.object(object_id)
-	if debris == null or debris.clears_to == null or debris.clears_to_amount <= 0:
+	if debris != null and debris.clears_to != null and debris.clears_to_amount > 0:
+		inventory.add(debris.clears_to, debris.clears_to_amount)
+		EventBus.message_posted.emit("+%d %s" % [debris.clears_to_amount, debris.clears_to.display_name.to_lower()])
+	_turn_up_find(cell, object_id)
+
+
+# --- Finds while clearing (DECISIONS 061) ---------------------------------------
+# Clearing the farm's new ground now and then turns up something: FindDefs in
+# data/finds/. Which one is rolled from the cell and the day, in file order,
+# the first to come up winning; at most RULES.finds_per_day a day. What's
+# kept is how many times each has turned up (saved, save version 22), and
+# how many have turned up today.
+
+## Find id -> how many times it has turned up.
+var finds: Dictionary = {}
+
+## The day_number finds_today counts for, and how many have turned up on it.
+## Not worth a save field of its own: saves are made at dawn, so a loaded
+## game always starts a fresh day's count.
+var finds_on_day: int = 0
+var finds_today: int = 0
+
+
+## How many times `find_id` has turned up.
+func times_found(find_id: StringName) -> int:
+	return int(finds.get(find_id, 0))
+
+
+## The find that turns up when `debris_id` is cleared from `cell` today, or
+## null. Doesn't change anything, so the same clearing always gets the same
+## answer.
+func find_under(cell: Vector2i, debris_id: StringName) -> FindDef:
+	var today := day_number()
+	if finds_on_day == today and finds_today >= RULES.finds_per_day:
+		return null
+	for each in ContentDB.finds():
+		if not each.could_turn_up(debris_id, today, season_id(), times_found(each.id)):
+			continue
+		var roll := float(absi(hash([cell, today, String(each.id), "find"])) % 10000) / 10000.0
+		if roll < each.chance:
+			return each
+	return null
+
+
+func _turn_up_find(cell: Vector2i, debris_id: StringName) -> void:
+	var found := find_under(cell, debris_id)
+	if found == null:
 		return
-	inventory.add(debris.clears_to, debris.clears_to_amount)
-	EventBus.message_posted.emit("+%d %s" % [debris.clears_to_amount, debris.clears_to.display_name.to_lower()])
+	var today := day_number()
+	if finds_on_day != today:
+		finds_on_day = today
+		finds_today = 0
+	finds_today += 1
+	finds[found.id] = times_found(found.id) + 1
+	for item: ItemDef in found.gives:
+		inventory.add(item, found.gives[item])
+	unlock(found.gives_unlock)
+	if found.leaves_object != &"" and farm != null:
+		farm.place_object(cell, found.leaves_object)
+	EventBus.found_while_clearing.emit(found.id, cell, times_found(found.id))
+
+
+func _finds_from_save(data: Variant) -> void:
+	finds = {}
+	finds_on_day = 0
+	finds_today = 0
+	if typeof(data) != TYPE_DICTIONARY:
+		return
+	for id: Variant in data:
+		var count: Variant = data[id]
+		if typeof(id) == TYPE_STRING and typeof(count) in [TYPE_FLOAT, TYPE_INT] and int(count) > 0:
+			finds[StringName(id)] = int(count)
 
 
 func _on_weeds_pulled(_cell: Vector2i) -> void:
@@ -1013,7 +1085,16 @@ func to_save() -> Dictionary:
 		"fish_log": _fish_log_to_save(),
 		"recipes": _recipes_to_save(),
 		"festivals": festival_log.duplicate(true),
+		"finds": _finds_to_save(),
 	}
+
+
+## {"seed_tin": 1}: by id as Strings, which JSON can hold.
+func _finds_to_save() -> Dictionary:
+	var data := {}
+	for id: StringName in finds:
+		data[String(id)] = finds[id]
+	return data
 
 
 ## {"woods": [[3, 16], [4, 16]]}: plain lists, which JSON can hold.
@@ -1106,6 +1187,8 @@ func load_from_save(data: Dictionary) -> void:
 	_recipes_from_save(data["recipes"])
 	# Festivals taken part in (save version 20).
 	_festival_log_from_save(data["festivals"])
+	# What has turned up while clearing (save version 22).
+	_finds_from_save(data["finds"])
 	unlocks = []
 	for id: Variant in data["unlocks"]:
 		if StringName(id) not in unlocks:

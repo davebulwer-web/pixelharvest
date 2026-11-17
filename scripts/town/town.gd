@@ -103,7 +103,7 @@ func _ready() -> void:
 	var doors: Array[LocationDef] = LocationManager.buildings_on(TOWN_ID)
 	var door_cells: Array[Vector2i] = []
 	for def in doors:
-		door_cells.append(def.door_cell)
+		door_cells.append_array(Building.door_cells(def))
 
 	SeasonLook.apply_ground(_ground)
 	var bridge_open := _woods_open()
@@ -119,8 +119,7 @@ func _ready() -> void:
 
 	for def in doors:
 		_entities.add_child(Building.create(def))
-		_add_spawn(StringName("from_%s" % def.id), Vector2(
-				def.door_cell.x * TILE_PX + TILE_PX / 2.0, (def.door_cell.y + 2) * TILE_PX - 2))
+		_add_spawn(StringName("from_%s" % def.id), Building.doorstep(def))
 	_add_spawn(&"from_woods", TownLayout.ARRIVAL_FROM_WOODS)
 	# The road east to the Lane (and on to the farm): town.tres's exits.
 	Exits.add(self, town, _spawns)

@@ -41,6 +41,8 @@ extends Node
 ##   data/dishes/    ToolDef with an EatAction — food cooked at the farmhouse
 ##                   stove and eaten from the hotbar (DECISIONS 056)
 ##   data/recipes/   RecipeDef — what goes into each dish (DECISIONS 056)
+##   data/finds/     FindDef — things that turn up while clearing the farm's
+##                   new ground (DECISIONS 061)
 ##
 
 const CROPS_DIR := "res://data/crops/"
@@ -58,6 +60,7 @@ const QUESTS_DIR := "res://data/quests/"
 const UNLOCKS_DIR := "res://data/unlocks/"
 const WEATHER_DIR := "res://data/weather/"
 const ORDERS_DIR := "res://data/orders/"
+const FINDS_DIR := "res://data/finds/"
 
 ## For checking crops name real seasons. Read directly rather than through
 ## GameState, because ContentDB starts first.
@@ -74,6 +77,7 @@ var _unlocks: Dictionary = {}  # StringName -> UnlockDef
 var _weathers: Dictionary = {}  # StringName -> WeatherDef
 var _orders: Dictionary = {}  # StringName -> OrderTemplate
 var _recipes: Dictionary = {}  # StringName -> RecipeDef
+var _finds: Dictionary = {}  # StringName -> FindDef
 
 
 func _ready() -> void:
@@ -89,6 +93,7 @@ func _ready() -> void:
 	_index(WEATHER_DIR, _weathers)
 	_index(ORDERS_DIR, _orders)
 	_index(RECIPES_DIR, _recipes)
+	_index(FINDS_DIR, _finds)
 	_check()
 	_check_quests()
 	_check_unlocks()
@@ -98,9 +103,10 @@ func _ready() -> void:
 	_check_fish()
 	_check_festivals()
 	_check_recipes()
-	print("ContentDB: %d crops, %d items (%d forage, %d fish, %d dishes), %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers, %d order patterns, %d recipes"
+	_check_finds()
+	print("ContentDB: %d crops, %d items (%d forage, %d fish, %d dishes), %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers, %d order patterns, %d recipes, %d finds"
 			% [_crops.size(), _items.size(), forage().size(), fish().size(), dishes().size(), _objects.size(), _upgrades.size(), _characters.size(),
-			_events.size(), _quests.size(), _unlocks.size(), _weathers.size(), _orders.size(), _recipes.size()])
+			_events.size(), _quests.size(), _unlocks.size(), _weathers.size(), _orders.size(), _recipes.size(), _finds.size()])
 
 
 ## The crop with this id, or null if there isn't one (for example, a save from
@@ -267,6 +273,21 @@ func crop_giving(item: ItemDef) -> CropDef:
 		if each.produce == item:
 			return each
 	return null
+
+
+## The find with this id, or null (DECISIONS 061).
+func find(id: StringName) -> FindDef:
+	return _finds.get(id)
+
+
+## Every find, in file-name order: the order they're rolled in when debris
+## is cleared, so the dice always see the same list.
+func finds() -> Array[FindDef]:
+	var result: Array[FindDef] = []
+	for each: FindDef in _finds.values():
+		result.append(each)
+	result.sort_custom(func(a: FindDef, b: FindDef) -> bool: return a.resource_path < b.resource_path)
+	return result
 
 
 ## The unlock with this id, or null.
@@ -506,7 +527,13 @@ func _check() -> void:
 	for location in RULES.locations:
 		if location == null or location.id == &"":
 			push_error("ContentDB: game_rules.tres lists a location with no id")
-		elif location.scene_path == "" or not ResourceLoader.exists(location.scene_path):
+		elif location.scene_path == "":
+			# A home seen only from outside (DECISIONS 061) has no scene, but
+			# it must stand somewhere and say who lives there.
+			if location.outside == &"" or location.door_words == "":
+				push_error("ContentDB: location '%s' has no scene; only a building with an outside and door_words can do without"
+						% location.id)
+		elif not ResourceLoader.exists(location.scene_path):
 			push_error("ContentDB: location '%s' has no scene at '%s'" % [location.id, location.scene_path])
 		if location.outside != &"":
 			if location.exterior == null:
@@ -699,8 +726,8 @@ func _check_quests() -> void:
 
 
 ## Unlocks (DECISIONS 043): everything that waits for one must name an unlock
-## in data/unlocks/, and every unlock must be earnable (by a date or a
-## request) and say something when it opens.
+## in data/unlocks/, and every unlock must be earnable (by a date, a request
+## or a find) and say something when it opens.
 func _check_unlocks() -> void:
 	var given: Dictionary = {}  # unlock id -> true, for ones a request gives
 	for each: QuestDef in _quests.values():
@@ -709,6 +736,10 @@ func _check_unlocks() -> void:
 				continue
 			given[reward.id] = true
 		_is_unknown_unlock(each.requires_unlock, each.resource_path, "waits for")
+	# A find can earn one too (DECISIONS 061): the rusty tool head.
+	for each: FindDef in _finds.values():
+		if each.gives_unlock != null:
+			given[each.gives_unlock.id] = true
 	for each: ItemDef in _items.values():
 		_is_unknown_unlock(each.requires_unlock, each.resource_path, "waits for")
 	for each: UpgradeDef in _upgrades.values():
@@ -932,3 +963,32 @@ func _check_festivals() -> void:
 		for rival in contest.rivals:
 			if rival == null or rival.max_score < rival.min_score:
 				push_error("ContentDB: '%s' has a rival with no scores, or a max below the min" % where)
+
+
+## Finds while clearing (DECISIONS 061): what they're under is debris, what
+## they give and leave exists, and anything that turns up more than once
+## with pages has a page for each time.
+func _check_finds() -> void:
+	for each: FindDef in _finds.values():
+		var where := each.resource_path
+		if each.display_name == "":
+			push_warning("ContentDB: '%s' has no display_name" % where)
+		if each.words.is_empty() and each.pages.is_empty():
+			push_warning("ContentDB: '%s' has no words, so finding it says nothing" % where)
+		for debris_id in each.found_under:
+			var debris: ObjectDef = _objects.get(debris_id)
+			if debris == null or not debris.is_debris():
+				push_error("ContentDB: '%s' is found under '%s', which isn't debris in %s"
+						% [where, debris_id, OBJECTS_DIR])
+		for item: ItemDef in each.gives:
+			if item == null or not _items.has(item.id):
+				push_error("ContentDB: '%s' gives an item that isn't in the item folders" % where)
+		_is_unknown_unlock(each.gives_unlock, where, "gives")
+		if each.leaves_object != &"":
+			var left: ObjectDef = _objects.get(each.leaves_object)
+			if left == null or left.scene == null:
+				push_error("ContentDB: '%s' leaves '%s', which isn't in %s with a scene"
+						% [where, each.leaves_object, OBJECTS_DIR])
+		if each.pages.size() > 1 and each.times != each.pages.size():
+			push_warning("ContentDB: '%s' has %d pages but turns up %d times"
+					% [where, each.pages.size(), each.times])

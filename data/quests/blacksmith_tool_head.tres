@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/commission_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/produce/rusty_tool_head.tres" id="3_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="4_r"]
+[ext_resource type="Resource" path="res://data/unlocks/tool_head_found.tres" id="5_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="6_r"]
+[ext_resource type="Resource" path="res://data/tools/axe.tres" id="7_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+item = ExtResource("3_r")
+amount = 1
+fee = 50
+
+[resource]
+script = ExtResource("1_r")
+id = &"blacksmith_tool_head"
+title = "The old axe head"
+giver = &"blacksmith"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Word is you're digging up the old farm's east ground. Turned up anything?", "An axe head? Let's see it... That's my father's mark, there on the cheek. He made it for the old farmer, forty years back.", "Bring it here with 50 gold for a new ash handle, and I'll have it as sharp as the day he made it."])
+reminder_line = "The old axe head and 50 gold for the handle. My father's work deserves a good one."
+thanks_lines = Array[String](["Good steel. They don't make it like this now. Give me a moment...", "There: the old farmer's axe, with a new handle. Stumps on your new ground, thicket, fallen logs in the Woods. It'll do them all.", "If Marlow's already sold you one, keep this as a spare. It'll outlast his."])
+reward_items = Dictionary[ExtResource("6_r"), int]({
+ExtResource("7_r"): 1
+})
+requires_unlock = ExtResource("5_r")
+first_day = 8

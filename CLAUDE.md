@@ -113,7 +113,8 @@ scripts/             Game code
   woods/             The Woods: their map, the day's forage (Forage, ForageSpot; DECISIONS 052)
                      and fallen logs (FallenLogs, FallenLog; DECISIONS 053)
   lane/              The Lane between the farm and the town: its map (LaneLayout), its
-                     hedgerow forage, the signpost (DECISIONS 060)
+                     hedgerow forage, the signpost (DECISIONS 060); Pip's cottage and
+                     Dot's yard are LocationDefs with door_words (DECISIONS 061)
   exits.gd           Exits: builds a place's ways out from LocationDef.exits (ExitDef;
                      DECISIONS 060)
   items/             Inventory
@@ -152,7 +153,8 @@ data/                Content resources (.tres), indexed by ContentDB
   weather/           WeatherDef — sunny, rain, storm, heatwave, snow, frost: what each does,
                      looks and sounds like (DECISIONS 046)
   locations/         LocationDef — the farm, the farmhouse, the greenhouse, the Lane, the town,
-                     the Woods, each shop (and where its door is, or its ways out: exits)
+                     the Woods, each shop (and where its door is, or its ways out: exits),
+                     and homes seen from outside (door_words; DECISIONS 061)
   shops/             ShopDef — a shopkeeper, their words, and what the counter offers
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers)
   events/            CalendarEvent — what happens on which days (market day) and its stalls,
@@ -173,6 +175,8 @@ data/                Content resources (.tres), indexed by ContentDB
                      energy, never sold (DECISIONS 056)
   recipes/           RecipeDef — what goes into each dish; known recipes are taught by
                      requests and cooked at the farmhouse stove (DECISIONS 056)
+  finds/             FindDef — what now and then turns up while clearing the farm's new
+                     ground: what it gives, earns or leaves standing (DECISIONS 061)
 tests/saves/         Old-version save files, for proving save upgrades still work
 assets/sprites/      Character and object art from Pixellab (town/ holds the shops and keepers,
                      farm/ the farmhouse and its furniture, decorations/ the farm's decorations,

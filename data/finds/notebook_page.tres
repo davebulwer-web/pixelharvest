@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="FindDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/find_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"notebook_page"
+display_name = "A page of the old farmer's notebook"
+chance = 0.08
+times = 5
+first_day = 3
+words = Array[String](["Under it, a page torn from a notebook, damp but readable. The old farmer's writing:"])
+pages = Array[String](["\"Started on the east ground again. The hoe for the stones, the axe for the old stumps, gloves for the brambles. It'll be a field by summer, if my back holds.\"", "\"Lost the head off my axe in the brambles, somewhere out past the pond. Brann's father made it. If it ever turns up, the forge will know it.\"", "\"Stone's no use to the shipping bin, but it's good for building. Once the workbench has a new leg I'll make path stones out of all this rubble.\"", "\"There's an old well out on the new ground. I put the lid on it the dry summer and let the brambles have it. The water was always sweet.\"", "\"Thirty years on this ground. Whoever has it next: clear it a bit at a time, and keep the hedges. The hedges feed you when the fields don't.\""])
