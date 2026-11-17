@@ -2964,3 +2964,56 @@ pier), a small daily round (the pots), and a buyer that makes the walk pay (Tam)
 crabs; `art/build_stage21_s2_placeholders.py`). Tam is on the quay day and night until
 Stage 22's schedules. A pot can't be moved except by emptying it with no bait in the bag.
 Every price, weight and wait is a first guess for Stage 26.
+
+## 066 — The music is the season's: Dave's own tunes, two a season, taking turns everywhere
+
+**Decision.** Dave composed eight pieces, two for each season, to replace the generated
+tunes from DECISIONS 042 (farm, town, woods). A side task between Stage 21 and Stage 22.
+**No save change.**
+
+- *The season owns the music.* `SeasonTheme.music` (an `Array[AudioStream]`) lists the
+  season's tunes, and `SeasonTheme.music_volume_db` how loud they play. Every place plays
+  them: the farm, the Lane, the town, the Cove, the Woods and every room inside. So walking
+  from the farm to the Cove carries on with the same tune, and the turn of the season
+  cross-fades to the new season's.
+- *A place can still have its own.* `LocationDef.music` stays: a place (or its outside)
+  with a tune of its own plays that instead, looping, all year round. That is for
+  somewhere that should sound different, like Stage 22's tavern. The five outdoor places'
+  `music` entries were emptied, so nothing uses `farm.ogg`, `town.ogg` or `woods.ogg` any
+  more (still in `assets/audio/music/`; Dave can delete them, and `art/build_sounds.py`
+  still writes them).
+- *Taking turns.* `Audio` keeps the list for here and now and picks the next tune at
+  random from all but the one that played last, so with two tunes they alternate and the
+  same one never plays twice running; with three or more the order varies. Three seconds
+  before a tune's end the next one starts and the two cross-fade
+  (`TRACK_CROSSFADE_SECONDS`), because Dave's tunes end at full volume and a hard stop
+  then silence would be noticeable. A tune playing that is in the new place's list
+  carries on where it is, so doors never restart the music.
+- *The files.* MP3 as Dave made them (192 kbps, 44.1 kHz, 90–150 s each). Godot 4 imports
+  MP3 directly, so nothing was converted; the import leaves `loop` off, which is what lets
+  `Audio` notice the end and change tune. Renamed to `<season>_<title>.mp3` without the
+  timestamps: spring `spring_harvest_path`, `spring_harvest_meadow`; summer
+  `summer_fields`, `summer_harvest_path`; autumn `autumn_acres`, `autumn_harvest_hush`;
+  winter `winter_farm_loop`, `winter_harvest_loop`.
+- *Which is which.* Six names say their season. "Harvest Path" and "Harvest Meadow" were
+  made together, before the summer pair, so they are spring; "Harvest Hush" was made with
+  "Autumn Acres", so it is autumn. A guess from the timestamps: moving a tune is one line in
+  a season's .tres.
+- *Loudness.* The new tunes measure about −12 to −17 LUFS, the old ones −24 to −26, and the
+  sound effects were balanced against the old. Each season's `music_volume_db` is −10 dB,
+  which puts them back where the old music sat (on top of the Music bus's −4 dB).
+
+Options considered: keeping music per place and giving each place a season → tune table
+(eight tunes don't divide into five places, and Dave asked for the music by season);
+putting the playlist in `game_rules.tres` keyed by season id (the season's look, weather
+and now its sound all live on its `SeasonTheme`, so one file says what a season is);
+converting to Ogg Vorbis like the old music (no need: MP3 imports, and Dave's files stay
+as he made them); normalising the files' loudness (changes his files; a number in data is
+easier to adjust by ear); a strict alternation (random-but-not-the-last is the same with
+two tunes and still varies with more).
+
+**Why.** Dave's own music, in by season, and room to add more: a new piece is a file and
+one more entry in that season's list, never a code change.
+
+**Cost.** −10 dB is set by measurement, not by ear; Dave may want it a little up or down.
+The old generated tunes and their import files are left on disk unused.

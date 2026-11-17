@@ -1189,6 +1189,20 @@ version 24.
       hauled a ready one with E, talked to Tam and sold him three mackerel
 - [ ] Dave confirms it plays correctly on Windows
 
+### Side task — Dave's seasonal music (no save change)
+
+Dave composed eight tunes, two a season, to replace the generated music (DECISIONS 066).
+
+- [x] The tunes in `assets/audio/music/` (MP3, as Dave made them) and on each season's
+      `SeasonTheme.music`; every place plays the season's tunes, taking turns at random
+      but never the same twice running, cross-fading 3 s before each ends and when the
+      season turns; `LocationDef.music` kept for a place with a tune of its own
+- [x] Verified in the sandbox: headless import and run clean; a probe started a new game
+      (spring tune in the farmhouse at −10 dB), skipped to near the end (cross-faded into
+      the other spring tune), turned the season to winter (winter tune), checked every
+      outdoor place gives the season's pair, and walked into the town without a restart
+- [ ] Dave confirms it plays correctly on Windows (and the volume sounds right)
+
 ## Stage 22 — The tavern and people on the move · 2 sessions · Opus
 
 ROADMAP 13.3 (#10, #11) and 13.4. Probably no save change.

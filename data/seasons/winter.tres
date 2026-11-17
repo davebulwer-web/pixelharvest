@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SeasonTheme" load_steps=11 format=3]
+[gd_resource type="Resource" script_class="SeasonTheme" load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/season_theme.gd" id="1_theme"]
 [ext_resource type="TileSet" path="res://assets/tilesets/ground_tileset_winter.tres" id="2_tiles"]
@@ -10,6 +10,8 @@
 [ext_resource type="Script" path="res://scripts/resources/weather_def.gd" id="w_def"]
 [ext_resource type="Resource" path="res://data/weather/sunny.tres" id="w_sunny"]
 [ext_resource type="Resource" path="res://data/weather/snow.tres" id="w_snow"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/winter_farm_loop.mp3" id="m_1"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/winter_harvest_loop.mp3" id="m_2"]
 
 [resource]
 script = ExtResource("1_theme")
@@ -29,3 +31,5 @@ weather_odds = Dictionary[ExtResource("w_def"), int]({
 ExtResource("w_sunny"): 1,
 ExtResource("w_snow"): 1
 })
+music = Array[AudioStream]([ExtResource("m_1"), ExtResource("m_2")])
+music_volume_db = -10.0

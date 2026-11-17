@@ -1,7 +1,6 @@
-[gd_resource type="Resource" script_class="LocationDef" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="LocationDef" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
-[ext_resource type="AudioStream" path="res://assets/audio/music/town.ogg" id="2_music"]
 [ext_resource type="Script" path="res://scripts/resources/exit_def.gd" id="9_exit"]
 
 [sub_resource type="Resource" id="Exit_lane"]
@@ -21,5 +20,4 @@ script = ExtResource("1_def")
 id = &"town"
 display_name = "Town"
 scene_path = "res://scenes/town.tscn"
-music = ExtResource("2_music")
 exits = Array[ExtResource("9_exit")]([SubResource("Exit_lane"), SubResource("Exit_cove")])

@@ -9,8 +9,11 @@ extends Node
 ## sound exists. (Screens that aren't game events, like closing the day's
 ## summary, call play() directly.)
 ##
-## What each sound is lives in data/audio/sound_bank.tres (SoundBank). Which
-## tune plays where lives on each LocationDef (its `music`). The weather's
+## What each sound is lives in data/audio/sound_bank.tres (SoundBank). The
+## music is the season's (SeasonTheme.music, DECISIONS 066): its tunes play
+## one after another wherever you go, so walking from the farm to the Cove
+## doesn't change the tune, but the turn of the season does. A place can
+## still have a tune of its own instead (LocationDef.music). The weather's
 ## loop (rain on the leaves) is on its WeatherDef (`ambience`, DECISIONS
 ## 046): it plays all day, and quieter indoors.
 ##
@@ -26,6 +29,11 @@ const BANK: SoundBank = preload("res://data/audio/sound_bank.tres")
 
 ## How long one tune takes to fade into the next, in seconds.
 const MUSIC_FADE_SECONDS := 0.8
+
+## When one of the season's tunes is nearly over, the next starts this many
+## seconds before its end and the two cross-fade, so there's no gap and no
+## hard stop (Dave's tunes end at full volume).
+const TRACK_CROSSFADE_SECONDS := 3.0
 
 ## How many copies of one sound can overlap. Watering three tiles in a row
 ## quickly overlaps; more than this and the oldest is cut off.
@@ -50,6 +58,13 @@ var _music_b: AudioStreamPlayer
 var _music_now: AudioStreamPlayer
 ## Music player -> the fade running on it.
 var _music_tweens: Dictionary = {}
+
+## The tunes that take turns here and now (the season's, or a place's own
+## one), how loud they play, and the last one started, so the next pick
+## isn't the same again.
+var _playlist: Array[AudioStream] = []
+var _music_volume_db: float = 0.0
+var _last_track: AudioStream
 
 ## The first scene of a session is opened by the boot, not by a door, so it
 ## doesn't get a door sound.
@@ -116,16 +131,31 @@ func play(sound_name: StringName) -> void:
 	player.play()
 
 
-## The tune for a location: its own, or its outside's (a shop plays the
-## town's tune). Null for silence.
-func music_for(location_id: StringName) -> AudioStream:
+## The tunes for a location: its own one if it has one (or its outside's: a
+## shop plays the town's), otherwise the season's (DECISIONS 066). Empty for
+## silence.
+func music_for(location_id: StringName) -> Array[AudioStream]:
+	var own := _own_music(location_id)
+	if own != null:
+		return [own]
+	var tunes: Array[AudioStream] = []
+	var theme := GameState.current_season_theme()
+	if theme != null:
+		for tune: AudioStream in theme.music:
+			if tune != null:
+				tunes.append(tune)
+	return tunes
+
+
+## A location's own tune, or its outside's, or null if neither has one.
+func _own_music(location_id: StringName) -> AudioStream:
 	for location in LocationManager.all():
 		if location.id != location_id:
 			continue
 		if location.music != null:
 			return location.music
 		if location.outside != &"":
-			return music_for(location.outside)
+			return _own_music(location.outside)
 		return null
 	return null
 
@@ -185,6 +215,8 @@ func _listen() -> void:
 	EventBus.day_ended.connect(func(_d: int) -> void: play(&"sleep"))
 	EventBus.day_started.connect(func(_d: int, _s: int, _y: int) -> void: play(&"morning"))
 	EventBus.location_changed.connect(_on_location_changed)
+	# The season's turn changes the tunes (DECISIONS 066).
+	EventBus.season_changed.connect(func(_s: int) -> void: _update_music(GameState.location))
 	EventBus.weather_changed.connect(func(_w: StringName) -> void: _update_ambience())
 	EventBus.thunder_rolled.connect(func() -> void: play(&"thunder"))
 
@@ -200,7 +232,7 @@ func _on_location_changed(location_id: StringName) -> void:
 		_first_location = false
 	elif not TimeSystem.is_ending_day():
 		play(&"door")
-	_play_music(music_for(location_id))
+	_update_music(location_id)
 	_update_ambience()
 
 
@@ -239,32 +271,85 @@ func _make_music_player() -> AudioStreamPlayer:
 	return player
 
 
+## Work out the tunes for `location_id` and play them. If the tune already
+## playing is one of them it carries on where it is, so going through a door,
+## or from the farm down the Lane to the town, never restarts the music.
+func _update_music(location_id: StringName) -> void:
+	var tunes := music_for(location_id)
+	var volume := 0.0
+	if _own_music(location_id) == null and GameState.current_season_theme() != null:
+		volume = GameState.current_season_theme().music_volume_db
+	_playlist = tunes
+	if tunes.is_empty():
+		_play_music(null)
+		return
+	if _music_now.playing and tunes.has(_music_now.stream):
+		if not is_equal_approx(volume, _music_volume_db):
+			_music_volume_db = volume
+			_fade(_music_now, volume, false)
+		return
+	_music_volume_db = volume
+	_play_music(_next_track())
+
+
+## The next tune to play: any one of the list but the one that played last,
+## so it never plays the same tune twice running (unless it only has one).
+func _next_track() -> AudioStream:
+	var choices: Array[AudioStream] = []
+	for tune in _playlist:
+		if tune != _last_track:
+			choices.append(tune)
+	if choices.is_empty():
+		return _playlist[0] if not _playlist.is_empty() else null
+	return choices.pick_random()
+
+
+## A tune that loops by itself (a place's own .ogg, imported with loop on)
+## never ends, so it never needs the next one queued.
+func _loops(stream: AudioStream) -> bool:
+	return stream != null and stream.get(&"loop") == true
+
+
+## Near the end of one of the season's tunes, cross-fade into the next.
+func _process(_delta: float) -> void:
+	if _playlist.is_empty() or not _music_now.playing or _loops(_music_now.stream):
+		return
+	var length := _music_now.stream.get_length()
+	if length <= 0.0:
+		return
+	if _music_now.get_playback_position() >= length - TRACK_CROSSFADE_SECONDS:
+		_play_music(_next_track(), true, TRACK_CROSSFADE_SECONDS)
+
+
 ## Fade to `stream`. The same tune already playing carries on where it is,
-## so going into a shop and out again doesn't restart the town's tune.
-func _play_music(stream: AudioStream) -> void:
-	if stream != null and _music_now.playing and _music_now.stream == stream:
+## unless `restart` (a tune following itself, when the list has only one).
+func _play_music(stream: AudioStream, restart: bool = false,
+		fade_seconds: float = MUSIC_FADE_SECONDS) -> void:
+	if stream != null and not restart and _music_now.playing and _music_now.stream == stream:
 		return
 	var old := _music_now
 	_music_now = _music_b if old == _music_a else _music_a
 	if old.playing:
-		_fade(old, -40.0, true)
+		_fade(old, -40.0, true, fade_seconds)
 	if stream == null:
 		_music_now.stop()
 		return
+	_last_track = stream
 	_music_now.stream = stream
 	_music_now.volume_db = -40.0
 	_music_now.play()
-	_fade(_music_now, 0.0, false)
+	_fade(_music_now, _music_volume_db, false, fade_seconds)
 
 
 ## Fade one music player to `volume_db`, stopping it at the end if asked.
 ## A player already fading has that fade cancelled first.
-func _fade(player: AudioStreamPlayer, volume_db: float, then_stop: bool) -> void:
+func _fade(player: AudioStreamPlayer, volume_db: float, then_stop: bool,
+		seconds: float = MUSIC_FADE_SECONDS) -> void:
 	var running: Tween = _music_tweens.get(player)
 	if running != null:
 		running.kill()
 	var tween := create_tween()
-	tween.tween_property(player, ^"volume_db", volume_db, MUSIC_FADE_SECONDS)
+	tween.tween_property(player, ^"volume_db", volume_db, seconds)
 	if then_stop:
 		tween.tween_callback(player.stop)
 	_music_tweens[player] = tween

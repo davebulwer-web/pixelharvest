@@ -164,8 +164,8 @@ data/                Content resources (.tres), indexed by ContentDB
                      bee hives: an object can make something, like honey; DECISIONS 057;
                      debris on the new ground, cleared for what it gives: DECISIONS 060)
   upgrades/          UpgradeDef — bought once: tool tiers, energy, fields
-  seasons/           SeasonTheme — each season's name, look and weather odds (crops list
-                     their own seasons)
+  seasons/           SeasonTheme — each season's name, look, weather odds and music (crops
+                     list their own seasons)
   weather/           WeatherDef — sunny, rain, storm, heatwave, snow, frost: what each does,
                      looks and sounds like (DECISIONS 046)
   locations/         LocationDef — the farm, the farmhouse, the greenhouse, the Lane, the town,
@@ -210,7 +210,8 @@ assets/sprites/      Character and object art from Pixellab (town/ holds the sho
                      fish/ the fish's icons, fishing/ the float,
                      dishes/ the dishes' icons, lane/ the Lane's pieces, cove/ the Cove's)
 assets/tilesets/     Ground and world tilesets
-assets/audio/        Sound effects (sfx/*.wav), music (music/*.ogg: farm, town, woods) and the weather's loops
-                     (ambience/*.ogg), made by art/build_sounds.py
+assets/audio/        Sound effects (sfx/*.wav) and the weather's loops (ambience/*.ogg), made by
+                     art/build_sounds.py; music (music/*.mp3: Dave's own tunes, two a season, on
+                     each SeasonTheme; DECISIONS 066)
 art/                 Art specification and generation log (not shipped art)
 ```

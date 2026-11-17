@@ -23,9 +23,11 @@ extends Resource
 ## is only loaded when the player actually goes there.
 @export_file("*.tscn") var scene_path: String
 
-## The tune that plays here, looping (DECISIONS 042). A building left empty
-## plays its outside's tune: the shops have the town's, the farmhouse the
-## farm's, so walking indoors doesn't restart the music.
+## A tune of this place's own, looping (DECISIONS 042). Left empty, a building
+## plays its outside's tune, and a place with none plays the season's music
+## (SeasonTheme.music, DECISIONS 066), which is what every place does since
+## Dave's seasonal tunes: this is for somewhere that should sound different
+## all year round, like a tavern one day.
 @export var music: AudioStream
 
 ## --- Buildings -----------------------------------------------------------------

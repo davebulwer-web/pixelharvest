@@ -43,6 +43,17 @@ extends Resource
 ## of day's colour (DECISIONS 036), since a scene can only have one tint.
 @export var light_tint: Color = Color.WHITE
 
+## The season's music (DECISIONS 066): Dave's tunes for this season, played
+## one after another, everywhere that has no tune of its own (LocationDef.music).
+## A new piece for the season is one more file in this list. With two or more,
+## the same tune never plays twice running; with one, it simply repeats.
+@export var music: Array[AudioStream] = []
+
+## How loud this season's tunes play, in decibels: 0 as recorded, -10 a good
+## deal quieter. The tunes are recorded much louder than the game's sounds,
+## so this brings them down to sit under the hoe and the watering can.
+@export var music_volume_db: float = 0.0
+
 ## The weather's odds this season (DECISIONS 046): each kind of weather and
 ## its weight. {sunny: 6, rain: 3, storm: 1} means sunny six days in ten, on
 ## average. Empty: always fine (no weather at all).
