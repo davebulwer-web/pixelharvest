@@ -8,7 +8,7 @@ size = Vector2(6, 4)
 
 [node name="Signpost" type="StaticBody2D"]
 script = ExtResource("1_script")
-words = "Signpost: \"The Cove, by the cliff path.\" Beyond it the path has slipped away down the cliff. Someone will have to mend it."
+words = "Signpost: \"The Cove, by the cliff path.\" Down past the gorse, the sea's glinting at the bottom of the cliffs."
 
 [node name="Sprite" type="Sprite2D" parent="."]
 texture = ExtResource("2_tex")

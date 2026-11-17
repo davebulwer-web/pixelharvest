@@ -75,6 +75,11 @@ func has_inside() -> bool:
 ## the spots the location's map offers. 0: no foraging here.
 @export var forage_per_day: int = 0
 
+## How many of the spots the sea uncovers at low tide get something each
+## morning (DECISIONS 064): the Cove's rockpools and sand bar. Only forage
+## with `at_low_tide` turns up on them. 0: none.
+@export var low_tide_forage_per_day: int = 0
+
 ## --- Timber (DECISIONS 053) -------------------------------------------------------
 ## How many fallen logs lie about each morning, for the axe, out of the places
 ## the location's map offers. 0: none here.

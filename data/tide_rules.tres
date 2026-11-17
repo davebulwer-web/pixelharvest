@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="TideRules" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/tide_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+period_minutes = 745
+first_low_minute = 620
+low_window_minutes = 90

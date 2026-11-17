@@ -9,7 +9,8 @@ extends Node2D
 ## Dot's yard, DECISIONS 061: homes seen from outside, whose doors say who
 ## lives there), lays out today's hedgerow forage (Forage.spots_today, the
 ## same as the Woods' mushrooms), and builds its two ends from its
-## LocationDef's exits (Exits): west to the town, east to the farm.
+## LocationDef's exits (Exits): west to the town, east to the farm, and
+## south down the cliff path to the Cove (DECISIONS 064).
 ##
 ## Odd jobs and errands (DECISIONS 062): Dot the carrier stands at her gate
 ## (a CharacterDef who lives on the Lane), with her errands; the allotment
@@ -22,7 +23,7 @@ extends Node2D
 ##
 ##   Lane
 ##   ├── Ground      (TileMapLayer, the same seasonal tilesets as the farm)
-##   ├── SpawnPoints (Marker2Ds, made by Exits: "from_town", "from_farm")
+##   ├── SpawnPoints (Marker2Ds, made by Exits: "from_town", "from_farm", "from_cove")
 ##   ├── Entities    (y-sorted: player, buildings, trees, the fence, the
 ##   │                signpost, the cart, forage)
 ##   ├── Weather     (the season's and the day's overlays, as on the farm)
@@ -241,7 +242,7 @@ func water_at(cell: Vector2i) -> StringName:
 	return LaneLayout.water_at(cell)
 
 
-## Put the player where LocationManager asked: "from_farm" or "from_town",
+## Put the player where LocationManager asked: "from_farm", "from_town" or "from_cove",
 ## made by Exits. With no arrival point (shouldn't happen: the game always
 ## starts at home), the farm end.
 func _place_player() -> void:

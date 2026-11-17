@@ -30,6 +30,22 @@ extends ItemDef
 ## up when it rains. Empty: any weather.
 @export var only_in_weather: Array[StringName] = []
 
+## --- The Cove (DECISIONS 064) -----------------------------------------------------
+
+## True for something that lives in the rockpools and on the sand bar
+## (shrimps, mussels): it turns up only on the spots the sea uncovers at low
+## tide (LocationDef.low_tide_forage_per_day of them), and can only be picked
+## while the tide is out. False: the ordinary spots (a beach's strand line,
+## the Woods, the hedgerows).
+@export var at_low_tide: bool = false
+
+## What picking it up puts in the bag, if not itself: driftwood is timber.
+## Null: the forage itself (a mushroom is a mushroom).
+@export var gives: ItemDef
+
+## How many of `gives` it puts in the bag.
+@export var gives_count: int = 1
+
 
 ## True if it can be found in `location_id` on a day of `season_id` with
 ## `weather_id`.

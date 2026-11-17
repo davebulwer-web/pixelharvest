@@ -68,6 +68,12 @@ extends Resource
 ## The wait, the strike and the reel bar: data/fishing_rules.tres.
 @export var fishing: FishingRules
 
+## --- Tides (DECISIONS 064) ---------------------------------------------------
+
+## When the sea at the Cove is out: data/tide_rules.tres. Null: no tides
+## (the rockpools never uncover).
+@export var tides: TideRules
+
 ## --- Cooking (DECISIONS 056) ------------------------------------------------
 
 ## What opens the farmhouse kitchen, so the stove cooks: Mabel's lessons give

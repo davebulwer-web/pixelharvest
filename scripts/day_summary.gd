@@ -96,6 +96,10 @@ static func news_for(r: DayRecord) -> Array[String]:
 	var coming := Notices.weather_warning()
 	if coming != "":
 		news.append(coming)
+	# Today's low tides at the Cove (DECISIONS 064).
+	var tides := Tides.day_text(GameState.day_number(), true)
+	if tides != "":
+		news.append(tides)
 	for id in r.unlocked:
 		var unlock_def := ContentDB.unlock(id)
 		if unlock_def != null and unlock_def.announcement != "":

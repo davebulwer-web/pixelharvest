@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 20 — early days** (ROADMAP section 13, agreed 2026-11-17; the stages from 19 on were rewritten by it, see below). Session 1 (odd jobs at the allotments and Dot's errands: requests handed to someone else, by a time of day; no save change) is built, waiting for Dave to try it. Stage 19 (the Lane and the bigger farm) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 21 — the Cove** (ROADMAP section 13, agreed 2026-11-17; the stages from 19 on were rewritten by it, see below). Session 1 (the Cove, its two ways in, tides worked out from the clock, the beach and the rockpools; no save change) is built, waiting for Dave to try it. Stage 20 (early days) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 19 (the Lane and the bigger farm) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -1098,18 +1098,64 @@ session 2 the workbench, where to sell and the bakery (Sonnet: patterns that exi
       the bench broken and mended, its menu before and after making fences, the bin's
       "plenty" message, the town with the bakery, the bakery's counter before and after
       plenty, Marlow's "(plenty today)" and the morning summary
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-17)
 
 ## Stage 21 — The Cove · 2 sessions · Opus, then Sonnet
 
-ROADMAP 13.2 and 13.3 (#5, #6). Save version 24.
+ROADMAP 13.2 and 13.3 (#5, #6). Split in two on 2026-11-17: session 1 the place and its
+tides (Opus: a new kind of time window), session 2 Tam, sea fishing and crab pots (Sonnet:
+fishing and requests exist). Session 1 needed no save change, so session 2 takes save
+version 24.
 
-- [ ] The Cove (56 × 36): harbour, pier, beach, cliffs, lighthouse; the coast road from
-      the town and the cliff path from the Lane's signpost
-- [ ] Tides worked out from the date; rockpools and the sand bar at low tide; driftwood
-      after storms; today's low tide on the notice board and in the morning summary
-- [ ] Tam at the harbour; his handline in week 1 (sea fishing from the pier); crab pots
-- [ ] Sea fish and sea forage
+**Session 1 (2026-11-17) — the Cove, its tides, the beach and the rockpools (DECISIONS 064, no save change)**
+
+- [x] **The Cove** (56 × 36, `cove.tres`, `scripts/cove/`): the coast road from the town's
+      west edge to the harbour; the quay with the old lighthouse, Tam's fish shed and the
+      tide board; the pier; a breakwater; the beach; cliffs with the cliff path through
+      them up to the Lane (the Lane's path now runs on past the signpost to its bottom
+      edge); Rosa's cottage above the road. The three buildings are homes seen from
+      outside (placeholder, at the new size). It plays the town's tune
+- [x] **Tides worked out from the clock** (`Tides`, `data/tide_rules.tres`): low water
+      every 12 h 25 min from 10:20 AM on spring day 1, so twice a day and 50 minutes later
+      each day; out for 90 minutes either side. No save, no dice
+- [x] **The shore the tide uncovers:** wet sand, a rocky shelf full of pools and a sand bar
+      out to an islet, sea (solid) while the tide's in. The Cove redraws it as the tide
+      turns, says so, and puts anyone still out there back on the strand line
+- [x] **Sea forage:** 5 spots a day on the strand line (seashells, sea glass, seaweed;
+      samphire in summer; driftwood on stormy days, picked up as 2 timber), and 8 in the
+      rockpools, only while the tide's out (shrimps, mussels, winkles, shore crabs in
+      summer and autumn, oysters in autumn and winter). `ForageDef.at_low_tide`, `gives`;
+      `LocationDef.low_tide_forage_per_day`. The Woods' and the Lane's forage unchanged
+- [x] Today's low tides on the notice board, in the morning summary and on the harbour's
+      tide board (which also says what the tide's doing now)
+- [x] Verified in the sandbox: headless import and run clean, 12,188 harness checks (the
+      tides for 112 days: one or two lows a day, a period apart, 50 minutes later each
+      day, out exactly 90 minutes either side, about a quarter of the day, the texts; the
+      Woods' and the Lane's forage identical to before for a year in three weathers; the
+      Cove's forage every day of a year in three weathers: counts, cells, seasons,
+      driftwood only in storms, every kind seen, the same twice; picking driftwood and a
+      shrimp; the map: both arrivals, every strand spot at any tide, every rockpool at low
+      tide only, the shore above each, the pier, the tide board, the buildings' doors and
+      plots, the trees; the Lane's cliff path and the town's west gap; the notice board and
+      the summary; in the scene: the shore drawn at high and low, the pools' forage out and
+      back, picking from a pool, the player put ashore as the tide came in, picked spots
+      staying picked after a trip to town, the tide board, the doors' words; walking the
+      coast road both ways and the cliff path both ways, down onto the shelf at low tide,
+      stopped by the sea at high tide and at the pier's edge; a night's sleep from the
+      Cove and a save round trip), and rendered the road's end, the harbour, the beach and
+      the shelf at high and low tide, the sand bar, the tide board's message, the cliff
+      path, driftwood after a summer storm, the Cove in winter, the Lane's cliff path and
+      the town's west end, and the whole Cove at both tides
+- [ ] Dave confirms it plays correctly on Windows
+
+**Session 2 — Tam, sea fishing and crab pots (save version 24)**
+
+- [ ] Tam at the harbour from spring day 7: bring 3 rockpool finds → his handline (sea
+      fishing from the pier and the breakwater; `CoveLayout.water_at` gives &"sea")
+- [ ] Sea fish (`FishDef`s in the sea; high tide fishes best, as ROADMAP 13.3 #5 says)
+- [ ] Crab pots: Tam's plan for the workbench (day 10), dropped off the pier with bait,
+      emptied next day (saved: save version 24)
+- [ ] Tam buys fish and sea forage at a better price than Marlow (`ShopDef.buys_tags`)
 
 ## Stage 22 — The tavern and people on the move · 2 sessions · Opus
 

@@ -120,6 +120,9 @@ scripts/             Game code
                      Dot's yard are LocationDefs with door_words (DECISIONS 061); Dot at her gate, the
                      allotment holders' slate (JobSlate) and the beds as today's jobs
                      leave them (AllotmentBeds, AllotmentWeed; DECISIONS 062)
+  cove/              The Cove: its map (CoveLayout: the harbour, the beach, the shore the
+                     tide uncovers), the tides worked out from the clock (Tides), the
+                     harbour's tide board (DECISIONS 064)
   exits.gd           Exits: builds a place's ways out from LocationDef.exits (ExitDef;
                      DECISIONS 060)
   items/             Inventory
@@ -141,6 +144,8 @@ data/                Content resources (.tres), indexed by ContentDB
   game_rules.tres    Starting conditions and global numbers (GameRules)
   hazard_rules.tres  Thirst, weeds, crows and aphids: every number (HazardRules,
                      DECISIONS 045, 048)
+  tide_rules.tres    When the Cove's tide is out: the period, the first low tide and the
+                     window either side (TideRules, DECISIONS 064)
   fishing_rules.tres The wait, the strike and the reel bar's numbers, the ice, the lures and
                      the fine rod (FishingRules, DECISIONS 054, 055)
   crops/             CropDef — how each plant grows and looks, and its rules (trellis,
@@ -159,7 +164,7 @@ data/                Content resources (.tres), indexed by ContentDB
   weather/           WeatherDef — sunny, rain, storm, heatwave, snow, frost: what each does,
                      looks and sounds like (DECISIONS 046)
   locations/         LocationDef — the farm, the farmhouse, the greenhouse, the Lane, the town,
-                     the Woods, each shop (and where its door is, or its ways out: exits),
+                     the Woods, the Cove, each shop (and where its door is, or its ways out: exits),
                      and homes seen from outside (door_words; DECISIONS 061)
   shops/             ShopDef — a shopkeeper, their words, and what the counter offers; what
                      it buys (buys_tags) and how its price drops for plenty (DemandDef,
@@ -177,8 +182,10 @@ data/                Content resources (.tres), indexed by ContentDB
                      market orders, the notice board's daily jobs (DECISIONS 050), Dot's
                      errands (ErrandTemplate) and the allotments' odd jobs (JobTemplate;
                      DECISIONS 062)
-  forage/            ForageDef — wild things found in the Woods: items, with the seasons,
-                     places and weather they grow in (DECISIONS 052)
+  forage/            ForageDef — wild things found in the Woods, the Lane's hedgerows and
+                     the Cove: items, with the seasons, places and weather they grow in
+                     (DECISIONS 052); rockpool forage only at low tide, and driftwood
+                     picked up as timber (DECISIONS 064)
   fish/              FishDef — fish: items, with the water, seasons, hours and weather
                      they bite in, their size and fight (DECISIONS 054)
   dishes/            ToolDef with an EatAction — food: eaten from the hotbar for
@@ -194,7 +201,7 @@ assets/sprites/      Character and object art from Pixellab (town/ holds the sho
                      farm/ the farmhouse and its furniture, decorations/ the farm's decorations,
                      forage/ the wild things' icons, woods/ the Woods' own pieces,
                      fish/ the fish's icons, fishing/ the float,
-                     dishes/ the dishes' icons, lane/ the Lane's pieces)
+                     dishes/ the dishes' icons, lane/ the Lane's pieces, cove/ the Cove's)
 assets/tilesets/     Ground and world tilesets
 assets/audio/        Sound effects (sfx/*.wav), music (music/*.ogg: farm, town, woods) and the weather's loops
                      (ambience/*.ogg), made by art/build_sounds.py

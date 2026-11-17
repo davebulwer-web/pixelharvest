@@ -9,7 +9,8 @@ extends RefCounted
 ## Calendar events (market day) get a page of their own, worked out the same
 ## way from data/events/ (DECISIONS 037). So does the weather: today's and
 ## tomorrow's, and a warning days ahead of weather fixed by date, like
-## autumn's frost (DECISIONS 046).
+## autumn's frost (DECISIONS 046). And the tides: today's low water at the
+## Cove (DECISIONS 064).
 ##
 
 ## How close to the end of a season the board starts warning that crops
@@ -31,6 +32,10 @@ static func today() -> Array[String]:
 		weather = (weather + " " + coming).strip_edges()
 	if weather != "":
 		notices.append(weather)
+	# Today's low tides at the Cove (DECISIONS 064).
+	var tides := Tides.today_text()
+	if tides != "":
+		notices.append(tides)
 	for event in ContentDB.events():
 		var text := _event_notice(event)
 		if text != "":

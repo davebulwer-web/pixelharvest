@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="LocationDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/town.ogg" id="2_music"]
+[ext_resource type="Script" path="res://scripts/resources/exit_def.gd" id="9_exit"]
+
+[sub_resource type="Resource" id="Exit_town"]
+script = ExtResource("9_exit")
+to = &"town"
+cells = Array[Vector2i]([Vector2i(56, 10), Vector2i(56, 11)])
+arrival = Vector2i(54, 11)
+
+[sub_resource type="Resource" id="Exit_lane"]
+script = ExtResource("9_exit")
+to = &"lane"
+cells = Array[Vector2i]([Vector2i(56, 16), Vector2i(56, 17)])
+arrival = Vector2i(54, 17)
+
+[resource]
+script = ExtResource("1_def")
+id = &"cove"
+display_name = "the Cove"
+scene_path = "res://scenes/cove.tscn"
+music = ExtResource("2_music")
+forage_per_day = 5
+low_tide_forage_per_day = 8
+exits = Array[ExtResource("9_exit")]([SubResource("Exit_town"), SubResource("Exit_lane")])

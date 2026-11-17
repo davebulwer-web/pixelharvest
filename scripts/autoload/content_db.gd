@@ -898,8 +898,14 @@ func _check_forage() -> void:
 		for weather_id in each.only_in_weather:
 			if weather(weather_id) == null:
 				push_error("ContentDB: '%s' waits for weather '%s', which isn't in %s" % [where, weather_id, WEATHER_DIR])
-		if each.sell_price <= 0:
+		if each.sell_price <= 0 and each.gives == null:
 			push_warning("ContentDB: '%s' sells for nothing, so the bin won't take it" % where)
+		# Rockpool forage needs a place with low-tide spots (DECISIONS 064).
+		if each.at_low_tide:
+			for location in RULES.locations:
+				if location != null and location.id in each.found_in and location.low_tide_forage_per_day <= 0:
+					push_warning("ContentDB: '%s' lives in rockpools, but '%s' has no low-tide spots (low_tide_forage_per_day)"
+							% [where, location.id])
 
 
 ## Fish (DECISIONS 054): each kind must live in a real kind of water, bite in

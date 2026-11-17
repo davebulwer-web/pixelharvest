@@ -450,6 +450,13 @@ func forage(location_id: StringName, cell: Vector2i, what: ForageDef) -> void:
 		_foraged_today.clear()
 		_foraged_on_day = day_number()
 	_foraged_today[_forage_key(location_id, cell)] = true
+	# Driftwood goes in the bag as timber (ForageDef.gives; DECISIONS 064).
+	if what.gives != null:
+		inventory.add(what.gives, maxi(1, what.gives_count))
+		EventBus.foraged.emit(what.id, location_id)
+		EventBus.message_posted.emit("Found: %s (+%d %s)" % [what.display_name,
+				maxi(1, what.gives_count), what.gives.display_name.to_lower()])
+		return
 	inventory.add(what)
 	EventBus.foraged.emit(what.id, location_id)
 	EventBus.message_posted.emit("Found: %s" % what.display_name)

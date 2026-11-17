@@ -25,14 +25,15 @@ extends RefCounted
 ##        trees      meadow    ||   (signpost) /Dot's\ ||    ~~   trees
 ##                             ||              | shed | ||cart~~
 ##                             ||              |_[  ]_|_||   ~~
-##                             || cliff path south (the Cove, Stage 21)
+##                             || cliff path south, down to the Cove
 ##
 ##   (# hedge, = path, ~~ the stream, [bed] the allotments' beds)
 ##
 ## The gaps in the hedges lead to what's off the lane: the allotments' path
 ## (odd jobs, Stage 20), Pip's family's cottage to the north and Dot the
 ## carrier's yard to the south (DECISIONS 061), and the cliff path down to
-## the Cove (Stage 21). Until then the cliff path stops at a signpost.
+## the Cove past its signpost (DECISIONS 064: the gap in the bottom edge is
+## lane.tres's third exit).
 ##
 ## The two buildings are LocationDefs with their door on the Lane
 ## (data/locations/pip_cottage.tres, dot_yard.tres), built by lane.gd like the
@@ -69,9 +70,9 @@ const ALLOTMENT_PATHS: Array[Rect2i] = [
 	Rect2i(6, 5, 23, 1),  # across the middle
 ]
 
-## The cliff path, south from the lane's gap to the signpost. The Cove
-## (Stage 21) will open the way on to the bottom edge.
-const CLIFF_PATH := Rect2i(20, 15, 2, 6)
+## The cliff path, south from the lane's gap past the signpost to the
+## bottom edge, where it goes down to the Cove (DECISIONS 064).
+const CLIFF_PATH := Rect2i(20, 15, 2, 9)
 const SIGNPOST := Vector2i(22, 18)
 
 ## Pip's family's cottage (DECISIONS 061): its plot north of the lane's

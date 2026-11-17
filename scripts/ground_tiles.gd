@@ -26,6 +26,18 @@ const CLIFF := Vector2i(7, 0)
 const THICKET := Vector2i(8, 0)
 const PAVING := Vector2i(0, 3)
 
+## The Cove's ground (DECISIONS 064), in row 3 after the paving: dry sand,
+## wet sand and the rocky shelf with its pools (both uncovered only at low
+## tide), the sea, the pier's planks and rocks. The sea and the rocks are
+## solid, like the pond and the cliffs. Placeholder until the Cove's tileset
+## (Stage 23): art/build_stage21_placeholders.py draws them.
+const SAND := Vector2i(1, 3)
+const WET_SAND := Vector2i(2, 3)
+const ROCKPOOL := Vector2i(3, 3)
+const SEA := Vector2i(4, 3)
+const PIER := Vector2i(5, 3)
+const ROCKS := Vector2i(6, 3)
+
 ## How many detail tiles row 1 holds, left to right from column 0. Every
 ## season's ground image must have this many.
 const GRASS_DETAIL_COUNT := 8
@@ -82,9 +94,10 @@ static func path_for(cell: Vector2i) -> Vector2i:
 ## collision box is the whole square, so turning it changes nothing.) A detail
 ## is only mirrored left-right, so tufts and flowers still grow upwards.
 ## Everything else is drawn as is: the paving's stones only line up one way
-## round, and water and cliffs look wrong turned.
+## round, and water and cliffs look wrong turned. Sand and the rockpools are
+## turned like grass.
 static func transform_for(cell: Vector2i, coords: Vector2i) -> int:
-	if coords in [GRASS, GRASS_ALT, PATH, THICKET]:
+	if coords in [GRASS, GRASS_ALT, PATH, THICKET, SAND, WET_SAND, ROCKPOOL]:
 		return _ALL_TRANSFORMS[_pick(cell, 4, _ALL_TRANSFORMS.size())]
 	if coords.y == GRASS_DETAIL_ROW or coords.y == PATH_DETAIL_ROW:
 		return TileSetAtlasSource.TRANSFORM_FLIP_H if _pick(cell, 5, 2) == 1 else 0

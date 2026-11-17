@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ForageDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/forage_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/forage/shore_crab.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"shore_crab"
+display_name = "Shore crab"
+description = "A green shore crab, cross at being lifted out of its pool."
+icon = ExtResource("2_icon")
+sell_price = 18
+tags = Array[StringName]([&"sea", &"seafood"])
+seasons = Array[StringName]([&"summer", &"autumn"])
+found_in = Array[StringName]([&"cove"])
+weight = 5
+at_low_tide = true

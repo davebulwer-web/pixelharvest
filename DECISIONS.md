@@ -2826,3 +2826,77 @@ foods; `art/build_stage20_s2_placeholders.py`). Mabel is in the square and behin
 at once until Stage 22's schedules. The bakery's room is the shared shop interior. The
 ROADMAP's crab pot (Stage 21, Tam), rain barrel, compost bin and path stones aren't plans yet.
 Every price and every demand number is a first guess for Stage 26.
+
+## 064 — The Cove: a place reached two ways, tides worked out from the clock, and rockpools that only the low tide uncovers
+
+**Decision.** Stage 21 session 1 (ROADMAP 13.2 and 13.3 #5) opens the Cove from day 1, with
+its tides, its beach and its rockpools. Tam, his handline, sea fishing, crab pots and sea
+fish are session 2 (save version 24). Placeholder art. **No save change** (still 23).
+
+- *The Cove* (`cove.tres`, `scenes/cove.tscn`, `scripts/cove/`): 56 × 36, west of the town.
+  `CoveLayout` is a map function like the Lane's, with one more input: whether the tide is
+  out. The coast road comes in from the east edge to the harbour; the quay (paved) has the
+  old lighthouse, Tam's fish shed and the tide board on it, and the pier runs out into the
+  harbour; a breakwater of rocks parts the harbour from a sandy beach; cliffs at the east
+  end, with the cliff path cut through them up to the Lane. Below the beach's strand line
+  is the shore the tide uncovers: wet sand, a rocky shelf full of pools under the cliffs,
+  and a sand bar out to a little rocky islet. Rosa's cottage stands above the road. The
+  three buildings are homes seen from outside (`door_words`, DECISIONS 061), at the new
+  building size (placeholder: the lighthouse 64 × 128, the shed and the cottage 128 × 96).
+- *Two ways in, both data* (DECISIONS 060): the town's road now leaves the west edge too
+  (`town.tres`: the Cove), and the Lane's cliff path carries on past the signpost to the
+  bottom edge (`lane.tres`: the Cove; `LaneLayout.CLIFF_PATH` is three rows longer). The
+  signpost no longer says the path has slipped. So the map is the loop ROADMAP 13.2 drew:
+  farm, Lane, town, Cove, and back up the cliff path.
+- *Tides are worked out, not saved or rolled* (`Tides`, `TideRules` in
+  `data/tide_rules.tres`): low water comes every 745 game minutes (12 h 25 min, the real
+  sea's), counting from 10:20 AM on spring day 1, so twice a day and 50 minutes later each
+  day; the tide is out for 90 minutes either side. Like market day and the day's forage, a
+  save, a reload or a walk in and out can never put it wrong. A low tide after midnight
+  belongs to the day it's in (the game's day ends at 2 AM). The tide is out about a
+  quarter of the waking day.
+- *The tide in the scene.* As the clock moves the Cove asks `Tides.is_out()`; when it
+  changes, the tidal shore is redrawn (wet sand and rockpools, or sea, which is solid), the
+  rockpools' forage is put out or taken back, and a line on the HUD says so ("The tide's
+  going out. The rockpools are showing. The tide's out until 1:30 PM."). Anyone still out on
+  the shore when it comes in is put back on the strand line above ("The tide's come in! You
+  splash back up the beach."), so nobody is ever stranded. Walking in says what the tide is
+  doing.
+- *Sea forage is forage* (DECISIONS 052), with two small additions. `ForageDef.at_low_tide`
+  marks what lives in the rockpools (shrimps, mussels, winkles, shore crabs, oysters):
+  `Forage.spots_today(..., low_tide = true)` lays it on the pools with dice of its own and
+  `LocationDef.low_tide_forage_per_day` of them (8 at the Cove), and the ordinary spots (the
+  strand line, 5 a day: seashells, sea glass, seaweed, samphire in summer) never get it. The
+  Woods' and the Lane's forage is laid out exactly as before (same dice, same kinds; checked
+  for a whole year in three weathers). `ForageDef.gives` and `gives_count` let something be
+  picked up as something else: driftwood, which washes up on the strand on stormy days,
+  goes in the bag as 2 timber. What was picked stays picked all day, tide or no tide.
+- *The day's low tides* are a page on the notice board ("Low tide at the Cove today: 12:00
+  PM and 12:25 AM. The rockpools and the sand bar are uncovered for an hour and a half
+  either side.") and a line in the morning summary; the harbour's tide board gives them
+  and what the tide is doing now.
+- *New ground tiles* in row 3 of the seasonal ground images, after the paving: sand, wet
+  sand, rockpool, sea, pier planks, rocks (`GroundTiles.SAND` … `ROCKS`; the sea and the
+  rocks are solid in all four tilesets). `art/build_ground.py` now keeps those columns.
+
+Options considered: the tide saved and stepped by TimeSystem (a save change, and a reload
+could disagree with the clock); a fixed low tide each day (no reason to come back at a
+different hour, which is the point of 13.3 #5); tides as two calendar weathers (the tide
+turns within a day, the weather doesn't). Rockpool spots as a second place id
+(`&"cove_pools"` in `found_in`): a place that isn't a place, and it would need a
+`LocationDef` of its own; a flag on the forage and a count on the place say it directly.
+Flooding that blocks the player in on the islet until the next low: realistic, but six
+hours stuck is no fun; wading ashore keeps the time cost without the trap. Driftwood "the
+morning after a storm": yesterday's weather isn't kept, and keeping it is a save change for
+one item; on the stormy day itself is close enough.
+
+**Why.** ROADMAP 13.3 #5: a daily time window that moves, so where to be at what hour is a
+choice, and the bigger map's far end has a reason to be visited at a particular time. It's
+open from day 1 (Dave's decision, 13.7), so spring has a second place to gather from.
+
+**Cost.** The Cove plays the town's tune and has no sound of the sea yet. Placeholder art
+for the ground, the three buildings, the tide board and ten icons
+(`art/build_stage21_placeholders.py`) until Stage 23. The pier doesn't fish and Tam isn't
+there yet (session 2). Most of the map's bottom half is open sea until there's something to
+fish it with. Storms only come in summer and autumn, so driftwood does too. Every sea forage
+price is a first guess for Stage 26.

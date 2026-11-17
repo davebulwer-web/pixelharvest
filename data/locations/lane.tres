@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LocationDef" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="LocationDef" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
 [ext_resource type="AudioStream" path="res://assets/audio/music/farm.ogg" id="2_music"]
@@ -16,6 +16,12 @@ to = &"farm"
 cells = Array[Vector2i]([Vector2i(64, 11), Vector2i(64, 12)])
 arrival = Vector2i(62, 12)
 
+[sub_resource type="Resource" id="Exit_cove"]
+script = ExtResource("9_exit")
+to = &"cove"
+cells = Array[Vector2i]([Vector2i(20, 24), Vector2i(21, 24)])
+arrival = Vector2i(20, 22)
+
 [resource]
 script = ExtResource("1_def")
 id = &"lane"
@@ -23,4 +29,4 @@ display_name = "the Lane"
 scene_path = "res://scenes/lane.tscn"
 music = ExtResource("2_music")
 forage_per_day = 6
-exits = Array[ExtResource("9_exit")]([SubResource("Exit_town"), SubResource("Exit_farm")])
+exits = Array[ExtResource("9_exit")]([SubResource("Exit_town"), SubResource("Exit_farm"), SubResource("Exit_cove")])

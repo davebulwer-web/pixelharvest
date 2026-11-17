@@ -11,6 +11,8 @@ assets/tilesets/ground_<season>.png is a 144-px-wide atlas of 16x16 tiles:
   row 2  four path details, the same idea on the dirt path, from
          art/ground_sources/path_details/<season>.png (64x16).
   row 3  column 0, the paving of the town square, from art/ground_sources/cobbles.png.
+         Columns 1-6 (the Cove's sand, wet sand, rockpools, sea, pier and rocks)
+         are left as they are: art/build_stage21_placeholders.py draws them.
 
 Pixellab's terrain tool draws in its own colours, so the dirt and cobbles are
 mapped onto palette shades by brightness rank (darkest pixels to the darkest
@@ -123,5 +125,8 @@ for season in SEASONS:
     for i, t in enumerate(with_details(path_tile, pd, PATH_DETAILS)):
         out.paste(t, (i * 16, 32))
     out.paste(cobbles_winter if winter else cobbles, (0, 48))
+    # Row 3's other columns (the Cove's ground, DECISIONS 064) are drawn by
+    # art/build_stage21_placeholders.py: keep them as they are.
+    out.paste(Image.open(path).convert("RGBA").crop((16, 48, 144, 64)), (16, 48))
     out.save(path)
     print("built", path)

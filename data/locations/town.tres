@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LocationDef" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="LocationDef" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
 [ext_resource type="AudioStream" path="res://assets/audio/music/town.ogg" id="2_music"]
@@ -10,10 +10,16 @@ to = &"lane"
 cells = Array[Vector2i]([Vector2i(40, 13), Vector2i(40, 14)])
 arrival = Vector2i(38, 14)
 
+[sub_resource type="Resource" id="Exit_cove"]
+script = ExtResource("9_exit")
+to = &"cove"
+cells = Array[Vector2i]([Vector2i(-1, 13), Vector2i(-1, 14)])
+arrival = Vector2i(1, 14)
+
 [resource]
 script = ExtResource("1_def")
 id = &"town"
 display_name = "Town"
 scene_path = "res://scenes/town.tscn"
 music = ExtResource("2_music")
-exits = Array[ExtResource("9_exit")]([SubResource("Exit_lane")])
+exits = Array[ExtResource("9_exit")]([SubResource("Exit_lane"), SubResource("Exit_cove")])

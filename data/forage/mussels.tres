@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ForageDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/forage_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/forage/mussels.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"mussels"
+display_name = "Mussels"
+description = "A cluster of blue-black mussels prised off the rocks."
+icon = ExtResource("2_icon")
+sell_price = 10
+tags = Array[StringName]([&"sea", &"seafood"])
+seasons = Array[StringName]([&"autumn", &"winter", &"spring"])
+found_in = Array[StringName]([&"cove"])
+weight = 10
+at_low_tide = true
