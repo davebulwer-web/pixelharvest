@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="ErrandTemplate" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/errand_template.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_t"]
+[ext_resource type="Resource" path="res://data/unlocks/dot_errands.tres" id="3_t"]
+[ext_resource type="Resource" path="res://data/produce/parcel.tres" id="4_i"]
+[ext_resource type="Resource" path="res://data/produce/letter.tres" id="5_i"]
+[ext_resource type="Resource" path="res://data/produce/flour_sack.tres" id="6_i"]
+
+[resource]
+script = ExtResource("1_t")
+id = &"dot_errands"
+posted_at = &"dot"
+title = "Dot's errand: the {item} for {to}"
+choice_line = "Two going out today, if your legs are up to it. Which will you take?"
+offer_line = "Right you are. That {item}'s for {to}, by {time}. They'll pay you {gold}g when it's in their hands."
+reminder_line = "The {item} for {to}, by {time}. Don't let me down, now."
+thanks_line = "For me? From Dot? She's a marvel, that woman. Here's {gold}g for bringing it."
+late_line = "Dot will have taken the {item} round herself."
+choice_text = "The {item} to {to} by {time}: {gold}g"
+items = Array[ExtResource("2_t")]([ExtResource("4_i"), ExtResource("5_i"), ExtResource("6_i")])
+count_min = 1
+count_max = 1
+deadline_days = 1
+choices = 2
+weight = 1
+first_day = 1
+requires_unlock = ExtResource("3_t")
+deliver_to = Array[StringName]([&"mayor", &"baker", &"child", &"angler", &"ivy", &"seed_shop", &"general_store", &"blacksmith"])
+due_times = Array[int]([720, 840, 960, 1080])
+pay_min = 20
+pay_max = 35

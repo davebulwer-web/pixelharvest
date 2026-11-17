@@ -2693,3 +2693,64 @@ notebook a use). A find's "+N" items show on the HUD under the dialogue box. The
 does nothing but talk; mending it could come later. Save version 22, so Stage 20's change
 becomes 23 and later stages shift by one. `tests/saves/v21_example.json` is the v20 example
 brought up by the real v21 build.
+
+## 062 — Requests handed to someone else, by a time: Dot's errands and the allotments' odd jobs
+
+**Decision.** Stage 20 session 1 (ROADMAP 13.3 #3 and #4) gives the early game two daily
+uses of time and energy on the Lane. No save change.
+
+- *A request can go to someone else, by a time.* `QuestDef.hand_in_to` names who takes it
+  in when that isn't the giver (`receiver()`); `QuestDef.due_minute` is a time of day on its
+  last day, and the Quests service checks it as the clock moves (`time_changed`), so it runs
+  out there and then; `late_line` is added to "Out of time: …". Talking to someone first
+  hands in anything ready for them (their own request or a parcel addressed to them:
+  `ready_for`), and the "?" over them says so; the giver still asks nothing else while it's
+  open. The request log says "Take it to Hollis".
+- *Goals got three small hooks*, all no-ops by default: `on_taken` (a `CarryGoal` puts the
+  parcel in the bag), `on_expired` (it takes it back), and `finishes_itself` (an
+  `AllotmentGoal` is paid the moment its last tile is done, its words going to the HUD).
+- *Two new kinds of order pattern* extend `OrderTemplate` (DECISIONS 050), so the dice by
+  date, the ids, choosing, declining and clearing away each morning all carry on as before.
+  Each makes its own goal (`make_goal`); the Quests service picks what each asks for
+  (`_pick_deliveries`, `_pick_errands`, `_pick_job`). `always_up` puts a pattern up every day
+  beside the place's others, and taking it leaves the others up. `choice_text` lets a
+  pattern word its choices; the words gain {to}, {time} and {plot}.
+- *Dot* is a CharacterDef living on the Lane, at her gate (46, 15). Day 1: a letter for the
+  mayor (no deadline; 15g; opens `dot_errands`). Then `dot_errands.tres`: two errands a day,
+  each a parcel, letter or flour sack (ItemDefs that sell for nothing, tag `parcel`) to a
+  different person who's about, by noon, 2, 4 or 6 PM, paying 20–35g (by the difficulty) on
+  delivery. A shopkeeper is only given a time at least an hour after their shop opens and
+  no later than it shuts. An errand whose time has passed isn't offered.
+- *The allotments' jobs* are pinned on a slate by their gate (`JobSlate`, at (19, 8), its
+  id `Quests.ALLOTMENTS` like the board's). Three patterns, all `always_up`: weed a plot
+  (4–8 weeds, 3g each + 8; not in winter), water a plot before noon (the bed, 3g a tile + 6;
+  not in winter), dig over a plot (the bed, 5g a tile + 6). Each lands on a different bed
+  (shuffled by the date). The `Allotments` service (a new autoload) knows which tiles the
+  job in hand wants, which are done today (kept across scene changes, cleared each morning),
+  and announces each one (`EventBus.allotment_worked`), which the goal counts.
+  `AllotmentBeds` draws the beds as it says: weeds, a holder's crop on dry soil, a bed gone
+  back to grass, watered or dug; each weed answers E (`AllotmentWeed`).
+- *Tools on other people's ground.* `ToolAction.away_work` (hoe: weed and dig; can: water;
+  sickle: weed) and a default `can_use_away`/`apply_away` that ask the place
+  `work_wanted_at`/`do_work`; the axe and the rod still say for themselves. The Lane passes
+  these to `Allotments`. Energy is the tool's swing, as in the Woods; E on a weed costs what
+  a weed on the farm does.
+
+Options considered: a FarmData for the allotment beds (the greenhouse's way, DECISIONS 057):
+every tool would work unchanged, but so would planting your own seeds on someone's bed, the
+night's growing and the summary's counts would go round it, and the farm's tilled/watered
+signals would be counted as farm work. A separate jobs system with its own log: a second
+request log, markers and expiry for something that is a request. Saving the beds' state:
+nothing needs it, as everything is due the day it's taken and the game saves in the morning.
+
+**Why.** Dave's complaint (ROADMAP 13.1): nothing to do after 9 AM, and the only early money
+is crops. A spring day now has three paid jobs worth about 100g for their energy and a
+parcel run across the map against the clock.
+
+**Cost.** Placeholder art (Dot, the slate, the three parcels; `art/build_stage20_placeholders.py`).
+Errands go to people, not yet to homes' doors (the ROADMAP's "each errand introduces a
+home" waits for Stage 22's homes and schedules). The holders' "goodwill" (seeds or plots for
+jobs done) isn't counted yet: it would be a save change. Job and errand pay is a first
+guess for Stage 26's balance. Turning Dot down hides her errands for the day; the slate can
+be read again any time.
+

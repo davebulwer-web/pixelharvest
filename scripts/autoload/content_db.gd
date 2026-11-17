@@ -676,6 +676,10 @@ func _check_quests() -> void:
 		if character(each.giver) == null and shop(each.giver) == null:
 			push_error("ContentDB: '%s' is asked by '%s', who isn't in %s or a shop's keeper"
 					% [where, each.giver, CHARACTERS_DIR])
+		# Handed to someone else (DECISIONS 062): they must exist too.
+		if each.hand_in_to != &"" and character(each.hand_in_to) == null and shop(each.hand_in_to) == null:
+			push_error("ContentDB: '%s' is handed in to '%s', who isn't in %s or a shop's keeper"
+					% [where, each.hand_in_to, CHARACTERS_DIR])
 		if each.title == "":
 			push_warning("ContentDB: '%s' has no title, so the request log shows it blank" % where)
 		if each.offer_lines.is_empty():
@@ -803,16 +807,21 @@ func _check_weather() -> void:
 func _check_orders() -> void:
 	for each: OrderTemplate in _orders.values():
 		var where := each.resource_path
-		if each.posted_at != &"notice_board" and character(each.posted_at) == null \
-				and shop(each.posted_at) == null:
-			push_error("ContentDB: '%s' is posted at '%s', which isn't &\"notice_board\", a townsperson or a shop"
+		if each.posted_at != &"notice_board" and each.posted_at != &"allotments" \
+				and character(each.posted_at) == null and shop(each.posted_at) == null:
+			push_error("ContentDB: '%s' is posted at '%s', which isn't &\"notice_board\", &\"allotments\", a person or a shop"
 					% [where, each.posted_at])
-		if each.items.is_empty():
+		# An allotment job asks for work, not items (DECISIONS 062).
+		if each is JobTemplate:
+			_check_job(each as JobTemplate, where)
+		elif each.items.is_empty():
 			push_error("ContentDB: '%s' has no items, so it never asks for anything" % where)
+		if each is ErrandTemplate:
+			_check_errand(each as ErrandTemplate, where)
 		for wanted in each.items:
 			if wanted == null or item(wanted.id) != wanted:
 				push_error("ContentDB: '%s' asks for an item that isn't in data/produce/ or data/tools/" % where)
-			elif wanted.sell_price <= 0 and each.bonus_gold <= 0:
+			elif wanted.sell_price <= 0 and each.bonus_gold <= 0 and not each is ErrandTemplate:
 				push_warning("ContentDB: '%s' asks for %s, which sells for nothing, so the order pays nothing"
 						% [where, wanted.id])
 		if each.count_min < 1 or each.count_max < each.count_min:
@@ -826,6 +835,39 @@ func _check_orders() -> void:
 		if each.on_event != &"" and event(each.on_event) == null:
 			push_error("ContentDB: '%s' is offered on '%s', which isn't in %s" % [where, each.on_event, EVENTS_DIR])
 		_is_unknown_unlock(each.requires_unlock, where, "waits for")
+
+
+## Dot's errands (DECISIONS 062): addressed to people who exist, by times
+## within the day, paying something.
+func _check_errand(each: ErrandTemplate, where: String) -> void:
+	if each.deliver_to.is_empty():
+		push_error("ContentDB: '%s' has nobody in deliver_to, so it's never offered" % where)
+	for person in each.deliver_to:
+		if character(person) == null and shop(person) == null:
+			push_error("ContentDB: '%s' delivers to '%s', which isn't a person or a shop" % [where, person])
+	if each.due_times.is_empty():
+		push_error("ContentDB: '%s' has no due_times" % where)
+	for time in each.due_times:
+		if time < RULES.day_start_minutes or time > RULES.day_end_minutes:
+			push_error("ContentDB: '%s' has a due time %d outside the day" % [where, time])
+	if each.pay_min < 0 or each.pay_max < each.pay_min:
+		push_error("ContentDB: '%s' needs 0 <= pay_min <= pay_max" % where)
+
+
+## The allotments' jobs (DECISIONS 062): a kind of work the beds know, and
+## in real seasons.
+func _check_job(each: JobTemplate, where: String) -> void:
+	if each.work not in [&"weed", &"water", &"dig"]:
+		push_error("ContentDB: '%s' asks for work '%s': the allotments know weed, water and dig" % [where, each.work])
+	if each.cells_min < 1 or each.cells_max < each.cells_min:
+		push_error("ContentDB: '%s' needs 1 <= cells_min <= cells_max" % where)
+	var season_ids: Array[StringName] = []
+	for theme in RULES.seasons:
+		if theme != null:
+			season_ids.append(theme.id)
+	for season_id in each.seasons:
+		if season_id not in season_ids:
+			push_error("ContentDB: '%s' is put up in a season '%s' that isn't in game_rules.tres" % [where, season_id])
 
 
 ## Forage (DECISIONS 052): each kind must grow in a real season and a real

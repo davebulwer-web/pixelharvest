@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="JobTemplate" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/job_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+id = &"allotment_weeding"
+posted_at = &"allotments"
+title = "Weeding plot {plot}"
+offer_line = "Chalked on the slate: Plot {plot}'s gone to weeds. {gold}g on the hook to whoever clears them, today. You rub it out: it's yours."
+reminder_line = "Plot {plot}'s weeds, by tonight."
+thanks_line = "Plot {plot} is clear. You take the {gold}g from the hook by the slate."
+late_line = "Someone else will have weeded plot {plot}."
+choice_text = "Weed plot {plot} ({count} weeds): {gold}g"
+choice_line = "Jobs chalked on the allotment holders' slate. Paid from the hook by the gate, the moment it's done."
+deadline_days = 1
+choices = 1
+weight = 1
+first_day = 1
+always_up = true
+work = &"weed"
+cells_min = 4
+cells_max = 8
+pay_per_cell = 3
+bonus_gold = 8
+seasons = Array[StringName]([&"spring", &"summer", &"autumn"])

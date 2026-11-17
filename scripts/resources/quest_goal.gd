@@ -77,6 +77,25 @@ func gold_to_hand_in() -> int:
 	return 0
 
 
+## Called once, when the request is taken: a goal that comes with something
+## to carry (Dot's parcel, DECISIONS 062) puts it in the bag. Most give nothing.
+func on_taken(_bag: Inventory) -> void:
+	pass
+
+
+## Called once, if the request runs out: whatever on_taken() gave goes back
+## (the parcel returns to Dot). Most take nothing.
+func on_expired(_bag: Inventory) -> void:
+	pass
+
+
+## True for a goal that's finished the moment it's done, with nobody to go
+## back to: an allotment job is paid on the spot (DECISIONS 062). False for
+## every request that's handed in.
+func finishes_itself() -> bool:
+	return false
+
+
 ## "parsnip, radish and potato": names joined for a sentence, lower case.
 static func list_names(items: Array[ItemDef]) -> String:
 	var names: Array[String] = []

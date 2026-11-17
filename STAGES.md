@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 19 — the Lane and the bigger farm** (ROADMAP section 13, agreed 2026-11-17; the stages from 19 on were rewritten by it, see below). Session 1 (ways out as data, the Lane between the farm and the town with its hedgerows, the farm grown to 48 × 32 with overgrown new ground to clear; save version 21) is built, waiting for Dave to try it. Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 20 — early days** (ROADMAP section 13, agreed 2026-11-17; the stages from 19 on were rewritten by it, see below). Session 1 (odd jobs at the allotments and Dot's errands: requests handed to someone else, by a time of day; no save change) is built, waiting for Dave to try it. Stage 19 (the Lane and the bigger farm) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -1026,15 +1026,49 @@ ROADMAP 13.2 and 13.3 (#1, #2). Placeholder art at the new building size; no Pix
       on the plots; walking up to both doors and along their paths; the walk to town), and
       rendered a find's dialogue after a real hoe swing, the old well, Pip's cottage with
       the farmer at the door, and Dot's yard
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-17)
 
 ## Stage 20 — Early days · 2 sessions · Opus, then Sonnet
 
-ROADMAP 13.3 (#3, #4, #7, #8, #9) and the first fortnight rewritten. Save version 23
-(Stage 19 session 2 took 22, so every later version in ROADMAP 13.6 is one higher).
+ROADMAP 13.3 (#3, #4, #7, #8, #9) and the first fortnight rewritten. Split in two on
+2026-11-17: session 1 the time-and-energy jobs on the Lane (Opus: a new shape of request),
+session 2 the workbench, where to sell and the bakery (Sonnet: patterns that exist).
 
-- [ ] Odd jobs at the allotments (paid on the spot)
-- [ ] Dot's errands (a parcel somewhere by a time), Dot on the Lane from day 1
+**Session 1 (2026-11-17) — odd jobs at the allotments, Dot's errands (DECISIONS 062, no save change)**
+
+- [x] Requests can be handed to someone other than who asked (`QuestDef.hand_in_to`) and
+      be due by a time of day (`QuestDef.due_minute`), running out there and then; a goal
+      can come with something to carry (`on_taken`/`on_expired`) or finish itself the
+      moment it's done (`finishes_itself`)
+- [x] Order patterns of two new kinds: `ErrandTemplate` (Dot's parcels) and `JobTemplate`
+      (allotment jobs); a pattern can be `always_up` beside the place's others
+- [x] **Dot** at her gate on the Lane from day 1 (placeholder sprite). Day 1: a letter for
+      the mayor (15g, opens her daily errands). Then two errands a day to choose from: a
+      parcel, letter or flour sack to someone about that day, by noon, 2, 4 or 6 PM, 20–35g
+      on delivery; a shopkeeper only by a time their shop is open. Late: gone, and the
+      parcel goes back to Dot
+- [x] **Odd jobs at the allotments**, chalked on the holders' slate by their gate: weed a
+      plot (4–8 weeds: E, the hoe or the sickle), water a plot before noon (the can), dig
+      over a plot (the hoe); one of each a day (no weeding or watering in winter), each on
+      a different bed, all three can be done one after another; paid on the spot. The beds
+      show the work wanted, a tile outline shows where the tool will act, and walking off
+      and back keeps what's done (`Allotments` service)
+- [x] No save change: jobs and errands are due the day they're taken and the game saves in
+      the morning, so none is ever in a save (Stage 20 session 2 takes save version 23)
+- [x] Verified in the sandbox: headless import and run clean, 999 harness checks (the
+      first errand start to finish; 59 days of errands: same twice, different people,
+      about, shops open, pay; taking, delivering, running out at the time and overnight,
+      the parcel taken back, too late to offer, declining; jobs: three in spring on three
+      beds, digging only in winter, no watering after noon, cells, looks, energy by hand,
+      paid on the spot, the others still up, running out, mornings clear; in the Lane
+      scene: Dot and the slate by E, the hoe, E and the sickle on weeds, the can and the
+      axe not, leaving and coming back; the letter handed to the mayor in town; save round
+      trip; saves v1–v21), and rendered Dot at her gate, both her choices, the slate's
+      jobs, the beds being weeded, watered and dug, and the request log
+- [ ] Dave confirms it plays correctly on Windows
+
+**Session 2 — the workbench, where to sell, the bakery (save version 23)**
+
 - [ ] The workbench in the farm's shed: about ten recipes from stone, timber, fibre,
       shells; recipes taught by people; no machines that make goods for profit
 - [ ] Where to sell: buyers that pay differently, and a buyer's price drops when flooded

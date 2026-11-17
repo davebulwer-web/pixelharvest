@@ -207,6 +207,11 @@ signal debris_cleared(cell: Vector2i, object_id: StringName)
 ## gives; the farm shows what it says.
 signal found_while_clearing(find_id: StringName, cell: Vector2i, nth: int)
 
+## A tile of an allotment job was done on the Lane (DECISIONS 062): on bed
+## `plot` (1 to 8), the `work` (&"weed", &"water", &"dig") at `cell`. The
+## Allotments service announces it; the job's request counts it.
+signal allotment_worked(plot: int, work: StringName, cell: Vector2i)
+
 ## An object that makes something finished a batch overnight (DECISIONS 057):
 ## `amount` of `item_id` waits in it (honey in a bee hive) until collected.
 signal object_made(cell: Vector2i, object_id: StringName, item_id: StringName, amount: int)

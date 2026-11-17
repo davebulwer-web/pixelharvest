@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"dot_errands"
+display_name = "Dot's errands, any day"
+announcement = "Dot the carrier has errands going out every day now: find her at her gate on the Lane."

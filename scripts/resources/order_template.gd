@@ -18,7 +18,14 @@ extends Resource
 ## between. Rosa offers three; the board one job.
 ##
 ## The words can name what was picked: {count} "8", {item} "tomatoes",
-## {gold} "420", {client} "Marlow", {due} "by next market day".
+## {gold} "420", {client} "Marlow", {due} "by next market day"; an errand's
+## {to} "Hollis" and {time} "2 PM", an allotment job's {plot} "3"
+## (DECISIONS 062).
+##
+## Two kinds of pattern extend this one (DECISIONS 062): ErrandTemplate (Dot's
+## parcels, carried to someone by a time) and JobTemplate (the allotments'
+## odd jobs, done with your own tools). The Quests service picks what each
+## kind asks for; each kind makes its own goal (make_goal).
 ##
 ## Nothing in this file may touch an autoload (it is plain data).
 ##
@@ -95,6 +102,32 @@ extends Resource
 
 ## Not offered until this is earned (DECISIONS 043). Null: no wait.
 @export var requires_unlock: UnlockDef
+
+
+## Put up every day it's available, alongside whichever of the place's other
+## patterns has its turn, instead of taking turns with them (DECISIONS 062):
+## the allotment shed has its weeding, watering and digging up together. Each
+## such pattern is taken on its own: taking it leaves the others up.
+@export var always_up: bool = false
+
+## Said when an order from this pattern runs out (QuestDef.late_line).
+@export var late_line: String = ""
+
+## How a choice is put when choosing between them, with the same
+## {placeholders}: "A parcel to {to}, by {time}: {gold}g". Empty: "8 tomatoes,
+## 420g" (and "for Marlow" if there's a client).
+@export var choice_text: String = ""
+
+
+## The goal of an order made from this pattern: a delivery of `params`'
+## "count" of `item`. ErrandTemplate and JobTemplate make their own
+## (DECISIONS 062). `item` is looked up by the Quests service, since this
+## file touches no autoload.
+func make_goal(item: ItemDef, params: Dictionary) -> QuestGoal:
+	var goal := DeliverGoal.new()
+	goal.item = item
+	goal.amount = int(params.get("count", 1))
+	return goal
 
 
 ## `text` with its {placeholders} filled in.

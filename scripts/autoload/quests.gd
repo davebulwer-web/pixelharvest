@@ -38,10 +38,24 @@ extends Node
 ## same however often you ask (the dice are seeded by the date), so walking
 ## away and back, or loading the morning's save, changes nothing.
 ##
+## Handed to someone else, by a time (DECISIONS 062): a request can be handed
+## in to someone other than its giver (QuestDef.hand_in_to: Dot's parcels go
+## to whoever they're addressed to) and be due by a time of day
+## (QuestDef.due_minute), when it runs out there and then. Dot's errands
+## (ErrandTemplate) and the allotments' odd jobs (JobTemplate) are orders
+## too. A job is paid on the spot, the moment its last tile of work is done
+## (QuestGoal.finishes_itself), with nobody to go back to. Who a request is
+## handed in to is its receiver; who it came from is still its giver, who
+## asks nothing else while it's open.
+##
 
 ## Where the notice board's jobs are posted and handed in: it stands in for
 ## a giver's id.
 const BOARD := &"notice_board"
+
+## Where the allotments' odd jobs are pinned up and paid from: the shed on
+## the Lane (DECISIONS 062). Like the board, it stands in for a giver's id.
+const ALLOTMENTS := &"allotments"
 
 ## Requests already announced as ready to hand in, so the message comes once.
 ## Not saved: after loading, the "?" over the giver's head says it.
@@ -76,6 +90,8 @@ func _ready() -> void:
 		_record(&"giant_harvested", [cell, crop_id]), CONNECT_DEFERRED)
 	EventBus.fish_caught.connect(func(fish_id: StringName, size: int, location_id: StringName, water: StringName, through_ice: bool) -> void:
 		_record(&"fish_caught", [fish_id, size, location_id, water, through_ice]), CONNECT_DEFERRED)
+	EventBus.allotment_worked.connect(func(plot: int, work: StringName, cell: Vector2i) -> void:
+		_record(&"allotment_worked", [plot, work, cell]), CONNECT_DEFERRED)
 	# Deliveries count what's in the bag, and gifts of gold the purse, so any
 	# change to either may finish one.
 	EventBus.item_added.connect(func(_id: StringName, _n: int) -> void: _check_ready(), CONNECT_DEFERRED)
@@ -87,6 +103,9 @@ func _ready() -> void:
 	# are finished with are cleared away, before the morning's save.
 	EventBus.day_ended.connect(func(_d: int) -> void: _expire_overdue())
 	EventBus.day_started.connect(func(_d: int, _s: int, _y: int) -> void: _start_of_day())
+	# A request due by a time of day runs out as the clock passes it
+	# (DECISIONS 062), not only overnight.
+	EventBus.time_changed.connect(func(_m: int) -> void: _expire_late())
 
 
 # --- Questions ---------------------------------------------------------------
@@ -114,9 +133,10 @@ func find(id: StringName) -> QuestDef:
 		return null
 	var template := ContentDB.order_template(StringName(params.get("template", "")))
 	var item := ContentDB.item(StringName(params.get("item", "")))
-	if template == null or item == null:
+	# A job asks for work, not an item (DECISIONS 062); everything else needs one.
+	if template == null or (item == null and not template is JobTemplate):
 		return null
-	return _build_order(id, template, item, int(params["count"]), int(params["gold"]), int(params["day"]))
+	return _build_order(id, template, item, params)
 
 
 ## How far along `quest` is, capped at what it needs.
@@ -142,6 +162,20 @@ func active_for(npc_id: StringName) -> QuestDef:
 		if quest.giver == npc_id:
 			return quest
 	return null
+
+
+## A request in hand that's ready to be handed in to `npc_id` (its receiver:
+## the giver, or whoever a parcel is addressed to), or null.
+func ready_for(npc_id: StringName) -> QuestDef:
+	for quest in active():
+		if quest.receiver() == npc_id and not quest.goal.finishes_itself() and is_ready(quest):
+			return quest
+	return null
+
+
+## True if talking to `npc_id` now would hand something in.
+func has_ready_for(npc_id: StringName) -> bool:
+	return ready_for(npc_id) != null
 
 
 ## The request `npc_id` would ask today if spoken to, or null. One at a time:
@@ -174,6 +208,8 @@ func is_about(npc_id: StringName) -> bool:
 func giver_name(npc_id: StringName) -> String:
 	if npc_id == BOARD:
 		return "the notice board"
+	if npc_id == ALLOTMENTS:
+		return "the allotment shed"
 	var person := ContentDB.character(npc_id)
 	if person != null:
 		return person.display_name
@@ -228,25 +264,28 @@ func givers_new_today() -> Array[StringName]:
 ## something you now have, "!" if they've something to ask (a request, or
 ## orders to choose from), else "".
 func marker_for(npc_id: StringName) -> String:
-	var quest := active_for(npc_id)
-	if quest != null:
-		return "?" if is_ready(quest) else ""
+	if has_ready_for(npc_id):
+		return "?"
+	if active_for(npc_id) != null:
+		return ""
 	if offer_for(npc_id) != null or not orders_on_offer(npc_id).is_empty():
 		return "!"
 	return ""
 
 
 ## "today", "tomorrow", "in 5 days (summer day 10)": when `quest`'s time runs
-## out, or "" if it has no deadline or isn't in hand.
+## out, or "" if it has no deadline or isn't in hand. With a time of day
+## (DECISIONS 062): "today by 2 PM".
 func due_text(quest: QuestDef) -> String:
 	var due := GameState.quests.due_day(quest.id)
 	if due <= 0:
 		return ""
 	var ahead := due - GameState.day_number()
+	var at := " by %s" % Clock.format_short(quest.due_minute) if quest.due_minute > 0 else ""
 	if ahead <= 0:
-		return "today"
+		return "today" + at
 	if ahead == 1:
-		return "tomorrow"
+		return "tomorrow" + at
 	var length := GameState.RULES.days_per_season
 	return "in %d days (%s day %d)" % [ahead, GameState.season_name(GameState.season_id_on(due)).to_lower(),
 			posmod(due - 1, length) + 1]
@@ -267,12 +306,18 @@ func givers_with_offers() -> Array[StringName]:
 ## in, reminding you, or asking a new one), or an empty list if they've
 ## nothing to say about requests today.
 func talk(npc_id: StringName) -> Array[String]:
+	# Something for them, from them or (a parcel) from someone else.
+	var ready := ready_for(npc_id)
+	if ready != null:
+		return _complete(ready)
 	var quest := active_for(npc_id)
 	if quest != null:
-		if is_ready(quest):
-			return _complete(quest)
 		var reminder := quest.reminder_line if quest.reminder_line != "" else "%s?" % quest.goal.describe()
-		var line := "%s (%s)" % [reminder, quest.goal.progress_text(progress(quest))]
+		var line := reminder
+		# A parcel for someone else is in the bag from the start: "1 / 1"
+		# would only confuse. Anything else says how far it's got.
+		if quest.receiver() == quest.giver:
+			line += " (%s)" % quest.goal.progress_text(progress(quest))
 		var missing := quest.goal.still_needed(GameState.inventory)
 		if missing != "":
 			line += " Still to find: %s." % missing
@@ -290,14 +335,18 @@ func talk(npc_id: StringName) -> Array[String]:
 func _start(quest: QuestDef) -> Array[String]:
 	var due := GameState.day_number() + quest.deadline_days - 1 if quest.deadline_days > 0 else 0
 	GameState.quests.start(quest.id, due, _order_params.get(quest.id, {}))
+	# Dot's parcel goes in the bag as the errand is taken (DECISIONS 062).
+	quest.goal.on_taken(GameState.inventory)
 	EventBus.quest_started.emit(quest.id)
 	var lines: Array[String] = quest.offer_lines.duplicate()
 	var text := "New request: %s. %s" % [quest.title, quest.goal.describe()]
-	# "Bring 5 parsnips to Mabel". A gift of gold already says what it's for.
+	# "Bring 5 parsnips to Mabel", "Deliver the parcel to Hollis". A gift
+	# of gold already says what it's for.
 	if quest.goal.is_handed_over() and quest.goal.gold_to_hand_in() == 0:
-		text += " to %s" % giver_name(quest.giver)
+		text += " to %s" % giver_name(quest.receiver())
 	if due > 0:
-		text += ", %s" % ("by tonight" if due == GameState.day_number() else "due " + due_text(quest))
+		var tonight := due == GameState.day_number() and quest.due_minute == 0
+		text += ", %s" % ("by tonight" if tonight else "due " + due_text(quest))
 	text += "."
 	var reward := quest.reward_text()
 	if reward != "":
@@ -339,40 +388,137 @@ func _complete(quest: QuestDef) -> Array[String]:
 
 # --- Orders (DECISIONS 050) ---------------------------------------------------
 
-## The orders `place` (Rosa's shop id, or BOARD) has up today for the player
-## to choose from, or none: none while the player has a request from there in
-## hand or a written one to be asked first, or after turning them down today.
-## The same every time it's asked today.
+## The orders `place` (Rosa's shop id, BOARD, Dot, or ALLOTMENTS) has up
+## today for the player to choose from, or none: none while the player has a
+## request from there in hand or a written one to be asked first, or after
+## turning them down today. The same every time it's asked today, except that
+## one due by a time that has passed isn't offered any more (DECISIONS 062).
 func orders_on_offer(place: StringName) -> Array[QuestDef]:
 	var offers: Array[QuestDef] = []
 	var today := GameState.day_number()
 	if active_for(place) != null or _declined.get(place, -1) == today:
 		return offers
-	if place != BOARD and (not is_about(place) or offer_for(place) != null):
+	if place != BOARD and place != ALLOTMENTS and (not is_about(place) or offer_for(place) != null):
 		return offers
-	var template := _template_today(place, today)
-	if template == null:
-		return offers
-	var dice := _dice(place, today, 1)
+	var slot := 0
+	for template in _templates_today(place, today):
+		offers.append_array(_orders_from(template, today, slot))
+		slot += 1
+	return offers
+
+
+## Today's orders from one pattern: none if one of them was taken today
+## (taking one takes the others off the table), else `choices` of them, each
+## for something different. `slot` is the pattern's place among those up at
+## its place today, so the allotment shed's jobs fall on different beds.
+func _orders_from(template: OrderTemplate, today: int, slot: int) -> Array[QuestDef]:
+	var orders: Array[QuestDef] = []
+	for n in maxi(template.choices, 1):
+		if GameState.quests.state(_order_id(template, today, n)) != &"":
+			return orders
+	var picks: Array[Dictionary] = []
+	var dice := _dice(template.id, today, 1)
+	if template is ErrandTemplate:
+		picks = _pick_errands(template as ErrandTemplate, dice)
+	elif template is JobTemplate:
+		picks = _pick_job(template as JobTemplate, today, slot)
+	else:
+		picks = _pick_deliveries(template, dice)
+	for n in picks.size():
+		var params: Dictionary = picks[n]
+		params["template"] = String(template.id)
+		params["day"] = today
+		# Too late to do today: not on offer (the rest keep their ids).
+		if int(params.get("due_at", 0)) > 0 and GameState.minutes >= int(params["due_at"]):
+			continue
+		var item := ContentDB.item(StringName(params.get("item", "")))
+		orders.append(_build_order(_order_id(template, today, n), template, item, params))
+	return orders
+
+
+func _order_id(template: OrderTemplate, today: int, n: int) -> StringName:
+	return StringName("%s@%d#%d" % [template.id, today, n + 1])
+
+
+## An ordinary order's picks (DECISIONS 050): `choices` different items in
+## season, how many of each, and the pay.
+func _pick_deliveries(template: OrderTemplate, dice: RandomNumberGenerator) -> Array[Dictionary]:
+	var picks: Array[Dictionary] = []
 	var pool := _in_season(template)
-	# Shuffled by the day's own dice, then the first few: different items.
-	for i in range(pool.size() - 1, 0, -1):
-		var j := dice.randi_range(0, i)
-		var swap := pool[i]
-		pool[i] = pool[j]
-		pool[j] = swap
+	_shuffle(pool, dice)
 	for n in mini(template.choices, pool.size()):
-		var id := StringName("%s@%d#%d" % [template.id, today, n + 1])
-		if GameState.quests.state(id) != &"":
-			return []  # one was taken today: the rest are off the table
 		var item: ItemDef = pool[n]
 		var count := dice.randi_range(template.count_min, template.count_max)
 		var price := Economy.sell_price(item)
 		if template.max_value > 0 and price > 0:
 			count = clampi(mini(count, floori(template.max_value / float(price))), 1, count)
 		var gold := ceili(price * count * template.pay_rate) + template.bonus_gold
-		offers.append(_build_order(id, template, item, count, gold, today))
-	return offers
+		picks.append({"item": String(item.id), "count": count, "gold": gold})
+	return picks
+
+
+## Dot's errands (DECISIONS 062): `choices` parcels, each to a different
+## person who is about today, by a time of day; a shopkeeper only by a time
+## after their shop opens (they can't take it in before), and never Dot
+## herself.
+func _pick_errands(template: ErrandTemplate, dice: RandomNumberGenerator) -> Array[Dictionary]:
+	var picks: Array[Dictionary] = []
+	var people: Array[StringName] = []
+	for person in template.deliver_to:
+		if person != template.posted_at and is_about(person):
+			people.append(person)
+	_shuffle(people, dice)
+	var times := template.due_times.duplicate()
+	times.sort()
+	for person in people:
+		if picks.size() >= template.choices or template.items.is_empty() or times.is_empty():
+			break
+		var due: int = times[dice.randi_range(0, times.size() - 1)]
+		var shop := ContentDB.shop(person)
+		if shop != null:
+			# The earliest time from the list that leaves an hour of opening.
+			var possible := times.filter(func(t: int) -> bool:
+				return t >= shop.opens_at + 60 and t <= shop.closes_at)
+			if possible.is_empty():
+				continue
+			if due not in possible:
+				due = possible[0]
+		var item: ItemDef = template.items[dice.randi_range(0, template.items.size() - 1)]
+		var gold := DifficultyDef.scale_price(dice.randi_range(template.pay_min, template.pay_max),
+				GameState.difficulty.sell_price_multiplier)
+		picks.append({"item": String(item.id), "count": 1, "gold": gold, "to": String(person),
+				"due_at": due})
+	return picks
+
+
+## An allotment job (DECISIONS 062): which bed (different for each pattern
+## up today, by `slot`), how much work and the pay. Watering and digging
+## are the whole bed; weeding a few weeds.
+func _pick_job(template: JobTemplate, today: int, slot: int) -> Array[Dictionary]:
+	var picks: Array[Dictionary] = []
+	var beds := Allotments.bed_count()
+	if beds <= 0:
+		return picks
+	var plots: Array = range(1, beds + 1)
+	_shuffle(plots, _dice(template.posted_at, today, 2))
+	var plot: int = plots[slot % beds]
+	var room := Allotments.bed_size(plot)
+	var count := room
+	if template.work == &"weed":
+		count = clampi(_dice(template.id, today, 3).randi_range(template.cells_min, template.cells_max), 1, room)
+	var gold := DifficultyDef.scale_price(count * template.pay_per_cell + template.bonus_gold,
+			GameState.difficulty.sell_price_multiplier)
+	picks.append({"item": "", "count": count, "gold": gold, "plot": plot, "due_at": template.due_time})
+	return picks
+
+
+## Shuffle `list` in place with `dice` (the day's, so always the same way).
+func _shuffle(list: Array, dice: RandomNumberGenerator) -> void:
+	for i in range(list.size() - 1, 0, -1):
+		var j := dice.randi_range(0, i)
+		var swap = list[i]
+		list[i] = list[j]
+		list[j] = swap
 
 
 ## Take `order` (one of orders_on_offer): it goes in the log like any request.
@@ -388,19 +534,25 @@ func decline(place: StringName) -> void:
 	_declined[place] = GameState.day_number()
 
 
-## What `place`'s pattern today says before its choices, or "".
+## What `place`'s patterns today say before their choices, or "".
 func choice_line(place: StringName) -> String:
-	var template := _template_today(place, GameState.day_number())
-	return template.choice_line if template != null else ""
+	for template in _templates_today(place, GameState.day_number()):
+		if template.choice_line != "":
+			return template.choice_line
+	return ""
 
 
 ## "8 tomatoes, 420g": an order in a few words, for choosing between them.
+## A pattern can put it its own way (choice_text): "A parcel to Hollis by 2
+## PM: 30g".
 func order_choice_text(order: QuestDef) -> String:
 	var params: Dictionary = _order_params.get(order.id, {})
+	var template := ContentDB.order_template(StringName(params.get("template", "")))
+	if template != null and template.choice_text != "":
+		return OrderTemplate.fill(template.choice_text, _words(template, params))
 	var item := ContentDB.item(StringName(params.get("item", "")))
 	var count := int(params.get("count", 0))
 	var client := ""
-	var template := ContentDB.order_template(StringName(params.get("template", "")))
 	if template != null and template.client != "":
 		client = " for %s" % template.client
 	return "%d %s%s, %dg" % [count, QuestGoal.plural(item.display_name if item != null else "?", count),
@@ -418,16 +570,18 @@ func order_news_today() -> Array[String]:
 	for place in places:
 		if orders_on_offer(place).is_empty():
 			continue
-		var template := _template_today(place, GameState.day_number())
-		if template != null and template.news_line != "":
-			news.append(template.news_line)
+		for template in _templates_today(place, GameState.day_number()):
+			if template.news_line != "":
+				news.append(template.news_line)
+				break
 	return news
 
 
-## Which of `place`'s patterns is up on day `number`: one of those available
-## that day with something in season to ask for, picked by weight with the
-## day's dice. Null if none.
-func _template_today(place: StringName, number: int) -> OrderTemplate:
+## Which of `place`'s patterns are up on day `number`: one of those available
+## that day (with something in season to ask for), picked by weight with the
+## day's dice, and every available one that's `always_up` (DECISIONS 062).
+func _templates_today(place: StringName, number: int) -> Array[OrderTemplate]:
+	var result: Array[OrderTemplate] = []
 	var candidates: Array[OrderTemplate] = []
 	var total := 0
 	for template in ContentDB.order_templates():
@@ -437,18 +591,32 @@ func _template_today(place: StringName, number: int) -> OrderTemplate:
 		if template.on_event != &"" and not GameState.events_on(number).any(
 				func(e: CalendarEvent) -> bool: return e.id == template.on_event):
 			continue
-		if _in_season(template).is_empty():
+		if not _available(template, number):
+			continue
+		if template.always_up:
+			result.append(template)
 			continue
 		candidates.append(template)
 		total += template.weight
 	if candidates.is_empty():
-		return null
+		return result
 	var roll := _dice(place, number, 0).randi_range(1, total)
 	for template in candidates:
 		roll -= template.weight
 		if roll <= 0:
-			return template
-	return candidates[-1]
+			result.push_front(template)
+			return result
+	result.push_front(candidates[-1])
+	return result
+
+
+## True if `template` has something to ask for on day `number`: an
+## allotment job in one of its seasons, anything else something in season.
+func _available(template: OrderTemplate, number: int) -> bool:
+	if template is JobTemplate:
+		var seasons := (template as JobTemplate).seasons
+		return seasons.is_empty() or GameState.season_id_on(number) in seasons
+	return not _in_season(template).is_empty()
 
 
 ## The items of `template` that can be asked for today: produce of a crop
@@ -488,40 +656,74 @@ func _dice(place: StringName, number: int, roll: int) -> RandomNumberGenerator:
 	return dice
 
 
-## Build the QuestDef for an order: a delivery of `count` `item`, paying `gold`,
-## from `template`, offered on day `day`.
-func _build_order(id: StringName, template: OrderTemplate, item: ItemDef, count: int, gold: int,
-		day: int) -> QuestDef:
-	var goal := DeliverGoal.new()
-	goal.item = item
-	goal.amount = count
+## Build the QuestDef for an order from `template` and what was picked for
+## it (`params`: "item", "count", "gold", "day", and for an errand "to" and
+## "due_at", for a job "plot" and "due_at"). `item` is params' item, looked
+## up (null for a job).
+func _build_order(id: StringName, template: OrderTemplate, item: ItemDef, params: Dictionary) -> QuestDef:
 	var quest := QuestDef.new()
 	quest.id = id
 	quest.giver = template.posted_at
-	quest.goal = goal
-	quest.reward_gold = gold
+	quest.goal = template.make_goal(item, params)
+	quest.reward_gold = int(params.get("gold", 0))
 	quest.deadline_days = template.deadline_days
-	var words := {"count": count, "item": QuestGoal.plural(item.display_name, count), "gold": gold,
-			"client": template.client}
+	quest.hand_in_to = StringName(params.get("to", ""))
+	quest.due_minute = int(params.get("due_at", 0))
+	var words := _words(template, params)
 	quest.title = OrderTemplate.fill(template.title, words)
 	if template.offer_line != "":
 		quest.offer_lines = [OrderTemplate.fill(template.offer_line, words)]
 	quest.reminder_line = OrderTemplate.fill(template.reminder_line, words)
 	if template.thanks_line != "":
 		quest.thanks_lines = [OrderTemplate.fill(template.thanks_line, words)]
+	quest.late_line = OrderTemplate.fill(template.late_line, words)
 	_orders[id] = quest
-	_order_params[id] = {"template": String(template.id), "item": String(item.id), "count": count,
-			"gold": gold, "day": day}
+	_order_params[id] = params.duplicate()
 	return quest
+
+
+## What an order's words can name: {count} {item} {gold} {client}, and
+## {to} {time} {plot} (DECISIONS 062).
+func _words(template: OrderTemplate, params: Dictionary) -> Dictionary:
+	var count := int(params.get("count", 0))
+	var item := ContentDB.item(StringName(params.get("item", "")))
+	var due := int(params.get("due_at", 0))
+	return {"count": count, "item": QuestGoal.plural(item.display_name, count) if item != null else "",
+			"gold": int(params.get("gold", 0)), "client": template.client,
+			"to": giver_name(StringName(params.get("to", ""))) if params.has("to") else "",
+			"time": Clock.format_short(due) if due > 0 else "tonight",
+			"plot": int(params.get("plot", 0))}
 
 
 ## Night, step 1: anything due today that's still in hand runs out.
 func _expire_overdue() -> void:
 	for id in GameState.quests.overdue_ids(GameState.day_number()):
-		var quest := find(id)
-		GameState.quests.expire(id)
-		_told_ready.erase(id)
-		EventBus.quest_expired.emit(id, quest.title if quest != null else String(id))
+		_expire(id)
+
+
+## Through the day (DECISIONS 062): anything due by a time of day that has
+## now passed runs out there and then.
+func _expire_late() -> void:
+	var today := GameState.day_number()
+	for quest in active():
+		var due := GameState.quests.due_day(quest.id)
+		if quest.due_minute > 0 and due > 0 and due <= today and GameState.minutes >= quest.due_minute:
+			_expire(quest.id)
+
+
+## Request `id` ran out: gone, with anything it gave to carry taken back.
+func _expire(id: StringName) -> void:
+	var quest := find(id)
+	GameState.quests.expire(id)
+	_told_ready.erase(id)
+	if quest != null and quest.goal != null:
+		quest.goal.on_expired(GameState.inventory)
+	var title := quest.title if quest != null else String(id)
+	EventBus.quest_expired.emit(id, title)
+	var line := "Out of time: %s." % title
+	if quest != null and quest.late_line != "":
+		line += " " + quest.late_line
+	EventBus.message_posted.emit(line)
 
 
 ## The morning: yesterday's orders are cleared away and today's will be built
@@ -555,13 +757,22 @@ func _record(event: StringName, args: Array) -> void:
 			continue
 		GameState.quests.add(quest.id, amount)
 		EventBus.quest_progressed.emit(quest.id, progress(quest), quest.goal.needed())
+		# An allotment job is paid the moment its last tile is done
+		# (DECISIONS 062): what would be said on handing in goes on the HUD.
+		if quest.goal.finishes_itself() and is_ready(quest):
+			for line in _complete(quest):
+				EventBus.message_posted.emit(line)
 	_check_ready()
 
 
 ## Tell the player, once, when a request has everything it needs.
 func _check_ready() -> void:
 	for quest in active():
-		if _told_ready.has(quest.id) or not is_ready(quest):
+		if _told_ready.has(quest.id) or quest.goal.finishes_itself() or not is_ready(quest):
 			continue
 		_told_ready[quest.id] = true
-		EventBus.message_posted.emit("%s: done! Go and see %s" % [quest.title, giver_name(quest.giver)])
+		# A parcel is ready the moment it's taken: the line that took it
+		# already said where it goes.
+		if quest.receiver() != quest.giver:
+			continue
+		EventBus.message_posted.emit("%s: done! Go and see %s" % [quest.title, giver_name(quest.receiver())])

@@ -58,16 +58,28 @@ func clears_at(farm: FarmData, cell: Vector2i) -> bool:
 # there (the Woods answers choppable_at). Most tools only work on the farm,
 # so by default these say no.
 
+## The work this tool does on someone else's ground (DECISIONS 062): the
+## allotment jobs on the Lane. &"weed", &"water", &"dig", in the tool's .tres
+## (the hoe weeds and digs, the can waters, the sickle weeds). A place that
+## has such work answers work_wanted_at(cell, works) and do_work(cell,
+## works); the two methods below ask it. Empty for a tool that does none.
+@export var away_work: Array[StringName] = []
+
+
 ## True if this tool would do something to `cell` in `place` (the scene of a
-## map that isn't the farm). Must not change anything.
-func can_use_away(_place: Node, _cell: Vector2i) -> bool:
-	return false
+## map that isn't the farm). Must not change anything. By default, the work
+## it does on other people's ground (away_work), if the place wants any
+## done there; the axe and the rod say for themselves.
+func can_use_away(place: Node, cell: Vector2i) -> bool:
+	return not away_work.is_empty() and place != null and place.has_method(&"work_wanted_at") \
+			and place.work_wanted_at(cell, away_work)
 
 
 ## Do it, away from the farm. Only called after can_use_away() said yes and
 ## the energy was paid.
-func apply_away(_place: Node, _cell: Vector2i) -> void:
-	pass
+func apply_away(place: Node, cell: Vector2i) -> void:
+	if not away_work.is_empty() and place != null and place.has_method(&"do_work"):
+		place.do_work(cell, away_work)
 
 
 # --- Used on the farmer (DECISIONS 056) ----------------------------------------

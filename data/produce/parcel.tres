@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="1_item"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/parcel.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"parcel"
+display_name = "Parcel"
+description = "Brown paper and string, addressed in Dot the carrier's hand. Not yours to open: take it where it's going."
+icon = ExtResource("2_icon")
+tags = Array[StringName]([&"parcel"])

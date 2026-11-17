@@ -8,6 +8,7 @@
 [sub_resource type="Resource" id="Resource_action"]
 script = ExtResource("2_action")
 clears = Array[StringName]([&"bramble", &"nettles"])
+away_work = Array[StringName]([&"weed"])
 
 [sub_resource type="Resource" id="ToolTier_1"]
 script = ExtResource("4_tier")

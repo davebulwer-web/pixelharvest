@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/carry_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/produce/letter.tres" id="3_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="4_r"]
+[ext_resource type="Resource" path="res://data/unlocks/dot_errands.tres" id="5_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+item = ExtResource("3_r")
+amount = 1
+
+[resource]
+script = ExtResource("1_r")
+id = &"dot_first_errand"
+title = "A letter for the mayor"
+giver = &"dot"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Hold up! You'll be the new farmer. I'm Dot: I carry for the whole valley, from that yard behind me.", "Since you're going into town anyway, would you take this to Mayor Bramble? It's from the council, about your farm. He'll want to meet you.", "He sits by the fountain in the square most days. He'll see you right for your trouble."])
+reminder_line = "That letter's for Mayor Bramble, by the fountain in the square."
+thanks_lines = Array[String](["A letter? Ah, the council's papers for the old farm! Then it's official: welcome, farmer. Here, for your trouble.", "Dot sent you? She'll have more where that came from. She always has something going somewhere, and her legs aren't what they were."])
+reward_gold = 15
+reward_unlocks = Array[ExtResource("4_r")]([ExtResource("5_r")])
+hand_in_to = &"mayor"

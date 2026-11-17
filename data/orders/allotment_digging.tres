@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="JobTemplate" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/job_template.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+id = &"allotment_digging"
+posted_at = &"allotments"
+title = "Digging over plot {plot}"
+offer_line = "Chalked on the slate: Plot {plot} to be dug over for new sowing. Back's gone. {gold}g on the hook. You rub it out: it's yours."
+reminder_line = "Plot {plot} to dig over, by tonight."
+thanks_line = "Plot {plot} is dug over, neat as a pin. You take the {gold}g from the hook by the slate."
+late_line = "Someone else will have dug over plot {plot}."
+choice_text = "Dig over plot {plot}: {gold}g"
+choice_line = "Jobs chalked on the allotment holders' slate. Paid from the hook by the gate, the moment it's done."
+deadline_days = 1
+choices = 1
+weight = 1
+first_day = 1
+always_up = true
+work = &"dig"
+pay_per_cell = 5
+bonus_gold = 6

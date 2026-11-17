@@ -102,7 +102,7 @@ icon.svg
 scenes/              .tscn scene files
 scripts/             Game code
   autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem,
-                     Audio, DayReport, Fishing, Festivals…)
+                     Audio, DayReport, Fishing, Festivals, Allotments…)
   farm/              The farm's data and layout, the farmhouse with its bed and its
                      stove and cooking menu (Stove, CookMenu; DECISIONS 056), the
                      farm's effects, the night's hazards (FarmHazards) and the
@@ -114,7 +114,9 @@ scripts/             Game code
                      and fallen logs (FallenLogs, FallenLog; DECISIONS 053)
   lane/              The Lane between the farm and the town: its map (LaneLayout), its
                      hedgerow forage, the signpost (DECISIONS 060); Pip's cottage and
-                     Dot's yard are LocationDefs with door_words (DECISIONS 061)
+                     Dot's yard are LocationDefs with door_words (DECISIONS 061); Dot at her gate, the
+                     allotment holders' slate (JobSlate) and the beds as today's jobs
+                     leave them (AllotmentBeds, AllotmentWeed; DECISIONS 062)
   exits.gd           Exits: builds a place's ways out from LocationDef.exits (ExitDef;
                      DECISIONS 060)
   items/             Inventory
@@ -130,7 +132,8 @@ scripts/             Game code
                      biggest fish; DECISIONS 059)
   quests/            QuestGoal scripts (deliver, deliver any of, deliver one of each,
                      harvest, sell, give gold, grow a giant, deliver with a fee, catch
-                     fish) and the saved QuestLog
+                     fish, carry a parcel, do an allotment job: DECISIONS 062) and the
+                     saved QuestLog
 data/                Content resources (.tres), indexed by ContentDB
   game_rules.tres    Starting conditions and global numbers (GameRules)
   hazard_rules.tres  Thirst, weeds, crows and aphids: every number (HazardRules,
@@ -166,7 +169,9 @@ data/                Content resources (.tres), indexed by ContentDB
   unlocks/           UnlockDef — things that open up over time, from a request or a date
                      (DECISIONS 043); content waits for one with `requires_unlock`
   orders/            OrderTemplate — patterns for requests made fresh each day: Rosa's
-                     market orders, the notice board's daily jobs (DECISIONS 050)
+                     market orders, the notice board's daily jobs (DECISIONS 050), Dot's
+                     errands (ErrandTemplate) and the allotments' odd jobs (JobTemplate;
+                     DECISIONS 062)
   forage/            ForageDef — wild things found in the Woods: items, with the seasons,
                      places and weather they grow in (DECISIONS 052)
   fish/              FishDef — fish: items, with the water, seasons, hours and weather

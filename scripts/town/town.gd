@@ -346,9 +346,8 @@ func _on_npc_talked_to(npc_id: StringName) -> void:
 	if person == null or person.location != TOWN_ID:
 		return
 	# A festival's host talks about the festival, unless you've brought
-	# something they asked for (DECISIONS 059).
-	var in_hand := Quests.active_for(npc_id)
-	if (in_hand == null or not Quests.is_ready(in_hand)) and Festivals.has_something_for(npc_id):
+	# something they asked for (DECISIONS 059) or a parcel for them (062).
+	if not Quests.has_ready_for(npc_id) and Festivals.has_something_for(npc_id):
 		var festival_lines := Festivals.talk(npc_id)
 		_festival_to_ask = npc_id if not Festivals.question_for(npc_id).is_empty() else &""
 		_dialogue.say(person.display_name, festival_lines)

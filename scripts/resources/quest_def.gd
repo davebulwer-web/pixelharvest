@@ -89,6 +89,25 @@ extends Resource
 ## requests each time, so they keep coming).
 @export var deadline_days: int = 0
 
+# --- Handed to someone else, by a time (DECISIONS 062) ---------------------------
+
+## Who it's handed in to, when that isn't the giver: Dot's parcels go to
+## whoever they're addressed to (a CharacterDef id or a shop id, as for
+## `giver`). &"": handed in to the giver, as every request before Dot's.
+@export var hand_in_to: StringName = &""
+## The time of day it's due by on its last day, in minutes after midnight
+## (840 is 2 PM). 0: the end of the day, as before. Past it, the request runs
+## out there and then rather than overnight.
+@export var due_minute: int = 0
+## Said when it runs out, after "Out of time: <title>.": "Dot takes the parcel
+## round herself." Empty: nothing more.
+@export var late_line: String = ""
+
+
+## Who takes it in: `hand_in_to`, or the giver.
+func receiver() -> StringName:
+	return hand_in_to if hand_in_to != &"" else giver
+
 
 ## "150g, 5 potato seeds and Hollis's spring seeds", or "" for no reward.
 func reward_text() -> String:

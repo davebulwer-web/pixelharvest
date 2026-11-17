@@ -60,6 +60,10 @@ const ALLOTMENT_BEDS: Array[Rect2i] = [
 	Rect2i(7, 3, 4, 2), Rect2i(12, 3, 3, 2), Rect2i(19, 3, 4, 2), Rect2i(24, 3, 4, 2),
 	Rect2i(7, 6, 4, 2), Rect2i(12, 6, 3, 2), Rect2i(19, 6, 4, 2), Rect2i(24, 6, 4, 2),
 ]
+## The allotment holders' slate, where odd jobs are chalked up (DECISIONS
+## 062): just inside the gate, right of the path up from the lane. Two tiles
+## wide, standing on this cell.
+const JOB_SLATE := Vector2i(19, 8)
 const ALLOTMENT_PATHS: Array[Rect2i] = [
 	Rect2i(16, 2, 2, 7),  # up from the lane's gap
 	Rect2i(6, 5, 23, 1),  # across the middle

@@ -52,7 +52,11 @@ func _refresh() -> void:
 	for quest in quests:
 		var who := Quests.giver_name(quest.giver)
 		var done := Quests.progress(quest)
-		var status := "Ready! Go and see %s" % who if Quests.is_ready(quest) else quest.goal.progress_text(done)
+		# Who to take it to: the giver, or whoever a parcel is for (DECISIONS 062).
+		var to := Quests.giver_name(quest.receiver())
+		var status := "Ready! Go and see %s" % to if Quests.is_ready(quest) else quest.goal.progress_text(done)
+		if quest.receiver() != quest.giver:
+			status = "Take it to %s" % to
 		_add_line("%s  (%s)" % [quest.title, who], 9, UiStyle.TEXT)
 		# Once some of a "one of each" request is found, say what's left
 		# rather than the whole list again (DECISIONS 049).

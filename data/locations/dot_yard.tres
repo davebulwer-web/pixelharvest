@@ -10,4 +10,4 @@ display_name = "Dot's yard"
 outside = &"lane"
 door_cell = Vector2i(41, 21)
 exterior = ExtResource("2_ext")
-door_words = "Dot the carrier's shed. A slate on the door says: \"Out on my rounds. Back by dusk.\""
+door_words = "Dot the carrier's shed. A slate on the door says: \"At the gate, or out on my rounds.\""
