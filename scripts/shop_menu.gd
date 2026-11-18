@@ -195,7 +195,7 @@ func _fill(keep_focus_on: Resource) -> void:
 		for item in GameState.inventory.items():
 			if not Economy.shop_buys(item, _shop):
 				continue
-			var amount := GameState.inventory.count(item)
+			var amount := Economy.sellable_amount(item, _shop)
 			var total := Economy.store_total(item, _shop, amount)
 			var each := Economy.store_price(item, _shop)
 			var detail := "Sell all %d for %dg. The shipping bin on the farm pays full price, but only overnight." \
@@ -206,6 +206,11 @@ func _fill(keep_focus_on: Resource) -> void:
 			elif _shop.produce_pay_rate > 1.0:
 				detail = "Sell all %d for %dg, more than the shipping bin pays (%dg)." \
 						% [amount, total, Economy.bin_pays(item, amount)]
+			# A chalkboard (DECISIONS 068) takes only so many of each.
+			if _shop.chalkboard:
+				detail = "Sell %d for %dg: on today's chalkboard, half as much again as the shipping bin pays (%dg). %s wants %d more today." \
+						% [amount, total, Economy.bin_pays(item, amount), _shop.keeper_name,
+						Tavern.left_today(item, _shop)]
 			# Where to sell (DECISIONS 063): a buyer who has had plenty of
 			# something today pays less for more, until the morning.
 			var full := Economy.full_store_price(item, _shop)
@@ -222,7 +227,10 @@ func _fill(keep_focus_on: Resource) -> void:
 				button.text += "  (plenty today)"
 			button.pressed.connect(_sell_item.bind(item))
 		if _sells.get_child_count() == 0:
-			_add_none(_sells, "Nothing %s buys" % _shop.keeper_name if not _shop.buys_tags.is_empty() else "No produce to sell")
+			var none := "Nothing %s buys" % _shop.keeper_name if not _shop.buys_tags.is_empty() else "No produce to sell"
+			if _shop.chalkboard:
+				none = "Nothing from today's chalkboard"
+			_add_none(_sells, none)
 
 	_gold_label.text = "%dg" % GameState.gold
 	_show_detail("")

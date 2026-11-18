@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/catch_goal.gd" id="11_r"]
+[ext_resource type="Resource" path="res://data/fish/conger_eel.tres" id="12_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="13_r"]
+[ext_resource type="Resource" path="res://data/tools/crab_pot.tres" id="14_r"]
+[ext_resource type="Resource" path="res://data/quests/tam_crabs.tres" id="15_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("11_r")
+fish = ExtResource("12_r")
+where = "off the pier at night"
+
+[resource]
+script = ExtResource("1_r")
+id = &"tam_conger"
+title = "Pip's sea monster"
+giver = &"tam"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Pip's been telling the whole valley there's a sea monster under my pier. It's a conger, and a big one.", "They come out after dark, eight till late. Catch one off the pier and bring it to me, and we'll put that monster to rest."])
+reminder_line = "A conger eel, off the pier after dark. Mind your fingers."
+thanks_lines = Array[String](["There's Pip's monster! Look at the size of it.", "That'll go up to the city on the morning cart. Here's your share, and a crab pot, since you've the knack."])
+reward_gold = 280
+reward_items = Dictionary[ExtResource("13_r"), int]({
+ExtResource("14_r"): 1
+})
+requires = ExtResource("15_r")
+first_day = 1

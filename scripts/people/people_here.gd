@@ -29,6 +29,11 @@ extends Node
 ##
 ## Each Npc wears a "!" or "?" (Quests.marker_for, Festivals.marker_for).
 ##
+## Indoors (DECISIONS 068): a room people spend time in, the Wheatsheaf,
+## adds one too (create_inside), with the room's door: everyone comes in at
+## it and goes out by it. The room's keeper (Nell behind the bar) is the
+## room's own, so she is left out here.
+##
 
 const TILE_PX := 16
 
@@ -41,6 +46,12 @@ var _entities: Node2D
 var _size: Vector2i
 var _dialogue
 var _counter: ShopCounter
+
+## Indoors: the cell of the room's door, which everyone comes and goes by,
+## and who's the room's own rather than ours (the keeper behind the bar).
+var _has_door: bool = false
+var _door: Vector2i
+var _exclude: Array[StringName] = []
 
 ## Everyone standing or walking here, by character id, and where each was
 ## last told to be.
@@ -77,8 +88,22 @@ static func create(place: StringName, entities: Node2D, size: Vector2i, dialogue
 	return people
 
 
+## The same, for a room (DECISIONS 068): people whose stop is `place` stand
+## on their cells in it, coming in and going out by `door_cell`; `exclude`
+## are left to the room (its keeper).
+static func create_inside(place: StringName, entities: Node2D, size: Vector2i, dialogue, menu,
+		door_cell: Vector2i, exclude: Array[StringName] = []) -> PeopleHere:
+	var people := create(place, entities, size, dialogue, menu)
+	people._has_door = true
+	people._door = door_cell
+	people._exclude = exclude
+	return people
+
+
 func _ready() -> void:
 	for person in ContentDB.characters():
+		if person.id in _exclude:
+			continue
 		var stop := Schedules.stop_now(person)
 		_stops[person.id] = stop
 		if stop.place == _place:
@@ -128,6 +153,8 @@ func refresh_markers() -> void:
 ## be, and set off anyone whose stop has changed.
 func _update() -> void:
 	for person in ContentDB.characters():
+		if person.id in _exclude:
+			continue
 		var stop := Schedules.stop_now(person)
 		var was: ScheduleStop = _stops.get(person.id)
 		if was != null and was.place == stop.place and (stop.place != _place or was.cell == stop.cell):
@@ -150,6 +177,28 @@ func _move(person: CharacterDef, from_place: StringName, stop: ScheduleStop) -> 
 	elif walker != null:
 		# Going: to the road that leads to their next place, or to its door.
 		_walk(walker, _gate_toward(stop.place, walker.cell()), true)
+	elif from_place != stop.place and _passes_through(from_place, stop.place):
+		# Neither here before nor after, but on the way (DECISIONS 068): out of
+		# one door on this map and in at another (the mayor from his house to
+		# the tavern), or in along the road and in at a door (Wren home from
+		# the pier), or out of a door and off along the road.
+		var to_gate := _gate_toward(stop.place, Vector2i.ZERO)
+		walker = _add_npc(person, _base_of(_gate_toward(from_place, to_gate)))
+		_walk(walker, to_gate, true)
+
+
+## True if going from `from_place` to `to_place` takes someone across this
+## map: either end is a building whose door is here. Indoors there's no
+## passing through, and someone coming from nowhere (away) doesn't walk.
+func _passes_through(from_place: StringName, to_place: StringName) -> bool:
+	if _has_door or from_place == &"" or to_place == &"":
+		return false
+	return _is_building_here(from_place) or _is_building_here(to_place)
+
+
+func _is_building_here(place: StringName) -> bool:
+	var location := LocationManager.find(place)
+	return location != null and location.outside == _place and location.exterior != null
 
 
 ## Send `walker` to `cell`; with `leave`, they're gone when they get there.
@@ -227,6 +276,8 @@ func _walkable() -> AStarGrid2D:
 ## from it): the door of a building on this map; the road that leads that
 ## way; for "away" (or anywhere there's no road to), the road nearest `near`.
 func _gate_toward(other: StringName, near: Vector2i) -> Vector2i:
+	if _has_door:
+		return _door  # a room: in and out by its door, wherever they're going
 	var location := LocationManager.find(other)
 	if location != null and location.outside == _place and location.exterior != null:
 		return Building.door_cells(location)[0]

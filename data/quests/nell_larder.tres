@@ -1,0 +1,48 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=25 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_any_goal.gd" id="11_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="12_r"]
+[ext_resource type="Resource" path="res://data/produce/parsnip.tres" id="13_r"]
+[ext_resource type="Resource" path="res://data/produce/potato.tres" id="14_r"]
+[ext_resource type="Resource" path="res://data/produce/cabbage.tres" id="15_r"]
+[ext_resource type="Resource" path="res://data/produce/green_bean.tres" id="16_r"]
+[ext_resource type="Resource" path="res://data/produce/radish.tres" id="17_r"]
+[ext_resource type="Resource" path="res://data/produce/spring_onion.tres" id="18_r"]
+[ext_resource type="Resource" path="res://data/produce/pea.tres" id="19_r"]
+[ext_resource type="Resource" path="res://data/produce/corn.tres" id="20_r"]
+[ext_resource type="Resource" path="res://data/produce/tomato.tres" id="21_r"]
+[ext_resource type="Resource" path="res://data/produce/beetroot.tres" id="22_r"]
+[ext_resource type="Resource" path="res://data/produce/pumpkin.tres" id="23_r"]
+[ext_resource type="Resource" path="res://data/produce/leek.tres" id="24_r"]
+[ext_resource type="Resource" path="res://data/produce/garlic.tres" id="25_r"]
+[ext_resource type="Resource" path="res://data/produce/brussels_sprouts.tres" id="26_r"]
+[ext_resource type="Resource" path="res://data/produce/kale.tres" id="27_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="28_r"]
+[ext_resource type="Resource" path="res://data/dishes/hotpot.tres" id="29_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="30_r"]
+[ext_resource type="Resource" path="res://data/unlocks/nell_hotpot.tres" id="31_r"]
+[ext_resource type="Resource" path="res://data/unlocks/tavern_opens.tres" id="32_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("11_r")
+amount = 6
+items = Array[ExtResource("12_r")]([ExtResource("13_r"), ExtResource("14_r"), ExtResource("15_r"), ExtResource("16_r"), ExtResource("17_r"), ExtResource("18_r"), ExtResource("19_r"), ExtResource("20_r"), ExtResource("21_r"), ExtResource("22_r"), ExtResource("23_r"), ExtResource("24_r"), ExtResource("25_r"), ExtResource("26_r"), ExtResource("27_r")])
+what = "vegetables"
+
+[resource]
+script = ExtResource("1_r")
+id = &"nell_larder"
+title = "Nell's larder"
+giver = &"nell"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["You'll be the farmer! I'm Nell. I've opened up the Wheatsheaf again, my mother's old place.", "Ten years shut, and the larder's as bare as a bone. I want a proper hot meal on the menu, not just bread and cheese.", "Six vegetables, any you've grown, any mix. Bring them to the bar and I'll make it worth your while."])
+reminder_line = "Six vegetables for the larder, any mix. I'll be behind the bar from four."
+thanks_lines = Array[String](["Look at these! Straight in the pot.", "There: my hotpot's on the menu from tonight. First one's on me. Well, the gold is."])
+reward_gold = 100
+reward_items = Dictionary[ExtResource("28_r"), int]({
+ExtResource("29_r"): 1
+})
+reward_unlocks = Array[ExtResource("30_r")]([ExtResource("31_r")])
+first_day = 8
+requires_unlock = ExtResource("32_r")

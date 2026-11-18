@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_each_goal.gd" id="11_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="12_r"]
+[ext_resource type="Resource" path="res://data/produce/leek.tres" id="13_r"]
+[ext_resource type="Resource" path="res://data/produce/kale.tres" id="14_r"]
+[ext_resource type="Resource" path="res://data/produce/brussels_sprouts.tres" id="15_r"]
+[ext_resource type="Resource" path="res://data/fish/mackerel.tres" id="16_r"]
+[ext_resource type="Resource" path="res://data/fish/whiting.tres" id="17_r"]
+[ext_resource type="Resource" path="res://data/fish/dab.tres" id="18_r"]
+[ext_resource type="Resource" path="res://data/fish/pollack.tres" id="19_r"]
+[ext_resource type="Resource" path="res://data/fish/plaice.tres" id="20_r"]
+[ext_resource type="Resource" path="res://data/fish/garfish.tres" id="21_r"]
+[ext_resource type="Resource" path="res://data/fish/gurnard.tres" id="22_r"]
+[ext_resource type="Resource" path="res://data/fish/cod.tres" id="23_r"]
+[ext_resource type="Resource" path="res://data/fish/bass.tres" id="24_r"]
+[ext_resource type="Resource" path="res://data/fish/wrasse.tres" id="25_r"]
+[ext_resource type="Resource" path="res://data/quests/nell_sloe_gin.tres" id="26_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("11_r")
+items = Array[ExtResource("12_r")]([ExtResource("13_r"), ExtResource("14_r"), ExtResource("15_r")])
+and_one_of = Array[ExtResource("12_r")]([ExtResource("16_r"), ExtResource("17_r"), ExtResource("18_r"), ExtResource("19_r"), ExtResource("20_r"), ExtResource("21_r"), ExtResource("22_r"), ExtResource("23_r"), ExtResource("24_r"), ExtResource("25_r")])
+and_one_of_what = "a sea fish"
+
+[resource]
+script = ExtResource("1_r")
+id = &"nell_winter_supper"
+title = "The winter supper"
+giver = &"nell"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Every winter the Wheatsheaf puts on a supper for the whole valley. The first in ten years, this'll be.", "I want the best of the winter garden: a leek, some kale and sprouts. And a fish from the sea, whatever's biting."])
+reminder_line = "A leek, kale, sprouts, and a sea fish, for the winter supper."
+thanks_lines = Array[String](["That's the supper made. The whole valley's coming, you know. They'll know who grew it.", "Here. Nobody pays for a drink at the Wheatsheaf who fed the valley in winter. Well: nearly nobody."])
+reward_gold = 450
+requires = ExtResource("26_r")
+first_day = 1
+seasons = Array[StringName]([&"winter"])

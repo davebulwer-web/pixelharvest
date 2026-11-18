@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 21 — the Cove** (ROADMAP section 13, agreed 2026-11-17; the stages from 19 on were rewritten by it, see below). Session 1 (the Cove, its two ways in, tides worked out from the clock, the beach and the rockpools; no save change) is built, waiting for Dave to try it. Stage 20 (early days) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 19 (the Lane and the bigger farm) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 22 — the tavern and people on the move** (ROADMAP section 13, agreed 2026-11-17; the stages from 19 on were rewritten by it, see below). Session 2 (Nell's tavern, the Wheatsheaf: rumours, the chalkboard, darts night, hot meals; Nell, Dot and Tam's requests; homes for the mayor, Wren and Ivy and the town hall, the town grown to 48 × 32; evenings at the tavern; DECISIONS 068, no save change) is built, waiting for Dave to try it. Session 1 (weekdays, schedules, people who walk; DECISIONS 067) is tested and committed by Dave (2026-11-18). Stage 21 (the Cove) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 20 (early days) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 19 (the Lane and the bigger farm) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -1246,13 +1246,48 @@ homes that use it.
       rendered Mabel coming out and walking, Pip leaving town, Pip by the ford and Dot at
       her gate, Pip walking home, knocking at Pip's door, Wren and Tam at the Cove on a
       Saturday and the request log
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-18)
+
+**Session 2 (2026-11-18) — the tavern, the questlines, homes (DECISIONS 068, no save change)**
+
+- [x] **Nell's tavern, the Wheatsheaf** (4 PM – 1 AM), on the town's new Back Street; it
+      opens on day 8 (`tavern_opens`), when Nell arrives. A room of its own
+      (scenes/tavern.tscn): the bar with Nell behind it, barrels, the fire, three tables,
+      and whoever's in tonight walking in and out of the door (`PeopleHere` indoors)
+- [x] **Rumours**: talk to Nell and she passes on one a night, always true and always
+      about tomorrow: the forecast, the low tides, what's biting or in the hedgerows,
+      tomorrow's chalkboard (worked out from the date, the `Tavern` autoload)
+- [x] **The chalkboard**: three things Nell wants today (produce, forage, sea fish in
+      season), five of each at half again their price, on the board and the town notice
+      board; Nell buys nothing else (`ShopDef.chalkboard`, capped in `Economy`)
+- [x] **Darts night**: Fridays from 7 PM, one go a night at the dartboard: three darts,
+      each stopped across then up and down (`DartsGame`); beat the regulars' best and the
+      pot is yours (120g). Numbers in data/tavern_rules.tres
+- [x] **A hot meal**: a ploughman's from the start; the hotpot and the fish supper once
+      Nell's requests teach her them
+- [x] **Requests**: Nell (a larder of vegetables, fish for Friday, sloe gin in autumn, a
+      winter supper), Dot (a mounting block, a parcel to the tavern, bramble jam), Tam (a
+      conger eel, mending his nets); Dot's errands can send you to Nell
+- [x] **Homes for everyone**: the mayor's house and the town hall (his office, weekday
+      middays) on Back Street, Wren's cottage by the river, Ivy's cottage by the
+      allotments on the Lane; knock and whoever's in comes out. The town grows to 48 × 32
+      (new south and east, nothing old moved)
+- [x] **Evenings at the tavern** in everyone's day, once it's open (`DayPlan.requires_unlock`):
+      Tam most nights, Dot on Tuesdays and Thursdays, Ivy on Sunday afternoons, Mabel, Wren
+      and the mayor on Fridays, Wren and the mayor on Saturdays; people walk from one door
+      to another on the same map
+- [x] Verified in the sandbox: headless import and run clean, 343,902 harness checks
+      (every person's stop every ten minutes of a year in three weathers, before and after
+      the tavern opens; Nell findable whenever she has an errand; the chalkboard and the
+      rumours over 224 days; selling capped at the chalkboard; darts scoring, the night's
+      best, one go a night and the pot; the new requests; every stop cell and door open and
+      reachable in town, on the Lane, at the Cove and in the tavern; the regulars in the
+      tavern on a Friday at 7; the mayor walking out of his house and in at the tavern
+      door; Nell speaking), and rendered Back Street with the tavern, the mayor's house and
+      the town hall, Wren's cottage, Ivy's cottage, the tavern on a Friday night, the
+      chalkboard and a dart thrown. Placeholder art for the new buildings, furniture,
+      Nell and the dishes (art/build_stage22_s2_placeholders.py) until Stage 23
 - [ ] Dave confirms it plays correctly on Windows
-
-**Session 2 — the tavern, the questlines, homes**
-
-- [ ] Nell's tavern (4 PM – 1 AM): rumours, the chalkboard, darts night, a hot meal
-- [ ] Nell, Dot and Tam's questlines; homes for everyone (exteriors), the town grown for
-      them; evening stops at the tavern in people's schedules
 
 ## Stage 23 — Art: the world · 2–3 art sessions · cloud env (Pixellab)
 

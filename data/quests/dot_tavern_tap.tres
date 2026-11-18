@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/carry_goal.gd" id="11_r"]
+[ext_resource type="Resource" path="res://data/produce/parcel.tres" id="12_r"]
+[ext_resource type="Resource" path="res://data/quests/dot_first_errand.tres" id="13_r"]
+[ext_resource type="Resource" path="res://data/unlocks/tavern_opens.tres" id="14_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("11_r")
+item = ExtResource("12_r")
+amount = 1
+
+[resource]
+script = ExtResource("1_r")
+id = &"dot_tavern_tap"
+title = "A new tap for the Wheatsheaf"
+giver = &"dot"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["The Wheatsheaf's new beer tap has come up from the city for Nell. Without it there's no beer tonight.", "She's at the Cove first thing buying fish, then in the town square at midday. Get it to her by two, before she's shut away getting the bar ready."])
+reminder_line = "Nell's tap, by two o'clock. The Cove in the morning, the town square at midday."
+thanks_lines = Array[String](["My tap! Dot sent you? She's a treasure, and so are you.", "Here, and come by tonight. The first evening's always the best."])
+reward_gold = 60
+requires = ExtResource("13_r")
+first_day = 8
+requires_unlock = ExtResource("14_r")
+deadline_days = 1
+hand_in_to = &"nell"
+due_minute = 840
+late_line = "Dot will have taken Nell's tap round herself."

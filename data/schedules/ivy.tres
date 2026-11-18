@@ -3,6 +3,39 @@
 [ext_resource type="Script" path="res://scripts/resources/schedule_def.gd" id="1_def"]
 [ext_resource type="Script" path="res://scripts/resources/day_plan.gd" id="2_plan"]
 [ext_resource type="Script" path="res://scripts/resources/schedule_stop.gd" id="3_stop"]
+[ext_resource type="Resource" path="res://data/unlocks/tavern_opens.tres" id="4_unlock"]
+
+[sub_resource type="Resource" id="Stop_sunday_1"]
+script = ExtResource("3_stop")
+at = 540
+place = &"town"
+cell = Vector2i(19, 7)
+words = "at the old glasshouse in town"
+
+[sub_resource type="Resource" id="Stop_sunday_2"]
+script = ExtResource("3_stop")
+at = 780
+place = &"town"
+cell = Vector2i(22, 7)
+words = "at the old glasshouse in town"
+
+[sub_resource type="Resource" id="Stop_sunday_3"]
+script = ExtResource("3_stop")
+at = 1020
+place = &"tavern"
+cell = Vector2i(4, 7)
+words = "at a table in the Wheatsheaf"
+
+[sub_resource type="Resource" id="Stop_sunday_4"]
+script = ExtResource("3_stop")
+at = 1140
+place = &"ivy_cottage"
+
+[sub_resource type="Resource" id="Plan_sunday"]
+script = ExtResource("2_plan")
+weekdays = Array[int]([6])
+requires_unlock = ExtResource("4_unlock")
+stops = Array[ExtResource("3_stop")]([SubResource("Stop_sunday_1"), SubResource("Stop_sunday_2"), SubResource("Stop_sunday_3"), SubResource("Stop_sunday_4")])
 
 [sub_resource type="Resource" id="Stop_everyday_1"]
 script = ExtResource("3_stop")
@@ -21,8 +54,7 @@ words = "at the old glasshouse in town"
 [sub_resource type="Resource" id="Stop_everyday_3"]
 script = ExtResource("3_stop")
 at = 1020
-place = &""
-words = "gone home"
+place = &"ivy_cottage"
 
 [sub_resource type="Resource" id="Plan_everyday"]
 script = ExtResource("2_plan")
@@ -30,6 +62,6 @@ stops = Array[ExtResource("3_stop")]([SubResource("Stop_everyday_1"), SubResourc
 
 [resource]
 script = ExtResource("1_def")
-home = &""
-home_words = "gone home"
-plans = Array[ExtResource("2_plan")]([SubResource("Plan_everyday")])
+home = &"ivy_cottage"
+home_words = "at home in her cottage on the Lane (knock)"
+plans = Array[ExtResource("2_plan")]([SubResource("Plan_sunday"), SubResource("Plan_everyday")])

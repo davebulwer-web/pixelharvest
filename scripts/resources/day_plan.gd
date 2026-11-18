@@ -22,6 +22,11 @@ extends Resource
 ## Which weathers, by WeatherDef id (&"rain", &"storm"). Empty: any weather.
 @export var weathers: Array[StringName] = []
 
+## Only once this is earned (DECISIONS 068): an evening at the tavern waits
+## for the tavern to open, and until then the next plan that fits is used.
+## Null: from the start.
+@export var requires_unlock: UnlockDef
+
 ## The day's stops, in time order. Before the first, they're at home (the
 ## ScheduleDef's `home`).
 @export var stops: Array[ScheduleStop] = []

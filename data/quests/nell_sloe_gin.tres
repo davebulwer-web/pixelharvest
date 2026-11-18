@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="11_r"]
+[ext_resource type="Resource" path="res://data/forage/sloe.tres" id="12_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="13_r"]
+[ext_resource type="Resource" path="res://data/decorations/paper_lantern.tres" id="14_r"]
+[ext_resource type="Resource" path="res://data/quests/nell_fish_friday.tres" id="15_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("11_r")
+item = ExtResource("12_r")
+amount = 8
+
+[resource]
+script = ExtResource("1_r")
+id = &"nell_sloe_gin"
+title = "Sloes for the gin"
+giver = &"nell"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["The sloes are out on the Lane's hedges. My mother made sloe gin every autumn, and the regulars still ask.", "Bring me eight, and come back at Lantern night for a glass."])
+reminder_line = "Eight sloes, off the blackthorn on the Lane. Blue-black, and sour as anything."
+thanks_lines = Array[String](["Perfect. Pricked, sugared, and in the jar they go.", "Here: and a pair of lanterns for the farm, from the Wheatsheaf's old stock."])
+reward_gold = 300
+reward_items = Dictionary[ExtResource("13_r"), int]({
+ExtResource("14_r"): 2
+})
+requires = ExtResource("15_r")
+first_day = 1
+seasons = Array[StringName]([&"autumn"])

@@ -1,0 +1,78 @@
+[gd_resource type="Resource" script_class="TavernRules" load_steps=43 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/tavern_rules.gd" id="1_rules"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_itemdef"]
+[ext_resource type="Resource" path="res://data/produce/parsnip.tres" id="10_item"]
+[ext_resource type="Resource" path="res://data/produce/potato.tres" id="11_item"]
+[ext_resource type="Resource" path="res://data/produce/cabbage.tres" id="12_item"]
+[ext_resource type="Resource" path="res://data/produce/green_bean.tres" id="13_item"]
+[ext_resource type="Resource" path="res://data/produce/radish.tres" id="14_item"]
+[ext_resource type="Resource" path="res://data/produce/spring_onion.tres" id="15_item"]
+[ext_resource type="Resource" path="res://data/produce/rhubarb.tres" id="16_item"]
+[ext_resource type="Resource" path="res://data/produce/strawberry.tres" id="17_item"]
+[ext_resource type="Resource" path="res://data/produce/pea.tres" id="18_item"]
+[ext_resource type="Resource" path="res://data/produce/tomato.tres" id="19_item"]
+[ext_resource type="Resource" path="res://data/produce/corn.tres" id="20_item"]
+[ext_resource type="Resource" path="res://data/produce/blueberry.tres" id="21_item"]
+[ext_resource type="Resource" path="res://data/produce/melon.tres" id="22_item"]
+[ext_resource type="Resource" path="res://data/produce/chilli.tres" id="23_item"]
+[ext_resource type="Resource" path="res://data/produce/beetroot.tres" id="24_item"]
+[ext_resource type="Resource" path="res://data/produce/pumpkin.tres" id="25_item"]
+[ext_resource type="Resource" path="res://data/produce/leek.tres" id="26_item"]
+[ext_resource type="Resource" path="res://data/produce/garlic.tres" id="27_item"]
+[ext_resource type="Resource" path="res://data/produce/apple.tres" id="28_item"]
+[ext_resource type="Resource" path="res://data/produce/brussels_sprouts.tres" id="29_item"]
+[ext_resource type="Resource" path="res://data/produce/kale.tres" id="30_item"]
+[ext_resource type="Resource" path="res://data/forage/wild_garlic.tres" id="31_item"]
+[ext_resource type="Resource" path="res://data/forage/elderflower.tres" id="32_item"]
+[ext_resource type="Resource" path="res://data/forage/raspberry.tres" id="33_item"]
+[ext_resource type="Resource" path="res://data/forage/blackberry.tres" id="34_item"]
+[ext_resource type="Resource" path="res://data/forage/hazelnut.tres" id="35_item"]
+[ext_resource type="Resource" path="res://data/forage/sloe.tres" id="36_item"]
+[ext_resource type="Resource" path="res://data/forage/rosehip.tres" id="37_item"]
+[ext_resource type="Resource" path="res://data/forage/chanterelle.tres" id="38_item"]
+[ext_resource type="Resource" path="res://data/forage/penny_bun.tres" id="39_item"]
+[ext_resource type="Resource" path="res://data/forage/mussels.tres" id="40_item"]
+[ext_resource type="Resource" path="res://data/forage/winkles.tres" id="41_item"]
+[ext_resource type="Resource" path="res://data/forage/samphire.tres" id="42_item"]
+[ext_resource type="Resource" path="res://data/fish/mackerel.tres" id="43_item"]
+[ext_resource type="Resource" path="res://data/fish/dab.tres" id="44_item"]
+[ext_resource type="Resource" path="res://data/fish/whiting.tres" id="45_item"]
+[ext_resource type="Resource" path="res://data/fish/perch.tres" id="46_item"]
+[ext_resource type="Resource" path="res://data/fish/roach.tres" id="47_item"]
+[ext_resource type="Resource" path="res://data/fish/pollack.tres" id="48_item"]
+[ext_resource type="Resource" path="res://data/fish/cod.tres" id="49_item"]
+
+[resource]
+script = ExtResource("1_rules")
+chalkboard_items = Array[ExtResource("2_itemdef")]([ExtResource("10_item"), ExtResource("11_item"), ExtResource("12_item"), ExtResource("13_item"), ExtResource("14_item"), ExtResource("15_item"), ExtResource("16_item"), ExtResource("17_item"), ExtResource("18_item"), ExtResource("19_item"), ExtResource("20_item"), ExtResource("21_item"), ExtResource("22_item"), ExtResource("23_item"), ExtResource("24_item"), ExtResource("25_item"), ExtResource("26_item"), ExtResource("27_item"), ExtResource("28_item"), ExtResource("29_item"), ExtResource("30_item"), ExtResource("31_item"), ExtResource("32_item"), ExtResource("33_item"), ExtResource("34_item"), ExtResource("35_item"), ExtResource("36_item"), ExtResource("37_item"), ExtResource("38_item"), ExtResource("39_item"), ExtResource("40_item"), ExtResource("41_item"), ExtResource("42_item"), ExtResource("43_item"), ExtResource("44_item"), ExtResource("45_item"), ExtResource("46_item"), ExtResource("47_item"), ExtResource("48_item"), ExtResource("49_item")])
+chalkboard_count = 3
+chalkboard_each = 5
+darts_weekday = 4
+darts_from = 1140
+darts_per_go = 3
+ring_radii = Array[float]([0.08, 0.2, 0.45, 0.75, 1.0])
+ring_points = Array[int]([50, 25, 15, 10, 5])
+aim_sweeps_per_second = 0.7
+aim_overshoot = 1.15
+rival_min = 55
+rival_max = 105
+darts_prize_gold = 120
+regulars_name = "One of the regulars"
+rumour_chalkboard = "Tomorrow I'll be after {items} for the kitchen. Bring them in and I'll pay you well."
+rumour_forage = "Dot says there'll be {item} about {where} tomorrow, if you're quick."
+rumour_fish = "Talk at the bar tonight's of a big {fish} in {where}. Bites {hours}, they say."
+rumour_tides = "Tam reckons low water tomorrow's {tides}. Mind you're not caught on the rocks."
+rumour_weather = "My knee says {weather} tomorrow, and my knee's never wrong."
+water_words = Dictionary[StringName, String]({
+&"pond": "the town pond",
+&"river": "the river by town",
+&"stream": "the stream in the Woods",
+&"sea": "the sea off the pier"
+})
+place_words = Dictionary[StringName, String]({
+&"lane": "in the Lane's hedgerows",
+&"woods": "in the Woods",
+&"cove": "on the beach at the Cove"
+})
+gossip = Array[String](["Brann's been at the forge till all hours. Something for the mayor, they say, and he won't say what.", "Rosa says the city pays twice what we do for good vegetables. Mind, the city's a long way off.", "Pip's been telling everyone there's a sea monster in the Cove. Tam says it's a conger eel. Tam would know.", "The old farm fed the whole valley once. Folk are glad to see smoke from its chimney again."])

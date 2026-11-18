@@ -83,6 +83,12 @@ extends Resource
 ## What baits a crab pot, what it catches and how soon: data/crab_pot_rules.tres.
 @export var crab_pots: CrabPotRules
 
+## --- The tavern (DECISIONS 068) --------------------------------------------------
+
+## Nell's chalkboard, her rumours and darts night: data/tavern_rules.tres.
+## Null: the chalkboard is blank, and there's no darts night.
+@export var tavern: TavernRules
+
 ## --- Cooking (DECISIONS 056) ------------------------------------------------
 
 ## What opens the farmhouse kitchen, so the stove cooks: Mabel's lessons give

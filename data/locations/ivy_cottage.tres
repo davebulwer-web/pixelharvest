@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="LocationDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lane/ivy_cottage.png" id="2_ext"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"ivy_cottage"
+display_name = "Ivy's cottage"
+outside = &"lane"
+door_cell = Vector2i(32, 7)
+exterior = ExtResource("2_ext")
+door_words = "A little cottage by the allotments, roses round the door and the garden kept beautifully. Nobody answers."

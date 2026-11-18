@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="GameRules" load_steps=42 format=3]
+[gd_resource type="Resource" script_class="GameRules" load_steps=48 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/game_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_itemdef"]
@@ -40,6 +40,12 @@
 [ext_resource type="Resource" path="res://data/locations/rosa_cottage.tres" id="38_rosa"]
 [ext_resource type="Resource" path="res://data/locations/lighthouse.tres" id="39_lighthouse"]
 [ext_resource type="Resource" path="res://data/crab_pot_rules.tres" id="40_crab_pots"]
+[ext_resource type="Resource" path="res://data/locations/tavern.tres" id="41_tavern"]
+[ext_resource type="Resource" path="res://data/locations/mayor_house.tres" id="42_mayor"]
+[ext_resource type="Resource" path="res://data/locations/town_hall.tres" id="43_hall"]
+[ext_resource type="Resource" path="res://data/locations/wren_cottage.tres" id="44_wren"]
+[ext_resource type="Resource" path="res://data/locations/ivy_cottage.tres" id="45_ivy"]
+[ext_resource type="Resource" path="res://data/tavern_rules.tres" id="46_tavern_rules"]
 
 [sub_resource type="Resource" id="Demand_bin"]
 script = ExtResource("34_demand")
@@ -57,7 +63,7 @@ ExtResource("4_can"): 1,
 ExtResource("23_trowel"): 1,
 ExtResource("5_seeds"): 10
 })
-locations = Array[ExtResource("6_locdef")]([ExtResource("7_farm"), ExtResource("13_town"), ExtResource("14_seeds"), ExtResource("15_general"), ExtResource("16_smith"), ExtResource("17_house"), ExtResource("24_woods"), ExtResource("27_greenhouse"), ExtResource("28_lane"), ExtResource("29_pip"), ExtResource("30_dot"), ExtResource("31_bakery"), ExtResource("36_cove"), ExtResource("37_tam"), ExtResource("38_rosa"), ExtResource("39_lighthouse")])
+locations = Array[ExtResource("6_locdef")]([ExtResource("7_farm"), ExtResource("13_town"), ExtResource("14_seeds"), ExtResource("15_general"), ExtResource("16_smith"), ExtResource("17_house"), ExtResource("24_woods"), ExtResource("27_greenhouse"), ExtResource("28_lane"), ExtResource("29_pip"), ExtResource("30_dot"), ExtResource("31_bakery"), ExtResource("36_cove"), ExtResource("37_tam"), ExtResource("38_rosa"), ExtResource("39_lighthouse"), ExtResource("41_tavern"), ExtResource("42_mayor"), ExtResource("43_hall"), ExtResource("44_wren"), ExtResource("45_ivy")])
 starting_location = &"farmhouse"
 home_location = &"farmhouse"
 seasons = Array[ExtResource("8_theme")]([ExtResource("9_spring"), ExtResource("10_summer"), ExtResource("11_autumn"), ExtResource("12_winter")])
@@ -71,6 +77,7 @@ hazards = ExtResource("22_hazards")
 fishing = ExtResource("25_fishing")
 tides = ExtResource("35_tides")
 crab_pots = ExtResource("40_crab_pots")
+tavern = ExtResource("46_tavern_rules")
 kitchen_unlock = ExtResource("26_kitchen")
 workbench_unlock = ExtResource("32_bench")
 workbench_mend_item = ExtResource("33_stone")

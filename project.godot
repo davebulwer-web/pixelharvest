@@ -32,6 +32,7 @@ Audio="*res://scripts/autoload/audio.gd"
 DayReport="*res://scripts/autoload/day_report.gd"
 Fishing="*res://scripts/autoload/fishing.gd"
 Festivals="*res://scripts/autoload/festivals.gd"
+Tavern="*res://scripts/autoload/tavern.gd"
 
 [display]
 

@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/resources/schedule_def.gd" id="1_def"]
 [ext_resource type="Script" path="res://scripts/resources/day_plan.gd" id="2_plan"]
 [ext_resource type="Script" path="res://scripts/resources/schedule_stop.gd" id="3_stop"]
+[ext_resource type="Resource" path="res://data/unlocks/tavern_opens.tres" id="4_unlock"]
 
 [sub_resource type="Resource" id="Stop_sunday_1"]
 script = ExtResource("3_stop")
@@ -14,47 +15,162 @@ words = "by the fountain in town"
 [sub_resource type="Resource" id="Stop_sunday_2"]
 script = ExtResource("3_stop")
 at = 960
-place = &""
-words = "gone home for the day"
+place = &"mayor_house"
 
 [sub_resource type="Resource" id="Plan_sunday"]
 script = ExtResource("2_plan")
 weekdays = Array[int]([6])
 stops = Array[ExtResource("3_stop")]([SubResource("Stop_sunday_1"), SubResource("Stop_sunday_2")])
 
-[sub_resource type="Resource" id="Stop_everyday_1"]
+[sub_resource type="Resource" id="Stop_friday_1"]
 script = ExtResource("3_stop")
 at = 480
 place = &"town"
 cell = Vector2i(22, 16)
 words = "by the fountain in town"
 
-[sub_resource type="Resource" id="Stop_everyday_2"]
+[sub_resource type="Resource" id="Stop_friday_2"]
+script = ExtResource("3_stop")
+at = 720
+place = &"town_hall"
+words = "in his office at the town hall (knock)"
+
+[sub_resource type="Resource" id="Stop_friday_3"]
+script = ExtResource("3_stop")
+at = 840
+place = &"town"
+cell = Vector2i(16, 16)
+words = "by the bench in the town square"
+
+[sub_resource type="Resource" id="Stop_friday_4"]
+script = ExtResource("3_stop")
+at = 1080
+place = &"mayor_house"
+
+[sub_resource type="Resource" id="Stop_friday_5"]
+script = ExtResource("3_stop")
+at = 1170
+place = &"tavern"
+cell = Vector2i(11, 8)
+words = "by the fire in the Wheatsheaf"
+
+[sub_resource type="Resource" id="Stop_friday_6"]
+script = ExtResource("3_stop")
+at = 1320
+place = &"mayor_house"
+
+[sub_resource type="Resource" id="Plan_friday"]
+script = ExtResource("2_plan")
+weekdays = Array[int]([4])
+requires_unlock = ExtResource("4_unlock")
+stops = Array[ExtResource("3_stop")]([SubResource("Stop_friday_1"), SubResource("Stop_friday_2"), SubResource("Stop_friday_3"), SubResource("Stop_friday_4"), SubResource("Stop_friday_5"), SubResource("Stop_friday_6")])
+
+[sub_resource type="Resource" id="Stop_weekday_1"]
+script = ExtResource("3_stop")
+at = 480
+place = &"town"
+cell = Vector2i(22, 16)
+words = "by the fountain in town"
+
+[sub_resource type="Resource" id="Stop_weekday_2"]
+script = ExtResource("3_stop")
+at = 720
+place = &"town_hall"
+words = "in his office at the town hall (knock)"
+
+[sub_resource type="Resource" id="Stop_weekday_3"]
+script = ExtResource("3_stop")
+at = 840
+place = &"town"
+cell = Vector2i(16, 16)
+words = "by the bench in the town square"
+
+[sub_resource type="Resource" id="Stop_weekday_4"]
+script = ExtResource("3_stop")
+at = 1080
+place = &"mayor_house"
+
+[sub_resource type="Resource" id="Plan_weekday"]
+script = ExtResource("2_plan")
+weekdays = Array[int]([0, 1, 2, 3, 4])
+stops = Array[ExtResource("3_stop")]([SubResource("Stop_weekday_1"), SubResource("Stop_weekday_2"), SubResource("Stop_weekday_3"), SubResource("Stop_weekday_4")])
+
+[sub_resource type="Resource" id="Stop_saturday_1"]
+script = ExtResource("3_stop")
+at = 480
+place = &"town"
+cell = Vector2i(22, 16)
+words = "by the fountain in town"
+
+[sub_resource type="Resource" id="Stop_saturday_2"]
 script = ExtResource("3_stop")
 at = 720
 place = &"town"
-cell = Vector2i(20, 21)
+cell = Vector2i(19, 20)
 words = "at the bottom of the town square"
 
-[sub_resource type="Resource" id="Stop_everyday_3"]
+[sub_resource type="Resource" id="Stop_saturday_3"]
 script = ExtResource("3_stop")
 at = 900
 place = &"town"
 cell = Vector2i(16, 16)
 words = "by the bench in the town square"
 
-[sub_resource type="Resource" id="Stop_everyday_4"]
+[sub_resource type="Resource" id="Stop_saturday_4"]
 script = ExtResource("3_stop")
 at = 1080
-place = &""
-words = "gone home for the day"
+place = &"mayor_house"
 
-[sub_resource type="Resource" id="Plan_everyday"]
+[sub_resource type="Resource" id="Stop_saturday_5"]
+script = ExtResource("3_stop")
+at = 1170
+place = &"tavern"
+cell = Vector2i(11, 8)
+words = "by the fire in the Wheatsheaf"
+
+[sub_resource type="Resource" id="Stop_saturday_6"]
+script = ExtResource("3_stop")
+at = 1320
+place = &"mayor_house"
+
+[sub_resource type="Resource" id="Plan_saturday"]
 script = ExtResource("2_plan")
-stops = Array[ExtResource("3_stop")]([SubResource("Stop_everyday_1"), SubResource("Stop_everyday_2"), SubResource("Stop_everyday_3"), SubResource("Stop_everyday_4")])
+weekdays = Array[int]([5])
+requires_unlock = ExtResource("4_unlock")
+stops = Array[ExtResource("3_stop")]([SubResource("Stop_saturday_1"), SubResource("Stop_saturday_2"), SubResource("Stop_saturday_3"), SubResource("Stop_saturday_4"), SubResource("Stop_saturday_5"), SubResource("Stop_saturday_6")])
+
+[sub_resource type="Resource" id="Stop_saturday_early_1"]
+script = ExtResource("3_stop")
+at = 480
+place = &"town"
+cell = Vector2i(22, 16)
+words = "by the fountain in town"
+
+[sub_resource type="Resource" id="Stop_saturday_early_2"]
+script = ExtResource("3_stop")
+at = 720
+place = &"town"
+cell = Vector2i(19, 20)
+words = "at the bottom of the town square"
+
+[sub_resource type="Resource" id="Stop_saturday_early_3"]
+script = ExtResource("3_stop")
+at = 900
+place = &"town"
+cell = Vector2i(16, 16)
+words = "by the bench in the town square"
+
+[sub_resource type="Resource" id="Stop_saturday_early_4"]
+script = ExtResource("3_stop")
+at = 1080
+place = &"mayor_house"
+
+[sub_resource type="Resource" id="Plan_saturday_early"]
+script = ExtResource("2_plan")
+stops = Array[ExtResource("3_stop")]([SubResource("Stop_saturday_early_1"), SubResource("Stop_saturday_early_2"), SubResource("Stop_saturday_early_3"), SubResource("Stop_saturday_early_4")])
 
 [resource]
 script = ExtResource("1_def")
-home = &""
-home_words = "gone home for the day"
-plans = Array[ExtResource("2_plan")]([SubResource("Plan_sunday"), SubResource("Plan_everyday")])
+home = &"mayor_house"
+home_words = "at home in the mayor's house on Back Street (knock)"
+plans = Array[ExtResource("2_plan")]([SubResource("Plan_sunday"), SubResource("Plan_friday"), SubResource("Plan_weekday"), SubResource("Plan_saturday"), SubResource("Plan_saturday_early")])

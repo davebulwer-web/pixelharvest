@@ -3092,3 +3092,68 @@ Stage 24's walk cycles both need it.
 their next spot. The walkable grid is rebuilt (a couple of thousand small physics
 queries) whenever someone sets off, at most once a game minute. Wren, Ivy and the mayor
 have no home to knock at yet.
+
+## 068 — Nell's tavern: a room of its own, a chalkboard that caps what she buys, true rumours about tomorrow, darts on Fridays; homes for everyone in a bigger town
+
+**Decision.** Stage 22 session 2 (ROADMAP 13.3 #10, #11). **No save change** (still v24).
+
+- *The town grows to 48 × 32.* The new ground is south and east of the old map (Back
+  Street along the bottom, a lane down to it past the square, a path up to Wren's), so no
+  old cell, door or stop moved. The Lane's exit cells and the town's arrival point were
+  moved to the new east edge.
+- *The Wheatsheaf is a room, not a shop counter.* Its LocationDef points at
+  scenes/tavern.tscn (scripts/town/tavern.gd), built in code like the shops' rooms: the
+  bar, barrels, fire, three tables, the chalkboard and the dartboard on the back wall
+  (`TavernFixture`: face it and press E, like the notice board). Nell keeps it like
+  Mabel keeps the bakery (`ShopDef.keeper_id`), talked to across the bar: her requests
+  first, then tonight's rumour, then the menu. Everyone else in the room is there by
+  their schedule (a stop at `&"tavern"` with a cell in the room) and `PeopleHere` runs
+  indoors too: in and out by the door, with the keeper left out. It opens on day 8
+  (`tavern_opens`), 4 PM to 1 AM.
+- *The chalkboard caps what Nell buys.* `ShopDef.chalkboard`: such a shop buys only
+  today's three things (`Tavern.wanted_today`, chosen by dice seeded with the day from
+  `TavernRules.chalkboard_items`, only what's in season), and only five of each
+  (`Economy.sellable_amount`). Her rate is 1.5, so it's a better price for a little of
+  the right thing: a reason to look at the board, not a second bin. The town's notice
+  board says what's on it.
+- *Rumours are true, and about tomorrow.* Worked out from what the game already knows:
+  the forecast (`GameState.forecast`), tomorrow's low tides, what bites or grows
+  tomorrow, tomorrow's chalkboard; which kind rotates by the day, and the words are
+  templates in data/tavern_rules.tres. A rumour you can act on is worth a walk to the
+  tavern; a made-up one would teach you to ignore Nell.
+- *Darts is a small game of skill, once a night.* Fridays from 7 PM: three darts, each
+  aimed in two presses (stop the sweep across, then up and down), scored by ring.
+  Tonight's best is a regular's (named from who's in the room at 7) with a score from
+  dice seeded by the day, so it's the same however often you look. Beat it and the pot
+  (120g) is yours. The `Tavern` autoload keeps only "played tonight, and what you
+  scored", not saved (the game saves in the morning; reloading starts the day again).
+  Every number is in `TavernRules`.
+- *Hot meals are dishes sold only there* (`sold_only_by`): a ploughman's from the start,
+  the hotpot and the fish supper taught by Nell's requests (unlocks on the dishes).
+- *Requests.* Nell four, Dot three (one of them a parcel to the tavern before it opens, so
+  you meet Nell in her day), Tam two; Dot's errands can now be to Nell.
+- *Homes for everyone.* The mayor's house and the town hall on Back Street, Wren's cottage
+  by the river in town (not in the Woods: it uses the town's exits and people as they
+  are), Ivy's cottage by the allotments on the Lane. All are LocationDefs with
+  `door_words` and no inside: knocking brings out whoever's in (DECISIONS 067). The
+  mayor's weekday middays are at the town hall, so knocking there finds him.
+- *Evening plans wait for the tavern.* `DayPlan.requires_unlock`: a plan whose unlock
+  isn't open is skipped and the next that fits is used, so each tavern evening has an
+  ordinary evening after it for the first week. `Schedules.todays_plan` does the
+  choosing (`ScheduleDef.plan_for` is no longer used).
+- *Walking door to door.* `PeopleHere` now also shows someone who leaves one building for
+  another on the same map (the mayor from his house to the tavern), and indoors walks
+  people to and from the room's door.
+
+Options considered: the tavern as a counter on its front like the bakery (no room for
+people to be in of an evening, or for darts); Nell buying anything, like Marlow (a third
+place to dump the harvest); random rumours (not worth listening to); darts as a dice roll
+(no reason to play it yourself); saving the darts night (nothing else in an evening is
+saved, and you can't save mid-evening).
+
+**Why.** ROADMAP 13 wants evenings to have somewhere to go and people to be found there;
+the chalkboard and rumours give a short daily reason to visit, darts a weekly one.
+
+**Cost.** Placeholder art for the tavern, the new homes, the furniture, Nell and the
+dishes (art/build_stage22_s2_placeholders.py) until Stage 23. The regulars don't play
+darts themselves; their score is only a number.

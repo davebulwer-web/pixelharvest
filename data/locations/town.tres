@@ -6,8 +6,8 @@
 [sub_resource type="Resource" id="Exit_lane"]
 script = ExtResource("9_exit")
 to = &"lane"
-cells = Array[Vector2i]([Vector2i(40, 13), Vector2i(40, 14)])
-arrival = Vector2i(38, 14)
+cells = Array[Vector2i]([Vector2i(48, 13), Vector2i(48, 14)])
+arrival = Vector2i(46, 14)
 
 [sub_resource type="Resource" id="Exit_cove"]
 script = ExtResource("9_exit")

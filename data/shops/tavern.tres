@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ShopDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/shop_def.gd" id="1_shop"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/nell.png" id="2_keeper"]
+
+[resource]
+script = ExtResource("1_shop")
+id = &"tavern"
+display_name = "The Wheatsheaf"
+keeper_name = "Nell"
+keeper_sprite = ExtResource("2_keeper")
+keeper_id = &"nell"
+greetings = Array[String](["Evening! What'll it be? There's food on, and I'm buying off the chalkboard.", "Pull up a stool. The chalkboard says what I'm after today, and I pay well for it.", "Busy tonight. Have a look at the menu, love."])
+buys_produce = true
+produce_pay_rate = 1.5
+chalkboard = true
+opens_at = 960
+closes_at = 1500

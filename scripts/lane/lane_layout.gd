@@ -13,10 +13,10 @@ extends RefCounted
 ##
 ## The map, roughly (64 × 24 tiles, about three screens long):
 ##
-##      trees           trees             /Pip's \         ~~  trees
-##    | fence ---------------------- |   | cottage|        ~~
-##    | [bed] [bed] || [bed] [bed]   |   |__[ ]___|        ~~
-##    | ======== cross path ======== |        ||           ~~
+##      trees           trees      /Ivy's\/Pip's \         ~~  trees
+##    | fence ---------------------- ||cot- || cottage|        ~~
+##    | [bed] [bed] || [bed] [bed]   ||_[]_||__[ ]___|        ~~
+##    | ======== cross path ======== |   ||     ||           ~~
 ##    | [bed] [bed] || [bed] [bed]   |        ||           ~~
 ##   #######hedge#### ## ##################### ## ###########~~########
 ##  =====================================the lane========================== farm
@@ -51,7 +51,7 @@ const ROAD_ROWS: Array[int] = [11, 12]
 ## cell of each two-wide gap).
 const NORTH_HEDGE_ROW := 9
 const SOUTH_HEDGE_ROW := 14
-const NORTH_GAPS: Array[int] = [16, 40]
+const NORTH_GAPS: Array[int] = [16, 32, 40]
 const SOUTH_GAPS: Array[int] = [20, 46]
 
 ## The allotments: fenced, with eight beds either side of a path up from
@@ -81,6 +81,13 @@ const SIGNPOST := Vector2i(22, 18)
 ## doorway is cells 40 and 41 and the cottage covers x 37–44, rows 2–7).
 const PIP_PLOT := Rect2i(36, 1, 10, 8)
 const PIP_PATHS: Array[Rect2i] = [Rect2i(40, 8, 2, 1)]
+
+## Ivy's cottage (DECISIONS 068), between the allotments and Pip's: her own
+## gap in the north hedge and a short path to her door (ivy_cottage.tres:
+## door cell (32, 7), a 96 × 96 picture, so the doorway is cells 32 and 33
+## and the cottage covers x 30–35, rows 2–7).
+const IVY_PLOT := Rect2i(30, 1, 6, 8)
+const IVY_PATHS: Array[Rect2i] = [Rect2i(32, 8, 2, 1)]
 
 ## Dot the carrier's yard (DECISIONS 061): south of the lane's second south
 ## gap. The shed faces south, like every building, so the path runs down
@@ -148,7 +155,8 @@ static func is_path(cell: Vector2i) -> bool:
 	if not inside(cell):
 		return false
 	return cell.y in ROAD_ROWS or _in_any(cell, ALLOTMENT_PATHS) or CLIFF_PATH.has_point(cell) \
-			or _in_gap(cell) or _in_any(cell, PIP_PATHS) or _in_any(cell, DOT_PATHS)
+			or _in_gap(cell) or _in_any(cell, PIP_PATHS) or _in_any(cell, DOT_PATHS) \
+			or _in_any(cell, IVY_PATHS)
 
 
 ## True for the cells of a gap in either hedge: path, joining the lane to
@@ -215,7 +223,8 @@ static func objects() -> Dictionary:
 static func _is_meadow(cell: Vector2i) -> bool:
 	if not inside(cell) or is_path(cell) or is_stream(cell) or is_hedge(cell):
 		return false
-	if ALLOTMENTS.grow(1).has_point(cell) or PIP_PLOT.has_point(cell) or DOT_PLOT.has_point(cell):
+	if ALLOTMENTS.grow(1).has_point(cell) or PIP_PLOT.has_point(cell) or DOT_PLOT.has_point(cell) \
+			or IVY_PLOT.has_point(cell):
 		return false
 	if absi(cell.y - NORTH_HEDGE_ROW) <= 1 or absi(cell.y - SOUTH_HEDGE_ROW) <= 1:
 		return false

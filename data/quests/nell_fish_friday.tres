@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_any_goal.gd" id="11_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="12_r"]
+[ext_resource type="Resource" path="res://data/fish/mackerel.tres" id="13_r"]
+[ext_resource type="Resource" path="res://data/fish/whiting.tres" id="14_r"]
+[ext_resource type="Resource" path="res://data/fish/dab.tres" id="15_r"]
+[ext_resource type="Resource" path="res://data/fish/pollack.tres" id="16_r"]
+[ext_resource type="Resource" path="res://data/fish/plaice.tres" id="17_r"]
+[ext_resource type="Resource" path="res://data/fish/garfish.tres" id="18_r"]
+[ext_resource type="Resource" path="res://data/fish/gurnard.tres" id="19_r"]
+[ext_resource type="Resource" path="res://data/fish/cod.tres" id="20_r"]
+[ext_resource type="Resource" path="res://data/fish/bass.tres" id="21_r"]
+[ext_resource type="Resource" path="res://data/fish/wrasse.tres" id="22_r"]
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="23_r"]
+[ext_resource type="Resource" path="res://data/unlocks/nell_fish_supper.tres" id="24_r"]
+[ext_resource type="Resource" path="res://data/quests/nell_larder.tres" id="25_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("11_r")
+amount = 4
+items = Array[ExtResource("12_r")]([ExtResource("13_r"), ExtResource("14_r"), ExtResource("15_r"), ExtResource("16_r"), ExtResource("17_r"), ExtResource("18_r"), ExtResource("19_r"), ExtResource("20_r"), ExtResource("21_r"), ExtResource("22_r")])
+what = "sea fish"
+
+[resource]
+script = ExtResource("1_r")
+id = &"nell_fish_friday"
+title = "Fish on a Friday"
+giver = &"nell"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Darts night's busy, and a busy bar wants feeding. Fish and chips, that's what they want.", "Tam can't spare me enough. Catch me four sea fish, any kind, off the pier, and I'll fry suppers every night."])
+reminder_line = "Four sea fish for the fryer. Any kind off the pier will do."
+thanks_lines = Array[String](["Fresh as the morning. I'll have the fryer going by tonight.", "Fish suppers on the menu from now on. And here's for your trouble."])
+reward_gold = 180
+reward_unlocks = Array[ExtResource("23_r")]([ExtResource("24_r")])
+requires = ExtResource("25_r")
+first_day = 1

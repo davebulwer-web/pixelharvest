@@ -36,6 +36,10 @@ static func today() -> Array[String]:
 	var tides := Tides.today_text()
 	if tides != "":
 		notices.append(tides)
+	# What Nell's chalkboard wants today (DECISIONS 068).
+	var chalkboard := Tavern.notice_text()
+	if chalkboard != "":
+		notices.append(chalkboard)
 	for event in ContentDB.events():
 		var text := _event_notice(event)
 		if text != "":

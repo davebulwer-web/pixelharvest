@@ -104,6 +104,7 @@ func _ready() -> void:
 	_check_festivals()
 	_check_recipes()
 	_check_finds()
+	_check_tavern()
 	print("ContentDB: %d crops, %d items (%d forage, %d fish, %d dishes), %d objects, %d upgrades, %d characters, %d events, %d quests, %d unlocks, %d weathers, %d order patterns, %d recipes, %d finds"
 			% [_crops.size(), _items.size(), forage().size(), fish().size(), dishes().size(), _objects.size(), _upgrades.size(), _characters.size(),
 			_events.size(), _quests.size(), _unlocks.size(), _weathers.size(), _orders.size(), _recipes.size(), _finds.size()])
@@ -1123,3 +1124,22 @@ func _check_schedule(schedule: ScheduleDef, where: String) -> void:
 		for day in plan.weekdays:
 			if day < 0 or day > 6:
 				push_error("ContentDB: '%s' has a plan for weekday %d (0 is Monday, 6 Sunday)" % [where, day])
+
+
+## The tavern's rules (DECISIONS 068): the chalkboard has things to want, the
+## dartboard's rings and their scores pair up, and a chalkboard shop buys.
+func _check_tavern() -> void:
+	var tavern: TavernRules = RULES.tavern
+	if tavern == null:
+		return
+	var where := tavern.resource_path
+	if tavern.chalkboard_items.has(null):
+		push_error("ContentDB: '%s' has an empty slot in chalkboard_items" % where)
+	if tavern.ring_radii.size() != tavern.ring_points.size() or tavern.ring_radii.is_empty():
+		push_error("ContentDB: '%s' needs as many ring_points as ring_radii" % where)
+	if tavern.rival_min > tavern.rival_max:
+		push_error("ContentDB: '%s' has rival_min above rival_max" % where)
+	for location in RULES.locations:
+		if location != null and location.shop != null and location.shop.chalkboard \
+				and not location.shop.buys_produce:
+			push_error("ContentDB: '%s' has a chalkboard but doesn't buy produce" % location.shop.resource_path)

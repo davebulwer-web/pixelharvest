@@ -142,7 +142,20 @@ func buy(item: ItemDef, amount: int = 1) -> bool:
 ## True if `shop` buys `item` across the counter at all: it buys produce,
 ## this is a kind it takes (ShopDef.buys_tags), and it has a sell price.
 func shop_buys(item: ItemDef, shop: ShopDef) -> bool:
-	return shop != null and shop.takes(item) and sell_price(item) > 0
+	if shop == null or not shop.takes(item) or sell_price(item) <= 0:
+		return false
+	# A chalkboard (DECISIONS 068): only today's wanted things, and only
+	# until Nell has had her fill of each.
+	return not shop.chalkboard or Tavern.takes_today(item, shop)
+
+
+## How many of `item` from the bag `shop` would buy now: all of them, or,
+## at a chalkboard, no more than it still wants today (DECISIONS 068).
+func sellable_amount(item: ItemDef, shop: ShopDef) -> int:
+	var amount := GameState.inventory.count(item)
+	if shop != null and shop.chalkboard:
+		amount = mini(amount, Tavern.left_today(item, shop))
+	return amount
 
 
 ## What `shop` pays for one of `item` at its full rate: the usual price times
@@ -175,10 +188,11 @@ func shop_flooded(item: ItemDef, shop: ShopDef) -> bool:
 	return DemandDef.is_flooded(shop.demand, bought_today(item, shop))
 
 
-## Sell everything the player carries of `item` to `shop`, for gold now.
+## Sell everything the player carries of `item` to `shop` (or as many as a
+## chalkboard still wants), for gold now.
 ## Returns the gold paid, 0 if the shop doesn't buy it or there was none.
 func sell_to_shop(item: ItemDef, shop: ShopDef) -> int:
-	var amount := GameState.inventory.count(item)
+	var amount := sellable_amount(item, shop)
 	if amount <= 0 or not shop_buys(item, shop):
 		return 0
 	var gold := store_total(item, shop, amount)

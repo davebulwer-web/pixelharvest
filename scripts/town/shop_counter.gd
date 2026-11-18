@@ -41,8 +41,8 @@ func _init(dialogue, menu) -> void:
 ## `giver`, the keeper's id for the Quests service: the shop's own id for a
 ## shopkeeper, or a person's CharacterDef id when the counter is theirs
 ## (Tam on the quay, CharacterDef.counter; DECISIONS 065), and then `lines`
-## are what they say when they've nothing to ask (the shop's greetings, if
-## it has any, come first).
+## are what they say when they've nothing to ask (before the shop's own
+## greetings, which are said when no lines are given: DECISIONS 068).
 func serve(shop: ShopDef, giver: StringName = &"", lines: Array[String] = []) -> void:
 	if giver == &"":
 		giver = shop.id
@@ -74,7 +74,9 @@ func serve(shop: ShopDef, giver: StringName = &"", lines: Array[String] = []) ->
 		answers.append("Not this time")
 		_dialogue.ask(shop.keeper_name, Quests.choice_line(giver), answers)
 		return
-	var greetings: Array[String] = shop.greetings if not shop.greetings.is_empty() else lines
+	# What the caller gives to say comes first (Nell's rumour for tonight,
+	# DECISIONS 068; Tam's own lines), then the shop's greetings.
+	var greetings: Array[String] = lines if not lines.is_empty() else shop.greetings
 	if greetings.is_empty():
 		_menu.open(shop)
 		return

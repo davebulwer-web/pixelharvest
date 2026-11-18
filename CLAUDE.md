@@ -102,7 +102,7 @@ icon.svg
 scenes/              .tscn scene files
 scripts/             Game code
   autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem,
-                     Audio, DayReport, Fishing, Festivals, Allotments…)
+                     Audio, DayReport, Fishing, Festivals, Allotments, Tavern…)
   farm/              The farm's data and layout, the farmhouse with its bed and its
                      stove and cooking menu (Stove, CookMenu; DECISIONS 056), the
                      workbench by the farmhouse, which uses the same menu for its
@@ -112,12 +112,16 @@ scripts/             Game code
                      which extends main.gd, and GreenhouseLayout; DECISIONS 057)
   town/              The town, its map, shop interiors and fronts (Mabel's bakery is one:
                      DECISIONS 063), people, notice board (Stage 7),
-                     the river and the bridge to the Woods
+                     the river and the bridge to the Woods; Nell's tavern, the Wheatsheaf:
+                     its room (tavern.gd), the chalkboard and dartboard (TavernFixture) and
+                     the darts game (DartsGame; DECISIONS 068); the town hall and the
+                     mayor's and Wren's homes are LocationDefs with door_words
   woods/             The Woods: their map, the day's forage (Forage, ForageSpot; DECISIONS 052)
                      and fallen logs (FallenLogs, FallenLog; DECISIONS 053)
   lane/              The Lane between the farm and the town: its map (LaneLayout), its
-                     hedgerow forage, the signpost (DECISIONS 060); Pip's cottage and
-                     Dot's yard are LocationDefs with door_words (DECISIONS 061); Dot at her gate, the
+                     hedgerow forage, the signpost (DECISIONS 060); Pip's cottage,
+                     Dot's yard and Ivy's cottage (DECISIONS 068) are LocationDefs with
+                     door_words (DECISIONS 061); Dot at her gate, the
                      allotment holders' slate (JobSlate) and the beds as today's jobs
                      leave them (AllotmentBeds, AllotmentWeed; DECISIONS 062)
   cove/              The Cove: its map (CoveLayout: the harbour, the beach, the shore the
@@ -156,6 +160,8 @@ data/                Content resources (.tres), indexed by ContentDB
                      the fine rod (FishingRules, DECISIONS 054, 055); the sea and its tide
                      (DECISIONS 065)
   crab_pot_rules.tres What baits a crab pot and what it catches (CrabPotRules, DECISIONS 065)
+  tavern_rules.tres  Nell's chalkboard, her rumours' words and darts night's numbers
+                     (TavernRules, DECISIONS 068)
   crops/             CropDef — how each plant grows and looks, and its rules (trellis,
                      perennial, hardy…; DECISIONS 047; giants and 2 × 2 trees, 048)
   produce/           ItemDef — what a harvest gives, and its sell price (and fibre, timber,

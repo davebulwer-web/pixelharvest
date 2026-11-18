@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ToolDef" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/tools/eat_action.gd" id="2_action"]
+[ext_resource type="Texture2D" path="res://assets/sprites/dishes/hotpot.png" id="3_icon"]
+[ext_resource type="Resource" path="res://data/unlocks/nell_hotpot.tres" id="4_unlock"]
+
+[sub_resource type="Resource" id="Resource_action"]
+script = ExtResource("2_action")
+energy = 80.0
+
+[resource]
+script = ExtResource("1_def")
+id = &"hotpot"
+display_name = "Nell's hotpot"
+description = "Lamb and onions under a lid of crisp sliced potato, hot from Nell's oven. Gives back 80 energy. Space to eat."
+icon = ExtResource("3_icon")
+buy_price = 70
+sold_only_by = Array[StringName]([&"tavern"])
+requires_unlock = ExtResource("4_unlock")
+action = SubResource("Resource_action")
+consumed_on_use = true

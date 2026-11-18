@@ -68,6 +68,13 @@ extends Resource
 ## DECISIONS 063). Null: the price never drops.
 @export var demand: DemandDef
 
+## A chalkboard instead of a buying list (DECISIONS 068): the counter buys
+## only the few things chalked up as wanted today, and only so many of each
+## (TavernRules: Nell's board at the Wheatsheaf). What's wanted changes every
+## day; Economy asks the Tavern service. `buys_produce` must be on too, and
+## `produce_pay_rate` is what the board pays.
+@export var chalkboard: bool = false
+
 ## --- Opening hours (DECISIONS 035) --------------------------------------------
 ## Minutes after midnight, like game_rules.tres: 9 AM is 540, 5 PM is 1020.
 ## The door is locked outside these hours; if the shop closes while you're

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="11_r"]
+[ext_resource type="Resource" path="res://data/produce/stone.tres" id="12_r"]
+[ext_resource type="Resource" path="res://data/quests/dot_first_errand.tres" id="13_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("11_r")
+item = ExtResource("12_r")
+amount = 12
+
+[resource]
+script = ExtResource("1_r")
+id = &"dot_mounting_block"
+title = "A mounting block for Dot"
+giver = &"dot"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["My knees, farmer. Getting up on that cart's a climb, and getting down's worse.", "A mounting block by the gate is what I want. Twelve good stones from that field of yours, and I'll have the Lane's best."])
+reminder_line = "Twelve stones for the mounting block. Your field's full of them."
+thanks_lines = Array[String](["Lovely and solid. My knees thank you, and so do I.", "Here's for the carrying. You've a carrier's back on you, you know."])
+reward_gold = 120
+requires = ExtResource("13_r")
+first_day = 6

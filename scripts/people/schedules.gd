@@ -70,8 +70,14 @@ static func stop_now(person: CharacterDef) -> ScheduleStop:
 static func todays_plan(person: CharacterDef) -> DayPlan:
 	if person.schedule == null:
 		return null
-	return person.schedule.plan_for(weekday(GameState.day_number()), GameState.season_id(),
-			GameState.weather_id())
+	# The first plan that fits today and has been earned (DayPlan.requires_unlock:
+	# the tavern evenings wait for the tavern to open; DECISIONS 068).
+	var day := weekday(GameState.day_number())
+	for plan in person.schedule.plans:
+		if plan != null and plan.fits(day, GameState.season_id(), GameState.weather_id()) \
+				and GameState.has_unlock(plan.requires_unlock):
+			return plan
+	return null
 
 
 ## Everyone whose stop at `minute` is `place` (an outdoor map or a building),

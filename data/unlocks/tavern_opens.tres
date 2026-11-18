@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"tavern_opens"
+display_name = "The Wheatsheaf opens"
+announcement = "Nell has opened the Wheatsheaf on Back Street, down the lane beside the town square: 4 PM till 1 AM. A hot meal, the chalkboard's wants at half as much again as the bin, rumours at the bar, and darts on Fridays."
+on_day = 8

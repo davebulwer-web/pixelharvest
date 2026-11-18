@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/deliver_goal.gd" id="11_r"]
+[ext_resource type="Resource" path="res://data/produce/fibre.tres" id="12_r"]
+[ext_resource type="Resource" path="res://data/quests/tam_conger.tres" id="13_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("11_r")
+item = ExtResource("12_r")
+amount = 20
+
+[resource]
+script = ExtResource("1_r")
+id = &"tam_nets"
+title = "Mending the nets"
+giver = &"tam"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["The autumn gales have had my nets to rags. I mend them in the winter, but I need the twine.", "Twenty fibre, from your weeding and cutting. It plaits up as well as anything from the city."])
+reminder_line = "Twenty fibre for the nets. Weeds, nettles, cut grass: it all plaits."
+thanks_lines = Array[String](["That'll keep me busy by the stove till spring.", "Here's for it. And next season, when the mackerel run, you'll have first pick."])
+reward_gold = 300
+requires = ExtResource("13_r")
+first_day = 1
+seasons = Array[StringName]([&"autumn", &"winter"])
