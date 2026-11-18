@@ -237,6 +237,11 @@ signal npc_talked_to(npc_id: StringName)
 ## Stage 8's market days and requests can listen too and pin up their own.
 signal notice_board_read()
 
+## The farmer walked up to the door of a home with no inside (DECISIONS 061)
+## while someone who lives there is in (DECISIONS 067): whoever's in comes to
+## the door, and the map's people (PeopleHere) answer.
+signal door_knocked(location_id: StringName)
+
 ## The player took on a request from someone in town (a QuestDef id).
 signal quest_started(quest_id: StringName)
 

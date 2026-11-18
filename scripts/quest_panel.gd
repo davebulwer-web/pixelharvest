@@ -10,6 +10,10 @@ extends Control
 ## or the bag changed (a delivery counts what's in the bag). The game carries
 ## on while it's open; it's a note in your pocket, not a menu.
 ##
+## Under each request, where the person to take it to is now and where
+## they'll be next (Schedules.whereabouts; DECISIONS 067), so the bigger map
+## never hides a hand-in. It's redrawn as the clock moves.
+##
 
 const WIDTH := 250
 
@@ -26,6 +30,7 @@ func _ready() -> void:
 			EventBus.item_removed, EventBus.gold_changed]:
 		signal_ref.connect(func(_a = null, _b = null) -> void: _refresh())
 	EventBus.quest_progressed.connect(func(_id: StringName, _p: int, _n: int) -> void: _refresh())
+	EventBus.time_changed.connect(func(_m: int) -> void: _refresh())
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -69,6 +74,11 @@ func _refresh() -> void:
 		if due != "":
 			status += ".  Due %s" % due
 		_add_line("%s.  %s" % [what, status], 8, UiStyle.TEXT_DIM)
+		var receiver := ContentDB.character(quest.receiver())
+		if receiver != null:
+			var where := Schedules.whereabouts(receiver)
+			if where != "":
+				_add_line("%s is %s." % [receiver.display_name, where], 8, UiStyle.HIGHLIGHT)
 	var finished := GameState.quests.done_count()
 	if finished > 0:
 		_add_line("Finished: %d" % finished, 8, UiStyle.TEXT_DIM)

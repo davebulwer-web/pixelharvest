@@ -11,6 +11,13 @@ extends StaticBody2D
 ##
 ## The origin is the bottom-middle of the cell the character stands on.
 ##
+## Walking (DECISIONS 067): PeopleHere hands an Npc a path, cell by cell, and
+## it walks it at the townsfolk's pace, then says arrived. While walking it
+## doesn't block the farmer (its body is switched off, so nobody gets stuck
+## in a doorway), and it can still be talked to on whatever cell it's on.
+## There are no walk cycles yet (Stage 24): the picture bobs and turns to
+## face the way it's going.
+##
 
 const TILE_PX := 16
 
@@ -25,6 +32,14 @@ var npc_id: StringName = &""
 ## The cells that count as facing this character. Behind a counter the
 ## character can't be walked up to, so the counter's cells count too.
 var talk_cells: Array[Vector2i] = []
+
+## Said when a walk ends (DECISIONS 067).
+signal arrived
+
+## The rest of the walk, in pixels, and the pace, in pixels a second.
+var _path: Array[Vector2] = []
+var _speed: float = 40.0
+var _walked: float = 0.0
 
 
 static func create(id: StringName, texture: Texture2D, cell: Vector2i) -> Npc:
@@ -79,6 +94,67 @@ static func quest_marker_on(node: Node2D, height: int) -> Label:
 
 func occupies(cell: Vector2i) -> bool:
 	return cell in talk_cells
+
+
+## The cell this character is standing on now.
+func cell() -> Vector2i:
+	return Vector2i(floori(position.x / TILE_PX), floori((position.y - 1.0) / TILE_PX))
+
+
+## Walk through `points` (each the bottom-middle of a cell, in the parent's
+## coordinates) at `speed` pixels a second, then say arrived. A new walk
+## replaces one under way.
+func walk(points: Array[Vector2], speed: float) -> void:
+	_path = points.duplicate()
+	_speed = maxf(speed, 1.0)
+	_set_solid(_path.is_empty())
+	if _path.is_empty():
+		arrived.emit()
+
+
+func is_walking() -> bool:
+	return not _path.is_empty()
+
+
+func _physics_process(delta: float) -> void:
+	if _path.is_empty():
+		return
+	var step := _speed * delta
+	_walked += step
+	while step > 0.0 and not _path.is_empty():
+		var target: Vector2 = _path[0]
+		var to_go := position.distance_to(target)
+		if absf(target.x - position.x) > 0.5:
+			var sprite := get_node_or_null(^"Sprite") as Sprite2D
+			if sprite != null:
+				sprite.flip_h = target.x < position.x
+		if to_go <= step:
+			position = target
+			step -= to_go
+			_path.remove_at(0)
+		else:
+			position += (target - position) / to_go * step
+			step = 0.0
+	talk_cells = [cell()]
+	_bob()
+	if _path.is_empty():
+		_set_solid(true)
+		arrived.emit()
+
+
+## A little up-and-down while walking, in place of walk cycles.
+func _bob() -> void:
+	var sprite := get_node_or_null(^"Sprite") as Sprite2D
+	if sprite == null:
+		return
+	var lift := 0.0 if _path.is_empty() else -absf(sin(_walked / 6.0)) * 2.0
+	sprite.offset = SPRITE_OFFSET + Vector2(0, roundf(lift))
+
+
+func _set_solid(solid: bool) -> void:
+	for child in get_children():
+		if child is CollisionShape2D:
+			child.set_deferred(&"disabled", not solid)
 
 
 func interact() -> void:

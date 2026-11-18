@@ -171,13 +171,15 @@ func _gold_text_end() -> float:
 	return font.get_string_size(before, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 
 
-## "Spring · Day 5 · Year 1 · Rain", plus today's events: "· Market day".
+## "Spring · Fri 5 · Year 1 · Rain", plus today's events: "· Market day".
+## The weekday (DECISIONS 067) is worked out from the date (Schedules).
 ## The weather is today's (DECISIONS 046); tomorrow's is on the notice board
 ## and in the morning summary.
 func _date() -> String:
 	var theme := GameState.current_season_theme()
 	var season_name := theme.display_name if theme != null else "Season %d" % (GameState.season + 1)
-	var text := "%s · Day %d · Year %d" % [season_name, GameState.day, GameState.year]
+	var text := "%s · %s %d · Year %d" % [season_name, Schedules.weekday_short(GameState.day_number()),
+			GameState.day, GameState.year]
 	if GameState.weather != null:
 		text += " · %s" % GameState.weather.display_name
 	for event in GameState.events_today():
@@ -186,7 +188,7 @@ func _date() -> String:
 
 
 func _morning_text() -> String:
-	var text := "Day %d" % GameState.day
+	var text := "%s, day %d" % [Schedules.weekday_name(GameState.day_number()), GameState.day]
 	if _morning_new_season:
 		var theme := GameState.current_season_theme()
 		text = "%s has come" % (theme.display_name if theme != null else "A new season")

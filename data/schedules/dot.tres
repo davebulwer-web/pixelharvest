@@ -1,0 +1,75 @@
+[gd_resource type="Resource" script_class="ScheduleDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/schedule_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/resources/day_plan.gd" id="2_plan"]
+[ext_resource type="Script" path="res://scripts/resources/schedule_stop.gd" id="3_stop"]
+
+[sub_resource type="Resource" id="Stop_sunday_1"]
+script = ExtResource("3_stop")
+at = 600
+place = &"lane"
+cell = Vector2i(46, 15)
+words = "at her gate on the Lane"
+
+[sub_resource type="Resource" id="Stop_sunday_2"]
+script = ExtResource("3_stop")
+at = 780
+place = &"dot_yard"
+
+[sub_resource type="Resource" id="Plan_sunday"]
+script = ExtResource("2_plan")
+weekdays = Array[int]([6])
+stops = Array[ExtResource("3_stop")]([SubResource("Stop_sunday_1"), SubResource("Stop_sunday_2")])
+
+[sub_resource type="Resource" id="Stop_market_1"]
+script = ExtResource("3_stop")
+at = 420
+place = &"lane"
+cell = Vector2i(46, 15)
+words = "at her gate on the Lane"
+
+[sub_resource type="Resource" id="Stop_market_2"]
+script = ExtResource("3_stop")
+at = 720
+place = &"town"
+cell = Vector2i(24, 16)
+words = "at the market in town"
+
+[sub_resource type="Resource" id="Stop_market_3"]
+script = ExtResource("3_stop")
+at = 900
+place = &"lane"
+cell = Vector2i(46, 15)
+words = "at her gate on the Lane"
+
+[sub_resource type="Resource" id="Stop_market_4"]
+script = ExtResource("3_stop")
+at = 1080
+place = &"dot_yard"
+
+[sub_resource type="Resource" id="Plan_market"]
+script = ExtResource("2_plan")
+weekdays = Array[int]([2])
+stops = Array[ExtResource("3_stop")]([SubResource("Stop_market_1"), SubResource("Stop_market_2"), SubResource("Stop_market_3"), SubResource("Stop_market_4")])
+
+[sub_resource type="Resource" id="Stop_everyday_1"]
+script = ExtResource("3_stop")
+at = 420
+place = &"lane"
+cell = Vector2i(46, 15)
+words = "at her gate on the Lane"
+
+[sub_resource type="Resource" id="Stop_everyday_2"]
+script = ExtResource("3_stop")
+at = 1080
+place = &"dot_yard"
+
+[sub_resource type="Resource" id="Plan_everyday"]
+script = ExtResource("2_plan")
+stops = Array[ExtResource("3_stop")]([SubResource("Stop_everyday_1"), SubResource("Stop_everyday_2")])
+
+[resource]
+script = ExtResource("1_def")
+home = &"dot_yard"
+home_words = "at home in her yard on the Lane (knock)"
+plans = Array[ExtResource("2_plan")]([SubResource("Plan_sunday"), SubResource("Plan_market"), SubResource("Plan_everyday")])

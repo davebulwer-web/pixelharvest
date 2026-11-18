@@ -42,6 +42,13 @@ func _ready() -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if _used or not body is Player:
 		return
+	# A home with someone in (DECISIONS 067): knocking brings them to the
+	# door, instead of the door's words.
+	var home := LocationManager.find(destination)
+	if home != null and home.outside != &"" and not home.has_inside() \
+			and not Schedules.people_at(destination).is_empty():
+		EventBus.door_knocked.emit(destination)
+		return
 	var closed := LocationManager.closed_message(destination)
 	if closed != "":
 		EventBus.message_posted.emit(closed)

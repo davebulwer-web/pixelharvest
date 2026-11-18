@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="ScheduleDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/schedule_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/resources/day_plan.gd" id="2_plan"]
+[ext_resource type="Script" path="res://scripts/resources/schedule_stop.gd" id="3_stop"]
+
+[sub_resource type="Resource" id="Stop_everyday_1"]
+script = ExtResource("3_stop")
+at = 540
+place = &"town"
+cell = Vector2i(19, 7)
+words = "at the old glasshouse in town"
+
+[sub_resource type="Resource" id="Stop_everyday_2"]
+script = ExtResource("3_stop")
+at = 780
+place = &"town"
+cell = Vector2i(22, 7)
+words = "at the old glasshouse in town"
+
+[sub_resource type="Resource" id="Stop_everyday_3"]
+script = ExtResource("3_stop")
+at = 1020
+place = &""
+words = "gone home"
+
+[sub_resource type="Resource" id="Plan_everyday"]
+script = ExtResource("2_plan")
+stops = Array[ExtResource("3_stop")]([SubResource("Stop_everyday_1"), SubResource("Stop_everyday_2"), SubResource("Stop_everyday_3")])
+
+[resource]
+script = ExtResource("1_def")
+home = &""
+home_words = "gone home"
+plans = Array[ExtResource("2_plan")]([SubResource("Plan_everyday")])

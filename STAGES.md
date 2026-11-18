@@ -1187,7 +1187,7 @@ version 24.
       tool, the handline's cursor cells), and played it by keyboard in a rendered Cove:
       cast the handline off the pier at high tide, struck and reeled in a fish, set a pot,
       hauled a ready one with E, talked to Tam and sold him three mackerel
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-17)
 
 ### Side task — Dave's seasonal music (no save change)
 
@@ -1201,17 +1201,58 @@ Dave composed eight tunes, two a season, to replace the generated music (DECISIO
       (spring tune in the farmhouse at −10 dB), skipped to near the end (cross-faded into
       the other spring tune), turned the season to winter (winter tune), checked every
       outdoor place gives the season's pair, and walked into the town without a restart
-- [ ] Dave confirms it plays correctly on Windows (and the volume sounds right)
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-17)
 
 ## Stage 22 — The tavern and people on the move · 2 sessions · Opus
 
-ROADMAP 13.3 (#10, #11) and 13.4. Probably no save change.
+ROADMAP 13.3 (#10, #11) and 13.4. Split in two on 2026-11-17: session 1 the machinery of
+people being somewhere (Opus: a new system), session 2 the tavern, the questlines and
+homes that use it.
+
+**Session 1 (2026-11-17) — weekdays, schedules, people who walk (DECISIONS 067, no save change)**
+
+- [x] **Weekdays** from the date: spring day 1 is a Monday, every season starts on one,
+      market day is always Wednesday; the HUD says "Spring · Wed 3 · Year 1"
+- [x] **Schedules as data**: `CharacterDef.schedule` → `ScheduleDef` (data/schedules/):
+      a home and `DayPlan`s for some weekdays, seasons, weathers, each a list of
+      `ScheduleStop`s (time, place, cell, words). Worked out from the clock
+      (`Schedules`), nothing saved, nobody simulated off-screen; a festival's host is at
+      the festival all day
+- [x] **People walk** on the map you're on (`PeopleHere`, scripts/people/): between
+      stops along `AStarGrid2D` paths over the cells the colliders leave free, off along
+      the road towards their next place or in at a door, and in along the road or out of
+      a door when they arrive; they don't block the farmer while walking. The town, the
+      Lane and the Cove now answer their people the same way (festival, counter,
+      requests, errands, the day's line)
+- [x] **Knocking**: at a home with someone in, they come to the door and talk (Pip in
+      the rain, Dot after six, Tam in his shed)
+- [x] **Mabel** keeps the bakery (`ShopDef.keeper_id`): her requests at the counter, and
+      she's no longer in the square while she's behind it
+- [x] Dot's errands only to someone findable all the hour before they're due
+- [x] The request log says where the person to see is and where they'll be next
+- [x] Seven schedules: the mayor, Mabel, Pip, Wren, Ivy, Dot, Tam (Wren fishes off the
+      pier on Saturdays; Pip's on the beach at weekends; Mabel walks the beach on Sundays;
+      Dot's at the market on Wednesdays)
+- [x] Verified in the sandbox: headless import and run clean, 369,546 harness checks
+      (weekdays, market days on Wednesdays; every person's stop every ten minutes of a
+      year in three weathers on a real place and on the map; the expected stops on
+      weekdays, Saturday, Sunday, Wednesday, rain and storm, before arrivals, a festival;
+      the roads between maps; who's findable; 118 of Dot's errands over 59 days all
+      findable; in the scenes: who's in town, every stop cell open and reachable from
+      every road and door in town, on the Lane and at the Cove; Mabel out of the bakery
+      door at 2 PM and walking to the garden; Pip leaving town at 3; talking to Mabel, Dot
+      and Tam (his counter opening after); Pip walking home and in at the door; knocking
+      with Pip in and out; the bakery counter asking as Mabel, Marlow's as his shop), and
+      rendered Mabel coming out and walking, Pip leaving town, Pip by the ford and Dot at
+      her gate, Pip walking home, knocking at Pip's door, Wren and Tam at the Cove on a
+      Saturday and the request log
+- [ ] Dave confirms it plays correctly on Windows
+
+**Session 2 — the tavern, the questlines, homes**
 
 - [ ] Nell's tavern (4 PM – 1 AM): rumours, the chalkboard, darts night, a hot meal
-- [ ] Nell, Dot and Tam's questlines; homes for everyone (exteriors)
-- [ ] Weekdays; `ScheduleDef` per person; people walk between spots (`AStarGrid2D`);
-      off-screen positions worked out from the clock; the request log says where a giver
-      usually is
+- [ ] Nell, Dot and Tam's questlines; homes for everyone (exteriors), the town grown for
+      them; evening stops at the tavern in people's schedules
 
 ## Stage 23 — Art: the world · 2–3 art sessions · cloud env (Pixellab)
 

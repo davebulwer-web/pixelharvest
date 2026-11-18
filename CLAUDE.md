@@ -124,6 +124,9 @@ scripts/             Game code
                      tide uncovers), the tides worked out from the clock (Tides), the
                      harbour's tide board (DECISIONS 064); Tam on the quay, the sea off
                      the pier, and the crab pots' floats (CrabPot; DECISIONS 065)
+  people/            Where the townsfolk are (Schedules: worked out from the clock, and
+                     weekdays) and the people on the map you're on, walking between
+                     their stops and talking (PeopleHere; DECISIONS 067)
   exits.gd           Exits: builds a place's ways out from LocationDef.exits (ExitDef;
                      DECISIONS 060)
   items/             Inventory
@@ -176,6 +179,8 @@ data/                Content resources (.tres), indexed by ContentDB
                      DECISIONS 063; the bin's is in game_rules.tres)
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers); one can
                      have a counter of their own (Tam, DECISIONS 065)
+  schedules/         ScheduleDef — where each person is through the day: a home and
+                     DayPlans of ScheduleStops, by weekday, season and weather (DECISIONS 067)
   events/            CalendarEvent — what happens on which days (market day) and its stalls,
                      and the festivals: host, contest, rivals, prizes, decorations (DECISIONS 059)
   quests/            QuestDef — requests from townsfolk or shopkeepers: who asks, for what,

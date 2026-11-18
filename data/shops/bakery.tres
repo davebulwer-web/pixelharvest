@@ -15,6 +15,7 @@ script = ExtResource("1_shop")
 id = &"bakery"
 display_name = "Mabel's Bakery"
 keeper_name = "Mabel"
+keeper_id = &"baker"
 keeper_sprite = ExtResource("2_keeper")
 greetings = Array[String](["Fresh out of the oven. A roll'll keep you going till noon, a pasty till supper.", "Bring me fruit and I'll pay you better than any bin. Half a dozen of a kind, mind: I can only bake so many pies.", "Honey, pumpkins, a basket of berries: if it goes in a pie, I'll buy it.", "Up at four, sold out by two. That's a baker's day."])
 buys_produce = true

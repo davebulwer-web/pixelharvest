@@ -30,23 +30,29 @@ extends Node2D
 ## Shopkeepers can ask too (DECISIONS 044): their ShopCounter asks Quests.
 ##
 ## Festivals (DECISIONS 059): on a festival day its host stands at the
-## festival (Festivals.spot_for), its decorations are put up like the town's
-## own objects, and talking to the host goes to the Festivals service first
-## (entering the contest, the results, the keepsake), unless they're waiting
-## for a request you can hand in.
+## festival, its decorations are put up like the town's own objects, and
+## talking to the host goes to the Festivals service first (entering the
+## contest, the results, the keepsake), unless they're waiting for a request
+## you can hand in.
+##
+## The townsfolk themselves (DECISIONS 067) are PeopleHere's: who's in town
+## now by their schedules, walking between their stops, coming and going
+## along the roads and through the doors, and what they say. This scene keeps
+## the notice board and the market stalls.
 ##
 ##   Town
 ##   ├── Ground      (TileMapLayer, same seasonal tilesets as the farm)
 ##   ├── Bridge      (the bridge over the river to the Woods, whole or broken)
 ##   ├── SpawnPoints (Marker2Ds, made here: one per door, one for the road east
 ##   │                to the Lane (made by Exits, DECISIONS 060), one for the bridge)
-##   ├── Entities    (y-sorted: player, trees, decoration, shop fronts, people,
-##   │                market stalls and their keepers)
+##   ├── Entities    (y-sorted: player, trees, decoration, shop fronts, people
+##   │                (PeopleHere's), market stalls and their keepers)
 ##   ├── Weather     (the season's and the day's overlays — rain, snow — as on the farm)
 ##   ├── Daylight    (the time-of-day tint, as on the farm; lamp posts glow at night)
 ##   ├── Hud         (the same HUD scene as the farm)
 ##   ├── Dialogue    (the dialogue box, as in the shops)
-##   └── ShopMenu    (the shop menu, for the market stalls)
+##   ├── ShopMenu    (the shop menu, for the market stalls)
+##   └── People      (PeopleHere, made here: the townsfolk; DECISIONS 067)
 ##
 
 const TILE_PX := 16
@@ -82,8 +88,8 @@ var _stall_shops: Dictionary = {}  # StringName -> ShopDef
 ## packed away when the market closes.
 var _stall_nodes: Dictionary = {}  # StringName -> Array[Node]
 
-## The "!" or "?" over each townsperson's head, by character id, and over
-## each market keeper's, by shop id.
+## The "!" or "?" over each market keeper's head, by shop id, and the
+## notice board's (the townsfolk's are PeopleHere's).
 var _markers: Dictionary = {}  # StringName -> Label
 
 ## The board's job, waiting to be offered once its notices have been read,
@@ -91,10 +97,8 @@ var _markers: Dictionary = {}  # StringName -> Label
 var _board_offers: Array[QuestDef] = []
 var _asking_at_board: Array[QuestDef] = []
 
-## A festival's host with a question to ask once their lines are read (what
-## to enter), and the host whose question is up (DECISIONS 059).
-var _festival_to_ask: StringName = &""
-var _festival_asking: StringName = &""
+## The townsfolk (DECISIONS 067).
+var _people: PeopleHere
 
 
 func _ready() -> void:
@@ -127,7 +131,8 @@ func _ready() -> void:
 	_place_objects()
 	_place_festival_decorations()
 	_mark_notice_board()
-	_place_townsfolk()
+	_people = PeopleHere.create(TOWN_ID, _entities, TownLayout.SIZE, _dialogue, _menu)
+	add_child(_people)
 	_place_stalls()
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
@@ -137,9 +142,7 @@ func _ready() -> void:
 	EventBus.npc_talked_to.connect(_on_npc_talked_to)
 	EventBus.notice_board_read.connect(_on_notice_board_read)
 	_dialogue.finished.connect(func() -> void: _offer_board_job())
-	_dialogue.finished.connect(func() -> void: _ask_festival_question())
 	_dialogue.chosen.connect(_on_board_job_chosen)
-	_dialogue.chosen.connect(_on_festival_answer)
 	# Turning orders down takes the "!" away (Rosa's or the board's).
 	_dialogue.chosen.connect(func(_i: int) -> void: _refresh_markers.call_deferred())
 	EventBus.time_changed.connect(func(_m: int) -> void: _pack_up_closed_stalls())
@@ -195,21 +198,6 @@ func _stand_object(cell: Vector2i, id: StringName) -> void:
 	SeasonLook.skin_object(node, id)
 
 
-## An Npc for everyone who lives in town, at today's spot. Anyone waiting
-## for an unlock (Mabel, before spring day 5) isn't here yet (DECISIONS 044).
-func _place_townsfolk() -> void:
-	for person in ContentDB.characters_in(TOWN_ID):
-		if person.spots.is_empty():
-			continue  # ContentDB has already said so
-		if not GameState.has_unlock(person.requires_unlock):
-			continue
-		# A festival's host stands at the festival all day (DECISIONS 059).
-		var cell := Festivals.spot_for(person.id, person.spot_on(GameState.day))
-		var npc := Npc.create(person.id, person.sprite, cell)
-		_entities.add_child(npc)
-		_markers[person.id] = npc.add_quest_marker()
-
-
 ## The board's daily job (DECISIONS 050) gets a "!" or "?" like a person's.
 func _mark_notice_board() -> void:
 	for board in get_tree().get_nodes_in_group(&"notice_board"):
@@ -217,9 +205,12 @@ func _mark_notice_board() -> void:
 			_markers[Quests.BOARD] = Npc.quest_marker_on(board, board.MARKER_HEIGHT)
 
 
-## Ask what each townsperson's marker should say now: a festival's host
-## about the festival first, then the Quests service.
+## Ask what each stall keeper's and the board's marker should say now (a
+## festival's host about the festival first, then the Quests service), and
+## the townsfolk's.
 func _refresh_markers() -> void:
+	if _people != null:
+		_people.refresh_markers()
 	for id: StringName in _markers:
 		var text := Festivals.marker_for(id)
 		_markers[id].text = text if text != "" else Quests.marker_for(id)
@@ -338,29 +329,10 @@ func _limit_camera() -> void:
 
 # --- Talking -----------------------------------------------------------------
 
+## A market stall's keeper was spoken to (the townsfolk are PeopleHere's).
 func _on_npc_talked_to(npc_id: StringName) -> void:
 	if _stall_shops.has(npc_id):
 		_counter.serve(_stall_shops[npc_id])
-		return
-	var person := ContentDB.character(npc_id)
-	if person == null or person.location != TOWN_ID:
-		return
-	# A festival's host talks about the festival, unless you've brought
-	# something they asked for (DECISIONS 059) or a parcel for them (062).
-	if not Quests.has_ready_for(npc_id) and Festivals.has_something_for(npc_id):
-		var festival_lines := Festivals.talk(npc_id)
-		_festival_to_ask = npc_id if not Festivals.question_for(npc_id).is_empty() else &""
-		_dialogue.say(person.display_name, festival_lines)
-		return
-	var about_requests := Quests.talk(npc_id)
-	if not about_requests.is_empty():
-		_dialogue.say(person.display_name, about_requests)
-		return
-	var line := person.line_on(GameState.day)
-	if line == "":
-		return
-	var lines: Array[String] = [line]
-	_dialogue.say(person.display_name, lines)
 
 
 ## Reading the board: first the day's job, if one is in hand (handed in at
@@ -403,30 +375,3 @@ func _on_board_job_chosen(index: int) -> void:
 	if lines.size() > 1:
 		lines = lines.slice(1)
 	_dialogue.say("Notice board", lines)
-
-
-# --- Festivals (DECISIONS 059) -------------------------------------------------
-
-## After the host's lines: what will you enter?
-func _ask_festival_question() -> void:
-	var npc_id := _festival_to_ask
-	_festival_to_ask = &""
-	if npc_id == &"":
-		return
-	var question := Festivals.question_for(npc_id)
-	if question.is_empty():
-		return
-	var person := ContentDB.character(npc_id)
-	_festival_asking = npc_id
-	var answers: Array[String] = []
-	answers.assign(question["answers"])
-	_dialogue.ask(person.display_name if person != null else "", question["question"], answers)
-
-
-func _on_festival_answer(index: int) -> void:
-	var npc_id := _festival_asking
-	_festival_asking = &""
-	if npc_id == &"":
-		return  # someone else's question
-	var person := ContentDB.character(npc_id)
-	_dialogue.say(person.display_name if person != null else "", Festivals.answer(npc_id, index))

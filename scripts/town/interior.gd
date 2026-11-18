@@ -147,7 +147,15 @@ func _add_keeper() -> void:
 
 
 func _refresh_marker() -> void:
-	_marker.text = Quests.marker_for(_shop.id)
+	_marker.text = Quests.marker_for(_giver())
+
+
+## Who asks and takes requests at this counter: the keeper's CharacterDef
+## when they also walk about (Mabel, ShopDef.keeper_id; DECISIONS 067), so
+## her requests are handed in wherever she is, behind the counter too; else
+## the shop itself.
+func _giver() -> StringName:
+	return _shop.keeper_id if _shop.keeper_id != &"" else _shop.id
 
 
 ## The doormat: stepping out of the room's gap goes back to the town, to the
@@ -174,4 +182,4 @@ func _fit_camera() -> void:
 
 func _on_npc_talked_to(npc_id: StringName) -> void:
 	if npc_id == _shop.id:
-		_counter.serve(_shop)
+		_counter.serve(_shop, _giver())

@@ -15,8 +15,10 @@ extends Node2D
 ## Odd jobs and errands (DECISIONS 062): Dot the carrier stands at her gate
 ## (a CharacterDef who lives on the Lane), with her errands; the allotment
 ## holders chalk jobs on their slate by the allotments' gate. Both are
-## talked to with E, and this scene shows what the Quests service says, and
-## asks which to take. The farm's tools work here on an allotment job's bed
+## talked to with E. The slate is this scene's: it shows what the Quests
+## service says, and asks which to take. Dot, and everyone else whose day
+## brings them along the Lane (Pip, to the ford), are PeopleHere's
+## (DECISIONS 067), and knocking on a home's door brings whoever's in. The farm's tools work here on an allotment job's bed
 ## only: the hoe, the can and the sickle ask this scene work_wanted_at() and
 ## do_work(), which pass to the Allotments service; AllotmentBeds draws the
 ## beds as it says they are. A tile outline shows where a tool would work.
@@ -29,7 +31,8 @@ extends Node2D
 ##   ├── Weather     (the season's and the day's overlays, as on the farm)
 ##   ├── Daylight    (the time-of-day tint, as on the farm)
 ##   ├── Hud         (the same HUD scene as the farm)
-##   └── Dialogue    (the dialogue box: Dot, the slate)
+##   ├── Dialogue    (the dialogue box: Dot, the slate)
+##   └── People      (PeopleHere, made here: whoever's on the Lane; DECISIONS 067)
 ##
 
 const TILE_PX := 16
@@ -45,13 +48,15 @@ const LANE_ID := &"lane"
 ## The outline on the tiles a held tool would work on an allotment job's bed.
 var _cursor: Node2D
 
-## The "!" or "?" over Dot's head and the slate, by giver id.
+## The "!" or "?" over the slate (the people's are PeopleHere's).
 var _markers: Dictionary = {}  # StringName -> Label
 
-## Whose orders are being chosen between (Dot's id or Quests.ALLOTMENTS), and
+## Whose orders are being chosen between (Quests.ALLOTMENTS: the slate), and
 ## the orders; empty when nothing is being asked.
 var _asking_for: StringName = &""
 var _asking: Array[QuestDef] = []
+
+var _people: PeopleHere
 
 
 func _ready() -> void:
@@ -70,7 +75,8 @@ func _ready() -> void:
 	_add_buildings(buildings)
 	_place_objects()
 	_place_forage()
-	_place_people()
+	_people = PeopleHere.create(LANE_ID, _entities, LaneLayout.SIZE, _dialogue)
+	add_child(_people)
 	_place_allotments()
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
@@ -130,17 +136,6 @@ func _place_forage() -> void:
 		_entities.add_child(ForageSpot.create(LANE_ID, cell, spots[cell]))
 
 
-## An Npc for everyone who lives on the Lane (Dot, DECISIONS 062), as the
-## town builds its townsfolk, each with a request marker.
-func _place_people() -> void:
-	for person in ContentDB.characters_in(LANE_ID):
-		if person.spots.is_empty() or not GameState.has_unlock(person.requires_unlock):
-			continue
-		var npc := Npc.create(person.id, person.sprite, person.spot_on(GameState.day))
-		_entities.add_child(npc)
-		_markers[person.id] = npc.add_quest_marker()
-
-
 ## The allotment holders' slate, and the beds as today's jobs leave them
 ## (DECISIONS 062).
 func _place_allotments() -> void:
@@ -152,6 +147,8 @@ func _place_allotments() -> void:
 
 ## What each marker should say now (Quests.marker_for).
 func _refresh_markers() -> void:
+	if _people != null:
+		_people.refresh_markers()
 	for id: StringName in _markers:
 		_markers[id].text = Quests.marker_for(id)
 
@@ -179,12 +176,12 @@ func _physics_process(_delta: float) -> void:
 	_cursor.set_cells(cells)
 
 
-# --- Talking: Dot and the slate (DECISIONS 062) ----------------------------------
+# --- Talking: the slate (DECISIONS 062) ------------------------------------------
 
 func _on_talked_to(npc_id: StringName) -> void:
-	var speaker := _speaker(npc_id)
-	if speaker == "":
-		return
+	if npc_id != Quests.ALLOTMENTS:
+		return  # a person: PeopleHere's
+	var speaker := "The allotment slate"
 	var lines := Quests.talk(npc_id)
 	if not lines.is_empty():
 		_dialogue.say(speaker, lines)
@@ -196,45 +193,25 @@ func _on_talked_to(npc_id: StringName) -> void:
 		var answers: Array[String] = []
 		for order in offers:
 			answers.append(Quests.order_choice_text(order))
-		answers.append("Leave it" if npc_id == Quests.ALLOTMENTS else "Not today")
+		answers.append("Leave it")
 		_dialogue.ask(speaker, Quests.choice_line(npc_id), answers)
 		return
-	var idle: Array[String] = []
-	if npc_id == Quests.ALLOTMENTS:
-		idle.append("Nothing chalked on the slate that's yours to take. Try again tomorrow.")
-	else:
-		var person := ContentDB.character(npc_id)
-		if person != null and person.line_on(GameState.day) != "":
-			idle.append(person.line_on(GameState.day))
-	if not idle.is_empty():
-		_dialogue.say(speaker, idle)
+	var idle: Array[String] = ["Nothing chalked on the slate that's yours to take. Try again tomorrow."]
+	_dialogue.say(speaker, idle)
 
 
-## Who's speaking for `npc_id` here, or "" if it's nobody on the Lane.
-func _speaker(npc_id: StringName) -> String:
-	if npc_id == Quests.ALLOTMENTS:
-		return "The allotment slate"
-	var person := ContentDB.character(npc_id)
-	if person != null and person.location == LANE_ID:
-		return person.display_name
-	return ""
-
-
-## One of the orders was picked, or none (the last answer). Turning Dot down
-## means she doesn't ask again today; the slate can be read again any time.
+## One of the slate's jobs was picked, or none (the last answer). The slate
+## can be read again any time.
 func _on_chosen(index: int) -> void:
 	if _asking_for == &"":
 		return
-	var npc_id := _asking_for
 	var offers := _asking
 	_asking_for = &""
 	_asking = []
 	if index >= offers.size():
-		if npc_id != Quests.ALLOTMENTS:
-			Quests.decline(npc_id)
 		_refresh_markers.call_deferred()
 		return
-	_dialogue.say(_speaker(npc_id), Quests.take(offers[index]))
+	_dialogue.say("The allotment slate", Quests.take(offers[index]))
 
 
 ## The fishing rod asks this: no fish in the stream yet (LaneLayout.water_at).

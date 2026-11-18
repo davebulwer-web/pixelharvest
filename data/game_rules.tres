@@ -66,6 +66,7 @@ day_start_minutes = 360
 day_end_minutes = 1560
 seconds_per_ten_minutes = 5
 late_warning_minutes = 1440
+people_walk_speed = 2.5
 hazards = ExtResource("22_hazards")
 fishing = ExtResource("25_fishing")
 tides = ExtResource("35_tides")

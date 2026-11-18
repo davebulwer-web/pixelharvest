@@ -20,7 +20,9 @@ extends Node2D
 ## Tam (DECISIONS 065), from spring day 7, stands on the quay: a CharacterDef
 ## who lives here, with a counter of his own (CharacterDef.counter), so
 ## talking to him is a shop counter's conversation (ShopCounter): his
-## requests first, then the menu where he buys fish and sea forage. The sea
+## requests first, then the menu where he buys fish and sea forage. He and
+## anyone else whose day brings them to the Cove (Wren on the pier on
+## Saturdays, Pip and Mabel on the beach) are PeopleHere's (DECISIONS 067). The sea
 ## beside the pier, the quay and the breakwater can be fished
 ## (CoveLayout.water_at: &"sea"), with his handline or the rod, and crab pots
 ## are lowered off the pier (pot_wanted_at, set_pot); each pot set is drawn
@@ -36,7 +38,8 @@ extends Node2D
 ##   ├── Daylight    (the time-of-day tint, as on the farm)
 ##   ├── Hud         (the same HUD scene as the farm)
 ##   ├── Dialogue    (the dialogue box: Tam)
-##   └── ShopMenu    (Tam's counter: what he buys)
+##   ├── ShopMenu    (Tam's counter: what he buys)
+##   └── People      (PeopleHere, made here: whoever's at the Cove; DECISIONS 067)
 ##
 
 const TILE_PX := 16
@@ -50,15 +53,12 @@ const COVE_ID := &"cove"
 @onready var _dialogue = $Dialogue
 @onready var _menu = $ShopMenu
 
-## Talking to someone with a counter of their own (Tam) goes through this,
-## as a shopkeeper's does.
-var _counter: ShopCounter
+## Whoever's at the Cove now (DECISIONS 067).
+var _people: PeopleHere
 
 ## The outline on the sea the held line or crab pot would go into.
 var _cursor: Node2D
 
-## The "!" or "?" over each person's head here, by character id.
-var _markers: Dictionary = {}  # StringName -> Label
 
 ## The crab pots' floats, by cell (DECISIONS 065).
 var _pots: Dictionary = {}  # Vector2i -> CrabPot
@@ -89,7 +89,8 @@ func _ready() -> void:
 	_place_strand_forage()
 	if _tide_out:
 		_place_pool_forage()
-	_place_people()
+	_people = PeopleHere.create(COVE_ID, _entities, CoveLayout.SIZE, _dialogue, _menu)
+	add_child(_people)
 	_place_pots()
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
@@ -100,16 +101,7 @@ func _ready() -> void:
 	_cursor.name = "TileCursor"
 	add_child(_cursor)
 	move_child(_cursor, _entities.get_index())
-	_counter = ShopCounter.new(_dialogue, _menu)
-	EventBus.npc_talked_to.connect(_on_talked_to)
 	EventBus.crab_pot_changed.connect(_on_crab_pot_changed)
-	for signal_ref: Signal in [EventBus.quest_started, EventBus.quest_completed, EventBus.item_added,
-			EventBus.item_removed]:
-		signal_ref.connect(func(_a = null, _b = null) -> void: _refresh_markers())
-	EventBus.quest_progressed.connect(func(_id: StringName, _p: int, _n: int) -> void: _refresh_markers())
-	EventBus.quest_expired.connect(func(_id: StringName, _t: String) -> void: _refresh_markers())
-	_dialogue.chosen.connect(func(_i: int) -> void: _refresh_markers.call_deferred())
-	_refresh_markers()
 	# Say what the tide's doing on the way in, and if any pots want hauling.
 	EventBus.message_posted.emit.call_deferred(_arrival_text())
 
@@ -220,41 +212,6 @@ func _wade_ashore() -> bool:
 ## the quay and the breakwater, as the tide stands now (CoveLayout.water_at).
 func water_at(cell: Vector2i) -> StringName:
 	return CoveLayout.water_at(cell, _tide_out)
-
-
-# --- Tam (DECISIONS 065) ----------------------------------------------------------
-
-## An Npc for everyone who lives in the Cove and has arrived (Tam, from
-## spring day 7), each with a request marker.
-func _place_people() -> void:
-	for person in ContentDB.characters_in(COVE_ID):
-		if person.spots.is_empty() or not GameState.has_unlock(person.requires_unlock):
-			continue
-		var npc := Npc.create(person.id, person.sprite, person.spot_on(GameState.day))
-		_entities.add_child(npc)
-		_markers[person.id] = npc.add_quest_marker()
-
-
-func _refresh_markers() -> void:
-	for id: StringName in _markers:
-		_markers[id].text = Quests.marker_for(id)
-
-
-## Someone here was spoken to. With a counter of their own (Tam), it's a
-## shop counter's conversation: requests, then the menu. Otherwise their
-## requests, or their line for the day.
-func _on_talked_to(npc_id: StringName) -> void:
-	var person := ContentDB.character(npc_id)
-	if person == null or person.location != COVE_ID:
-		return
-	if person.counter != null:
-		_counter.serve(person.counter, person.id, person.lines)
-		return
-	var lines := Quests.talk(npc_id)
-	if lines.is_empty() and person.line_on(GameState.day) != "":
-		lines = [person.line_on(GameState.day)]
-	if not lines.is_empty():
-		_dialogue.say(person.display_name, lines)
 
 
 # --- Crab pots (DECISIONS 065) ----------------------------------------------------

@@ -10,4 +10,4 @@ display_name = "Pip's cottage"
 outside = &"lane"
 door_cell = Vector2i(40, 7)
 exterior = ExtResource("2_ext")
-door_words = "Pip's family live here. Nobody answers: Pip will be off in town, and Pip's mum has a plot at the allotments."
+door_words = "Pip's family live here. Nobody answers: Pip's out somewhere, and Pip's mum has a plot at the allotments."

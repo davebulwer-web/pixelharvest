@@ -459,8 +459,10 @@ func _pick_deliveries(template: OrderTemplate, dice: RandomNumberGenerator) -> A
 
 ## Dot's errands (DECISIONS 062): `choices` parcels, each to a different
 ## person who is about today, by a time of day; a shopkeeper only by a time
-## after their shop opens (they can't take it in before), and never Dot
-## herself.
+## after their shop opens (they can't take it in before), someone with a
+## schedule only by a time they can be found all the hour before (DECISIONS
+## 067: not the mayor at 6 PM on a Sunday, when he's gone home at 4), and
+## never Dot herself.
 func _pick_errands(template: ErrandTemplate, dice: RandomNumberGenerator) -> Array[Dictionary]:
 	var picks: Array[Dictionary] = []
 	var people: Array[StringName] = []
@@ -483,6 +485,14 @@ func _pick_errands(template: ErrandTemplate, dice: RandomNumberGenerator) -> Arr
 				continue
 			if due not in possible:
 				due = possible[0]
+		var character := ContentDB.character(person)
+		if character != null and character.schedule != null:
+			var findable := times.filter(func(t: int) -> bool:
+				return Schedules.findable_before(character, t))
+			if findable.is_empty():
+				continue
+			if due not in findable:
+				due = findable[dice.randi_range(0, findable.size() - 1)]
 		var item: ItemDef = template.items[dice.randi_range(0, template.items.size() - 1)]
 		var gold := DifficultyDef.scale_price(dice.randi_range(template.pay_min, template.pay_max),
 				GameState.difficulty.sell_price_multiplier)

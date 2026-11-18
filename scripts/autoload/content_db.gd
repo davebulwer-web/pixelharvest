@@ -139,6 +139,15 @@ func character(id: StringName) -> CharacterDef:
 	return _characters.get(id)
 
 
+## Every townsperson, by id, so they're always built in the same order.
+func characters() -> Array[CharacterDef]:
+	var result: Array[CharacterDef] = []
+	for each: CharacterDef in _characters.values():
+		result.append(each)
+	result.sort_custom(func(a: CharacterDef, b: CharacterDef) -> bool: return a.id < b.id)
+	return result
+
+
 ## Everyone who lives in `location_id`, by id, so they're always built in the
 ## same order.
 func characters_in(location_id: StringName) -> Array[CharacterDef]:
@@ -637,8 +646,10 @@ func _check() -> void:
 		if not RULES.locations.any(func(l: LocationDef) -> bool: return l.id == each.location):
 			push_error("ContentDB: '%s' lives in '%s', which isn't a location in game_rules.tres"
 					% [where, each.location])
-		if each.spots.is_empty():
-			push_error("ContentDB: '%s' has no spots, so there's nowhere to stand" % where)
+		if each.spots.is_empty() and each.schedule == null:
+			push_error("ContentDB: '%s' has no spots and no schedule, so there's nowhere to stand" % where)
+		if each.schedule != null:
+			_check_schedule(each.schedule, where)
 		if each.sprite == null:
 			push_warning("ContentDB: '%s' has no sprite, so they can't be seen" % where)
 		if each.lines.is_empty():
@@ -649,6 +660,13 @@ func _check() -> void:
 			if each.counter.id == &"" or each.counter.id in shop_ids or character(each.counter.id) != null:
 				push_error("ContentDB: '%s' has a counter whose id '%s' is empty or already a shop's or a character's"
 						% [where, each.counter.id])
+
+	# A shop kept by someone who walks about (DECISIONS 067: Mabel) names them.
+	for location in RULES.locations:
+		if location != null and location.shop != null and location.shop.keeper_id != &"" \
+				and character(location.shop.keeper_id) == null:
+			push_error("ContentDB: '%s' is kept by '%s', who isn't a character in %s"
+					% [location.shop.resource_path, location.shop.keeper_id, CHARACTERS_DIR])
 
 	for each: UpgradeDef in _upgrades.values():
 		var where := each.resource_path
@@ -1075,3 +1093,33 @@ func _check_finds() -> void:
 		if each.pages.size() > 1 and each.times != each.pages.size():
 			push_warning("ContentDB: '%s' has %d pages but turns up %d times"
 					% [where, each.pages.size(), each.times])
+
+
+## A schedule's places must be locations (or empty, for "away"), and its
+## stops in time order with a day's worth of minutes (DECISIONS 067).
+func _check_schedule(schedule: ScheduleDef, where: String) -> void:
+	var known: Array[StringName] = [&""]
+	for location in RULES.locations:
+		if location != null:
+			known.append(location.id)
+	if schedule.home not in known:
+		push_error("ContentDB: '%s' has a home '%s' that isn't a location in game_rules.tres"
+				% [where, schedule.home])
+	if schedule.plans.is_empty():
+		push_warning("ContentDB: '%s' has a schedule with no plans, so they stay at home" % where)
+	for plan in schedule.plans:
+		if plan == null:
+			continue
+		var last := -1
+		for stop in plan.stops:
+			if stop == null:
+				continue
+			if stop.place not in known:
+				push_error("ContentDB: '%s' has a stop at '%s', which isn't a location in game_rules.tres"
+						% [where, stop.place])
+			if stop.at < 0 or stop.at <= last:
+				push_error("ContentDB: '%s' has stops out of time order (%d after %d)" % [where, stop.at, last])
+			last = stop.at
+		for day in plan.weekdays:
+			if day < 0 or day > 6:
+				push_error("ContentDB: '%s' has a plan for weekday %d (0 is Monday, 6 Sunday)" % [where, day])

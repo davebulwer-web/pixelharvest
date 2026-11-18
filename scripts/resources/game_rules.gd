@@ -57,6 +57,10 @@ extends Resource
 ## clock turns red-ish). Midnight.
 @export var late_warning_minutes: int = 1440
 
+## How fast the townsfolk walk between the stops of their day (DECISIONS
+## 067), in tiles a real second. The farmer walks about 4.4.
+@export var people_walk_speed: float = 2.5
+
 ## --- Hazards (DECISIONS 045) ----------------------------------------------
 
 ## Thirst, weeds and crows: data/hazard_rules.tres. Null switches them all

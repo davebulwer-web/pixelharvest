@@ -1,0 +1,60 @@
+[gd_resource type="Resource" script_class="ScheduleDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/schedule_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/resources/day_plan.gd" id="2_plan"]
+[ext_resource type="Script" path="res://scripts/resources/schedule_stop.gd" id="3_stop"]
+
+[sub_resource type="Resource" id="Stop_sunday_1"]
+script = ExtResource("3_stop")
+at = 600
+place = &"town"
+cell = Vector2i(22, 16)
+words = "by the fountain in town"
+
+[sub_resource type="Resource" id="Stop_sunday_2"]
+script = ExtResource("3_stop")
+at = 960
+place = &""
+words = "gone home for the day"
+
+[sub_resource type="Resource" id="Plan_sunday"]
+script = ExtResource("2_plan")
+weekdays = Array[int]([6])
+stops = Array[ExtResource("3_stop")]([SubResource("Stop_sunday_1"), SubResource("Stop_sunday_2")])
+
+[sub_resource type="Resource" id="Stop_everyday_1"]
+script = ExtResource("3_stop")
+at = 480
+place = &"town"
+cell = Vector2i(22, 16)
+words = "by the fountain in town"
+
+[sub_resource type="Resource" id="Stop_everyday_2"]
+script = ExtResource("3_stop")
+at = 720
+place = &"town"
+cell = Vector2i(20, 21)
+words = "at the bottom of the town square"
+
+[sub_resource type="Resource" id="Stop_everyday_3"]
+script = ExtResource("3_stop")
+at = 900
+place = &"town"
+cell = Vector2i(16, 16)
+words = "by the bench in the town square"
+
+[sub_resource type="Resource" id="Stop_everyday_4"]
+script = ExtResource("3_stop")
+at = 1080
+place = &""
+words = "gone home for the day"
+
+[sub_resource type="Resource" id="Plan_everyday"]
+script = ExtResource("2_plan")
+stops = Array[ExtResource("3_stop")]([SubResource("Stop_everyday_1"), SubResource("Stop_everyday_2"), SubResource("Stop_everyday_3"), SubResource("Stop_everyday_4")])
+
+[resource]
+script = ExtResource("1_def")
+home = &""
+home_words = "gone home for the day"
+plans = Array[ExtResource("2_plan")]([SubResource("Plan_sunday"), SubResource("Plan_everyday")])

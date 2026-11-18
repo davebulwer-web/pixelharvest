@@ -3017,3 +3017,78 @@ one more entry in that season's list, never a code change.
 
 **Cost.** −10 dB is set by measurement, not by ear; Dave may want it a little up or down.
 The old generated tunes and their import files are left on disk unused.
+
+## 067 — People keep a schedule: where they are is worked out from the clock, and on the map you're on they walk
+
+**Decision.** Stage 22 session 1 (ROADMAP 13.4, 13.3 #11). Stage 22 was split in two:
+session 1 the machinery (weekdays, schedules, walking, knocking, the request log saying
+where people are), session 2 the content that uses it (Nell's tavern, the three new
+people's questlines, homes in a larger town). **No save change.**
+
+- *Weekdays.* Spring day 1 of year 1 is a Monday and the days run on from there
+  (`Schedules.weekday`, from `GameState.day_number`). With 28-day seasons every season
+  starts on a Monday, and market day (every 7 days from day 3) is always a Wednesday. The
+  HUD's date says "Spring · Wed 3 · Year 1", the morning message "Wednesday, day 3".
+- *A schedule is data.* `CharacterDef.schedule` is a `ScheduleDef` (data/schedules/): a
+  home and a list of `DayPlan`s, each for some weekdays, seasons and weathers, with its
+  `ScheduleStop`s (from a time, a place and a cell, and words for the request log). The
+  first plan that fits today is used, so a rainy-day plan goes before the everyday one.
+  A stop's place is an outdoor map (they stand on the cell), a building (indoors: behind
+  a shop counter, or at home), or empty (away: the mayor's evenings until his house is
+  built in session 2). Someone without a schedule stands on their `spots` as before.
+- *Worked out, not simulated.* `Schedules.stop_at(person, minute)` is a pure function of
+  the date, weekday, season, weather and clock, like market day and the tides. Nothing is
+  saved and nobody is moved about off-screen: arriving anywhere, everyone who should be
+  there is already standing in place. A festival's host is at the festival all day, as
+  before.
+- *Walking where you are.* `PeopleHere` (scripts/people/), one per outdoor map with
+  people (the town, the Lane, the Cove), asks every ten game minutes where everyone
+  should be. Someone whose stop moved walks there along an `AStarGrid2D` path (2.5 tiles
+  a second, `GameRules.people_walk_speed`); someone leaving walks to the road that leads
+  towards their next place (a breadth-first walk over every LocationDef's exits) or to
+  the door of the building they're going into, and is gone; someone arriving comes in
+  along the road or out of the door. Which cells can be walked is found by asking the
+  physics world whether a pair of feet fits on each cell, so trees, fences, walls, water
+  and the tide are all avoided with no list of them, and a new map needs only the node.
+  While walking an Npc doesn't block the farmer (nobody gets stuck in a doorway) and can
+  still be talked to. No walk cycles yet (Stage 24): the picture bobs and turns.
+- *Talking moved with them.* The town, the Lane and the Cove each had their own way of
+  answering their people; now `PeopleHere` does it the same way everywhere: a festival
+  host about the festival, a counter of their own (Tam), requests, orders (Dot's errands),
+  or the day's line. The scenes keep what's theirs: the board and the stalls in town, the
+  allotment slate on the Lane.
+- *Knocking.* Walking up to the door of a home with no inside while someone who lives
+  there is in (`EventBus.door_knocked`) brings them to the door to talk, so being at home
+  doesn't hide anyone: Pip on a rainy day, Dot after six, Tam in his shed (with his
+  counter). Nobody in: the door's own words, as before.
+- *Shops with a keeper who walks about.* `ShopDef.keeper_id` names the keeper's
+  CharacterDef (Mabel): the counter asks and takes her requests, and her schedule has
+  her indoors there while it's open. That ends Mabel standing in the square and behind
+  the counter at once (DECISIONS 063's known gap).
+- *Errands fit the day.* Dot's errands to someone with a schedule are only due by a time
+  they can be found all through the hour before (not the mayor at 6 PM on a Sunday, when
+  he goes home at 4; not Mabel after the bakery shuts).
+- *The request log says where.* Under each request: "Pip is playing by the ford on the
+  Lane until 7 PM, then at home in Pip's cottage on the Lane (knock)."
+- *The first schedules.* Mayor (fountain, the square; Sunday short), Mabel (bakery till
+  2, then the garden and the square; Sunday on the beach), Pip (town till 3 then the
+  ford; weekends the ford and the beach; indoors in rain), Wren (the pond; Saturday off
+  the pier), Ivy (the glasshouse), Dot (her gate; Wednesday the market; Sunday short),
+  Tam (the quay; Sunday short). Wren, Ivy and the mayor are "away" at night until session
+  2 gives them homes.
+
+Options considered: simulating everyone all the time (they'd need saving, and a person
+could get stuck somewhere unseen); one schedule list with conditions on each stop
+(harder to read than "Pip's weekend"); hand-listing each map's walkable cells (a second
+copy of what the colliders already say, wrong as soon as a tree moves); navigation
+meshes (more set-up than a tile grid needs); a new autoload for schedules (there's no
+state to keep, so static functions).
+
+**Why.** People being *somewhere* gives the bigger map a reason: a route to plan, a
+reason to come back at the right time, and Stage 22 session 2's tavern evenings and
+Stage 24's walk cycles both need it.
+
+**Cost.** Only the map you're on is lively; arriving mid-walk shows someone already at
+their next spot. The walkable grid is rebuilt (a couple of thousand small physics
+queries) whenever someone sets off, at most once a game minute. Wren, Ivy and the mayor
+have no home to knock at yet.

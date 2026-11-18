@@ -26,6 +26,13 @@ extends Resource
 @export var keeper_name: String
 @export var keeper_sprite: Texture2D
 
+## The keeper's CharacterDef id, when the keeper is also someone who walks
+## about the valley (Mabel, DECISIONS 067): their requests are asked and
+## handed in at this counter too, and their schedule has them indoors here
+## while it's open. Empty: the keeper is only ever behind the counter, and
+## asks under the shop's own id (Brann, Hollis, Marlow).
+@export var keeper_id: StringName = &""
+
 ## What the keeper says when spoken to. One is picked each day, so the shop
 ## doesn't repeat itself within a day but isn't random on reloading.
 @export var greetings: Array[String] = []

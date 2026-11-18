@@ -45,8 +45,15 @@ extends Resource
 ## must differ from every character's and shop's. Null: they only talk.
 @export var counter: ShopDef
 
+## Where they are through the day, by the clock (DECISIONS 067): a home and
+## a plan for each kind of day (ScheduleDef), so they walk between places and
+## a request is handed in wherever they are now. Null: they stand on today's
+## `spots` in `location` all day, as before Stage 22. `location` still says
+## where they belong (a festival's host is checked against it).
+@export var schedule: ScheduleDef
 
-## Where they stand on `day`.
+
+## Where they stand on `day` (someone without a schedule).
 func spot_on(day: int) -> Vector2i:
 	if spots.is_empty():
 		return Vector2i.ZERO
