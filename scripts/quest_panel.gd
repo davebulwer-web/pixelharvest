@@ -92,13 +92,13 @@ func _add_line(text: String, size: int, colour: Color,
 	label.horizontal_alignment = align
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(WIDTH - 12, 0)
-	UiStyle.style_label(label, size, colour)
+	UiStyle.style_panel_label(label, size, colour)
 	_list.add_child(label)
 
 
 func _build() -> void:
 	_panel = PanelContainer.new()
-	_panel.add_theme_stylebox_override(&"panel", UiStyle.box(UiStyle.PANEL, UiStyle.PANEL_EDGE, 6))
+	_panel.add_theme_stylebox_override(&"panel", UiStyle.panel(6))
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_panel)
 	# Top right, under the date line, clear of the hotbar.

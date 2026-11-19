@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="ShopDef" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="ShopDef" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/shop_def.gd" id="1_shop"]
 [ext_resource type="Texture2D" path="res://assets/sprites/town/keeper_general.png" id="2_keeper"]
+[ext_resource type="Texture2D" path="res://assets/sprites/portraits/keeper_general.png" id="80_portrait"]
 [ext_resource type="Script" path="res://scripts/resources/demand_def.gd" id="90_demand"]
 
 [sub_resource type="Resource" id="Demand_plenty"]
@@ -16,7 +17,8 @@ id = &"general_store"
 display_name = "Marlow's General Store"
 keeper_name = "Marlow"
 keeper_sprite = ExtResource("2_keeper")
-greetings = Array[String](["Welcome in! I'll buy your produce, and sell you a bit of land or a hearty breakfast.", "Bring me fresh vegetables and I'll pay you now. The shipping bin pays more, but it pays tomorrow.", "Looking to farm a bigger patch? Ask me about the fields.", "A farm should look loved. I've fences, flower beds and lamps, and a scarecrow or two.", "Twenty of anything I can shift at the going rate. After that it's stacked to the ceiling and I pay what I can. Tomorrow's another day."])
+keeper_portrait = ExtResource("80_portrait")
+greetings = Array[String](["[happy] Welcome in! I'll buy your produce, and sell you a bit of land or a hearty breakfast.", "Bring me fresh vegetables and I'll pay you now. The shipping bin pays more, but it pays tomorrow.", "Looking to farm a bigger patch? Ask me about the fields.", "A farm should look loved. I've fences, flower beds and lamps, and a scarecrow or two.", "Twenty of anything I can shift at the going rate. After that it's stacked to the ceiling and I pay what I can. Tomorrow's another day."])
 sells_decorations = true
 upgrade_categories = Array[StringName]([&"energy", &"land"])
 buys_produce = true

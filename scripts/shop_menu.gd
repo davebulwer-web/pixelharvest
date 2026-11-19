@@ -104,7 +104,7 @@ func _build() -> void:
 
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size.x = PANEL_WIDTH
-	panel.add_theme_stylebox_override(&"panel", UiStyle.box(UiStyle.PANEL, UiStyle.PANEL_EDGE, 8))
+	panel.add_theme_stylebox_override(&"panel", UiStyle.panel(8))
 	centre.add_child(panel)
 
 	var column := VBoxContainer.new()
@@ -115,10 +115,10 @@ func _build() -> void:
 	column.add_child(header)
 	_title = Label.new()
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	UiStyle.style_label(_title, 12)
+	UiStyle.style_panel_label(_title, 12)
 	header.add_child(_title)
 	_gold_label = Label.new()
-	UiStyle.style_label(_gold_label, 12, UiStyle.GOLD)
+	UiStyle.style_panel_label(_gold_label, 12, UiStyle.GOLD)
 	header.add_child(_gold_label)
 
 	var lists := HBoxContainer.new()
@@ -132,11 +132,11 @@ func _build() -> void:
 	_detail = Label.new()
 	_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_detail.custom_minimum_size = Vector2(PANEL_WIDTH - 16, 24)
-	UiStyle.style_label(_detail, 8)
+	UiStyle.style_panel_label(_detail, 8)
 	column.add_child(_detail)
 
 	_note = Label.new()
-	UiStyle.style_label(_note, 8, UiStyle.TEXT_DIM)
+	UiStyle.style_panel_label(_note, 8, UiStyle.TEXT_DIM)
 	column.add_child(_note)
 
 
@@ -149,7 +149,7 @@ func _add_list(parent: Container, heading: String) -> VBoxContainer:
 	parent.add_child(box)
 	var label := Label.new()
 	label.text = heading
-	UiStyle.style_label(label, 10, UiStyle.TEXT_DIM)
+	UiStyle.style_panel_label(label, 10, UiStyle.TEXT_DIM)
 	box.add_child(label)
 	var rows := VBoxContainer.new()
 	rows.add_theme_constant_override(&"separation", 2)
@@ -249,7 +249,7 @@ func _fill(keep_focus_on: Resource) -> void:
 func _add_none(list: VBoxContainer, text: String) -> void:
 	var none := Label.new()
 	none.text = text
-	UiStyle.style_label(none, 10, UiStyle.TEXT_DIM)
+	UiStyle.style_panel_label(none, 10, UiStyle.TEXT_DIM)
 	list.add_child(none)
 
 
@@ -266,14 +266,8 @@ func _add_button(list: VBoxContainer, buys: Resource, icon: Texture2D, text: Str
 	button.icon = icon
 	button.text = text
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.add_theme_font_size_override(&"font_size", 10)
-	button.add_theme_color_override(&"font_color", UiStyle.TEXT)
-	button.add_theme_color_override(&"font_focus_color", UiStyle.TEXT)
-	button.add_theme_color_override(&"font_hover_color", UiStyle.TEXT)
-	button.add_theme_stylebox_override(&"normal", UiStyle.box(UiStyle.SLOT, UiStyle.SLOT, 3))
-	button.add_theme_stylebox_override(&"hover", UiStyle.box(UiStyle.SLOT, UiStyle.SLOT_EDGE, 3))
-	button.add_theme_stylebox_override(&"pressed", UiStyle.box(UiStyle.PANEL_EDGE, UiStyle.HIGHLIGHT, 3))
-	button.add_theme_stylebox_override(&"focus", UiStyle.box(Color.TRANSPARENT, UiStyle.HIGHLIGHT, 3))
+	# The theme's button: plain ink on the panel, the wooden button when picked.
+	UiStyle.style_button(button)
 	# Dimmed when it can't be afforded; still pressable, to say why not.
 	button.modulate = Color.WHITE if GameState.gold >= price else Color(1, 1, 1, 0.5)
 	# The line under the lists explains whatever is focused or under the mouse.
@@ -326,4 +320,4 @@ func _show_detail(text: String) -> void:
 
 func _show_note(text: String, colour: Color) -> void:
 	_note.text = text
-	_note.add_theme_color_override(&"font_color", colour)
+	_note.add_theme_color_override(&"font_color", UiStyle.ink(colour))

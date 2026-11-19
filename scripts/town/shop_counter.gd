@@ -52,15 +52,16 @@ func serve(shop: ShopDef, giver: StringName = &"", lines: Array[String] = []) ->
 			"Sorry, we're closed for today. Come back tomorrow — I'm open %s." % shop.hours_text()]
 		if GameState.minutes < shop.opens_at:
 			closed_lines = ["Not open yet, I'm afraid. I open at %s." % Clock.format_short(shop.opens_at)]
-		_dialogue.say(shop.keeper_name, closed_lines)
+		_dialogue.say(shop.keeper_name, closed_lines, shop.keeper_portrait, &"worried")
 		return
 	# A keeper with a request to make, remind you of or take in says that
 	# instead of their greeting (DECISIONS 044), and the menu opens after, as
 	# usual: Brann can ask you to prove yourself and still sell you a hoe.
+	var mood := Quests.mood_for(giver)  # before talk(), which hands things in
 	var about_requests := Quests.talk(giver)
 	if not about_requests.is_empty():
 		_opens_after = shop
-		_dialogue.say(shop.keeper_name, about_requests)
+		_dialogue.say(shop.keeper_name, about_requests, shop.keeper_portrait, mood)
 		return
 	var offers := Quests.orders_on_offer(giver)
 	if not offers.is_empty():
@@ -72,7 +73,7 @@ func serve(shop: ShopDef, giver: StringName = &"", lines: Array[String] = []) ->
 		for order in offers:
 			answers.append(Quests.order_choice_text(order))
 		answers.append("Not this time")
-		_dialogue.ask(shop.keeper_name, Quests.choice_line(giver), answers)
+		_dialogue.ask(shop.keeper_name, Quests.choice_line(giver), answers, shop.keeper_portrait)
 		return
 	# What the caller gives to say comes first (Nell's rumour for tonight,
 	# DECISIONS 068; Tam's own lines), then the shop's greetings.
@@ -83,7 +84,7 @@ func serve(shop: ShopDef, giver: StringName = &"", lines: Array[String] = []) ->
 	# One greeting a day: the same line all day, a new one tomorrow.
 	_opens_after = shop
 	var said: Array[String] = [greetings[GameState.day % greetings.size()]]
-	_dialogue.say(shop.keeper_name, said)
+	_dialogue.say(shop.keeper_name, said, shop.keeper_portrait)
 
 
 ## The player picked one of the keeper's orders, or none (the last answer).
@@ -98,11 +99,11 @@ func _on_order_chosen(index: int) -> void:
 	_offers = []
 	_opens_after = shop
 	if index < offers.size():
-		_dialogue.say(shop.keeper_name, Quests.take(offers[index]))
+		_dialogue.say(shop.keeper_name, Quests.take(offers[index]), shop.keeper_portrait, &"happy")
 		return
 	Quests.decline(giver)
 	var lines: Array[String] = ["Another time, then."]
-	_dialogue.say(shop.keeper_name, lines)
+	_dialogue.say(shop.keeper_name, lines, shop.keeper_portrait)
 
 
 func _on_dialogue_finished() -> void:

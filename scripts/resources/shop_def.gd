@@ -25,6 +25,9 @@ extends Resource
 ## standing on the same baseline as the farmer).
 @export var keeper_name: String
 @export var keeper_sprite: Texture2D
+## The keeper's face in the dialogue box: a strip of busts, one per mood,
+## like CharacterDef.portrait (DECISIONS 074). Null: no portrait.
+@export var keeper_portrait: Texture2D
 
 ## The keeper's CharacterDef id, when the keeper is also someone who walks
 ## about the valley (Mabel, DECISIONS 067): their requests are asked and

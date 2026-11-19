@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="ShopDef" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="ShopDef" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/shop_def.gd" id="1_shop"]
 [ext_resource type="Texture2D" path="res://assets/sprites/town/keeper_grocer.png" id="2_keeper"]
+[ext_resource type="Texture2D" path="res://assets/sprites/portraits/keeper_grocer.png" id="80_portrait"]
 [ext_resource type="Script" path="res://scripts/resources/demand_def.gd" id="90_demand"]
 
 [sub_resource type="Resource" id="Demand_plenty"]
@@ -16,7 +17,8 @@ id = &"market_grocer"
 display_name = "Rosa's Produce Stall"
 keeper_name = "Rosa"
 keeper_sprite = ExtResource("2_keeper")
-greetings = Array[String](["Fresh from your field? I pay more than any bin, and I pay today.", "Market day's the best day of the week. Bring me everything you've got!", "The city folk can't get enough of good country vegetables.", "I can sell fifteen of a kind at a good price. Past that, mix it up, love: the city wants variety."])
+keeper_portrait = ExtResource("80_portrait")
+greetings = Array[String](["Fresh from your field? I pay more than any bin, and I pay today.", "[happy] Market day's the best day of the week. Bring me everything you've got!", "The city folk can't get enough of good country vegetables.", "I can sell fifteen of a kind at a good price. Past that, mix it up, love: the city wants variety."])
 buys_produce = true
 produce_pay_rate = 1.25
 opens_at = 480

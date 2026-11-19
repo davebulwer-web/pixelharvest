@@ -80,17 +80,17 @@ func _draw_slot(at: Vector2, item: ItemDef, is_selected: bool, show_count: bool,
 	if show_count:
 		var text := str(GameState.inventory.count(item))
 		var font := get_theme_default_font()
-		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 8)
+		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiStyle.FONT_SIZE)
 		var pos := at + Vector2(SLOT_PX - text_size.x, SLOT_PX + 1)
-		draw_string_outline(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, 3, UiStyle.OUTLINE)
-		draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, UiStyle.TEXT)
+		draw_string_outline(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiStyle.FONT_SIZE, 3, UiStyle.OUTLINE)
+		draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiStyle.FONT_SIZE, UiStyle.TEXT)
 
 
 ## The selected item's name, centred above its slot but kept on screen.
 func _draw_name(text: String, centre: Vector2) -> void:
 	var font := get_theme_default_font()
-	var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10)
+	var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiStyle.FONT_SIZE)
 	var left := clampf(centre.x - text_size.x / 2.0, 2.0, size.x - text_size.x - 2.0)
 	var pos := Vector2(roundf(left), centre.y)
-	draw_string_outline(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, 4, UiStyle.OUTLINE)
-	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyle.TEXT)
+	draw_string_outline(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiStyle.FONT_SIZE, 4, UiStyle.OUTLINE)
+	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, UiStyle.FONT_SIZE, UiStyle.TEXT)

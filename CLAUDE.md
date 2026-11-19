@@ -130,12 +130,19 @@ scripts/             Game code
                      the pier, and the crab pots' floats (CrabPot; DECISIONS 065)
   people/            Where the townsfolk are (Schedules: worked out from the clock, and
                      weekdays) and the people on the map you're on, walking between
-                     their stops and talking (PeopleHere; DECISIONS 067)
+                     their stops and talking (PeopleHere; DECISIONS 067); which of eight
+                     ways someone faces and which animation that plays, falling back to
+                     four (Facing; DECISIONS 074)
   exits.gd           Exits: builds a place's ways out from LocationDef.exits (ExitDef;
                      DECISIONS 060)
   ground_tiles.gd    GroundTiles: where each kind of ground is in the seasonal tilesets;
   ground_edges.gd    GroundEdges: the soft edges where grounds meet, a display-only
                      dual grid over every outdoor map's ground (DECISIONS 072)
+  ui_style.gd        UiStyle: the colours and sizes code asks for by name, text on the
+                     world (light, outlined) or on a panel (ink), panel and button boxes
+                     from the theme (DECISIONS 074)
+  dialogue_box.gd    DialogueBox: lines and questions, with the speaker's portrait in a
+                     mood (DECISIONS 074)
   items/             Inventory
   fishing/           FishingLine: the float, the line and the reel bar (DECISIONS 054)
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
@@ -187,7 +194,8 @@ data/                Content resources (.tres), indexed by ContentDB
                      it buys (buys_tags) and how its price drops for plenty (DemandDef,
                      DECISIONS 063; the bin's is in game_rules.tres)
   characters/        CharacterDef — townsfolk you can talk to (not shopkeepers); one can
-                     have a counter of their own (Tam, DECISIONS 065)
+                     have a counter of their own (Tam, DECISIONS 065); their portrait and,
+                     once drawn, their walk cycle (walk_frames; DECISIONS 074)
   schedules/         ScheduleDef — where each person is through the day: a home and
                      DayPlans of ScheduleStops, by weekday, season and weather (DECISIONS 067)
   events/            CalendarEvent — what happens on which days (market day) and its stalls,
@@ -223,9 +231,15 @@ assets/sprites/      Character and object art from Pixellab (town/ holds the sho
                      forage/ the wild things' icons, woods/ the Woods' own pieces,
                      fish/ the fish's icons, fishing/ the float,
                      dishes/ the dishes' icons, lane/ the Lane's pieces, cove/ the Cove's)
+assets/sprites/portraits/  Each person's three busts (neutral, happy, worried), 64 × 64 each
+assets/ui/           The UI Theme (theme.tres, the project's theme) and its nine-patch
+                     pictures: panel, portrait frame, buttons (DECISIONS 074)
+assets/fonts/        monogram (text) and Pixelify Sans (headings), with their licences
 assets/tilesets/     Ground and world tilesets
 assets/audio/        Sound effects (sfx/*.wav) and the weather's loops (ambience/*.ogg), made by
                      art/build_sounds.py; music (music/*.mp3: Dave's own tunes, two a season, on
                      each SeasonTheme; DECISIONS 066)
-art/                 Art specification and generation log (not shipped art)
+art/                 Art specification and generation log (not shipped art); art/fonts/
+                     holds monogram's original and the script that adds four characters
+                     to it (ignored by Godot: .gdignore)
 ```

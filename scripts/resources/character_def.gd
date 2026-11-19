@@ -20,6 +20,18 @@ extends Resource
 ## shopkeepers (Npc.SPRITE_OFFSET).
 @export var sprite: Texture2D
 
+## Their face in the dialogue box (Stage 24, DECISIONS 074): a strip of
+## square busts, one per mood (neutral, happy, worried), from
+## assets/sprites/portraits/. Null: the box shows no portrait.
+@export var portrait: Texture2D
+
+## How they walk (Stage 24, DECISIONS 074): animations named like the
+## farmer's, idle_<facing> and walk_<facing>, for four facings (down, up,
+## left, right) or eight (adding down_left, down_right, up_left, up_right).
+## Whatever facings are missing fall back to the nearest of the four. Null:
+## the still `sprite`, bobbing as it walks (until their walk cycle is drawn).
+@export var walk_frames: SpriteFrames
+
 ## The location they're found in (&"town").
 @export var location: StringName = &"town"
 

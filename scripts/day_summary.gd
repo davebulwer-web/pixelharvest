@@ -269,7 +269,7 @@ func _build() -> void:
 
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size.x = PANEL_WIDTH
-	panel.add_theme_stylebox_override(&"panel", UiStyle.box(UiStyle.PANEL, UiStyle.PANEL_EDGE, 8))
+	panel.add_theme_stylebox_override(&"panel", UiStyle.panel(8))
 	centre.add_child(panel)
 
 	var column := VBoxContainer.new()
@@ -279,7 +279,7 @@ func _build() -> void:
 	var title := Label.new()
 	title.text = "End of %s" % _date_text()
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	UiStyle.style_label(title, 12)
+	UiStyle.style_panel_label(title, 12)
 	column.add_child(title)
 
 	var rows := rows_for(record)
@@ -287,7 +287,7 @@ func _build() -> void:
 		var quiet := Label.new()
 		quiet.text = "A quiet day."
 		quiet.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		UiStyle.style_label(quiet, 10, UiStyle.TEXT_DIM)
+		UiStyle.style_panel_label(quiet, 10, UiStyle.TEXT_DIM)
 		column.add_child(quiet)
 	else:
 		column.add_child(_table(rows))
@@ -304,14 +304,14 @@ func _build() -> void:
 		var done := Label.new()
 		done.text = "Request done: %s" % (quest.title if quest != null else String(quest_id))
 		done.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		UiStyle.style_label(done, 10, UiStyle.GOLD)
+		UiStyle.style_panel_label(done, 10, UiStyle.GOLD)
 		column.add_child(done)
 
 	for result in record.festival_results:
 		var placed := Label.new()
 		placed.text = result
 		placed.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		UiStyle.style_label(placed, 10, UiStyle.GOLD)
+		UiStyle.style_panel_label(placed, 10, UiStyle.GOLD)
 		column.add_child(placed)
 
 	var news := news_for(record)
@@ -322,13 +322,13 @@ func _build() -> void:
 			item.text = line
 			item.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			item.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			UiStyle.style_label(item, 10, UiStyle.TEXT)
+			UiStyle.style_panel_label(item, 10, UiStyle.TEXT)
 			column.add_child(item)
 
 	var hint := Label.new()
 	hint.text = "Space to start day %d" % GameState.day
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	UiStyle.style_label(hint, 9, UiStyle.TEXT_DIM)
+	UiStyle.style_panel_label(hint, 9, UiStyle.TEXT_DIM)
 	column.add_child(hint)
 
 	# Pop in: start a little small and see-through, settle at full size.
@@ -349,14 +349,14 @@ func _table(rows: Array[PackedStringArray], value_colour: Color = UiStyle.TEXT) 
 	for row in rows:
 		var name_label := Label.new()
 		name_label.text = row[0]
-		UiStyle.style_label(name_label, 10, UiStyle.TEXT_DIM)
+		UiStyle.style_panel_label(name_label, 10, UiStyle.TEXT_DIM)
 		grid.add_child(name_label)
 		var value := Label.new()
 		value.text = row[1]
 		value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		UiStyle.style_label(value, 10, value_colour)
+		UiStyle.style_panel_label(value, 10, value_colour)
 		grid.add_child(value)
 	return grid
 

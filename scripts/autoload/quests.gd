@@ -178,6 +178,21 @@ func has_ready_for(npc_id: StringName) -> bool:
 	return ready_for(npc_id) != null
 
 
+## The face `npc_id` wears for what talk() would say now (the dialogue box's
+## portrait moods, DECISIONS 074): happy when something's handed in, worried
+## when a request of theirs is due today or later than that; otherwise
+## neutral. Worked out before talk(), which changes what it looks at.
+func mood_for(npc_id: StringName) -> StringName:
+	if has_ready_for(npc_id):
+		return &"happy"
+	var quest := active_for(npc_id)
+	if quest != null:
+		var due: int = GameState.quests.due_day(quest.id)
+		if due > 0 and due <= GameState.day_number():
+			return &"worried"
+	return &"neutral"
+
+
 ## The request `npc_id` would ask today if spoken to, or null. One at a time:
 ## nobody asks a second thing while the first is still open, and nobody asks
 ## anything before they've arrived.

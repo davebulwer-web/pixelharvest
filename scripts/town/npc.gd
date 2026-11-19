@@ -15,8 +15,11 @@ extends StaticBody2D
 ## it walks it at the townsfolk's pace, then says arrived. While walking it
 ## doesn't block the farmer (its body is switched off, so nobody gets stuck
 ## in a doorway), and it can still be talked to on whatever cell it's on.
-## There are no walk cycles yet (Stage 24): the picture bobs and turns to
-## face the way it's going.
+## Someone with a walk cycle (CharacterDef.walk_frames, Stage 24, DECISIONS
+## 074) plays it, facing whichever of eight ways they're going (Facing; four
+## while their sheet only has four), and stands in that facing's idle when
+## they stop. Someone without one is still a single picture: it bobs and
+## turns to face the way it's going, as before.
 ##
 
 const TILE_PX := 16
@@ -41,19 +44,34 @@ var _path: Array[Vector2] = []
 var _speed: float = 40.0
 var _walked: float = 0.0
 
+## The way they last walked: one of Facing.EIGHT, and the nearest straight one.
+var _facing: StringName = &"down"
+var _straight: StringName = &"down"
 
-static func create(id: StringName, texture: Texture2D, cell: Vector2i) -> Npc:
+
+## A character standing on `cell`: the still picture `texture`, or, given
+## `frames` (their walk cycle, named like the farmer's animations), those.
+static func create(id: StringName, texture: Texture2D, cell: Vector2i,
+		frames: SpriteFrames = null) -> Npc:
 	var npc := Npc.new()
 	npc.name = String(id).capitalize().replace(" ", "")
 	npc.npc_id = id
 	npc.position = Vector2(cell.x * TILE_PX + TILE_PX / 2.0, (cell.y + 1) * TILE_PX)
 	npc.talk_cells = [cell]
 
-	var sprite := Sprite2D.new()
-	sprite.name = "Sprite"
-	sprite.texture = texture
-	sprite.offset = SPRITE_OFFSET
-	npc.add_child(sprite)
+	if frames != null:
+		var animated := AnimatedSprite2D.new()
+		animated.name = "Sprite"
+		animated.sprite_frames = frames
+		animated.offset = SPRITE_OFFSET
+		npc.add_child(animated)
+		animated.play(Facing.animation(frames, "idle", &"down", &"down"))
+	else:
+		var sprite := Sprite2D.new()
+		sprite.name = "Sprite"
+		sprite.texture = texture
+		sprite.offset = SPRITE_OFFSET
+		npc.add_child(sprite)
 
 	var shape := CollisionShape2D.new()
 	var box := RectangleShape2D.new()
@@ -124,10 +142,8 @@ func _physics_process(delta: float) -> void:
 	while step > 0.0 and not _path.is_empty():
 		var target: Vector2 = _path[0]
 		var to_go := position.distance_to(target)
-		if absf(target.x - position.x) > 0.5:
-			var sprite := get_node_or_null(^"Sprite") as Sprite2D
-			if sprite != null:
-				sprite.flip_h = target.x < position.x
+		if to_go > 0.5:
+			_face(target - position)
 		if to_go <= step:
 			position = target
 			step -= to_go
@@ -137,12 +153,32 @@ func _physics_process(delta: float) -> void:
 			step = 0.0
 	talk_cells = [cell()]
 	_bob()
+	_animate()
 	if _path.is_empty():
 		_set_solid(true)
 		arrived.emit()
 
 
-## A little up-and-down while walking, in place of walk cycles.
+## Turn towards `direction`: a still picture flips to face left or right; a
+## walk cycle remembers the facing for _animate().
+func _face(direction: Vector2) -> void:
+	_facing = Facing.eight_way(direction)
+	_straight = Facing.four_way(direction)
+	var sprite := get_node_or_null(^"Sprite") as Sprite2D
+	if sprite != null and absf(direction.x) > 0.5:
+		sprite.flip_h = direction.x < 0.0
+
+
+## Walking or standing, facing the last way they went (walk cycles only).
+func _animate() -> void:
+	var animated := get_node_or_null(^"Sprite") as AnimatedSprite2D
+	if animated == null:
+		return
+	var kind := "walk" if not _path.is_empty() else "idle"
+	animated.play(Facing.animation(animated.sprite_frames, kind, _facing, _straight))
+
+
+## A little up-and-down while walking, for a still picture (no walk cycle).
 func _bob() -> void:
 	var sprite := get_node_or_null(^"Sprite") as Sprite2D
 	if sprite == null:

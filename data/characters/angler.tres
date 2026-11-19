@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="CharacterDef" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="CharacterDef" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/character_def.gd" id="1_def"]
 [ext_resource type="Texture2D" path="res://assets/sprites/town/angler.png" id="2_sprite"]
+[ext_resource type="Texture2D" path="res://assets/sprites/portraits/angler.png" id="80_portrait"]
 [ext_resource type="Resource" path="res://data/schedules/angler.tres" id="20_schedule"]
 
 [resource]
@@ -9,6 +10,7 @@ script = ExtResource("1_def")
 id = &"angler"
 display_name = "Wren"
 sprite = ExtResource("2_sprite")
+portrait = ExtResource("80_portrait")
 location = &"town"
-lines = Array[String](["Shh. You'll scare the fish.", "Tench in the early morning, barbel at dusk, eels after dark. Every fish keeps its own hours.", "Your farm's got a pond too, hasn't it? Lucky.", "The river has its own fish, chub and dace and the like. The Woods' stream has trout.", "Sprinklers, eh? In my day we carried every drop.", "When the rain swells the stream, the sea trout come up. Silver, and strong with it.", "Ice on the pond? Cut a hole and be patient. Perch and pike don't mind the cold.", "Contest's on the fourteenth of summer, at the town pond. Biggest fish I ever saw there was a carp as long as your leg."])
+lines = Array[String](["[worried] Shh. You'll scare the fish.", "Tench in the early morning, barbel at dusk, eels after dark. Every fish keeps its own hours.", "[happy] Your farm's got a pond too, hasn't it? Lucky.", "The river has its own fish, chub and dace and the like. The Woods' stream has trout.", "Sprinklers, eh? In my day we carried every drop.", "When the rain swells the stream, the sea trout come up. Silver, and strong with it.", "Ice on the pond? Cut a hole and be patient. Perch and pike don't mind the cold.", "Contest's on the fourteenth of summer, at the town pond. Biggest fish I ever saw there was a carp as long as your leg."])
 schedule = ExtResource("20_schedule")

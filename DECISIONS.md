@@ -3404,3 +3404,57 @@ strips (wouldn't follow our outline exactly).
 same way.
 
 **Cost.** 23 Pixellab terrain sets (22 + one test), about $0.16 of credit ($4.92 left).
+
+## 074 — A pixel font and a Theme; portraits with moods; eight facings that fall back to four
+
+**Decision.** Stage 24 session 1 (2026-11-19, code; no save change).
+
+- *Fonts and a Theme.* `assets/ui/theme.tres` is the project's theme (Project Settings →
+  GUI → Theme → Custom), so every Label, Button and PanelContainer picks it up: monogram
+  (CC0) at 16 for all text, Pixelify Sans (OFL) at 13 for headings, Stage 23's wooden
+  nine-patch for panels and its buttons for menu rows (a row is plain ink until picked or
+  hovered, then sits on the orange button, so the keyboard's place in a list is obvious).
+  Fonts are imported with antialiasing, hinting and subpixel positioning off. Their licences
+  are beside them (assets/fonts/), and the credits screen (Stage 26) will name them.
+- *Sizes.* monogram is only pixel-exact at 16 (one font pixel to one game pixel), so every
+  size the code asked for below 12 (the old default font's 8, 9 and 10) becomes 16, and 12
+  and over (titles) becomes a heading. The old sizes stay in the code as "what this text
+  is"; `UiStyle.font_size()` makes the choice in one place.
+- *Ink on paper.* The panel is cream, so text on a panel is dark ink with no outline
+  (`UiStyle.style_panel_label`), and text on the world (HUD, hotbar, floating numbers, the
+  "!" over heads) stays light with a dark outline (`style_label`). Both take the same colour
+  names (TEXT, TEXT_DIM, GOLD, WARNING); `UiStyle.ink()` swaps each for its ink (GOLD
+  becomes a dark blue accent, WARNING a brick red), so screens still say what a line is.
+- *Four characters added to monogram.* It has no middle dot, en or em dash or times sign,
+  which the game's text uses. A fallback font fixed the glyphs but made every line taller
+  (Godot sizes a line for the tallest font in the chain), so art/fonts/extend_monogram.py
+  draws the four in monogram's own grid and writes assets/fonts/monogram.ttf; the original
+  is kept in art/fonts/ (ignored by Godot).
+- *Portraits.* `CharacterDef.portrait` and `ShopDef.keeper_portrait` point at the strips in
+  assets/sprites/portraits/ (three 64 × 64 busts: neutral, happy, worried). `DialogueBox.say()`
+  and `ask()` take the portrait and a mood; the box shows a framed bust in its left margin.
+  The mood comes from what's happening (`Quests.mood_for()`: happy when a request is handed
+  in, worried when one of theirs is due today or late; happy when you take an order or at a
+  festival; worried at a closed shop), or a line can set its own face with a leading tag,
+  `"[worried] The nets are torn again."`, stripped before it's shown. A few existing lines
+  are tagged. No portrait (notice board, slate, chalkboard): no frame.
+- *Eight facings.* `Facing` (scripts/people/facing.gd) picks one of eight from a direction,
+  and the animation `walk_down_right` if the SpriteFrames has it, else the straight facing's
+  (`walk_down`) chosen by the old rule. So nothing looks different until eight-way sheets
+  arrive, and they can arrive one character at a time. The farmer's tools and E always act
+  on the cell straight ahead (the straight facing), so no tool rule changed.
+- *Walk cycles for people.* `CharacterDef.walk_frames` (a SpriteFrames named like the
+  farmer's) makes an `Npc` an AnimatedSprite2D that walks and idles facing the way it went;
+  without one it's the still picture, bobbing, as before. PeopleHere's paths now cut corners
+  on open ground (`DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES`: only where both side cells are open,
+  so nobody clips a wall or slips diagonally into a door).
+
+Options considered: a Theme per screen (four places to change instead of one); a fallback
+font for the missing characters (taller lines everywhere); keeping light text on a dark
+panel (the nine-patch Dave approved is cream); moods chosen only by code (no way for a line
+in a .tres to look worried) or only by tags (every hand-in line would need one); eight-way
+facing for tools (a hoe on a corner cell would change every tool's rules).
+
+**Why.** ROADMAP 13.5 (font, theme, portraits) and section 15 (eight-way characters): the
+code half of Stage 24, so the two art sessions only make pictures and SpriteFrames.
+

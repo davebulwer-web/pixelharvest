@@ -1,0 +1,10 @@
+monogram, by Vinícius Menézio (datagoblin) — https://datagoblin.itch.io/monogram
+
+Released under Creative Commons Zero (CC0 1.0 Universal): public domain, free for
+any use, commercial or not, with no credit required. Pixel Harvest names it in the
+credits anyway (ROADMAP 13.5).
+
+This copy has four characters added in monogram's own pixel grid (the middle dot,
+en and em dashes and the times sign), drawn by art/fonts/extend_monogram.py from the
+original release kept at art/fonts/monogram_original.ttf (10,468 bytes; the same
+file, byte for byte, as three independent projects that ship it).

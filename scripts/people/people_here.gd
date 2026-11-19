@@ -247,7 +247,10 @@ func _walkable() -> AStarGrid2D:
 	_grid = AStarGrid2D.new()
 	_grid.region = Rect2i(-1, -1, _size.x + 2, _size.y + 2)
 	_grid.cell_size = Vector2(TILE_PX, TILE_PX)
-	_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
+	# Corners are cut across open ground (Stage 24, DECISIONS 074), but only
+	# where both cells beside the diagonal are open too, so nobody's feet
+	# clip a wall's corner or a fence post.
+	_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
 	_grid.update()
 	var box := RectangleShape2D.new()
 	box.size = FEET
@@ -302,7 +305,7 @@ func _gate_toward(other: StringName, near: Vector2i) -> Vector2i:
 
 func _add_npc(person: CharacterDef, at: Vector2) -> Npc:
 	var cell := Vector2i(floori(at.x / TILE_PX), floori((at.y - 1.0) / TILE_PX))
-	var walker := Npc.create(person.id, person.sprite, cell)
+	var walker := Npc.create(person.id, person.sprite, cell, person.walk_frames)
 	_entities.add_child(walker)
 	_npcs[person.id] = walker
 	_markers[person.id] = walker.add_quest_marker()
@@ -355,14 +358,15 @@ func _talk(person: CharacterDef) -> void:
 	if not Quests.has_ready_for(id) and Festivals.has_something_for(id):
 		var festival_lines := Festivals.talk(id)
 		_festival_to_ask = id if not Festivals.question_for(id).is_empty() else &""
-		_dialogue.say(person.display_name, festival_lines)
+		_dialogue.say(person.display_name, festival_lines, person.portrait, &"happy")
 		return
 	if person.counter != null and _counter != null:
 		_counter.serve(person.counter, id, person.lines)
 		return
+	var mood := Quests.mood_for(id)  # before talk(), which hands things in
 	var lines := Quests.talk(id)
 	if not lines.is_empty():
-		_dialogue.say(person.display_name, lines)
+		_dialogue.say(person.display_name, lines, person.portrait, mood)
 		return
 	var offers := Quests.orders_on_offer(id)
 	if not offers.is_empty():
@@ -372,12 +376,12 @@ func _talk(person: CharacterDef) -> void:
 		for order in offers:
 			answers.append(Quests.order_choice_text(order))
 		answers.append("Not today")
-		_dialogue.ask(person.display_name, Quests.choice_line(id), answers)
+		_dialogue.ask(person.display_name, Quests.choice_line(id), answers, person.portrait)
 		return
 	var line := person.line_on(GameState.day)
 	if line != "":
 		var said: Array[String] = [line]
-		_dialogue.say(person.display_name, said)
+		_dialogue.say(person.display_name, said, person.portrait)
 
 
 ## One of someone's orders was picked, or none (the last answer, and then
@@ -387,7 +391,8 @@ func _on_chosen(index: int) -> void:
 		var host := _festival_asking
 		_festival_asking = &""
 		var host_def := ContentDB.character(host)
-		_dialogue.say(host_def.display_name if host_def != null else "", Festivals.answer(host, index))
+		_dialogue.say(host_def.display_name if host_def != null else "", Festivals.answer(host, index),
+				host_def.portrait if host_def != null else null, &"happy")
 		return
 	if _asking_for == &"":
 		return  # someone else's question
@@ -399,7 +404,8 @@ func _on_chosen(index: int) -> void:
 		Quests.decline(id)
 		return
 	var person := ContentDB.character(id)
-	_dialogue.say(person.display_name if person != null else "", Quests.take(offers[index]))
+	_dialogue.say(person.display_name if person != null else "", Quests.take(offers[index]),
+			person.portrait if person != null else null, &"happy")
 
 
 ## After a festival host's lines: what will you enter?
@@ -415,4 +421,5 @@ func _ask_festival_question() -> void:
 	_festival_asking = id
 	var answers: Array[String] = []
 	answers.assign(question["answers"])
-	_dialogue.ask(person.display_name if person != null else "", question["question"], answers)
+	_dialogue.ask(person.display_name if person != null else "", question["question"], answers,
+			person.portrait if person != null else null, &"happy")

@@ -16,7 +16,7 @@ offset_bottom = 20.0
 theme_override_colors/font_color = Color(1, 0.905882, 0.847059, 1)
 theme_override_colors/font_outline_color = Color(0.133333, 0.133333, 0.168627, 1)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 16
 
 [node name="Message" type="Label" parent="."]
 offset_left = 6.0
@@ -26,7 +26,7 @@ offset_bottom = 34.0
 theme_override_colors/font_color = Color(1, 0.905882, 0.847059, 1)
 theme_override_colors/font_outline_color = Color(0.133333, 0.133333, 0.168627, 1)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 16
 
 [node name="Hotbar" type="Control" parent="."]
 layout_mode = 3

@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 23 — art: the world.** Session 5 (every soft edge made with Pixellab, a pond bank and the sea's foam; DECISIONS 073, no save change) is built, waiting for Dave to try it; sessions 1–4 are tested and committed by Dave (2026-11-19). After session 5, Stage 23 is complete and Stage 24 (art: people and the UI) is next. Eight-way movement and animation (ROADMAP section 15) was added to Stage 24 on 2026-11-19. Stage 22 (the tavern and people on the move) is complete: both sessions tested and committed by Dave (2026-11-18). Before that, from Stage 22: session 2 (Nell's tavern, the Wheatsheaf: rumours, the chalkboard, darts night, hot meals; Nell, Dot and Tam's requests; homes for the mayor, Wren and Ivy and the town hall, the town grown to 48 × 32; evenings at the tavern; DECISIONS 068, no save change) is built, waiting for Dave to try it. Session 1 (weekdays, schedules, people who walk; DECISIONS 067) is tested and committed by Dave (2026-11-18). Stage 21 (the Cove) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 20 (early days) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 19 (the Lane and the bigger farm) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 24 — art: people and the UI.** Session 1 (code: the pixel font and UI theme, portraits with moods in the dialogue box, eight-way facing that falls back to four, walk cycles ready to drop in; DECISIONS 074, no save change) is built, waiting for Dave to try it. Sessions 2 and 3 are art (walk cycles and eight-way sheets from Pixellab, cloud env). Stage 23 (art: the world) is complete: all five sessions tested and committed by Dave (2026-11-19). Stage 22 (the tavern and people on the move) is complete: both sessions tested and committed by Dave (2026-11-18). Before that, from Stage 22: session 2 (Nell's tavern, the Wheatsheaf: rumours, the chalkboard, darts night, hot meals; Nell, Dot and Tam's requests; homes for the mayor, Wren and Ivy and the town hall, the town grown to 48 × 32; evenings at the tavern; DECISIONS 068, no save change) is built, waiting for Dave to try it. Session 1 (weekdays, schedules, people who walk; DECISIONS 067) is tested and committed by Dave (2026-11-18). Stage 21 (the Cove) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 20 (early days) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 19 (the Lane and the bigger farm) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -1386,21 +1386,51 @@ pictures. Cells don't change; only the drawing does.
 - [x] Maps touched: farm, Lane, town, Cove, Woods (not interiors, buildings or the pier)
 - [x] Verified in the sandbox: headless import and run clean; rendered every map in all
       four seasons, the Cove at low and high tide (and the foam's frames changing)
-- [ ] Dave confirms session 5 plays correctly on Windows and likes the look
+- [x] Dave confirms session 5 plays correctly on Windows and likes the look (committed
+      2026-11-19)
 
 ## Stage 24 — Art: people and the UI · 1 code + 2 art sessions · Sonnet + cloud env
 
-- [ ] A pixel font (monogram for text; Pixel Operator Bold or Pixelify Sans for headings)
-      and a UI `Theme` with nine-patch panels (can run alongside, any time)
-- [ ] Portraits in the dialogue box: 13 people × 3 expressions (can run alongside)
-- [ ] Walk cycles for every person (after Stage 22)
-- [ ] Eight-way movement and animation (ROADMAP section 15, asked by Dave 2026-11-19): the
-      farmer and every person face and walk in eight directions, not four. Needs new
-      8-direction sprite sheets from Pixellab (the farmer and the 13 people: walk and idle
-      for the four diagonals), the player's facing and animation choosing from eight, the
-      walkers (PeopleHere) doing the same, and tools still acting on the cell straight
-      ahead (a diagonal facing picks the nearer side). Likely no save change. Best done
-      with the walk cycles above, as one art pass per person
+**Session 1 (2026-11-19, code) — the font, the theme, portraits, eight facings (DECISIONS 074, no save change)**
+
+- [x] **A pixel font**: monogram (CC0) for all text at 16, Pixelify Sans (OFL) for headings
+      at 13, with their licences in assets/fonts/; four characters monogram lacks (· – — ×)
+      drawn into it in its own grid (art/fonts/extend_monogram.py)
+- [x] **A UI `Theme`** (assets/ui/theme.tres, the project's theme): Stage 23's wooden
+      nine-patch for every panel (dialogue, shop, cook and workbench menus, requests, the
+      day's summary, the new-game menu), its buttons for menu rows (plain ink until picked,
+      then on the orange button); dark ink on the cream panels, light outlined text on the
+      world (HUD, hotbar)
+- [x] **Portraits in the dialogue box**: a framed bust beside the box for all 13 people
+      (`CharacterDef.portrait`, `ShopDef.keeper_portrait`), in three moods: happy when a
+      request is handed in, an order taken or at a festival; worried when their request is
+      due or late, or the shop's shut; a line in a .tres can pick its own face with a
+      leading `[happy]` or `[worried]` (a few are tagged)
+- [x] **Eight-way facing** (ROADMAP section 15) for the farmer and the walkers, from the
+      direction they move: `walk_down_right` and so on when their sheet has it, otherwise
+      the nearest of four exactly as before (so nothing changes until eight-way sheets
+      arrive); tools and E still act on the cell straight ahead
+- [x] **Walk cycles can drop in**: `CharacterDef.walk_frames` (a SpriteFrames named like the
+      farmer's: idle_down, walk_down_right…) makes a person walk and stand animated; without
+      it they're the still picture, bobbing, as now. Walkers cut corners across open ground
+- [x] Verified in the sandbox: headless import and run clean; rendered the new-game menu,
+      Mabel happy and the mayor worried and asking (with answers), the mayor's real first
+      words, the requests panel, Marlow's shop, the HUD, the day's summary and the farmer
+      on the farm; checked in the running game: four-way sheet on a diagonal plays walk_down
+      and targets the cell below, an added walk_down_right is picked up, idle falls back,
+      up-left plays walk_up, a walker with frames plays its diagonal then straight walk
+- [ ] Dave confirms it plays correctly on Windows and likes the look
+
+**Sessions 2 and 3 (art, cloud env with Pixellab)**
+
+- [ ] Walk cycles for every person (13), the same layout as the farmer's sheet, each made
+      into a SpriteFrames (data/… or beside the sheet) and set as their
+      `CharacterDef.walk_frames`; shopkeepers behind counters can stay still
+- [ ] Eight-way sheets (the four diagonals, walk and idle) for the farmer
+      (assets/sprites/player_frames.tres gains `walk_down_right`… ) and for each person, in
+      the same art pass as their walk cycle; left diagonals may be mirrored from right ones
+      (a mirrored SpriteFrames needs flipped frames, not flip_h, since Facing picks by name)
+- [ ] Optional: more lines tagged with `[happy]` / `[worried]` where a face would help
 
 ## Stage 25 — Almanac and year review · 1–2 sessions · Sonnet
 

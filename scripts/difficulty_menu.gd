@@ -70,7 +70,7 @@ func _build() -> void:
 
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size.x = PANEL_WIDTH
-	panel.add_theme_stylebox_override(&"panel", UiStyle.box(UiStyle.PANEL, UiStyle.PANEL_EDGE, 8))
+	panel.add_theme_stylebox_override(&"panel", UiStyle.panel(8))
 	centre.add_child(panel)
 
 	var column := VBoxContainer.new()
@@ -79,7 +79,7 @@ func _build() -> void:
 
 	var title := Label.new()
 	title.text = "New game: how would you like to play?"
-	UiStyle.style_label(title, 12)
+	UiStyle.style_panel_label(title, 12)
 	column.add_child(title)
 
 	var rules: GameRules = GameState.RULES
@@ -96,12 +96,12 @@ func _build() -> void:
 	_detail = Label.new()
 	_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_detail.custom_minimum_size = Vector2(PANEL_WIDTH - 16, 70)
-	UiStyle.style_label(_detail, 8)
+	UiStyle.style_panel_label(_detail, 8)
 	column.add_child(_detail)
 
 	var hint := Label.new()
 	hint.text = "Space / Enter: start" + ("     Esc: back to your game" if can_cancel else "")
-	UiStyle.style_label(hint, 8, UiStyle.TEXT_DIM)
+	UiStyle.style_panel_label(hint, 8, UiStyle.TEXT_DIM)
 	column.add_child(hint)
 
 	if focus_on == null:
@@ -113,14 +113,8 @@ func _add_button(list: VBoxContainer, difficulty: DifficultyDef, base_gold: int)
 	var button := Button.new()
 	button.text = difficulty.display_name
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.add_theme_font_size_override(&"font_size", 10)
-	button.add_theme_color_override(&"font_color", UiStyle.TEXT)
-	button.add_theme_color_override(&"font_focus_color", UiStyle.TEXT)
-	button.add_theme_color_override(&"font_hover_color", UiStyle.TEXT)
-	button.add_theme_stylebox_override(&"normal", UiStyle.box(UiStyle.SLOT, UiStyle.SLOT, 3))
-	button.add_theme_stylebox_override(&"hover", UiStyle.box(UiStyle.SLOT, UiStyle.SLOT_EDGE, 3))
-	button.add_theme_stylebox_override(&"pressed", UiStyle.box(UiStyle.PANEL_EDGE, UiStyle.HIGHLIGHT, 3))
-	button.add_theme_stylebox_override(&"focus", UiStyle.box(Color.TRANSPARENT, UiStyle.HIGHLIGHT, 3))
+	# The theme's button: plain ink on the panel, the wooden button when picked.
+	UiStyle.style_button(button)
 	# The line under the list explains whichever is focused or under the mouse.
 	var detail := difficulty.description
 	var changes := difficulty.summary(base_gold)

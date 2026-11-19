@@ -93,7 +93,7 @@ func _build() -> void:
 
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size.x = PANEL_WIDTH
-	panel.add_theme_stylebox_override(&"panel", UiStyle.box(UiStyle.PANEL, UiStyle.PANEL_EDGE, 8))
+	panel.add_theme_stylebox_override(&"panel", UiStyle.panel(8))
 	centre.add_child(panel)
 
 	var column := VBoxContainer.new()
@@ -102,12 +102,12 @@ func _build() -> void:
 
 	var title := Label.new()
 	title.text = "The workbench" if place == &"workbench" else "The stove"
-	UiStyle.style_label(title, 12)
+	UiStyle.style_panel_label(title, 12)
 	column.add_child(title)
 
 	var heading := Label.new()
 	heading.text = "Plans you know" if place == &"workbench" else "Recipes you know"
-	UiStyle.style_label(heading, 10, UiStyle.TEXT_DIM)
+	UiStyle.style_panel_label(heading, 10, UiStyle.TEXT_DIM)
 	column.add_child(heading)
 
 	_list = GridContainer.new()
@@ -119,13 +119,13 @@ func _build() -> void:
 	_detail = Label.new()
 	_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_detail.custom_minimum_size = Vector2(PANEL_WIDTH - 16, 24)
-	UiStyle.style_label(_detail, 8)
+	UiStyle.style_panel_label(_detail, 8)
 	column.add_child(_detail)
 
 	_note = Label.new()
 	_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_note.custom_minimum_size.x = PANEL_WIDTH - 16
-	UiStyle.style_label(_note, 8, UiStyle.TEXT_DIM)
+	UiStyle.style_panel_label(_note, 8, UiStyle.TEXT_DIM)
 	column.add_child(_note)
 
 
@@ -166,7 +166,7 @@ func _fill(keep_focus_on: RecipeDef) -> void:
 	if _buttons.is_empty():
 		var none := Label.new()
 		none.text = "No plans yet" if place == &"workbench" else "No recipes yet"
-		UiStyle.style_label(none, 10, UiStyle.TEXT_DIM)
+		UiStyle.style_panel_label(none, 10, UiStyle.TEXT_DIM)
 		_list.add_child(none)
 	_show_detail("")
 	_show_note("Space / Enter: %s one     Esc: leave" % ("make" if place == &"workbench" else "cook"), UiStyle.TEXT_DIM)
@@ -181,14 +181,8 @@ func _add_button(icon: Texture2D, text: String, detail: String, can_cook: bool) 
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.custom_minimum_size.x = (PANEL_WIDTH - 20) / COLUMNS
 	button.clip_text = true
-	button.add_theme_font_size_override(&"font_size", 10)
-	button.add_theme_color_override(&"font_color", UiStyle.TEXT)
-	button.add_theme_color_override(&"font_focus_color", UiStyle.TEXT)
-	button.add_theme_color_override(&"font_hover_color", UiStyle.TEXT)
-	button.add_theme_stylebox_override(&"normal", UiStyle.box(UiStyle.SLOT, UiStyle.SLOT, 3))
-	button.add_theme_stylebox_override(&"hover", UiStyle.box(UiStyle.SLOT, UiStyle.SLOT_EDGE, 3))
-	button.add_theme_stylebox_override(&"pressed", UiStyle.box(UiStyle.PANEL_EDGE, UiStyle.HIGHLIGHT, 3))
-	button.add_theme_stylebox_override(&"focus", UiStyle.box(Color.TRANSPARENT, UiStyle.HIGHLIGHT, 3))
+	# The theme's button: plain ink on the panel, the wooden button when picked.
+	UiStyle.style_button(button)
 	# Dimmed when something's missing; still pressable, to say what.
 	button.modulate = Color.WHITE if can_cook else Color(1, 1, 1, 0.5)
 	button.focus_entered.connect(_show_detail.bind(detail))
@@ -203,4 +197,4 @@ func _show_detail(text: String) -> void:
 
 func _show_note(text: String, colour: Color) -> void:
 	_note.text = text
-	_note.add_theme_color_override(&"font_color", colour)
+	_note.add_theme_color_override(&"font_color", UiStyle.ink(colour))

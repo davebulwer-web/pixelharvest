@@ -1,7 +1,7 @@
 class_name Player
 extends CharacterBody2D
 ##
-## Player — movement, four-direction animation, and the player's actions:
+## Player — movement, eight-direction animation, and the player's actions:
 ## using the held tool (or eating the held dish), and interacting (harvest,
 ## shipping bin, the bed, the stove).
 ##
@@ -33,17 +33,16 @@ const TILE_PX := 16
 ## "the tile they're standing on".
 const STANDING_PROBE := Vector2(0, -4)
 
-const FACING_VECTORS: Dictionary = {
-	&"down": Vector2i.DOWN,
-	&"up": Vector2i.UP,
-	&"left": Vector2i.LEFT,
-	&"right": Vector2i.RIGHT,
-}
+## The cell ahead for each straight facing (Facing.STRAIGHT).
+const FACING_VECTORS: Dictionary = Facing.STRAIGHT
 
 @onready var _sprite: AnimatedSprite2D = $Sprite
 
-## Last direction faced, so idle animation keeps facing the right way.
+## Last direction faced, so idle animation keeps facing the right way: one
+## of eight for the picture (Stage 24, DECISIONS 074), and the straight one
+## nearest it, which tools and E act on (the cell straight ahead).
 var _facing: StringName = &"down"
+var _straight: StringName = &"down"
 
 ## True on the farm. The town and the shops switch it off (see above).
 var can_farm: bool = true
@@ -111,7 +110,7 @@ func standing_cell() -> Vector2i:
 
 ## The cell the player is facing — the one tools act on.
 func target_cell() -> Vector2i:
-	return standing_cell() + FACING_VECTORS[_facing]
+	return standing_cell() + FACING_VECTORS[_straight]
 
 
 ## Every cell the held tool would act on, at the tier the player owns. One
@@ -120,7 +119,7 @@ func target_cells() -> Array[Vector2i]:
 	var tool := GameState.selected_tool()
 	if tool == null:
 		return [target_cell()]
-	return tool.cells_at(GameState.tool_tier(tool), target_cell(), FACING_VECTORS[_facing])
+	return tool.cells_at(GameState.tool_tier(tool), target_cell(), FACING_VECTORS[_straight])
 
 
 ## Ask the tool which of its cells it can act on, pay once for the swing,
@@ -199,19 +198,18 @@ func _interact() -> void:
 			return
 
 
+## Movement is eight-way, and so is the picture where the sprite sheet has the
+## diagonals: Facing picks "walk_down_right" if it exists and "walk_down"
+## (the nearest straight facing) if not, so the farmer looks exactly as
+## before until an eight-way sheet is dropped in.
 func _update_animation(direction: Vector2) -> void:
-	if direction == Vector2.ZERO:
-		_sprite.play("idle_%s" % _facing)
-		return
-	_facing = _facing_for(direction)
-	_sprite.play("walk_%s" % _facing)
+	if direction != Vector2.ZERO:
+		_facing = Facing.eight_way(direction)
+		_straight = Facing.four_way(direction)
+	var kind := "idle" if direction == Vector2.ZERO else "walk"
+	_sprite.play(Facing.animation(_sprite.sprite_frames, kind, _facing, _straight))
 
 
-## Movement is eight-way but the art is four-way, so the larger axis wins.
-## Horizontal is checked first, which makes diagonal movement read as
-## left/right — the convention most top-down games use, because the side
-## profiles are more distinctive than front and back.
-func _facing_for(direction: Vector2) -> StringName:
-	if absf(direction.x) > absf(direction.y):
-		return &"right" if direction.x > 0.0 else &"left"
-	return &"down" if direction.y > 0.0 else &"up"
+## The way the farmer faces: one of Facing.EIGHT.
+func facing() -> StringName:
+	return _facing
