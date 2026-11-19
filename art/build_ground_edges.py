@@ -4,7 +4,7 @@
 
 Reads  assets/tilesets/ground_<season>.png  (the plain ground tiles)
        art/ground_sources/edges/*.png       (Pixellab terrain sets, by mask)
-Writes assets/tilesets/edges_<season>.png   (256 x 400)
+Writes assets/tilesets/edges_<season>.png   (256 x 496)
 
 Layout (scripts/ground_tiles.gd says the same):
   row = ground * 2 + variant, one row per EdgeGround (lowest first) and variant;
@@ -12,16 +12,29 @@ Layout (scripts/ground_tiles.gd says the same):
   (1 top-left, 2 top-right, 4 bottom-left, 8 bottom-right, added up).
   Columns 0 and 15 stay empty (nothing / the plain tile is used instead).
   Row 24: scatter, small things on a clear background (0-5 green, 6-7 stones).
+  Rows 25-26: grass over pond water, with a sandy, stony bank (two variants).
+  Rows 27-30: the foam on the sea's edge, four frames of each mask, one under
+  the other (the tileset animates them: frame N of column M is row 27 + N).
 
 Every edge picture is the ground's OWN plain tile, cut to a shape, with a
 one-pixel darker rim, so it joins the plain tiles with no seam in every season.
-The shape comes from:
-  - a Pixellab terrain set where we have one (grass over the dirt path, the
-    look test: its lip and the shadow it throws on the path are kept); its
-    shape is used for grass over everything;
-  - otherwise a placeholder: a rounded, wobbly line worked out from the four
-    corners (smooth blend of the corners plus a little tileable noise), until
-    session 5 makes each one with Pixellab.
+The shape comes from Pixellab's terrain tool (/create-tileset, standard,
+16 px, transition 0.25, seed 7), one set per ground (session 5, DECISIONS 073):
+  - grass over the dirt path (session 4's look test): its lip and the shadow
+    it throws are kept; used for grass over everything but pond water;
+  - every other ground: Pixellab draws the SAME outline for every pair made
+    with one seed (shape.png, taken from the wet-sand-over-sea set), and only
+    the band along it differs: a dark rim, a lighter lip, a wet darkening
+    outside, a sandy bank. So each ground's own set is read pixel by pixel
+    against that outline: its own colours become our plain tile's, its band
+    becomes our rim / darkest / lightest shades, a dark band outside the
+    outline becomes a see-through shadow over whatever lies below;
+  - grass over pond water gets its own rows, with the bank's sand and stones
+    coloured from the season's sand tile;
+  - the foam is worked out from the outline: a ring one to three pixels out
+    on the sea, breathing in and out over four frames.
+The placeholder shapes (a wobbly line through the four corners) are still
+here, for any ground without a Pixellab set.
 """
 import math, os, random
 from PIL import Image
@@ -41,8 +54,24 @@ GROUNDS = [
 ]
 VARIANTS = 2
 SCATTER_ROW = len(GROUNDS) * VARIANTS
-# Pixellab shapes: ground -> source file (16 tiles side by side, by mask).
+BANK_ROW = SCATTER_ROW + 1          # grass over pond water, two variants
+FOAM_ROW = BANK_ROW + VARIANTS      # four frames, one row each
+FOAM_FRAMES = 4
+SOURCES = os.path.join(ROOT, 'art/ground_sources/edges')
+# Grass keeps session 4's own shape (Dave approved that look).
 PIXELLAB = {'grass': 'grass_over_path.png'}
+# Every other ground: its own Pixellab set (16 tiles by mask, lower | upper),
+# read against the shared outline.
+BANDED = {
+    'water': 'water.png', 'wet_sand': 'wet_sand.png', 'rockpool': 'rockpool.png',
+    'sand': 'sand.png', 'path': 'path.png', 'paving': 'paving.png',
+    'tilled': 'tilled.png', 'tilled_wet': 'tilled_wet.png', 'rocks': 'rocks.png',
+    'thicket': 'thicket.png',
+}
+BANK = 'grass_bank.png'
+# A see-through shadow / lightening, so it suits whatever ground lies below.
+SHADOW = (0, 0, 0, 72)
+LIGHTEN = (255, 255, 255, 56)
 
 
 def lum(c):
@@ -164,6 +193,161 @@ def pixellab_shape(src, mask):
     return shape
 
 
+# --- session 5: Pixellab sets read against the shared outline ---------------
+
+def load_outline():
+    """shape.png: white where the upper ground is, for each mask."""
+    im = Image.open(os.path.join(SOURCES, 'shape.png')).convert('L')
+    return {m: [[im.getpixel((m * T + x, y)) > 127 for x in range(T)] for y in range(T)]
+            for m in range(16)}
+
+
+def depth(inside):
+    """How far each pixel is from the outline: 1, 2, 3... inside (1 touches
+    the outside) and -1, -2, -3... outside."""
+    from collections import deque
+    far = 99
+    d = [[far] * T for _ in range(T)]
+    around = [(dx, dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1) if dx or dy]
+    for side in (True, False):
+        q = deque()
+        for y in range(T):
+            for x in range(T):
+                if inside[y][x] == side and any(
+                        0 <= x + dx < T and 0 <= y + dy < T and inside[y + dy][x + dx] != side
+                        for dx, dy in around):
+                    d[y][x] = 1
+                    q.append((x, y))
+        while q:
+            x, y = q.popleft()
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < T and 0 <= ny < T and inside[ny][nx] == side and d[ny][nx] > d[y][x] + 1:
+                    d[ny][nx] = d[y][x] + 1
+                    q.append((nx, ny))
+    return [[d[y][x] if inside[y][x] else -d[y][x] for x in range(T)] for y in range(T)]
+
+
+def colours_of(im, mask):
+    return set(p[:3] for p in im.crop((mask * T, 0, mask * T + T, T)).getdata())
+
+
+def mean_lum(im, mask):
+    px = [p[:3] for p in im.crop((mask * T, 0, mask * T + T, T)).getdata()]
+    return sum(lum(p) for p in px) / len(px)
+
+
+def shades(plain):
+    """The plain tile's darkest and lightest colours."""
+    cols = sorted(set(p[:3] for p in plain.getdata() if p[3] > 0), key=lum)
+    return cols[0], cols[-1]
+
+
+def ramp(plain):
+    """The plain tile's main colours (each at least an eighth of it, so a
+    berry or a fleck never becomes a whole band), plus its rim colour."""
+    from collections import Counter
+    count = Counter(p[:3] for p in plain.getdata() if p[3] > 0)
+    total = sum(count.values())
+    main = [c for c, n in count.items() if n * 8 >= total] or [count.most_common(1)[0][0]]
+    return main + [rim_colour(plain)]
+
+
+def render_banded(src, mask, outline, plain, keep_light_outside=True):
+    """One edge picture: the outline cut from our plain tile, with the band
+    Pixellab drew along it turned into our own shades: each band pixel takes
+    the colour of ours whose brightness sits as far from our tile's as the
+    band's sits from Pixellab's own tile (so it works in every season)."""
+    upper, lower = colours_of(src, 15), colours_of(src, 0)
+    ul, ll = mean_lum(src, 15), mean_lum(src, 0)
+    shades_here = ramp(plain)
+    ours = sum(lum(p[:3]) for p in plain.getdata()) / (T * T)
+    d = depth(outline)
+    out = Image.new('RGBA', (T, T), (0, 0, 0, 0))
+    for y in range(T):
+        for x in range(T):
+            c = src.getpixel((mask * T + x, y))[:3]
+            if d[y][x] > 0:
+                if c in upper:
+                    p = plain.getpixel((x, y))
+                else:
+                    target = ours + (lum(c) - ul)
+                    p = min(shades_here, key=lambda s: abs(lum(s) - target)) + (255,)
+            else:
+                if c in lower:
+                    continue
+                if lum(c) < ll - 15:
+                    p = SHADOW
+                elif lum(c) > ll + 15 and keep_light_outside:
+                    p = LIGHTEN
+                else:
+                    continue
+            out.putpixel((x, y), p)
+    return out
+
+
+def render_bank(src, mask, outline, grass, sand):
+    """Grass over pond water: grass where Pixellab drew grass, the bank's sand
+    and stones in our sand's colours (dark stones and the lip in rim colours).
+    Told apart by hue: green is grass, blue-green is the pond, the rest bank."""
+    sand_rim = rim_colour(sand)
+    sand_dark = shades(sand)[0]
+    grass_rim = rim_colour(grass)
+    out = Image.new('RGBA', (T, T), (0, 0, 0, 0))
+    for y in range(T):
+        for x in range(T):
+            c = src.getpixel((mask * T + x, y))[:3]
+            if is_pond(c):
+                continue
+            if g_ish(c):
+                # The grass's own darker lip, in our grass's rim colour.
+                p = grass_rim + (255,) if lum(c) < 125 else grass.getpixel((x, y))
+            elif lum(c) < 140:
+                p = sand_rim + (255,)
+            elif lum(c) < 175:
+                p = sand_dark + (255,)
+            else:
+                p = sand.getpixel((x, y))
+            out.putpixel((x, y), p)
+    return out
+
+
+def is_pond(c):
+    return c[2] >= c[1] - 10 and c[2] > c[0] + 20
+
+
+def g_ish(c):
+    return c[1] >= c[0] and c[1] > c[2] + 30
+
+
+def foam_frames(outline):
+    """The foam on the sea round the land in `outline`: four frames of a
+    ring that runs out from the shore and back (1, 2, 3, 2 pixels out), a
+    bright line with a paler fringe, broken here and there so it fizzes."""
+    white = nearest((255, 255, 255)) + (255,)
+    pale = nearest((180, 225, 235)) + (200,)
+    d = depth(outline)
+    reach = [1, 2, 3, 2]
+    frames = []
+    for f in range(FOAM_FRAMES):
+        im = Image.new('RGBA', (T, T), (0, 0, 0, 0))
+        r = reach[f]
+        for y in range(T):
+            for x in range(T):
+                k = -d[y][x]
+                if k <= 0:
+                    continue
+                broken = (x * 7 + y * 13 + f * 5) % 9 == 0
+                if k == r and not broken:
+                    im.putpixel((x, y), white)
+                elif k == r + 1 and (x + y + f) % 3 != 0:
+                    im.putpixel((x, y), pale)
+                elif k < r and (x * 3 + y * 5 + f) % 7 == 0:
+                    im.putpixel((x, y), pale)
+        frames.append(im)
+    return frames
+
+
 def render(shape, plain, rim, shadow):
     out = Image.new('RGBA', (T, T), (0, 0, 0, 0))
     for y in range(T):
@@ -191,13 +375,22 @@ def scatter_piece(detail, plain):
 
 def build(season):
     ground = Image.open(os.path.join(ROOT, f'assets/tilesets/ground_{season}.png')).convert('RGBA')
-    out = Image.new('RGBA', (16 * T, (SCATTER_ROW + 1) * T), (0, 0, 0, 0))
+    out = Image.new('RGBA', (16 * T, (FOAM_ROW + FOAM_FRAMES) * T), (0, 0, 0, 0))
     path_plain = tile(ground, 2, 0)
+    outline = load_outline()
     for gi, (name, (col, row)) in enumerate(GROUNDS):
         plain = tile(ground, col, row)
         rim = rim_colour(plain)
         for variant in range(VARIANTS):
             for mask in range(1, 15):
+                if name in BANDED:
+                    # Both variants alike: two different Pixellab outlines
+                    # wouldn't meet where neighbouring tiles join.
+                    src = Image.open(os.path.join(SOURCES, BANDED[name])).convert('RGBA')
+                    pic = render_banded(src, mask, outline[mask], plain,
+                                        keep_light_outside=(name != 'wet_sand'))
+                    out.paste(pic, (mask * T, (gi * VARIANTS + variant) * T))
+                    continue
                 if name in PIXELLAB:
                     src = Image.open(os.path.join(ROOT, 'art/ground_sources/edges', PIXELLAB[name])).convert('RGBA')
                     shape = pixellab_shape(src, mask)
@@ -213,6 +406,17 @@ def build(season):
     pieces.append(scatter_piece(tile(ground, 0, 2), path_plain))
     for i, p in enumerate(pieces):
         out.paste(p, (i * T, SCATTER_ROW * T))
+    # Grass over pond water, with its bank.
+    bank_src = Image.open(os.path.join(SOURCES, BANK)).convert('RGBA')
+    grass_plain, sand_plain = tile(ground, 0, 0), tile(ground, 1, 3)
+    for variant in range(VARIANTS):
+        for mask in range(1, 15):
+            out.paste(render_bank(bank_src, mask, outline[mask], grass_plain, sand_plain),
+                      (mask * T, (BANK_ROW + variant) * T))
+    # The foam: frame N of mask M at row FOAM_ROW + N.
+    for mask in range(1, 15):
+        for f, im in enumerate(foam_frames(outline[mask])):
+            out.paste(im, (mask * T, (FOAM_ROW + f) * T))
     out.save(os.path.join(ROOT, f'assets/tilesets/edges_{season}.png'))
     print('wrote', f'edges_{season}.png', out.size)
 

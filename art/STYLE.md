@@ -259,3 +259,26 @@ included. Off-palette colours: none. Winter roofs by `art/build_winter_roofs.py`
 | Nell, Dot, Tam, Ivy (56 × 56) | pixflux, palette, `init_image` = placeholder, strength 150, feet moved to the old row | e.g. "sturdy middle-aged woman village innkeeper, full body, front view facing the viewer, standing still, arms at sides, dark brown hair tied back, dark green waistcoat over a cream blouse with rolled sleeves, long brown skirt, brown boots" | on palette |
 
 Seeds 7 and 21, the better kept. Off-palette colours: none.
+
+**Soft ground edges, 2026-11-19 (Stage 23 sessions 4–5, DECISIONS 072–073).** `/create-tileset`
+standard, 16 px, `transition_size` 0.25, view "high top-down", **seed 7** (21 tried; 7 better).
+Sources (sixteen tiles by mask) in `art/ground_sources/edges/`; `art/build_ground_edges.py`
+reads each against `shape.png`, the outline every seed-7 set shares, and colours it from our
+plain tiles. Run `python3 art/build_ground_edges.py` after changing a ground image.
+
+| Source | Lower terrain | Upper terrain |
+|---|---|---|
+| `grass_over_path.png` (s4) | dirt path | short lush green meadow grass |
+| `water.png` | deep blue sea water with small white wave crests | still teal pond water with gentle ripples |
+| `wet_sand.png` (and `shape.png` from it) | deep blue sea water with small white wave crests | damp darker tan wet beach sand with faint ripple lines |
+| `rockpool.png` | damp darker tan wet beach sand … | grey rocky shore shelf dotted with small round teal tide pools and green weed |
+| `sand.png` | damp darker tan wet beach sand … | smooth pale cream dry beach sand with a few tiny shell flecks |
+| `path.png` | smooth pale cream beach sand | smooth packed light brown dirt footpath, fine even texture with a few tiny pebbles |
+| `paving.png` | smooth packed light brown dirt footpath | old village square paved with many small irregular cobblestones, warm light grey stones, thin dark mortar lines |
+| `tilled.png` | smooth packed light brown dirt footpath | dark brown tilled farm soil in neat furrows |
+| `tilled_wet.png` | dark brown tilled farm soil in neat furrows | very dark wet watered tilled farm soil in neat furrows |
+| `rocks.png` | smooth pale cream beach sand | tightly packed big round grey sea boulders with dark cracks |
+| `thicket.png` | short lush green meadow grass | dense dark green bramble hedge thicket with red berries |
+| `grass_bank.png` | still teal pond water with gentle ripples | short lush green meadow grass; `transition_description` "sandy pond bank with small grey pebbles" |
+
+Foam: no generation; drawn by the script from `shape.png` (a ring 1, 2, 3, 2 px out, four frames).

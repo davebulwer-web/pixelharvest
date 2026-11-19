@@ -29,6 +29,11 @@ extends Node2D
 ## layers underneath and is then drawn again, square, on a layer of its own
 ## on top.
 ##
+## Foam (session 5, DECISIONS 073). Where the sea meets anything, a ring of
+## foam is drawn on the sea just off the shore, on a layer between the sea and
+## the wet sand; the tileset animates it, so it runs up the beach and back. It
+## follows the tide by itself, like everything here.
+##
 ## Scatter. Along the joins, now and then, a tuft or a pebble is drawn on a
 ## layer of its own, so edges look lived in. Purely cosmetic, like the grass
 ## details.
@@ -63,6 +68,7 @@ var _ground: TileMapLayer
 var _layers: Array[TileMapLayer] = []
 var _scatter: TileMapLayer
 var _square: TileMapLayer
+var _foam: TileMapLayer
 
 ## Corners waiting to be redrawn at the end of the frame.
 var _dirty: Dictionary = {}  # Vector2i -> true
@@ -118,6 +124,10 @@ func follow_tileset() -> void:
 func _build_layers() -> void:
 	for i in GroundTiles.EDGE_GROUNDS.size():
 		_layers.append(_new_layer("Edge_%d" % i, HALF_TILE))
+		if i == GroundTiles.EdgeGround.SEA:
+			# Straight after the sea, so whatever lies on the sea covers the
+			# foam's inner half and only the ring out on the water shows.
+			_foam = _new_layer("Foam", HALF_TILE)
 	_scatter = _new_layer("EdgeScatter", HALF_TILE)
 	_square = _new_layer("SquareGround", Vector2.ZERO)
 
@@ -138,6 +148,7 @@ func _all_layers() -> Array[TileMapLayer]:
 	var result: Array[TileMapLayer] = _layers.duplicate()
 	result.append(_scatter)
 	result.append(_square)
+	result.append(_foam)
 	return result
 
 
@@ -172,6 +183,7 @@ func _draw_corner(corner: Vector2i, bounds: Rect2i) -> void:
 	for layer in _layers:
 		layer.erase_cell(corner)
 	_scatter.erase_cell(corner)
+	_foam.erase_cell(corner)
 	if lowest == GroundTiles.EDGE_GROUNDS.size():
 		return  # all four square: the square layer covers it
 	# The lowest ground is drawn whole; every higher one present over it.
@@ -195,9 +207,21 @@ func _draw_corner(corner: Vector2i, bounds: Rect2i) -> void:
 			# ground counts as highest of all).
 			if kinds[i] < 0 or kinds[i] >= kind:
 				mask |= _CORNER_BITS[i]
-		layer.set_cell(corner, GroundTiles.EDGE_SOURCE_ID, GroundTiles.edge_tile(kind, mask, corner))
+		layer.set_cell(corner, GroundTiles.EDGE_SOURCE_ID,
+				GroundTiles.edge_tile(kind, mask, corner, lowest))
 	if drawn.size() > 1:
 		_maybe_scatter(corner, drawn)
+		if lowest == GroundTiles.EdgeGround.SEA:
+			_draw_foam(corner, kinds)
+
+
+## The foam round whatever meets the sea at `corner`.
+func _draw_foam(corner: Vector2i, kinds: Array[int]) -> void:
+	var mask := 0
+	for i in 4:
+		if kinds[i] != GroundTiles.EdgeGround.SEA:
+			mask |= _CORNER_BITS[i]
+	_foam.set_cell(corner, GroundTiles.EDGE_SOURCE_ID, GroundTiles.foam_tile(mask))
 
 
 ## Now and then, a tuft or a pebble on a join between two soft grounds that

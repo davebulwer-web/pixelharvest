@@ -3343,3 +3343,64 @@ Dave one first: if he wants the grass different, the rest would be redone).
 tile edges.
 
 **Cost.** Four Pixellab terrain sets (the look test), well under $0.10.
+
+## 073 — Every soft edge from Pixellab, read against one shared outline; a pond bank; animated foam
+
+**Decision.** Stage 23 session 5 (ROADMAP section 14), after Dave approved session 4's
+grass-over-path look (2026-11-19). The eleven placeholder edge sets are replaced by
+Pixellab's, grass over pond water gets a bank, and the sea gets foam. No save change, no
+rule change.
+
+- *One terrain set per ground.* Pixellab's terrain tool (`/create-tileset`, standard,
+  16 px, transition 0.25, view high top-down, **seed 7** like grass) made a set for each
+  ground over the one it usually meets: pond water over sea, wet sand over sea, rock shelf
+  over wet sand, dry sand over wet sand, path over sand, paving over path, tilled soil over
+  path, wet tilled over dry tilled, boulders over sand, hedge over grass, and grass over
+  pond water with a "sandy pond bank with small grey pebbles" between. Seeds 7 and 21 were
+  both made; 7 was better in nearly every pair (21 often drew a plain upper tile, so no
+  edge at all). The sources are kept in `art/ground_sources/edges/<ground>.png`, sixteen
+  tiles side by side by mask.
+- *The shared outline.* With one seed, Pixellab draws the **same outline** for every pair;
+  only the band along it differs (a dark rim, a lighter lip, a wet darkening outside,
+  foam, a sandy bank). We checked this by measuring every set against the wet-sand one.
+  So the outline is kept once (`shape.png`, white = upper ground) and each ground's set is
+  read pixel by pixel against it: Pixellab's own colours of the upper ground become our
+  plain tile's pixel; band pixels become one of our tile's main colours or its rim colour,
+  whichever sits as far in brightness from our tile as the band sits from Pixellab's (so
+  winter's snow gets a snow-coloured band, and a berry never becomes a whole band); a dark
+  band just outside becomes a see-through shadow, a light one a see-through lightening,
+  so they suit whatever lower ground they fall on. Grass keeps session 4's own set.
+- *Why not two variants from two seeds.* Every edge picture must meet its neighbours where
+  the outline crosses a tile side, and two seeds cross at different places. So both
+  variant rows of a ground hold the same pictures for now (the layout keeps the rows, so
+  a matching second set can go in later without code).
+- *The pond bank.* Grass over pond water would otherwise show grass's lip hanging over
+  water. It gets its own two rows (`GroundTiles.BANK_ROW`, rows 25–26), picked when the
+  lowest ground at the corner is pond water (`edge_tile()` is now told the lowest ground).
+  The bank is told apart by hue (green = grass, blue-green = water, the rest = bank) and
+  coloured from the season's sand tile. One special pair, not a set per pair: the height
+  order stays.
+- *Foam.* A layer of its own in GroundEdges, straight after the sea's, so whatever lies on
+  the sea covers its inner half. Where the lowest ground at a corner is the sea, the foam
+  picture for the corners that aren't sea is drawn (`GroundTiles.foam_tile()`, rows 27–30).
+  The pictures are worked out from the shared outline: a white ring with a pale fringe
+  1, 2, 3, then 2 pixels out on the water, four frames the tileset animates (0.35 s each),
+  so it runs up the beach and back. It follows the tide by itself, since the tide redraws
+  the cells. Wet sand's own static foam line is dropped in favour of it.
+- *Not done.* The cliffs keep their square tops (they're drawn square on a top layer;
+  softening only their lip would need a cliff-top set drawn under them and wasn't worth a
+  new layer yet). The sea has no edge set of its own (it's the lowest ground, so nothing
+  ever needs one). Edge scatter keeps session 4's pieces (cut from the Pixellab grass and
+  path details already).
+
+Options considered: reading each set's own shape by colour alone (failed where the two
+grounds share colours: path over sand, wet over dry tilled, the rock shelf over wet sand
+came out speckled); keeping Pixellab's colours as drawn (off our palette, and wrong in
+every season but spring); a set per season from Pixen (four times the sets, and the
+outline would drift between seasons, so the seasons wouldn't line up); foam from pixflux
+strips (wouldn't follow our outline exactly).
+
+**Why.** ROADMAP section 14; Dave liked session 4's grass edge and asked for the rest the
+same way.
+
+**Cost.** 23 Pixellab terrain sets (22 + one test), about $0.16 of credit ($4.92 left).

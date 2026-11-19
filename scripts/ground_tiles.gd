@@ -154,6 +154,16 @@ const SCATTER_ROW := 24
 const SCATTER_GREEN := 6
 const SCATTER_COUNT := 8
 
+## Grass over pond water has rows of its own (session 5, DECISIONS 073): a
+## sandy, stony bank instead of the lip grass shows over a path. Two variants.
+const BANK_ROW := 25
+
+## The foam on the sea's edge (DECISIONS 073): one picture per mask (which
+## corners are NOT sea), on its own layer under everything that sits on the
+## sea. Row 27 holds the first frame; the tileset animates each one through
+## the three rows below it, so the foam runs up the shore and back.
+const FOAM_ROW := 27
+
 
 ## Which EdgeGround the ground tile `coords` is, or -1 for ground that keeps
 ## square edges (the cliff, the pier, anything unknown).
@@ -175,9 +185,20 @@ static func edge_fill(ground: int, corner: Vector2i) -> Vector2i:
 	return EDGE_GROUNDS[ground]
 
 
-## The edge picture of `ground` covering the corners in `mask`.
-static func edge_tile(ground: int, mask: int, corner: Vector2i) -> Vector2i:
-	return Vector2i(mask, ground * EDGE_VARIANTS + pick(corner, 9, EDGE_VARIANTS))
+## The edge picture of `ground` covering the corners in `mask`, drawn over
+## `lowest`, the lowest ground at that corner. Grass over pond water gets a
+## bank; everything else has one set, whatever it lies over.
+static func edge_tile(ground: int, mask: int, corner: Vector2i, lowest: int = -1) -> Vector2i:
+	var variant := pick(corner, 9, EDGE_VARIANTS)
+	if ground == EdgeGround.GRASS and lowest == EdgeGround.WATER:
+		return Vector2i(mask, BANK_ROW + variant)
+	return Vector2i(mask, ground * EDGE_VARIANTS + variant)
+
+
+## The foam picture for a corner where the sea meets something; `mask` is the
+## corners that are NOT sea.
+static func foam_tile(mask: int) -> Vector2i:
+	return Vector2i(mask, FOAM_ROW)
 
 
 ## A scatter piece for a join between the grounds `kinds` at `corner`, or
