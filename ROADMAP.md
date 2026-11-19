@@ -728,7 +728,7 @@ Stage 20 (balance and release) becomes Stage 26.
 | **20** | **Early days** (jobs, errands, workbench, where to sell, bakery) | 2 | Opus, then Sonnet | v22 (crafting recipes known, the day's jobs) | none |
 | **21** | **The Cove** (tides, rockpools, sea fishing, crab pots, Tam) | 2 | Opus, then Sonnet | v23 (crab pots, sea fish in the log) | none |
 | **22** | **The tavern and people on the move** (Nell, Dot, homes, weekdays, schedules, walking) | 2 | Opus | maybe none (schedules are worked out from the clock) | none |
-| **23** | **Art: the world** (every building at the new size with roof variety; Lane and Cove tilesets; the Stage 12–18 backlog) | 2–3 art | cloud env | — | lots |
+| **23** | **Art: the world** (every building at the new size with roof variety; Lane and Cove tilesets; the Stage 12–18 backlog; then soft ground edges, section 14) | 3 art + 1 code + 1 art | cloud env | — | lots |
 | **24** | **Art: people and the UI** (portraits, walk cycles, the font and a UI theme) | 1 code + 2 art | Sonnet + cloud env | — | lots |
 | **25** | **Almanac and year review** (old 19 without life in town; the almanac now includes sea fish and sea forage) | 1–2 | Sonnet | v24 (collections) | a few |
 | **26** | **Balance and release** (old 20; checks the clock again now that travel is longer: 6 s per 10 min may suit the bigger map better) | 2 | Opus | — | title screen |
@@ -765,3 +765,97 @@ marriage.
 handline in week 1; world and early game first, with the font and portraits alongside.
 
 Everything else in this section is a recommendation Dave can change while it's built.
+
+## 14. Soft ground edges (2026-11-19)
+
+Dave (2026-11-19), with two Stardew Valley screenshots: where land meets water, or grass
+meets earth, the ground should blend in soft, organic shapes instead of hard square tile
+edges. In the pictures: a beach whose edge curves and steps irregularly, with a band of wet
+sand and a light foam line where it meets the sea; ponds with rounded banks of sand and
+stones; grass that ends in a ragged, overhanging lip over the dirt paths, with stones and
+tufts scattered along the join.
+
+### 14.1 Why our edges are square today
+
+Every cell draws one plain tile for its kind of ground (`GroundTiles`: grass, path, tilled,
+water, cliff, thicket, paving, sand, wet sand, rockpool, sea, pier, rocks). Where two kinds
+meet, the line runs straight along the tile grid. And the Pixellab terrain tool we used for
+the ground (`/create-tileset`, a "Wang" set) already **drew the edge tiles** for every pair
+(grass and path, grass and water, sand and sea...): we kept only the plain tile of each and
+threw the edges away (DECISIONS 026, 032, 070). So the art half of this is mostly asking
+for what Pixellab already makes.
+
+### 14.2 The approach
+
+**Ground stays a grid of cells; only the drawing changes.** What a cell *is* (walkable,
+water, tillable) doesn't move, so the rules, collision, tides, fishing spots and saves are
+untouched. The edges are worked out from the cells every time a map is drawn, like the
+grass details today (never saved).
+
+- **Corner-matched transition tiles ("dual grid").** A second, display-only tile layer is
+  drawn half a tile offset, so each display tile sits on the corner where four cells meet
+  and picks its picture from what those four cells are. One terrain pair needs 16 tiles (a
+  Wang/corner set: every mix of the four corners), and that is exactly the 4 × 4 sheet
+  Pixellab's terrain tool returns. Godot 4's own terrain feature (TileSet terrain sets,
+  "match corners") can do the matching instead; the dual grid is recommended because each
+  game cell stays one plain kind of ground and those 16 tiles cover every case.
+- **Layers by height, not every pair.** Rather than a set for every pair of grounds, each
+  ground sits on its own height (sea < wet sand < sand < grass < path/tilled/paving...) and
+  draws its edge over what's under it. That keeps it to about one set per ground that meets
+  grass or sand (the list below) instead of dozens of pairs.
+- **Organic shapes.** Edges round off corners, but a long straight coast still looks ruled.
+  So the map layouts get a light reshape: the Cove's beach line, the pond, the stream and
+  the Woods' pools get irregular, stepped outlines (as data in the layout scripts), and
+  paths get the odd one-cell kink. Only cells that hold nothing a save can store change.
+- **Foam and wet sand.** The sea's edge gets a thin animated foam line (2–4 frames on its
+  own layer, or a small shader), and the wet-sand band follows the tide: when the tide moves
+  (Stage 21's tide clock), only the edge cells that changed are redrawn.
+- **Scatter along the joins.** Pebbles, tufts, shells and the odd flower drawn *only* on
+  edge tiles (the same trick as the grass details: something in the middle of the tile,
+  mirrored at random), so joins look lived in. Purely cosmetic, never saved.
+- **Seasons.** Every edge set comes in the four seasons' ground images, made from the spring
+  one with the same image-to-image method as the plain tiles (STYLE.md). Winter edges are
+  snow against path and ice against shore.
+
+### 14.3 What it touches
+
+| Edge | Maps | Notes |
+|---|---|---|
+| Grass ↔ dirt path | farm, Lane, town, Woods | the most visible; the first look test |
+| Grass ↔ tilled soil (and wet tilled) | farm, allotment on the Lane | redrawn when the hoe tills or a field goes back to grass |
+| Grass ↔ pond / stream water, with a sandy or stony bank | farm pond, town pond, Lane stream and ford, Woods | rounded banks as in Dave's second picture |
+| Grass ↔ sand, sand ↔ wet sand, wet sand ↔ sea, + foam | Cove | follows the tide |
+| Sand ↔ rock shelf / rockpools, sand ↔ rocks | Cove | the shelf shows at low tide only |
+| Grass ↔ paving | town square | a softer kerb |
+| Grass ↔ thicket / hedge | farm, Lane | ragged hedge foot |
+| Grass ↔ cliff | Lane, Cove | the cliff face keeps its own art; only its top lip softens |
+
+Buildings, the pier, fences and objects are unaffected. The farm's interior and the
+tavern's floors stay square (rooms are meant to be).
+
+### 14.4 Pixellab
+
+Yes, it can make them: `/create-tileset` (standard, 16 px) returns a 16-tile corner set
+for a lower and an upper terrain, and chaining `lower_base_tile_id` to our grass/sand base
+keeps them joined to today's plain tiles (pixellab-tiles notes). The work per set is what
+it already is for plain tiles: map the colours onto the palette by brightness, check the
+corner labels by eye (they can come swapped), and make the other three seasons
+image-to-image. About 10 pairs × 4 seasons. Foam frames and edge scatter: pixflux strips,
+as the grass details. Credits are not a constraint. The one unknown is how well the edge
+tiles match each other at the corners, so session 4 starts with one pair (grass ↔ path)
+as a look test for Dave before the rest are made.
+
+### 14.5 Saves and rules
+
+**No save change.** Edges, scatter and foam are worked out from the cells when drawn.
+The reshape of coastlines and ponds is chosen to avoid cells a save can hold anything on
+(tilled soil, crops, placed objects, crab-pot spots); if one can't be avoided, it gets a
+save version with an upgrade, as usual. No balance numbers move.
+
+### 14.6 Where it goes
+
+Two more sessions of **Stage 23 (Art: the world)**, after session 3 (the rest of the
+backlog and the crop sheets), so they don't collide: **session 4** (code, Opus) builds the
+edge drawing, the layering and the reshaped outlines with the grass ↔ path look test;
+**session 5** (art, cloud env) makes every edge set in four seasons, the foam and the edge
+scatter. Stage numbers 24–26 and their save versions don't change.

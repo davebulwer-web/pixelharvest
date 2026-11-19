@@ -10,6 +10,6 @@ id = &"seed_shop"
 display_name = "Hollis's Seeds"
 scene_path = "res://scenes/interior.tscn"
 outside = &"town"
-door_cell = Vector2i(8, 12)
+door_cell = Vector2i(6, 12)
 exterior = ExtResource("3_ext")
 shop = ExtResource("2_shop")

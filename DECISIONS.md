@@ -3157,3 +3157,112 @@ the chalkboard and rumours give a short daily reason to visit, darts a weekly on
 **Cost.** Placeholder art for the tavern, the new homes, the furniture, Nell and the
 dishes (art/build_stage22_s2_placeholders.py) until Stage 23. The regulars don't play
 darts themselves; their score is only a number.
+
+## 069 — Every building redrawn at the new size; the shop row and the farmhouse plot make room, and winter roofs come from one script
+
+**Decision.** Stage 23 session 1 (ROADMAP 13.5): real Pixellab art for all sixteen
+buildings, at the size rule's sizes (art/STYLE.md), and the maps changed where the
+bigger ones didn't fit. **Save version 25** (the farm's buildings stand on more cells).
+
+- *How the art was made.* Pixflux, the STYLE.md prompt template, `color_image` =
+  art/palette.png (so every picture is on the 41 colours), `init_image` = the picture it
+  replaces, two seeds each, the better kept. Dave picked the light take (strength 80) from
+  a look test: it keeps each placeholder's shape, door and roof and adds real texture.
+  The five old pictures (farmhouse, greenhouse, three shops) were scaled up first and run
+  at 150; the general store, the forge and the seed shop came back with flat roofs, so
+  they were redone from a scaled-up front with a hipped roof drawn on by script (strength
+  100). Sizes: farmhouse 128 × 112, the three shops 128 × 112, the greenhouse (and its
+  ruin) 80 × 64; the rest keep the sizes their placeholders already had (tavern 160 × 128,
+  town hall and mayor's house 128 × 112, Pip's, Dot's, Tam's and Rosa's 128 × 96, the
+  bakery, Wren's and Ivy's 96 × 96, the lighthouse 64 × 128). Garbled sign text on the
+  bakery was painted out.
+- *Winter roofs from one rule* (art/build_winter_roofs.py) instead of a hand-made mask per
+  building: a roof's colours are the ones found (almost) only in the top part of the
+  picture, so windows, doors and walls keep theirs; the roof's main colour and brighter
+  become snow white, darker shades pale blue, the outline the snow's shadow blue. Each
+  building has its `_winter.png` in winter.tres's `object_sprites`, keyed by location id,
+  which `Building` already looked up (DECISIONS 034).
+- *The town's shop row* at the new size: the seed shop's door moves to (6, 12), the
+  general store's to (15, 12), the bakery's to (23, 12), the forge stays at (31, 12), so
+  they stand at x 3-10, 12-19, 21-26 and 28-35 with a one-cell gap between each (a lamp, an
+  open way up to the old glasshouse, a flower bed). The forge covers the pond's old south
+  bank, so the pond is two rows deep (31-36, rows 2-3) and its bank is rows 4-5, reached
+  from the pond path, which moves a cell east (x 36-37) to join the bridge path. Wren's
+  pond stop and the fishing contest (host, flags, sign) move onto the new bank; Ivy's
+  glasshouse stops move to its sides. One tree that would be inside the general store goes.
+- *The farmhouse plot.* The farmhouse is 128 × 112 on the same door cell (8, 11): its
+  doorway is now cells 8 and 9 (even width, DECISIONS 061), and it stands on x 5-12, rows
+  5-11, two rows into the north field (the field's buildable ground shrinks by 16 cells;
+  thicket only grows on grass, so nothing else changes). The greenhouse grows up a row (x
+  0-4, rows 8-11). The workbench moves from (11, 11), now inside the house, to (13, 11),
+  against the new east wall above the bin; the two trees that stood inside go.
+- *Save version 25* does for old games what version 18 did for the greenhouse: the new
+  cells become BUILDING terrain, and whatever was on them goes back in the bag (a crop as
+  its seeds, a tree as its sapling, a sprinkler, hive or decoration as itself; a crop
+  reaching in from outside goes too); the workbench moves to the first bare cell by the
+  new east wall. The areas and the list of things that go back are written into the step.
+  `tests/saves/v24_example.json` is a new game saved by the Stage 22 build, with a crop,
+  an apple tree, a sprinkler, a hive, a scarecrow and weeds put where the new buildings
+  stand: loaded now, each is given back and the workbench is at (13, 11).
+
+Options considered: keeping the farmhouse at 80 × 64 (it would stay smaller than Pip's
+cottage, and the farmer still wouldn't fit its door); moving it onto the new ground (the
+player's start, the path, the bin and the doorstep would all move, and everything Dave
+knows about his farm with them); a smaller footprint than the picture, so the roof could
+overhang the field without taking it (crops would be hidden under the roof and could only
+be reached from behind it). Moving the forge off the pond instead of shrinking the pond:
+there's no other room on the north side of the road without moving every shop. Winter
+masks drawn by hand per building (sixteen masks to keep in step with the art).
+
+**Why.** ROADMAP 13.5 and the size rule (DECISIONS 061): the farmer has to fit the doors,
+roofs should slope and vary, and every building is redrawn, not only the new ones.
+
+**Cost.** Stage 25's save version becomes 26. The north field is 16 cells smaller. The
+roofs' snow is a recolour, so it follows the roof's tile pattern rather than lying in
+drifts. The tavern's, the seed shop's and the general store's signs are Pixellab's own
+(the tavern's says "Inn").
+
+## 070 — The Cove's ground from the terrain tool; the backlog's small pictures four to a strip
+
+**Decision.** Stage 23 session 2: real Pixellab art for the Cove's six ground tiles and for
+162 placeholder pictures from Stages 12 to 22. No save change, no data change; one code
+change, the sea's mirroring.
+
+- *The Cove's ground.* Pixellab's terrain tool (`/create-tileset`, standard, 16 px), one
+  terrain pair per tile (sand on grass, wet sand on sand, the rock shelf and the rocks on
+  wet sand, the sea on wet sand, the pier on the sea), keeping only the plain tile of the
+  wanted terrain. The tool can't take a palette, so each tile is mapped onto two or three
+  palette shades by brightness rank (DECISIONS 032's method), and the rockpool shelf,
+  which has real colours (grey, teal, weed green), onto the nearest of seven. The first
+  rock shelf had no pools, so it was redone with the pools named. The same six tiles go
+  in all four seasons' ground images, as the placeholders did. Sources are kept in
+  art/ground_sources/cove/.
+- *The sea is mirrored at random* (`GroundTiles.transform_for`), like the grass is turned,
+  so its crests don't line up into a grid; only mirrored, never turned, so they stay
+  level. The pond and the cliffs are still drawn as they are.
+- *The Lane* needed no tiles of its own: it draws with the farm's real grass, path,
+  thicket (its hedges), stream and cliff tiles.
+- *Small pictures* (icons, 16 × 16): pixflux, the STYLE.md template, palette as
+  `color_image`, four to a 64 × 16 strip with the four placeholders as `init_image`
+  (strength 150), as Stage 8's icons were; pixflux can't make anything under 1024 px.
+  Strays that crossed into a neighbour's cell are cleared by script.
+- *Bigger pieces* (furniture, debris, signs, poles, people): pixflux, one each, the
+  placeholder centred on a canvas of at least 32 × 32 (strength 100; people 150), cut back
+  to the placeholder's size, so every picture keeps its size and where it stands. People
+  are shifted so their feet are on the old row. Grass tufts pixflux drew at the foot of a
+  few standing things (barrels, tide board, bird box, hive, well, lantern) were removed.
+- Two seeds each (7 and 21), the better kept; where neither beat the placeholder (the
+  sprinklers, the sickle, the float, aphids, the broken bridge, the contest sign, the
+  ruined glasshouse, the Woods footbridge) the placeholder stays for session 3.
+
+Options considered: Pixellab's tiles-pro tool for the Cove (Stage 6 found it draws a grid
+at every tile edge); pixflux strips for the ground (Stage 6: flat single colours);
+transition tiles between sand and grass (a Wang tileset needs autotiling code in every
+map, for a small gain; the hard edges match the rest of the game). One picture per call
+for the icons (four times the calls, and icons drawn together match each other better).
+
+**Why.** ROADMAP 13.5: the world's art. The Cove was the last place still drawn with flat
+placeholder ground, and the backlog's pictures were recoloured shapes.
+
+**Cost.** About 400 generations (two takes of everything, a few redone), about $1.30 of
+Pixellab credit. Every picture is open to Dave's eye: any can be redone in session 3.

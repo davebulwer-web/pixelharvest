@@ -29,8 +29,8 @@ const PAVING := Vector2i(0, 3)
 ## The Cove's ground (DECISIONS 064), in row 3 after the paving: dry sand,
 ## wet sand and the rocky shelf with its pools (both uncovered only at low
 ## tide), the sea, the pier's planks and rocks. The sea and the rocks are
-## solid, like the pond and the cliffs. Placeholder until the Cove's tileset
-## (Stage 23): art/build_stage21_placeholders.py draws them.
+## solid, like the pond and the cliffs. Real art since Stage 23 (DECISIONS 070):
+## Pixellab terrain tiles, kept in art/ground_sources/cove/.
 const SAND := Vector2i(1, 3)
 const WET_SAND := Vector2i(2, 3)
 const ROCKPOOL := Vector2i(3, 3)
@@ -94,11 +94,15 @@ static func path_for(cell: Vector2i) -> Vector2i:
 ## collision box is the whole square, so turning it changes nothing.) A detail
 ## is only mirrored left-right, so tufts and flowers still grow upwards.
 ## Everything else is drawn as is: the paving's stones only line up one way
-## round, and water and cliffs look wrong turned. Sand and the rockpools are
-## turned like grass.
+## round, and the pond and cliffs look wrong turned. Sand and the rockpools are
+## turned like grass. The sea is only mirrored (Stage 23): its wave crests run
+## left to right, so turning it would stand them on end.
 static func transform_for(cell: Vector2i, coords: Vector2i) -> int:
 	if coords in [GRASS, GRASS_ALT, PATH, THICKET, SAND, WET_SAND, ROCKPOOL]:
 		return _ALL_TRANSFORMS[_pick(cell, 4, _ALL_TRANSFORMS.size())]
+	if coords == SEA:
+		# The first four ways in the list: as is and the three mirrorings.
+		return _ALL_TRANSFORMS[_pick(cell, 4, 4)]
 	if coords.y == GRASS_DETAIL_ROW or coords.y == PATH_DETAIL_ROW:
 		return TileSetAtlasSource.TRANSFORM_FLIP_H if _pick(cell, 5, 2) == 1 else 0
 	return 0

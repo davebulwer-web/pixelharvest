@@ -110,7 +110,13 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##  24 — crab pots (DECISIONS 065): the pots set off the Cove's pier
 ##       ("crab_pots": a list of {"location", "x", "y", "baited"}, the day
 ##       each was baited or 0). Older games have set none.
-const CURRENT_VERSION := 24
+##  25 — the buildings at the new size (DECISIONS 069): the farmhouse and the
+##       greenhouse stand on more cells (the farmhouse x 5-12, rows 5-11;
+##       the greenhouse x 0-4, rows 8-11). Those cells become BUILDING
+##       terrain and whatever was on them is given back, as version 18 did;
+##       the workbench, which stood against the old farmhouse's east wall,
+##       moves to stand against the new one. No new fields.
+const CURRENT_VERSION := 25
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -354,6 +360,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_22_to_23(data["game"])
 			23:
 				_upgrade_23_to_24(data["game"])
+			24:
+				_upgrade_24_to_25(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -946,3 +954,112 @@ func _v23_is_bare(by_cell: Dictionary, cell: Vector2i) -> bool:
 ## set before Tam came to the Cove, so an older game has none.
 func _upgrade_23_to_24(game: Dictionary) -> void:
 	game["crab_pots"] = []
+
+
+## Version 24 -> 25: the buildings at the new size (DECISIONS 069).
+##
+## The farmhouse's and the greenhouse's new pictures are bigger, so they stand
+## on more of the farm. As versions 7 and 18 did, the cells they now cover
+## become BUILDING terrain and are cleared, and nothing is lost: a crop goes
+## back in the bag as its seeds (a tree as its sapling), a sprinkler, a hive
+## or a decoration as itself; a crop of several tiles reaching in from outside
+## goes too. Trees, weeds and fed soil just go. The areas are written here, not
+## worked out from today's pictures, so this step means the same thing however
+## the buildings change later.
+##
+## The workbench stood at V25_OLD_WORKBENCH, against the old farmhouse's east
+## wall, which is now inside the new one: it moves to the first bare cell of
+## V25_WORKBENCH_CELLS (against the new east wall, by the bin), or else the
+## bare cell of the old ground nearest it.
+const V25_BUILDINGS: Array[Rect2i] = [Rect2i(5, 5, 8, 7), Rect2i(0, 8, 5, 4)]
+const V25_OLD_WORKBENCH := Vector2i(11, 11)
+const V25_WORKBENCH_CELLS: Array[Vector2i] = [
+	Vector2i(13, 11), Vector2i(13, 10), Vector2i(14, 11), Vector2i(14, 10),
+	Vector2i(14, 13), Vector2i(13, 13), Vector2i(12, 13), Vector2i(11, 13),
+]
+## Everything that can stand on the farm that was put there from the bag,
+## and so goes back into it: the item has the object's own id.
+const V25_PLACED_OBJECTS: Array[String] = [
+	"sprinkler", "big_sprinkler", "brass_sprinkler", "bee_hive",
+	"angler_trophy", "bird_bath", "bird_box", "fair_trophy", "garden_fence",
+	"garden_flower_bed", "garden_lamp", "hay_bale", "log_pile", "paper_lantern",
+	"scarecrow", "stone_wall", "sundial",
+]
+
+
+func _upgrade_24_to_25(game: Dictionary) -> void:
+	var farm: Variant = game.get("farm")
+	if typeof(farm) != TYPE_DICTIONARY or typeof(farm.get("tiles")) != TYPE_ARRAY:
+		return
+	var returned: Array[String] = []
+	var workbench_moves := false
+	var by_cell := {}
+	for entry: Variant in farm["tiles"]:
+		if typeof(entry) != TYPE_DICTIONARY:
+			continue
+		var cell := Vector2i(int(entry.get("x", -999)), int(entry.get("y", -999)))
+		by_cell[cell] = entry
+		var inside := _v25_in_buildings(Rect2i(cell, Vector2i.ONE))
+		var crop_id: String = entry.get("crop", "")
+		if crop_id != "":
+			# A crop's tile is the front-left corner of what it stands on.
+			var span: int = 3 if entry.get("giant", false) else int(V18_CROP_SPANS.get(crop_id, 1))
+			if _v25_in_buildings(Rect2i(cell.x, cell.y - span + 1, span, span)):
+				returned.append(V18_CROP_SEEDS.get(crop_id, crop_id + "_seeds"))
+				for key in ["crop", "crop_stage", "crop_days", "crop_regrowing", "dry_nights", "pests", "giant"]:
+					entry.erase(key)
+		if not inside:
+			continue
+		var object_id: String = entry.get("object", "")
+		if object_id in V25_PLACED_OBJECTS:
+			returned.append(object_id)
+		elif object_id == "workbench":
+			workbench_moves = true
+		for key in ["object", "tilled", "watered", "weeds", "made_days", "made_ready",
+				"fertiliser", "kept_wet"]:
+			entry.erase(key)
+		entry["terrain"] = "BUILDING"
+	if workbench_moves:
+		var spot := _v25_workbench_spot(by_cell)
+		if spot != Vector2i(-1, -1):
+			var entry: Dictionary = by_cell[spot]
+			entry["object"] = "workbench"
+	var inventory: Variant = game.get("inventory")
+	if typeof(inventory) != TYPE_ARRAY:
+		return
+	for item_id in returned:
+		var found := false
+		for stack: Variant in inventory:
+			if typeof(stack) == TYPE_DICTIONARY and stack.get("id", "") == item_id:
+				stack["count"] = float(int(stack.get("count", 0)) + 1)
+				found = true
+				break
+		if not found:
+			inventory.append({"id": item_id, "count": 1.0})
+
+
+## True if `area` overlaps either building's new cells.
+func _v25_in_buildings(area: Rect2i) -> bool:
+	for building in V25_BUILDINGS:
+		if area.intersects(building):
+			return true
+	return false
+
+
+## Where the workbench goes: the first bare cell of V25_WORKBENCH_CELLS, or
+## else the bare cell of the old ground nearest its old place. Every farm
+## tile is in the save, so a cell with no entry is off the farm.
+func _v25_workbench_spot(by_cell: Dictionary) -> Vector2i:
+	for cell in V25_WORKBENCH_CELLS:
+		if by_cell.has(cell) and _v23_is_bare(by_cell, cell):
+			return cell
+	var best := Vector2i(-1, -1)
+	var best_distance := INF
+	for y in range(V23_OLD_GROUND.position.y, V23_OLD_GROUND.end.y):
+		for x in range(V23_OLD_GROUND.position.x, V23_OLD_GROUND.end.x):
+			var cell := Vector2i(x, y)
+			var distance := Vector2(cell).distance_to(Vector2(V25_OLD_WORKBENCH))
+			if distance < best_distance and by_cell.has(cell) and _v23_is_bare(by_cell, cell):
+				best = cell
+				best_distance = distance
+	return best

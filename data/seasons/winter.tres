@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SeasonTheme" load_steps=13 format=3]
+[gd_resource type="Resource" script_class="SeasonTheme" load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/season_theme.gd" id="1_theme"]
 [ext_resource type="TileSet" path="res://assets/tilesets/ground_tileset_winter.tres" id="2_tiles"]
@@ -7,6 +7,20 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/town/flower_bed_winter.png" id="6_flowers"]
 [ext_resource type="Texture2D" path="res://assets/sprites/farm/farmhouse_winter.png" id="7_house"]
 [ext_resource type="Texture2D" path="res://assets/sprites/farm/greenhouse_winter.png" id="8_greenhouse"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/seed_shop_winter.png" id="b_seed_shop"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/general_store_winter.png" id="b_general_store"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/blacksmith_winter.png" id="b_blacksmith"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/bakery_winter.png" id="b_bakery"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/tavern_winter.png" id="b_tavern"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/town_hall_winter.png" id="b_town_hall"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/mayor_house_winter.png" id="b_mayor_house"]
+[ext_resource type="Texture2D" path="res://assets/sprites/town/wren_cottage_winter.png" id="b_wren_cottage"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lane/pip_cottage_winter.png" id="b_pip_cottage"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lane/dot_yard_winter.png" id="b_dot_yard"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lane/ivy_cottage_winter.png" id="b_ivy_cottage"]
+[ext_resource type="Texture2D" path="res://assets/sprites/cove/tam_shed_winter.png" id="b_tam_shed"]
+[ext_resource type="Texture2D" path="res://assets/sprites/cove/rosa_cottage_winter.png" id="b_rosa_cottage"]
+[ext_resource type="Texture2D" path="res://assets/sprites/cove/lighthouse_winter.png" id="b_lighthouse"]
 [ext_resource type="Script" path="res://scripts/resources/weather_def.gd" id="w_def"]
 [ext_resource type="Resource" path="res://data/weather/sunny.tres" id="w_sunny"]
 [ext_resource type="Resource" path="res://data/weather/snow.tres" id="w_snow"]
@@ -24,7 +38,21 @@ object_sprites = Dictionary[StringName, Texture2D]({
 &"flower_bed": ExtResource("6_flowers"),
 &"garden_flower_bed": ExtResource("6_flowers"),
 &"farmhouse": ExtResource("7_house"),
-&"greenhouse": ExtResource("8_greenhouse")
+&"greenhouse": ExtResource("8_greenhouse"),
+&"seed_shop": ExtResource("b_seed_shop"),
+&"general_store": ExtResource("b_general_store"),
+&"blacksmith": ExtResource("b_blacksmith"),
+&"bakery": ExtResource("b_bakery"),
+&"tavern": ExtResource("b_tavern"),
+&"town_hall": ExtResource("b_town_hall"),
+&"mayor_house": ExtResource("b_mayor_house"),
+&"wren_cottage": ExtResource("b_wren_cottage"),
+&"pip_cottage": ExtResource("b_pip_cottage"),
+&"dot_yard": ExtResource("b_dot_yard"),
+&"ivy_cottage": ExtResource("b_ivy_cottage"),
+&"tam_shed": ExtResource("b_tam_shed"),
+&"rosa_cottage": ExtResource("b_rosa_cottage"),
+&"lighthouse": ExtResource("b_lighthouse")
 })
 light_tint = Color(0.82, 0.84, 0.92, 1)
 weather_odds = Dictionary[ExtResource("w_def"), int]({

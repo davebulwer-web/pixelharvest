@@ -9,14 +9,14 @@
 script = ExtResource("3_stop")
 at = 540
 place = &"town"
-cell = Vector2i(19, 7)
+cell = Vector2i(18, 4)
 words = "at the old glasshouse in town"
 
 [sub_resource type="Resource" id="Stop_sunday_2"]
 script = ExtResource("3_stop")
 at = 780
 place = &"town"
-cell = Vector2i(22, 7)
+cell = Vector2i(22, 5)
 words = "at the old glasshouse in town"
 
 [sub_resource type="Resource" id="Stop_sunday_3"]
@@ -41,14 +41,14 @@ stops = Array[ExtResource("3_stop")]([SubResource("Stop_sunday_1"), SubResource(
 script = ExtResource("3_stop")
 at = 540
 place = &"town"
-cell = Vector2i(19, 7)
+cell = Vector2i(18, 4)
 words = "at the old glasshouse in town"
 
 [sub_resource type="Resource" id="Stop_everyday_2"]
 script = ExtResource("3_stop")
 at = 780
 place = &"town"
-cell = Vector2i(22, 7)
+cell = Vector2i(22, 5)
 words = "at the old glasshouse in town"
 
 [sub_resource type="Resource" id="Stop_everyday_3"]

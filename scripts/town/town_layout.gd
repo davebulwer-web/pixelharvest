@@ -14,9 +14,9 @@ extends RefCounted
 ## The map, roughly (each character is about two cells):
 ##
 ##   ~~~~~~~~~~~~~~~~~~~~~ the river ~~~~~~~~~~~~~~~~~~~~~ [=] ~~~~~~~~~~~~~~
-##        trees  (glasshouse) trees  ~~pond~~ ||       /Wren's\
-##                                    ~~~~~~~~ ||      |cottage|
-##    *  [Seeds]  *  |  * [General][Bakery][Smith] * ||  ||
+##        trees  (glasshouse) trees  ~~pond~~  ||      /Wren's\
+##                                    bank     ||      |cottage|
+##   | [ Seeds ] | [General] [Bakery] * [Smith]  ||   ||
 ##   ==================== road ===================================  -> the Lane
 ##          fence           #  square  #  ||
 ##       * * garden * *    #   bench    #  ||  /  the Wheatsheaf  \
@@ -46,10 +46,16 @@ const ROAD_ROWS: Array[int] = [13, 14]
 ## The paved square south of the road, with the fountain in the middle.
 const SQUARE := Rect2i(15, 15, 11, 7)
 
-## The path from the road up past the blacksmith to the pond.
-const POND_PATH := Rect2i(35, 6, 2, 7)
+## The path from the road up past the blacksmith to the pond, and on to the
+## bridge path (moved a cell east in Stage 23, to make room for the forge).
+const POND_PATH := Rect2i(36, 4, 2, 9)
 
-const POND := Rect2i(31, 2, 6, 4)
+## The pond, by the river. Since Stage 23 (DECISIONS 069) it's two rows
+## deep, not four: Brann's forge, at the new size, stands where its south
+## bank was, so the bank is now the two rows between the pond and the
+## forge's roof, reached from the pond path (where Wren fishes and the
+## fishing contest is held).
+const POND := Rect2i(31, 2, 6, 2)
 
 ## The lane south from the road beside the square, down to Back Street
 ## (DECISIONS 068), and Back Street itself, along the bottom of the town,
@@ -91,16 +97,14 @@ const OBJECTS: Dictionary = {
 	Vector2i(15, 15): &"lamp_post",
 	Vector2i(25, 15): &"lamp_post",
 
-	# Along the north side of the road: a flower bed each side of every shop
-	# front, and lamps between the shops.
-	Vector2i(5, 12): &"flower_bed",
-	Vector2i(11, 12): &"flower_bed",
-	# Mabel's bakery (DECISIONS 063) fills the gap between the general store
-	# and the forge, so that stretch has no flower beds or lamp of its own.
-	Vector2i(17, 12): &"flower_bed",
-	Vector2i(34, 12): &"flower_bed",
+	# Along the north side of the road. Since Stage 23 (DECISIONS 069) the
+	# shops are at the new size (8 cells wide: the seed shop x 3-10, the
+	# general store 12-19, the bakery 21-26, the forge 28-35), so there's a
+	# one-cell gap between each: a lamp in one, flowers in another, and the
+	# one at x 20 left open, the way up to the old glasshouse.
 	Vector2i(2, 12): &"lamp_post",
-	Vector2i(14, 12): &"lamp_post",
+	Vector2i(11, 12): &"lamp_post",
+	Vector2i(27, 12): &"flower_bed",
 	Vector2i(38, 12): &"lamp_post",
 
 	# The garden west of the square: a fence along the top and bottom, flower
@@ -121,7 +125,7 @@ const OBJECTS: Dictionary = {
 	# Trees: a band along the top, clumps round the south and east edges, kept
 	# off the road, the square and the paths.
 	Vector2i(2, 3): &"tree", Vector2i(6, 5): &"tree", Vector2i(10, 3): &"tree",
-	Vector2i(14, 6): &"tree", Vector2i(17, 3): &"tree", Vector2i(23, 5): &"tree",
+	Vector2i(17, 3): &"tree", Vector2i(23, 5): &"tree",
 	Vector2i(27, 3): &"tree", Vector2i(39, 8): &"tree",
 	Vector2i(1, 9): &"tree", Vector2i(1, 19): &"tree", Vector2i(2, 23): &"tree",
 	Vector2i(13, 19): &"tree", Vector2i(33, 17): &"tree",

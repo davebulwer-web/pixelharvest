@@ -10,6 +10,6 @@ id = &"general_store"
 display_name = "Marlow's General Store"
 scene_path = "res://scenes/interior.tscn"
 outside = &"town"
-door_cell = Vector2i(20, 12)
+door_cell = Vector2i(15, 12)
 exterior = ExtResource("3_ext")
 shop = ExtResource("2_shop")

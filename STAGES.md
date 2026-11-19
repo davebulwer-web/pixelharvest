@@ -1287,15 +1287,87 @@ homes that use it.
       the town hall, Wren's cottage, Ivy's cottage, the tavern on a Friday night, the
       chalkboard and a dart thrown. Placeholder art for the new buildings, furniture,
       Nell and the dishes (art/build_stage22_s2_placeholders.py) until Stage 23
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-18)
+
+## Stage 23 — Art: the world · 3 art sessions, then soft edges (1 code + 1 art) · cloud env (Pixellab)
+
+**Session 1 (2026-11-18) — every building at the new size (DECISIONS 069, save v25)**
+
+- [x] Every building at the new size with varied sloping roofs (farmhouse, shops,
+      greenhouse and its ruin, bakery, tavern, town hall, mayor's house, Pip's, Ivy's and
+      Wren's cottages, Dot's yard, Tam's shed, Rosa's cottage, lighthouse): Pixellab
+      pixflux from the placeholders, the light take Dave picked from a look test
+- [x] Winter versions by script for all of them (art/build_winter_roofs.py), in winter.tres
+- [x] The town's shop row rebuilt round the bigger shops (seed shop, general store and
+      bakery doors move; the pond is two rows deep with a bank where Wren fishes and the
+      fishing contest is held)
+- [x] The farmhouse (128 × 112) and greenhouse (80 × 64) on the farm; the workbench moves to
+      the new east wall; **save version 25** gives back what stood where they now stand
+- [x] Verified in the sandbox: headless import and run clean; 715 layout checks (every
+      town doorstep, scheduled stop, festival host and decoration open and reachable from
+      the road, no building overlapping another or the town's objects, the pond and its
+      bank, the contest host reachable with the decorations up, the farm's buildings,
+      BUILDING ground, doorsteps and workbench); the v24 example save upgraded (10 checks:
+      everything under the new buildings given back, the workbench moved, a crop outside
+      kept), and v1, v7, v18, v21 and v23 saves still load; rendered the town in spring
+      and winter, the farm, the Lane and the Cove. (A check of market stalls' cells fails
+      the same way on the Stage 22 build: it's the check, not the town.)
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-18)
+
+**Session 2 (2026-11-18) — the Cove's ground and the art backlog (DECISIONS 070, no save change)**
+
+- [x] The Cove's ground: sand, wet sand, the rock shelf with its pools, the sea, the pier's
+      planks and the rocks, from Pixellab's terrain tool, mapped onto the palette, in all
+      four seasons' ground images (sources in art/ground_sources/cove/); the sea is
+      mirrored at random to hide its repeat. The Lane already draws with the real grass,
+      path, hedge (thicket), stream and cliff tiles, so it needed no tiles of its own
+- [x] Stage 19–22 pieces: debris (bramble, nettles, stones, stump), stone, hedgerow forage
+      (raspberry, rosehip, sloe), signpost, old well, rusty tool head, cart, flour sack,
+      letter, parcel, the allotment slate, bird box, log pile, stone wall, workbench (and
+      broken), tide board, crab pots and their floats, handline, brown crab, lobster, the ten
+      sea forage icons, and the tavern's barrels, chalkboard, dartboard, fireplace, bar and
+      tables; Nell, Dot and Tam
+- [x] Stage 12–18 pieces: all 17 dishes, all 26 fish, the 13 Woods forage icons, the 14 new
+      crops' produce and seed packets, tools and items (axe, bait, fibre, rod, spinner,
+      winter lure, trowel, growth feed, mulch, pest spray, sapling, hive), the stove (hot and
+      cold), the bee hive, weeds, bird bath, trophies, paper lantern, ice hole, festival
+      flags and lantern, show tables, the town bridge, the fallen log, the energy icon, and
+      Ivy. 162 pictures, every one the same size as the placeholder it replaces, on the
+      palette; no code or data changes beyond the sea's mirroring
+- [x] Verified in the sandbox: headless import and run clean; rendered the Cove, the Lane,
+      the farm, the tavern and the town
 - [ ] Dave confirms it plays correctly on Windows
 
-## Stage 23 — Art: the world · 2–3 art sessions · cloud env (Pixellab)
+**Next session (3)**
 
-- [ ] Every building at the new size with varied sloping roofs (farmhouse, shops,
-      greenhouse, bakery, tavern, town hall, mayor's house, homes, Dot's yard, Tam's shed,
-      Rosa's cottage, lighthouse), winter versions by script
-- [ ] The Lane and Cove tilesets; the Stage 12–18 art backlog (and Stage 19's debris,
-      stone, hedgerow forage and signpost)
+- [ ] The rest of the backlog: the growth sheets of the Stage 12 crops (and the giants and
+      apple tree), the sprinklers, the field-upgrade icon, the broken bridge, the contest
+      sign, Ivy's ruined glasshouse, the Woods footbridge, the float, aphids, the sickle,
+      the fed and mulched soil, the greenhouse's floor; any of today's pictures Dave wants
+      redone
+
+**Sessions 4 and 5 — soft ground edges (ROADMAP.md section 14, asked by Dave 2026-11-19; no save change expected)**
+
+Where two kinds of ground meet (grass and path, land and water, sand and sea) they blend
+in soft, rounded, irregular edges instead of square tile edges, as in Dave's Stardew Valley
+pictures. Cells don't change; only the drawing does.
+
+- [ ] Session 4 (code, Opus): a display-only edge layer drawn half a tile offset ("dual
+      grid"), each tile picked from the four cells at its corner, using 16-tile corner
+      sets (the 4 × 4 sheet Pixellab's terrain tool returns); grounds drawn in height order
+      so each needs one set, not one per pair; edges redrawn when the hoe tills, a field
+      reverts or the tide moves; edge-only scatter (pebbles, tufts, shells); irregular
+      outlines for the Cove's beach, the ponds, the stream and the Woods' pools (only cells
+      no save can hold anything on); placeholder edge sets for everything except grass ↔
+      path, which is made for real as a look test for Dave
+- [ ] Session 5 (art, cloud env, Pixellab): the rest of the edge sets after Dave approves
+      the look: grass ↔ tilled (and wet), grass ↔ water with a sandy/stony bank, grass ↔
+      sand, sand ↔ wet sand, wet sand ↔ sea, sand ↔ rock shelf and rocks, grass ↔ paving,
+      grass ↔ thicket, the cliff's top lip; all four seasons; foam frames on the sea's
+      edge; edge scatter
+- [ ] Maps touched: farm, Lane, town, Cove, Woods (not interiors, buildings or the pier)
+- [ ] Verified in the sandbox (rendered every map in all four seasons and at both tides;
+      the layout checks still pass) and Dave confirms it plays correctly on Windows
 
 ## Stage 24 — Art: people and the UI · 1 code + 2 art sessions · Sonnet + cloud env
 
@@ -1306,7 +1378,7 @@ homes that use it.
 
 ## Stage 25 — Almanac and year review · 1–2 sessions · Sonnet
 
-The old Stage 19 without "life in town". Save version 24.
+The old Stage 19 without "life in town". Save version 26 (Stage 23 took 25).
 
 - [ ] The collections book (crops, fish, sea fish, forage, sea forage, recipes)
 - [ ] The mayor's year review and title at lantern night; year-2 content

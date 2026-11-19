@@ -39,8 +39,9 @@ redrawn in Stage 23:
 | Front | Faces the camera (south). A building north of a path is reached straight up; one south of it needs a path round to its front |
 | Winter | A snowy-roof version by script, as the farmhouse's (DECISIONS 034) |
 
-The first two at this size are placeholders: Pip's family's cottage and Dot's shed on the
-Lane (128 × 96), drawn by `art/build_stage19_s2_placeholders.py`.
+Since Stage 23 (DECISIONS 069) every building is real art at these sizes, made with
+pixflux from its placeholder (the light take, strength 80), and its winter picture comes
+from `art/build_winter_roofs.py`.
 
 ## Palette — derived, 41 colours
 
@@ -233,3 +234,28 @@ Path details (`ground_sources/path_details/<season>.png`, 64×16) reuse cut-outs
 | `decorations/sundial.png`, `scarecrow_icon.png`, `lamp_post_icon.png` | 120 | strip of four decoration icons: hay bale, stone sundial on a pedestal, small scarecrow, iron garden lamp post |
 | `decorations/scarecrow.png` (now 32×32) | 100 | front view of a farm scarecrow on a wooden post, straw hat, sack cloth face, red checked shirt stuffed with straw, arms out on a crossbar (32×32 canvas) |
 | `decorations/hay_bale.png` | 150 | front view of a square golden hay bale tied with two strings (32×32 canvas, cut back to 16×16) |
+
+**Buildings at the new size, 2026-11-18 (Stage 23 session 1, DECISIONS 069).** All sixteen
+buildings: pixflux, the template above with the subject "<building>, <roof>, <walls>,
+<door> in the middle, front view", `color_image` = palette, `init_image` = the placeholder
+(strength 80, Dave's pick from a look test of 80 and 150) or, for the old 80 × 64 pictures,
+the old art scaled up (150); the general store, forge and seed shop again from a scaled-up
+front with a hipped roof drawn on by script (100), because the first takes kept the old
+flat roofs. Two seeds each (7, 21), the better kept: about 50 generations in all, look tests
+included. Off-palette colours: none. Winter roofs by `art/build_winter_roofs.py`.
+
+**The Cove's ground and the art backlog, 2026-11-18 (Stage 23 session 2, DECISIONS 070).**
+
+| Asset | Method | Prompt subject (upper terrain / subject) | Palette mapping |
+|---|---|---|---|
+| Cove sand (row 3, col 1) | `/create-tileset` standard, lower = grass | smooth pale cream beach sand with a few tiny shell flecks | #c8997b 6% / #ffe7d8 |
+| wet sand (col 2) | lower = pale dry beach sand | damp darker tan wet beach sand with faint ripple lines | #8a6340 / #ab816c |
+| rockpools (col 3) | lower = wet beach sand | grey rocky shore shelf dotted with small round teal tide pools and green weed | nearest of #22222b #44444f #53434a #71717e #2a7a7a #4fb8ac #2f5a2b |
+| sea (col 4) | lower = wet beach sand | deep blue sea water with small white wave crests | #3f4e71 / #43547a / #7295ae 10% |
+| pier (col 5) | lower = deep blue sea water | weathered brown wooden pier deck of long planks with dark gaps | #2e1f1a / #6b4a2f / #8a6340 |
+| rocks (col 6) | lower = wet beach sand | tightly packed big round grey sea boulders with dark cracks | #22222b / #44444f / #71717e |
+| 16 × 16 icons: dishes, fish, forage, sea forage, crop produce and seed packets, tools, items | pixflux, palette, four to a 64 × 16 strip, `init_image` = the placeholders, strength 150 | "strip of four separate small <game item / food / fish> icons in a row, each in its own 16x16 cell, left to right: <a>, <b>, <c>, <d>" (fish "… facing right"; packets "a cream paper seed packet with a picture of <crop>") | on palette |
+| Furniture, debris, signs, poles, stove, hive, show tables, log | pixflux, palette, placeholder centred on a ≥ 32 × 32 canvas, strength 100, cut back | "front view of <thing>" (bridge: "top-down view of …") | on palette |
+| Nell, Dot, Tam, Ivy (56 × 56) | pixflux, palette, `init_image` = placeholder, strength 150, feet moved to the old row | e.g. "sturdy middle-aged woman village innkeeper, full body, front view facing the viewer, standing still, arms at sides, dark brown hair tied back, dark green waistcoat over a cream blouse with rolled sleeves, long brown skirt, brown boots" | on palette |
+
+Seeds 7 and 21, the better kept. Off-palette colours: none.
