@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="CharacterDef" load_steps=8 format=3]
+[gd_resource type="Resource" script_class="CharacterDef" load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/character_def.gd" id="1_def"]
 [ext_resource type="Texture2D" path="res://assets/sprites/cove/tam.png" id="2_sprite"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/resources/shop_def.gd" id="4_shop"]
 [ext_resource type="Script" path="res://scripts/resources/demand_def.gd" id="5_demand"]
 [ext_resource type="Resource" path="res://data/schedules/tam.tres" id="20_schedule"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/cove/tam_frames.tres" id="81_walk"]
 
 [sub_resource type="Resource" id="Demand_plenty"]
 script = ExtResource("5_demand")
@@ -32,6 +33,7 @@ id = &"tam"
 display_name = "Tam"
 sprite = ExtResource("2_sprite")
 portrait = ExtResource("80_portrait")
+walk_frames = ExtResource("81_walk")
 location = &"cove"
 lines = Array[String](["Fish, shellfish, a bucket of winkles: if it came out of the sea, I'll buy it. Better than Marlow pays, and today.", "High water's when the pier fishes. Low water, you want to be in the rockpools, not on the end of a line.", "Fifteen of a kind I can send up to the city at a fair price. After that I'm only feeding the gulls.", "[happy] My father fished this cove, and his. The sea doesn't care who you are, but it rewards the patient.", "Tide's a clock you can't wind. Read the board by the path and plan your day by it.", "A good crab pot wants bait that stinks. Winkles, mussels, a tin of Marlow's bait. Crabs aren't fussy."])
 requires_unlock = ExtResource("3_unlock")

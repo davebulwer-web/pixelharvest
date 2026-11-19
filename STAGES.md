@@ -1419,17 +1419,23 @@ pictures. Cells don't change; only the drawing does.
       on the farm; checked in the running game: four-way sheet on a diagonal plays walk_down
       and targets the cell below, an added walk_down_right is picked up, idle falls back,
       up-left plays walk_up, a walker with frames plays its diagonal then straight walk
-- [ ] Dave confirms it plays correctly on Windows and likes the look
+- [x] Dave confirms it plays correctly on Windows and likes the look (committed 2026-11-19)
 
-**Sessions 2 and 3 (art, cloud env with Pixellab)**
+**Sessions 2 and 3 (art, cloud env with Pixellab) — done as one session, 2026-11-19 (DECISIONS 075, no save change)**
 
-- [ ] Walk cycles for every person (13), the same layout as the farmer's sheet, each made
-      into a SpriteFrames (data/… or beside the sheet) and set as their
-      `CharacterDef.walk_frames`; shopkeepers behind counters can stay still
-- [ ] Eight-way sheets (the four diagonals, walk and idle) for the farmer
-      (assets/sprites/player_frames.tres gains `walk_down_right`… ) and for each person, in
-      the same art pass as their walk cycle; left diagonals may be mirrored from right ones
-      (a mirrored SpriteFrames needs flipped frames, not flip_h, since Facing picks by name)
+- [x] Walk cycles for every person (13), the same layout as the farmer's sheet, each made
+      into a SpriteFrames beside the sheet (`<id>_walk.png` + `<id>_frames.tres` next to
+      their still picture) and set as `CharacterDef.walk_frames` for the eight people who
+      walk (Mabel, Nell, Tam, Dot, Ivy, the mayor, the angler, the child); the five
+      counter-only keepers have sheets ready but nothing uses them yet
+- [x] Eight-way sheets (the four diagonals, walk and idle) for the farmer
+      (farmer.png gains rows 5-8 and four idles in row 0; player_frames.tres gains
+      `walk_down_right`… ; his four straight rows are untouched) and for each person, in
+      the same art pass; every diagonal drawn, none mirrored
+- [x] Verified in the sandbox: headless import and run clean; every SpriteFrames loads
+      with 16 animations (8 idle of 1 frame, 8 walk of 8 frames, all 56 × 56) and Facing
+      finds all eight walks; walk preview GIFs made for Dave
+- [ ] Dave confirms the look and that people walk correctly on Windows
 - [ ] Optional: more lines tagged with `[happy]` / `[worried]` where a face would help
 
 ## Stage 25 — Almanac and year review · 1–2 sessions · Sonnet

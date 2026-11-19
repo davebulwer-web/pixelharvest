@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="CharacterDef" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="CharacterDef" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/character_def.gd" id="1_def"]
 [ext_resource type="Texture2D" path="res://assets/sprites/town/baker.png" id="2_sprite"]
 [ext_resource type="Texture2D" path="res://assets/sprites/portraits/baker.png" id="80_portrait"]
 [ext_resource type="Resource" path="res://data/unlocks/mabel_arrives.tres" id="9_unlock"]
 [ext_resource type="Resource" path="res://data/schedules/baker.tres" id="20_schedule"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/town/baker_frames.tres" id="81_walk"]
 
 [resource]
 script = ExtResource("1_def")
@@ -12,6 +13,7 @@ id = &"baker"
 display_name = "Mabel"
 sprite = ExtResource("2_sprite")
 portrait = ExtResource("80_portrait")
+walk_frames = ExtResource("81_walk")
 location = &"town"
 lines = Array[String](["[worried] Flour everywhere. It gets in places you wouldn't believe.", "Up at four every morning. Bread doesn't bake itself, more's the pity.", "Good vegetables make good baking. Remember that when you're weeding.", "If you've too much of anything, there's always someone in town who needs it."])
 requires_unlock = ExtResource("9_unlock")

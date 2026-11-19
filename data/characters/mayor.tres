@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="CharacterDef" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="CharacterDef" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/character_def.gd" id="1_def"]
 [ext_resource type="Texture2D" path="res://assets/sprites/town/mayor.png" id="2_sprite"]
 [ext_resource type="Texture2D" path="res://assets/sprites/portraits/mayor.png" id="80_portrait"]
 [ext_resource type="Resource" path="res://data/schedules/mayor.tres" id="20_schedule"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/town/mayor_frames.tres" id="81_walk"]
 
 [resource]
 script = ExtResource("1_def")
@@ -11,6 +12,7 @@ id = &"mayor"
 display_name = "Mayor Bramble"
 sprite = ExtResource("2_sprite")
 portrait = ExtResource("80_portrait")
+walk_frames = ExtResource("81_walk")
 location = &"town"
 lines = Array[String](["[happy] Welcome to town, farmer! It's good to see that old farm worked again.", "Read the notice board now and then. It knows the calendar better than I do.", "Marlow at the general store will buy your vegetables on the spot. The bin pays better, if you can wait a night.", "[worried] When a season turns, anything that can't grow in the new one is lost. Plan ahead!", "The blacksmith can make your tools reach further. Worth saving up for.", "I sit by this fountain every day. Best seat in town.", "[worried] There was a bridge to the woods once, before the flood took it. One day we'll put it back.", "[worried] Weeds and crows: every farmer's two worries. Keep a hand free for the one and a scarecrow up for the other."])
 schedule = ExtResource("20_schedule")

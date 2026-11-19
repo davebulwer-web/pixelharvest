@@ -7,7 +7,7 @@
       "width": 48,
       "height": 48
     },
-    "directions": 4,
+    "directions": 8,
     "view": "low top-down"
   },
   "spritesheet": {
@@ -18,7 +18,7 @@
     },
     "sheet_size": {
       "width": 448,
-      "height": 280
+      "height": 504
     },
     "columns": 8,
     "pivot": "cell-center",
@@ -26,12 +26,16 @@
       {
         "row": 0,
         "type": "rotations",
-        "frame_count": 4,
+        "frame_count": 8,
         "directions": [
           "south",
           "west",
           "east",
-          "north"
+          "north",
+          "south-east",
+          "south-west",
+          "north-east",
+          "north-west"
         ]
       },
       {
@@ -65,9 +69,42 @@
         "animation": "Walking",
         "animation_group_id": "2c44b6f7-3378-40a5-9da4-4c789edf4538",
         "direction": "north"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "Walking",
+        "animation_group_id": "d4ee1867-1629-4d6c-8f15-4adc5e738aa3",
+        "direction": "south-east"
+      },
+      {
+        "row": 6,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "Walking",
+        "animation_group_id": "d4ee1867-1629-4d6c-8f15-4adc5e738aa3",
+        "direction": "south-west"
+      },
+      {
+        "row": 7,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "Walking",
+        "animation_group_id": "d4ee1867-1629-4d6c-8f15-4adc5e738aa3",
+        "direction": "north-east"
+      },
+      {
+        "row": 8,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "Walking",
+        "animation_group_id": "d4ee1867-1629-4d6c-8f15-4adc5e738aa3",
+        "direction": "north-west"
       }
     ]
   },
   "export_version": "1.0",
-  "export_date": "2026-11-14T12:19:14.353922+00:00"
+  "export_date": "2026-11-14T12:19:14.353922+00:00",
+  "note": "Stage 24 art (2026-11-19): diagonals added from Pixellab character be00695b-ede2-4095-817e-8846834a6a95 (v3 rotations of this farmer, v3 walking). Rows 0-4 straight art unchanged."
 }

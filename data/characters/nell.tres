@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="CharacterDef" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="CharacterDef" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/character_def.gd" id="1_def"]
 [ext_resource type="Texture2D" path="res://assets/sprites/town/nell.png" id="2_sprite"]
 [ext_resource type="Texture2D" path="res://assets/sprites/portraits/nell.png" id="80_portrait"]
 [ext_resource type="Resource" path="res://data/unlocks/tavern_opens.tres" id="9_unlock"]
 [ext_resource type="Resource" path="res://data/schedules/nell.tres" id="20_schedule"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/town/nell_frames.tres" id="81_walk"]
 
 [resource]
 script = ExtResource("1_def")
@@ -12,6 +13,7 @@ id = &"nell"
 display_name = "Nell"
 sprite = ExtResource("2_sprite")
 portrait = ExtResource("80_portrait")
+walk_frames = ExtResource("81_walk")
 location = &"town"
 lines = Array[String](["Doors open at four, last orders at one. In between, the Wheatsheaf's the warmest room in the valley.", "I buy a bit of what I need off the chalkboard every day. Read it before you sell the lot to Marlow.", "A tavern hears everything. Where the fish are, what the weather's doing, who's after what. Ask me at the bar.", "Friday's darts night. The mayor fancies himself, and Wren's better than he lets on.", "[happy] My mother kept the Wheatsheaf, and her father before her. It's been shut ten years. Not any more."])
 requires_unlock = ExtResource("9_unlock")

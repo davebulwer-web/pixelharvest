@@ -3458,3 +3458,36 @@ facing for tools (a hoe on a corner cell would change every tool's rules).
 **Why.** ROADMAP 13.5 (font, theme, portraits) and section 15 (eight-way characters): the
 code half of Stage 24, so the two art sessions only make pictures and SpriteFrames.
 
+## 075 — Eight-way walk sheets from Pixellab's character tool, one layout for everyone
+
+**Decision.** Stage 24 art (2026-11-19, cloud; no save change, no code change).
+
+- *One sheet layout.* Every walker's sheet is the farmer's, grown to 448 × 504: 56 × 56
+  cells, row 0 the eight standing pictures (down, left, right, up, then down-right,
+  down-left, up-right, up-left), rows 1-8 eight-frame walks in that same order. Each
+  SpriteFrames names them `idle_<facing>` (1 frame, speed 2) and `walk_<facing>` (8 frames,
+  speed 10), exactly as player_frames.tres always has, so Facing and Npc need nothing new.
+  The farmer keeps his file names (farmer.png, player_frames.tres) and his four straight
+  rows unchanged; everyone else gets `<id>_walk.png` and `<id>_frames.tres` beside their
+  still picture.
+- *How they're drawn.* Pixellab's v3 character tool turns each person's existing front
+  picture into eight views (the farmer: his four existing views given, the four diagonals
+  drawn), then its walking template animates each view (eight frames). Every diagonal is
+  drawn, not mirrored, because most people aren't symmetrical (Dot's satchel, Ivy's scarf).
+- *Tidied by script.* Each direction is shifted so the feet sit on the same line as the
+  still picture and it's centred in the cell, and stray specks under 20 pixels (a ground
+  line the tool sometimes draws under the boots) are removed. Three things were redone: Mabel
+  first came out holding a rolling pin (a new character with "empty hands" in the words), the
+  child's walking-down came out a size larger (redrawn), and the angler's walking-up kept
+  drawing a ground line under his boots (taken off by script, row by row).
+- *Who uses them.* The eight people with a CharacterDef get `walk_frames`. The five keepers
+  only ever behind a counter (Marlow, the grocer, the seed merchant, the seed shop, the
+  smith) have sheets made in the same pass for when they step out; ShopDef has no
+  walk_frames, so nothing changes for them yet.
+
+Options considered: mirroring the left diagonals (cheaper, but swaps which side bags and
+scarves are on); one sprite sheet per direction (eight files a person instead of one);
+regenerating the farmer's straight rows too (Dave already likes them).
+
+**Why.** STAGES.md Stage 24 sessions 2-3 and ROADMAP section 15: the art half of eight-way
+characters, landing on DECISIONS 074's fallback so each sheet just switches on.
