@@ -295,6 +295,10 @@ func _place_player() -> void:
 ## tile back in the right place with the new season's pixels.
 func _apply_season_theme() -> void:
 	SeasonLook.apply_ground(_ground)
+	# Soft edges where the grounds meet (DECISIONS 072). The greenhouse
+	# overrides this function, so its floor, a room, stays square.
+	if GroundEdges.of(_ground) == null:
+		GroundEdges.attach(_ground)
 
 
 func _draw_all() -> void:

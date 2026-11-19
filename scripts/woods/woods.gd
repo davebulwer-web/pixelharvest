@@ -48,6 +48,7 @@ func _ready() -> void:
 	_player.can_farm = false
 	_player.tool_place = self
 	SeasonLook.apply_ground(_ground)
+	GroundEdges.attach(_ground)
 	var woods := LocationManager.find(WOODS_ID)
 	var tiles := WoodsLayout.build(Exits.gap_cells(woods))
 	for cell: Vector2i in tiles:

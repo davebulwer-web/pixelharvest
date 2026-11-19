@@ -102,6 +102,16 @@ const DOT_CART := Vector2i(50, 19)
 ## farm end, shallow where the lane crosses it (the ford, drawn as path).
 const STREAM_X := 54
 
+## Since Stage 23 (DECISIONS 072) the stream wanders a little, as the Woods'
+## does: for row y its left tile is STREAM_X + STREAM_BENDS[y]. It runs
+## straight from the row above the north hedge to the row below the south
+## one, so the hedges, the ford and the hedgerow forage are where they were.
+const STREAM_BENDS: Array[int] = [
+	1, 1, 0, 0, -1, -1, -1, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 1, 1, 1, 0, 0, 1, 1,
+]
+
 ## Trees stand one to a 3 × 3 block, at a spot in the block chosen by its
 ## position, where that spot is open meadow: sparser than the Woods, so the
 ## Lane reads as fields with trees in them, not forest.
@@ -175,7 +185,10 @@ static func _in_gap(cell: Vector2i) -> bool:
 
 ## True for the stream (but not the ford, where the lane crosses it).
 static func is_stream(cell: Vector2i) -> bool:
-	return inside(cell) and (cell.x == STREAM_X or cell.x == STREAM_X + 1) and cell.y not in ROAD_ROWS
+	if not inside(cell) or cell.y in ROAD_ROWS:
+		return false
+	var left := STREAM_X + STREAM_BENDS[cell.y]
+	return cell.x == left or cell.x == left + 1
 
 
 ## True for hedge: the two hedgerows, apart from their gaps and the stream.

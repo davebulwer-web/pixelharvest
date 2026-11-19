@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 22 — the tavern and people on the move** (ROADMAP section 13, agreed 2026-11-17; the stages from 19 on were rewritten by it, see below). Session 2 (Nell's tavern, the Wheatsheaf: rumours, the chalkboard, darts night, hot meals; Nell, Dot and Tam's requests; homes for the mayor, Wren and Ivy and the town hall, the town grown to 48 × 32; evenings at the tavern; DECISIONS 068, no save change) is built, waiting for Dave to try it. Session 1 (weekdays, schedules, people who walk; DECISIONS 067) is tested and committed by Dave (2026-11-18). Stage 21 (the Cove) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 20 (early days) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 19 (the Lane and the bigger farm) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 23 — art: the world.** Session 4 (soft ground edges, ROADMAP section 14; DECISIONS 072, no save change) is built, waiting for Dave to try it; sessions 1–3 are tested and committed by Dave (2026-11-19). Next is session 5 (every edge set made with Pixellab) once Dave approves the grass and path look. Eight-way movement and animation (ROADMAP section 15) was added to Stage 24 on 2026-11-19. Stage 22 (the tavern and people on the move) is complete: both sessions tested and committed by Dave (2026-11-18). Before that, from Stage 22: session 2 (Nell's tavern, the Wheatsheaf: rumours, the chalkboard, darts night, hot meals; Nell, Dot and Tam's requests; homes for the mayor, Wren and Ivy and the town hall, the town grown to 48 × 32; evenings at the tavern; DECISIONS 068, no save change) is built, waiting for Dave to try it. Session 1 (weekdays, schedules, people who walk; DECISIONS 067) is tested and committed by Dave (2026-11-18). Stage 21 (the Cove) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 20 (early days) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 19 (the Lane and the bigger farm) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -1336,15 +1336,18 @@ homes that use it.
       palette; no code or data changes beyond the sea's mirroring
 - [x] Verified in the sandbox: headless import and run clean; rendered the Cove, the Lane,
       the farm, the tavern and the town
-- [ ] Dave confirms it plays correctly on Windows
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-19)
 
-**Next session (3)**
+**Session 3 (2026-11-19) — the rest of the backlog, portraits and UI pictures (DECISIONS 071, no save change)**
 
-- [ ] The rest of the backlog: the growth sheets of the Stage 12 crops (and the giants and
-      apple tree), the sprinklers, the field-upgrade icon, the broken bridge, the contest
-      sign, Ivy's ruined glasshouse, the Woods footbridge, the float, aphids, the sickle,
-      the fed and mulched soil, the greenhouse's floor; any of today's pictures Dave wants
-      redone
+- [x] The growth sheets of the 17 Stage 12 crops, the giant melon and pumpkin and the apple
+      tree; the sprinklers, the field-upgrade deed, the float, the sickle, aphids, the
+      contest sign and Ivy's ruined glasshouse
+- [x] Kept as they are (no take beat them): the broken bridge, the Woods footbridge, the
+      fed and mulched soil and the greenhouse floor
+- [x] Stage 24's pictures made early, not used yet: 13 portraits (neutral, happy, worried)
+      and the UI nine-patches (panel, portrait frame, buttons)
+- [x] Dave confirms it plays correctly on Windows (committed 2026-11-19)
 
 **Sessions 4 and 5 — soft ground edges (ROADMAP.md section 14, asked by Dave 2026-11-19; no save change expected)**
 
@@ -1352,14 +1355,27 @@ Where two kinds of ground meet (grass and path, land and water, sand and sea) th
 in soft, rounded, irregular edges instead of square tile edges, as in Dave's Stardew Valley
 pictures. Cells don't change; only the drawing does.
 
-- [ ] Session 4 (code, Opus): a display-only edge layer drawn half a tile offset ("dual
-      grid"), each tile picked from the four cells at its corner, using 16-tile corner
-      sets (the 4 × 4 sheet Pixellab's terrain tool returns); grounds drawn in height order
-      so each needs one set, not one per pair; edges redrawn when the hoe tills, a field
-      reverts or the tide moves; edge-only scatter (pebbles, tufts, shells); irregular
-      outlines for the Cove's beach, the ponds, the stream and the Woods' pools (only cells
-      no save can hold anything on); placeholder edge sets for everything except grass ↔
-      path, which is made for real as a look test for Dave
+- [x] Session 4 (2026-11-19, code; DECISIONS 072, no save change): GroundEdges, a
+      display-only "dual grid" drawn half a tile offset over every outdoor map's ground,
+      each picture chosen from the four cells at its corner (16-tile corner sets); twelve
+      grounds in height order (sea, pond, wet sand, rock shelf, sand, path, paving, tilled,
+      wet tilled, grass, rocks, hedge/thicket), each drawn over anything lower, so one set
+      each; the cliffs and the pier keep square edges; redrawn by itself whenever a cell is
+      drawn (the hoe, a field going back, the tide, the allotment beds, the Woods' logs);
+      tufts and pebbles scattered along the joins; the Cove's beach outline made irregular
+      (grass bites, sand spills, dry sand stepping into the shore, the low tide's edge in
+      and out) and the Lane's stream wanders (the farm and town ponds only round off: their
+      cells can hold saved things); **grass over the dirt path made with Pixellab** (the
+      terrain tool's corner set, with the lip and its shadow), the look test for Dave;
+      every other set a placeholder made by art/build_ground_edges.py from each ground's
+      own plain tile, in all four seasons
+- [x] Session 4 verified in the sandbox: headless import and run clean; rendered the farm,
+      the Lane, the town, the Cove and the Woods in all four seasons, the Cove at low and
+      high tide and freshly tilled soil; the Cove's and Lane's layouts compared cell by cell
+      with the old ones: the strand line, rockpools, crab-pot spots, the hedgerow forage
+      and the sea's fishing spots are unchanged
+- [ ] Dave confirms session 4 plays correctly on Windows, and whether the grass ↔ path look
+      is right for session 5 to make the rest the same way
 - [ ] Session 5 (art, cloud env, Pixellab): the rest of the edge sets after Dave approves
       the look: grass ↔ tilled (and wet), grass ↔ water with a sandy/stony bank, grass ↔
       sand, sand ↔ wet sand, wet sand ↔ sea, sand ↔ rock shelf and rocks, grass ↔ paving,
@@ -1375,6 +1391,13 @@ pictures. Cells don't change; only the drawing does.
       and a UI `Theme` with nine-patch panels (can run alongside, any time)
 - [ ] Portraits in the dialogue box: 13 people × 3 expressions (can run alongside)
 - [ ] Walk cycles for every person (after Stage 22)
+- [ ] Eight-way movement and animation (ROADMAP section 15, asked by Dave 2026-11-19): the
+      farmer and every person face and walk in eight directions, not four. Needs new
+      8-direction sprite sheets from Pixellab (the farmer and the 13 people: walk and idle
+      for the four diagonals), the player's facing and animation choosing from eight, the
+      walkers (PeopleHere) doing the same, and tools still acting on the cell straight
+      ahead (a diagonal facing picks the nearer side). Likely no save change. Best done
+      with the walk cycles above, as one art pass per person
 
 ## Stage 25 — Almanac and year review · 1–2 sessions · Sonnet
 

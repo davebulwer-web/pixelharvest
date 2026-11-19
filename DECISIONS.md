@@ -3266,3 +3266,80 @@ placeholder ground, and the backlog's pictures were recoloured shapes.
 
 **Cost.** About 400 generations (two takes of everything, a few redone), about $1.30 of
 Pixellab credit. Every picture is open to Dave's eye: any can be redone in session 3.
+
+## 071 — The backlog's last pictures, and Stage 24's portraits and panels made early
+
+**Decision.** Stage 23 session 3 (2026-11-19, art only, recorded afterwards in session 4):
+the growth sheets of the 17 Stage 12 crops, the giants and the apple tree, drawn as one
+pixflux strip per crop with the placeholder as `init_image` (eight takes each, the best
+kept; frame 0, the planted seed, is the parsnip's on every crop); the sprinklers (the
+placeholder's spray copied back on), the field deed, the float, the sickle, aphids, the
+contest sign and Ivy's ruined glasshouse (the farm's ruin shrunk, so the two match).
+The broken bridge, the Woods footbridge, the soil overlays and the greenhouse floor stay
+as they are: no take beat them. Stage 24's pictures were made while the art tools were
+warm: 13 portraits (`assets/sprites/portraits/<sprite>.png`, three 64 × 64 busts:
+neutral, happy, worried; neutral from each person's sprite at strength 50–70, the faces
+by Pixen edits) and the UI nine-patches (`assets/ui/`). Nothing uses those yet.
+
+**Why.** ROADMAP 13.5. No code, data or save change; every picture keeps its size.
+
+## 072 — Soft ground edges: a display-only dual grid, grounds in height order, one set each
+
+**Decision.** Stage 23 session 4 (ROADMAP section 14). Every outdoor map (the farm, the
+Lane, the town, the Cove, the Woods) gets a `GroundEdges` node just above its Ground
+layer, which draws the ground a second time so that where two kinds meet the join is soft.
+No save change, no rule change: the Ground layer still holds one plain tile per cell and
+still gives the water, sea and cliffs their collision.
+
+- *Dual grid.* GroundEdges' layers sit half a tile up and left, so each picture tile's
+  middle is a corner where four cells meet, and it's chosen from what those four cells
+  are. Sixteen pictures per ground cover every mix of four corners (a "mask": 1 top-left,
+  2 top-right, 4 bottom-left, 8 bottom-right), which is exactly the 4 × 4 set Pixellab's
+  terrain tool returns.
+- *Height order, one set per ground.* `GroundTiles.EDGE_GROUNDS` lists twelve grounds
+  lowest first: sea, pond water, wet sand, the rock shelf, sand, path, paving, tilled,
+  wet tilled, grass, rocks, thicket. At each corner the lowest ground there is drawn whole;
+  every higher one is drawn over it with its edge picture on its own layer, counting as
+  present wherever the cell is it or anything higher (so higher grounds always sit on a
+  bed of lower ones). So grass needs one set (grass over anything), not one per pair.
+  The cliffs and the pier keep square edges: they count as highest and are drawn again,
+  square, on a top layer.
+- *It reads the Ground layer's pictures, not the game's state.* `GroundTiles.draw()` tells
+  GroundEdges (through a meta on the layer) which cell changed, and it looks at the tile
+  drawn there. That breaks no architecture rule 1 (it only decides how other pictures
+  look) and means no map's drawing code changed: the hoe, a field going back to grass,
+  the tide, the allotment beds and the Woods' logs all redraw their edges for free. Marked
+  corners are redrawn once at the end of the frame.
+- *The edge pictures* are a second source (id 1) in each season's ground tileset:
+  `assets/tilesets/edges_<season>.png`, made by `art/build_ground_edges.py`: one row per
+  ground and variant (two variants), one column per mask, and a row of scatter pieces
+  (tufts and flowers cut from the grass details, two stones). Every edge is the ground's
+  own plain tile cut to a shape with a darker rim, so it joins the plain tiles in every
+  season. **Grass's shape is real Pixellab art** (the terrain tool, "short lush green
+  meadow grass" over "dirt path", transition 0.25, seed 7, picked from four takes; kept
+  in `art/ground_sources/edges/grass_over_path.png`): its ragged dark lip and the shadow it
+  throws are kept and coloured with our own grass and path. The other eleven sets are
+  placeholders: a line bent by tileable sine waves through a blend of the four corners,
+  until session 5 makes them with Pixellab once Dave likes the look.
+- *Scatter.* About a third of the corners on a join (not water, sea or tilled soil) get a
+  tuft, a flower or a stone on their own layer, mirrored at random. Never saved.
+- *Outlines.* The Cove's beach is made less ruled as data in CoveLayout (grass bites into
+  the sand's top row, sand spills into the grass, dry sand steps into the shore's top row,
+  extra wet sand and sea notches along the low tide's edge) and the Lane's stream wanders
+  like the Woods' (STREAM_BENDS), straight where it meets the hedges and the ford. The
+  strand line, the rockpools, the crab-pot spots, the sea's fishing spots and the hedgerow
+  forage are unchanged (compared cell by cell). The farm's pond (its cells are saved in
+  FarmData) and the town's pond (fishing and the contest) keep their cells; their corners
+  round off anyway.
+
+Options considered: Godot's own terrain sets ("match corners" autotiling on the Ground
+layer: one set per PAIR of grounds, the editor's peering bits for every tile, and collision
+and pictures tangled in one layer); a set per pair of grounds (dozens of sets instead of
+twelve); a shader blending the grounds (soft, but blurry rather than pixel art, and a new
+technique for one look). Making all twelve sets with Pixellab now (the plan says to show
+Dave one first: if he wants the grass different, the rest would be redone).
+
+**Why.** ROADMAP section 14: Dave asked for Stardew-like organic joins instead of square
+tile edges.
+
+**Cost.** Four Pixellab terrain sets (the look test), well under $0.10.

@@ -82,6 +82,31 @@ const CLIFF_PATH: Array[Rect2i] = [Rect2i(42, 16, 14, 2), Rect2i(42, 18, 2, 8)]
 const WET_SAND: Array[Rect2i] = [Rect2i(20, 26, 22, 3), Rect2i(28, 29, 2, 3)]
 const ROCK_SHELF: Array[Rect2i] = [Rect2i(38, 26, 18, 5), Rect2i(25, 32, 8, 3)]
 
+## The beach's outline, made less ruled (Stage 23, DECISIONS 072): a few cells
+## of the beach's top row left as grass, a few of the grass above it sand,
+## dry sand stepping out into the top row of the shore (so the high tide's
+## edge wanders), and the low tide's edge in and out: extra wet sand below
+## the shore, and notches where the sea stays. None of these cells is a
+## strand-line or rockpool cell, the pier, the breakwater or a crab pot's.
+const SAND_BITES: Array[Vector2i] = [
+	Vector2i(24, 20), Vector2i(25, 20), Vector2i(31, 20), Vector2i(32, 20), Vector2i(33, 20),
+	Vector2i(32, 21), Vector2i(39, 20),
+]
+const SAND_SPILLS: Array[Vector2i] = [
+	Vector2i(21, 19), Vector2i(22, 19), Vector2i(28, 19), Vector2i(36, 19), Vector2i(37, 19),
+]
+const DRY_BUMPS: Array[Vector2i] = [
+	Vector2i(22, 26), Vector2i(23, 26), Vector2i(29, 26), Vector2i(30, 26), Vector2i(31, 26),
+	Vector2i(30, 27), Vector2i(35, 26),
+]
+const WET_EXTRA: Array[Vector2i] = [
+	Vector2i(21, 29), Vector2i(22, 29), Vector2i(33, 29), Vector2i(34, 29), Vector2i(35, 29),
+	Vector2i(34, 30),
+]
+const SEA_NOTCHES: Array[Vector2i] = [
+	Vector2i(25, 28), Vector2i(26, 28), Vector2i(36, 28), Vector2i(37, 28),
+]
+
 ## Where the harbour's tide board stands, on the quay by the path down.
 const TIDE_BOARD := Vector2i(15, 15)
 
@@ -129,7 +154,9 @@ static func tile_for(cell: Vector2i, tide_out: bool) -> Vector2i:
 		return GroundTiles.CLIFF
 	if QUAY.has_point(cell):
 		return GroundTiles.PAVING
-	if BEACH.has_point(cell):
+	if SAND_BITES.has(cell):
+		return GroundTiles.grass_for(cell)
+	if BEACH.has_point(cell) or SAND_SPILLS.has(cell) or DRY_BUMPS.has(cell):
 		return GroundTiles.SAND
 	if cell.y >= HARBOUR.position.y:
 		return GroundTiles.SEA
@@ -150,7 +177,21 @@ static func _in_any(cell: Vector2i, rects: Array[Rect2i]) -> bool:
 ## True for the shore the tide covers and uncovers: the wet sand, the rocky
 ## shelf, the sand bar and the islet.
 static func is_tidal(cell: Vector2i) -> bool:
-	return inside(cell) and (_in_any(cell, WET_SAND) or _in_any(cell, ROCK_SHELF))
+	if not inside(cell) or SEA_NOTCHES.has(cell) or DRY_BUMPS.has(cell):
+		return false
+	return _in_any(cell, WET_SAND) or WET_EXTRA.has(cell) or _in_any(cell, ROCK_SHELF)
+
+
+## Every cell of wet sand the tide covers and uncovers (not the rocky
+## shelf), for redrawing when it turns. Always in the same order.
+static func wet_sand_cells() -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	for rect in WET_SAND:
+		for y in range(rect.position.y, rect.end.y):
+			for x in range(rect.position.x, rect.end.x):
+				result.append(Vector2i(x, y))
+	result.append_array(WET_EXTRA)
+	return result
 
 
 ## True for a path cell: the coast road, the way down to the quay and the

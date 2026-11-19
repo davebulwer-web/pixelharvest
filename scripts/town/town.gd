@@ -110,6 +110,7 @@ func _ready() -> void:
 		door_cells.append_array(Building.door_cells(def))
 
 	SeasonLook.apply_ground(_ground)
+	GroundEdges.attach(_ground)
 	var bridge_open := _woods_open()
 	_bridge_open = bridge_open
 	var town := LocationManager.find(TOWN_ID)

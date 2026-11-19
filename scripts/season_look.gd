@@ -17,6 +17,10 @@ static func apply_ground(ground: TileMapLayer) -> void:
 	var theme := GameState.current_season_theme()
 	if theme != null and theme.ground_tileset != null:
 		ground.tile_set = theme.ground_tileset
+	# Its soft edges (DECISIONS 072) draw from the same tileset.
+	var edges := GroundEdges.of(ground)
+	if edges != null:
+		edges.follow_tileset()
 
 
 ## Show `node` with the current season's picture for `object_id`, if the

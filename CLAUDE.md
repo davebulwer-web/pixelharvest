@@ -133,6 +133,9 @@ scripts/             Game code
                      their stops and talking (PeopleHere; DECISIONS 067)
   exits.gd           Exits: builds a place's ways out from LocationDef.exits (ExitDef;
                      DECISIONS 060)
+  ground_tiles.gd    GroundTiles: where each kind of ground is in the seasonal tilesets;
+  ground_edges.gd    GroundEdges: the soft edges where grounds meet, a display-only
+                     dual grid over every outdoor map's ground (DECISIONS 072)
   items/             Inventory
   fishing/           FishingLine: the float, the line and the reel bar (DECISIONS 054)
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects

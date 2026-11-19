@@ -75,6 +75,7 @@ func _ready() -> void:
 	_player.tool_place = self
 	var location := LocationManager.find(COVE_ID)
 	SeasonLook.apply_ground(_ground)
+	GroundEdges.attach(_ground)
 	var buildings := LocationManager.buildings_on(COVE_ID)
 	var door_cells: Array[Vector2i] = []
 	for def in buildings:
@@ -189,12 +190,7 @@ func _check_tide() -> void:
 
 
 func _wet_sand_cells() -> Array[Vector2i]:
-	var result: Array[Vector2i] = []
-	for rect in CoveLayout.WET_SAND:
-		for y in range(rect.position.y, rect.end.y):
-			for x in range(rect.position.x, rect.end.x):
-				result.append(Vector2i(x, y))
-	return result
+	return CoveLayout.wet_sand_cells()
 
 
 ## If any corner of the player's feet is on the shore the tide has just

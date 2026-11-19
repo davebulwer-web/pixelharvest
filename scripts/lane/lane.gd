@@ -64,6 +64,7 @@ func _ready() -> void:
 	_player.tool_place = self
 	var location := LocationManager.find(LANE_ID)
 	SeasonLook.apply_ground(_ground)
+	GroundEdges.attach(_ground)
 	var buildings := LocationManager.buildings_on(LANE_ID)
 	var door_cells: Array[Vector2i] = []
 	for def in buildings:

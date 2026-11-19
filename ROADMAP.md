@@ -729,7 +729,7 @@ Stage 20 (balance and release) becomes Stage 26.
 | **21** | **The Cove** (tides, rockpools, sea fishing, crab pots, Tam) | 2 | Opus, then Sonnet | v23 (crab pots, sea fish in the log) | none |
 | **22** | **The tavern and people on the move** (Nell, Dot, homes, weekdays, schedules, walking) | 2 | Opus | maybe none (schedules are worked out from the clock) | none |
 | **23** | **Art: the world** (every building at the new size with roof variety; Lane and Cove tilesets; the Stage 12–18 backlog; then soft ground edges, section 14) | 3 art + 1 code + 1 art | cloud env | — | lots |
-| **24** | **Art: people and the UI** (portraits, walk cycles, the font and a UI theme) | 1 code + 2 art | Sonnet + cloud env | — | lots |
+| **24** | **Art: people and the UI** (portraits, walk cycles and eight-way characters (section 15), the font and a UI theme) | 1 code + 2 art | Sonnet + cloud env | — | lots |
 | **25** | **Almanac and year review** (old 19 without life in town; the almanac now includes sea fish and sea forage) | 1–2 | Sonnet | v24 (collections) | a few |
 | **26** | **Balance and release** (old 20; checks the clock again now that travel is longer: 6 s per 10 min may suit the bigger map better) | 2 | Opus | — | title screen |
 
@@ -859,3 +859,34 @@ backlog and the crop sheets), so they don't collide: **session 4** (code, Opus) 
 edge drawing, the layering and the reshaped outlines with the grass ↔ path look test;
 **session 5** (art, cloud env) makes every edge set in four seasons, the foam and the edge
 scatter. Stage numbers 24–26 and their save versions don't change.
+
+## 15. Eight-way characters (2026-11-19)
+
+Dave (2026-11-19): four-way animation feels a bit off; he'd like the characters to move
+and animate in eight directions.
+
+**Today.** The farmer already *moves* diagonally (`Input.get_vector` in player.gd), but the
+picture snaps to the nearest of four facings (up, down, left, right), so walking
+diagonally shows a side-on walk sliding at an angle. The townsfolk walk along AStarGrid2D
+paths, also drawn with four facings.
+
+**What it takes.**
+
+- *Art (cloud env, Pixellab):* each character's sprite sheet gains the four diagonals
+  (up-left, up-right, down-left, down-right) for idle and walk. Pixellab's character tool
+  makes 8-direction characters natively; the farmer's sheet (assets/sprites/farmer.json)
+  came from it. The left-facing diagonals can be mirrored from the right ones to halve
+  the work. 14 characters (the farmer and 13 people).
+- *Code:* the player's facing becomes one of eight, picked from the direction's angle, and
+  the animation names follow (`walk_down_right`...). Tools keep acting on the cell
+  straight ahead: a diagonal facing uses whichever side is nearer (or the last straight
+  one), so tool rules don't change. PeopleHere's walkers can cut corners on open ground
+  (AStarGrid2D's diagonal mode, only where both side cells are open) and face eight ways.
+  A character with only four directions keeps working (fall back to the nearest of four),
+  so the art can arrive person by person.
+- *Saves:* none expected (facing isn't saved).
+
+**Where it goes.** Stage 24 (Art: people and the UI), with the walk cycles, so each person
+gets one art pass: one code session (eight-way facing for the player and walkers, with the
+four-way fallback) and the art in the existing art sessions.
+
