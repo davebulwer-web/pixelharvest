@@ -46,6 +46,7 @@ them is in art/palette.png, so the palette checker will list them. That is
 expected while this is a test.
 """
 import os
+import re
 import sys
 from PIL import Image
 
@@ -255,6 +256,11 @@ def write_tres(season):
         text = text.replace('res://assets/tilesets/%s_%s.png' % (kind, season),
                             'res://assets/tilesets/cozy/%s_%s.png' % (kind, season))
     assert 'tilesets/cozy/ground_' in text and 'tilesets/cozy/edges_' in text, src
+    # No uids in the copy (DECISIONS 091): our tileset's uid and its pictures'
+    # uids belong to OUR files, and Godot follows a known uid before the path,
+    # so a copy that kept them would quietly load our ground, not the pack's.
+    # Without them the copy is found, and finds its pictures, by path.
+    text = re.sub(r' uid="uid://[a-z0-9]+"', '', text)
     with open(os.path.join(OUT, 'ground_tileset_%s.tres' % season), 'wb') as f:
         f.write(text.encode('utf-8'))
 

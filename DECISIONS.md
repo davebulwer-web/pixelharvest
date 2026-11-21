@@ -4133,3 +4133,96 @@ Options considered:
 **Why.** Dave (2026-11-21) wants the world to feel alive with small animations like the
 fountain's: smoke, flags, water, leaves, critters, lit windows, a fish jumping, subtle and
 with a way to turn them off, and wants to add more himself.
+
+
+## 089 — The toolbar at twice the size, with room kept for a full bag
+
+**Decision.** The strip at the bottom of the screen (Hotbar) is drawn at twice its old
+size: each 16 px picture at 32 px in a 36 px box, the selected box with a thicker outline.
+No save change.
+
+- *Whole numbers only.* ×2, or ×1 with Settings → Toolbar → Small (kept in
+  `user://settings.cfg` as `toolbar_large`). A ×1.5 would draw some pixels wider than
+  others.
+- *The same at every window size.* The game's picture is always 640 × 360; the window
+  size and full screen only magnify it, so one layout serves all of them.
+- *A full bag.* Everything on one row when it fits, as before. When it doesn't, the tools
+  keep the bottom row and the rest of the bag moves to a row just above them. A row that
+  still doesn't fit: the tools show a window round the selected one with "<3" and "5>"
+  for how many are off each side (Q and Tab still reach them all); the rest of the bag
+  drops to small boxes, and past that ends with "+n". The selected tool's name sits over
+  the top row.
+- *Conversations.* The dialogue box sat just above the old 18 px strip; the new one would
+  have peeked out under it. The strip now hides while a DialogueBox is up (group
+  `covers_hotbar`), as in most farming games.
+
+Options considered:
+- *A bag window (I) with only the tools on screen.* The usual answer, but it changes how
+  the game plays the day before Dave's full playthrough; the two-row layout keeps
+  everything visible.
+- *Scaling the whole HUD.* The clock line is already as wide as the screen at its clean
+  size.
+
+**Why.** Dave (2026-11-21): the toolbar looked out of proportion; "maybe double the size".
+
+
+## 090 — Three saved games, and a credits page (Stage 26)
+
+**Decision.** The title screen gains "Saved games" and "Credits". No save-format change
+(still version 26).
+
+- *Three games, one file each.* Game 1 is `user://save.json` (so the save from before is
+  game 1, untouched), games 2 and 3 are `save_2.json` and `save_3.json`; a file that can't
+  be read is put aside as `save.unreadable.json` / `save_N.unreadable.json`. Which one is
+  played is `SaveSystem.slot`, remembered in `settings.cfg` (`[game] slot`), so the game
+  opens on the one played last.
+- *The page.* Each game shows its season, day, year and gold (read from the file without
+  loading it: `SaveSystem.peek()`; the fields are in every save since version 9). Picking
+  another game goes back through the boot scene, which loads it and puts the title over it
+  again; picking an empty one does the same, and the title then offers New game for it.
+  Continue and New game work on the game picked, as before.
+- *No delete.* A new game in a used slot replaces it at its first night, as New game always
+  has. A delete button would need its own "are you sure"; not needed yet.
+- *Credits* (`scripts/menus/credits.gd`): the short, player-facing version of CREDITS.md
+  (which isn't exported): who made it, the five packs by Michel Clauwaert, the two fonts,
+  Dave's tunes, and Godot's MIT notice. monogram has no accented letters, so names are
+  written without them. When CREDITS.md gains a line, credits.gd gets one too.
+
+**Why.** Stage 26's list (save slots, a credits screen), done before Dave's full playthrough
+so he can keep his current farm in game 1 and start a fresh one in game 2.
+
+
+## 091 — Balance session 1: the clock at 6 seconds, a Windows build, a fix to the pack tilesets
+
+**Decision.**
+
+- *The clock.* `seconds_per_ten_minutes` 5 → 6 (`data/game_rules.tres`). Since Stage 19
+  the walk from the farmhouse through the Lane to the town square is about 108 tiles,
+  25 real seconds: 50 game minutes at 5, 41 at 6. A day (6 AM to 2 AM) is now 12 real
+  minutes instead of 10. One number to put back if the days feel slow.
+- *Crop money, checked, not changed.* A table of every crop (grow days, regrowth, seed
+  price, sell price, harvests in a 28-day season) shows profit per tile per season between
+  about 70 and 280 gold, with the dear crops (melon, pumpkin, Brussels sprouts) at the top
+  and the spring starters (parsnip, radish, tulip, spring onion) at 80 to 90, which is the
+  intended shape. Prices are left alone until Dave's full playthrough says where the year
+  feels slow or rich: that is balance session 2.
+- *The Windows build.* `export_presets.cfg` is now kept in git (it holds no secrets): one
+  preset, "Windows Desktop", 64-bit, the game packed into one `PixelHarvest.exe`, written
+  to `builds/windows/` (git-ignored). `art/`, `tests/` and `scenery/backdrops/` are left
+  out of it. Dave makes it in the editor (Project → Export; the templates are downloaded
+  once from Editor → Manage Export Templates): the sandbox can build it too, from the
+  packs' zips, but the 130 MB file can't be sent across. A build includes
+  the packs' pictures: it is for Dave's own testing only and must not be shared or put
+  online until the packs' licence has been checked for a released game (the licence allows
+  use in a game; what it says about a game given away is the question for the itch.io
+  step).
+- *Pack tilesets lost their uids.* `art/build_cozy_ground.py` copied our tilesets' text,
+  and since our tilesets gained Godot uids the copies carried OUR uids for the tileset and
+  its pictures. Godot follows a known uid before a path, so a freshly built cozy tileset
+  quietly loaded our noisy ground, and the calm and harbour ones logged "no tile at
+  (9, 34)". The script now strips the uids (the copies on Dave's PC were made before our
+  tilesets had uids, so they were already fine); the calm and harbour scripts start from
+  its output.
+
+**Why.** Stage 26: "check the clock again now that travel is longer", and Dave asked
+(2026-11-21) for a build he can install before a full playthrough.

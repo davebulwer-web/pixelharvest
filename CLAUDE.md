@@ -98,6 +98,9 @@ shortcut to be taken quietly.
 
 ```
 project.godot        Engine config — see DECISIONS.md 009 before changing display settings
+export_presets.cfg   The Windows export (DECISIONS 091): Project → Export → Windows Desktop
+                     writes builds/windows/PixelHarvest.exe. builds/ is git-ignored: a build
+                     has the packs' pictures in it, for Dave's own testing only
 icon.svg
 scenes/              .tscn scene files
 scenery/             Dave's scenery: one scene per map that he fills by dragging pictures in
@@ -165,7 +168,10 @@ scripts/             Game code
                      (DECISIONS 085)
   menus/             The title screen (TitleScreen) the game opens on, over the game it
                      loaded, and the Esc menu (PauseMenu); what they share, with the
-                     Settings, Controls and "are you sure?" pages (MenuScreen; DECISIONS 086)
+                     Settings, Controls and "are you sure?" pages (MenuScreen; DECISIONS 086);
+                     the Saved games page (three games: save.json, save_2.json, save_3.json)
+                     and the Credits page (Credits: the player's short version of
+                     CREDITS.md; DECISIONS 090)
   items/             Inventory
   fishing/           FishingLine: the float, the line and the reel bar (DECISIONS 054)
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects

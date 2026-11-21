@@ -1639,10 +1639,28 @@ The old Stage 20 (Stage 9's second half).
 - [ ] Dave tries it on Windows: F5 opens on the title; Continue; Esc in the world; Settings
       with the music and sound levels, and (with the game in its own window, not embedded
       in the editor) full screen and the window sizes
-- [ ] Save slots, credits (from CREDITS.md: the fonts and the Cozy Village & Farm pack; a
-      player-facing list, and CREDITS.md isn't exported by default); decide the repository:
-      private, or build the release on Dave's PC where `assets/tilesets/cozy/` exists
-      (DECISIONS 077)
-- [ ] Full balance pass across a simulated year, including the clock now that travel is
-      longer (`seconds_per_ten_minutes`, 5 now; 6 may suit the bigger map)
-- [ ] Windows export, itch.io page
+**Session 1 (2026-11-21) — toolbar, saved games, credits, clock, Windows build
+(DECISIONS 089–091, no save change)**
+
+- [x] The toolbar at twice the size, two rows and a sliding window when the bag is full,
+      hidden under conversations; Settings → Toolbar: Large / Small (DECISIONS 089)
+- [x] Three saved games (title → Saved games; game 1 is the old save.json) and a Credits
+      page (DECISIONS 090)
+- [x] The clock: 6 seconds per 10 minutes (was 5); every crop's money checked, none
+      changed yet (DECISIONS 091)
+- [x] Windows export preset (`export_presets.cfg`, now in git) → `builds/windows/PixelHarvest.exe`
+      (git-ignored), tested in the sandbox with the packs' pictures (the export runs, and
+      the exported game opens with the packs' look). The finished file is 130 MB with the
+      packs inside, so Dave makes it in the editor (steps in `PLAYTEST.md`). Repository:
+      stays public, packs stay out of it; builds are made where the packs are
+- [x] `art/build_cozy_ground.py` no longer copies our uids into the pack tilesets
+- [x] Verified in the sandbox: headless import and run clean; the toolbar rendered with
+      the starting kit, a mid-game bag, a huge bag and small; a conversation over it; the
+      Settings page; saved games: game 1 saved, game 2 picked and started and saved, back
+      to game 1 with its gold; the Credits page; the exported game's pack run (title, the
+      farm with the cozy ground, the Cove)
+- [ ] Dave makes the build (`PLAYTEST.md`, top) and plays it through, from the build and/or F5, and notes what
+      feels slow, rich, hard or wrong
+- [ ] Balance session 2, from Dave's notes: prices, energy, the clock
+- [ ] Before any public release: check the packs' licence for a game given away or sold,
+      then an itch.io page

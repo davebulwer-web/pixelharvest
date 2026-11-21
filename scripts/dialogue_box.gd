@@ -63,6 +63,8 @@ var _picked: int = 0
 func _ready() -> void:
 	_build()
 	visible = false
+	# The toolbar hides while the box is up (Hotbar; DECISIONS 089).
+	add_to_group(&"covers_hotbar")
 	add_to_group(&"pack_ui")  # TEST (DECISIONS 081)
 	pack_ui_changed()
 
@@ -247,7 +249,8 @@ func _build() -> void:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override(&"panel", UiStyle.panel(2))
 	anchor.add_child(panel)
-	# Along the bottom, inset 100px each side, above the hotbar.
+	# Along the bottom, inset 100px each side, over the toolbar (which hides
+	# while the box is up: DECISIONS 089).
 	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	panel.offset_left = 100.0
 	panel.offset_right = -100.0

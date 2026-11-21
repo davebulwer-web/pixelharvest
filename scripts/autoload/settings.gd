@@ -18,6 +18,9 @@ extends Node
 ##   window_scale=2
 ##   whole_pixels=false
 ##   ambience=true
+##   toolbar_large=true
+##   [game]
+##   slot=1
 ##
 ## Volumes are steps of 0 to 10 (10 is as loud as the game was before there
 ## were settings). Each is put on its own bus, "Music" or "SFX", from
@@ -34,6 +37,8 @@ extends Node
 
 ## The little moving things were turned on or off (Ambience listens).
 signal ambience_changed(on: bool)
+## The toolbar was made large or small (the hotbar listens; DECISIONS 089).
+signal toolbar_changed(large: bool)
 
 const PATH := "user://settings.cfg"
 
@@ -58,6 +63,13 @@ var whole_pixels: bool = false
 ## The little moving things on the maps: chimney smoke, lit windows,
 ## butterflies, birds, leaves, sparkles (Ambience, DECISIONS 088). Only looks.
 var ambience: bool = true
+## The toolbar at the bottom of the screen drawn at twice its old size
+## (DECISIONS 089). False draws it as it was.
+var toolbar_large: bool = true
+## The saved game played last (1 to 3, SaveSystem.SLOTS), so the game opens
+## on it (DECISIONS 090). Not a setting on the page: picking a game on the
+## title screen's "Saved games" page changes it.
+var slot: int = 1
 
 ## Each bus's level in default_bus_layout.tres, i.e. its level at 10.
 var _bus_base_db: Dictionary = {}
@@ -108,6 +120,17 @@ func set_whole_pixels(on: bool) -> void:
 func set_ambience(on: bool) -> void:
 	ambience = on
 	ambience_changed.emit(on)
+	_save()
+
+
+func set_toolbar_large(on: bool) -> void:
+	toolbar_large = on
+	toolbar_changed.emit(on)
+	_save()
+
+
+func set_slot(number: int) -> void:
+	slot = clampi(number, 1, 3)
 	_save()
 
 
@@ -196,6 +219,8 @@ func _load() -> void:
 	window_scale = scale if WINDOW_SCALES.has(scale) else window_scale
 	whole_pixels = bool(file.get_value("display", "whole_pixels", whole_pixels))
 	ambience = bool(file.get_value("display", "ambience", ambience))
+	toolbar_large = bool(file.get_value("display", "toolbar_large", toolbar_large))
+	slot = clampi(int(file.get_value("game", "slot", slot)), 1, 3)
 
 
 func _save() -> void:
@@ -206,6 +231,8 @@ func _save() -> void:
 	file.set_value("display", "window_scale", window_scale)
 	file.set_value("display", "whole_pixels", whole_pixels)
 	file.set_value("display", "ambience", ambience)
+	file.set_value("display", "toolbar_large", toolbar_large)
+	file.set_value("game", "slot", slot)
 	var error := file.save(PATH)
 	if error != OK:
 		push_error("Couldn't write the settings: %s" % error_string(error))

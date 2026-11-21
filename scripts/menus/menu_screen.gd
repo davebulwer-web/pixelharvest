@@ -142,6 +142,7 @@ func _page(title: String, main: bool = false) -> void:
 		_column.remove_child(child)
 		child.queue_free()
 	_detail.text = ""
+	_detail.visible = true
 	_hint.text = "Space / Enter: choose" + ("" if main else "     Esc: back")
 	if title != "":
 		var heading := Label.new()
@@ -223,6 +224,10 @@ func _show_settings() -> void:
 			func() -> String: return "On" if Settings.ambience else "Off",
 			func(_step: int) -> void: Settings.set_ambience(not Settings.ambience),
 			"The little things that move by themselves: chimney smoke, lit windows, butterflies, birds, leaves, sparkles on the water. Only looks. Ctrl+Y also swaps them.")
+	_setting("Toolbar",
+			func() -> String: return "Large" if Settings.toolbar_large else "Small",
+			func(_step: int) -> void: Settings.set_toolbar_large(not Settings.toolbar_large),
+			"How big the strip of tools and things you carry is at the bottom of the screen. Large is twice the size.")
 	_button("Back", "Back to the menu. Settings are kept as you change them.", _show_main)
 	_focus_first()
 

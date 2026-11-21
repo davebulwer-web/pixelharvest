@@ -66,7 +66,7 @@ ExtResource("5_seeds"): 10
 locations = Array[ExtResource("6_locdef")]([ExtResource("7_farm"), ExtResource("13_town"), ExtResource("14_seeds"), ExtResource("15_general"), ExtResource("16_smith"), ExtResource("17_house"), ExtResource("24_woods"), ExtResource("27_greenhouse"), ExtResource("28_lane"), ExtResource("29_pip"), ExtResource("30_dot"), ExtResource("31_bakery"), ExtResource("36_cove"), ExtResource("37_tam"), ExtResource("38_rosa"), ExtResource("39_lighthouse"), ExtResource("41_tavern"), ExtResource("42_mayor"), ExtResource("43_hall"), ExtResource("44_wren"), ExtResource("45_ivy")])
 starting_location = &"farmhouse"
 seasons = Array[ExtResource("8_theme")]([ExtResource("9_spring"), ExtResource("10_summer"), ExtResource("11_autumn"), ExtResource("12_winter")])
-seconds_per_ten_minutes = 5
+seconds_per_ten_minutes = 6
 hazards = ExtResource("22_hazards")
 fishing = ExtResource("25_fishing")
 tides = ExtResource("35_tides")

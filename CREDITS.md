@@ -1,7 +1,8 @@
 # Credits
 
-What the game uses that we didn't make ourselves. The credits screen (Stage 26) is built
-from this list.
+What the game uses that we didn't make ourselves. The title screen's Credits page
+(`scripts/menus/credits.gd`, DECISIONS 090) is a short version of this list: when a line
+is added here, add it there too.
 
 ## Art
 

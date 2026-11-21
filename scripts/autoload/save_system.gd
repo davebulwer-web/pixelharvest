@@ -22,6 +22,12 @@ extends Node
 ##   %APPDATA%\Godot\app_userdata\Pixel Harvest\save.json
 ## It's plain JSON, so it can be opened in Notepad to see exactly what's kept.
 ##
+## Saved games (DECISIONS 090): there are three, each a file of its own.
+## Game 1 is save.json (so a game saved before there were three is game 1),
+## games 2 and 3 are save_2.json and save_3.json. Which one is being played is
+## `slot`, remembered in settings.cfg (Settings.slot) so the game opens on the
+## one played last; the title screen's "Saved games" page changes it.
+##
 ## The file always looks like:
 ##   { "save_version": 16, "game": { ...whatever GameState.to_save() returned... } }
 ##
@@ -29,8 +35,11 @@ extends Node
 const SAVE_PATH := "user://save.json"
 
 ## Where a save that couldn't be loaded is moved to, so it's never silently
-## overwritten. Only the most recent one is kept.
+## overwritten. Only the most recent one is kept (one per saved game).
 const SET_ASIDE_PATH := "user://save.unreadable.json"
+
+## How many saved games there are (DECISIONS 090).
+const SLOTS := 3
 
 ## The scene that loads the save and shows the title (the Esc menu's "Title
 ## screen" goes back to it).
@@ -172,6 +181,10 @@ var _active: bool = false
 ## the save was put aside.
 var load_problem: String = ""
 
+## Which saved game is being played, 1 to SLOTS. Set from Settings.slot when
+## the boot scene loads.
+var slot: int = 1
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Nothing here runs while the game is paused (in a shop, a conversation,
@@ -197,7 +210,49 @@ func ask_for_new_game() -> void:
 
 
 func has_save() -> bool:
-	return FileAccess.file_exists(SAVE_PATH)
+	return FileAccess.file_exists(save_path())
+
+
+## The file saved game `number` lives in (the one being played by default):
+## user://save.json for game 1, user://save_2.json and so on for the others.
+func save_path(number: int = slot) -> String:
+	return SAVE_PATH if number <= 1 else "user://save_%d.json" % number
+
+
+func _set_aside_path(number: int = slot) -> String:
+	return SET_ASIDE_PATH if number <= 1 else "user://save_%d.unreadable.json" % number
+
+
+## Switch to saved game `number` (it's loaded by the boot scene next) and
+## remember it as the one to open on.
+func choose_slot(number: int) -> void:
+	slot = clampi(number, 1, SLOTS)
+	Settings.set_slot(slot)
+
+
+## A look inside saved game `number` without loading it, for the title
+## screen's list: {"empty": true} if there's no file, {"unreadable": true}
+## if it can't be read, otherwise its "season" (a name), "day", "year",
+## "gold" and "difficulty" (a name). Those fields are in every save from
+## version 9 on, so an old file shows too (it's upgraded when it's loaded).
+func peek(number: int) -> Dictionary:
+	var path := save_path(number)
+	if not FileAccess.file_exists(path):
+		return {"empty": true}
+	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if typeof(data) != TYPE_DICTIONARY or typeof(data.get("game")) != TYPE_DICTIONARY:
+		return {"unreadable": true}
+	var game: Dictionary = data["game"]
+	var seasons := GameState.RULES.seasons
+	var season_index := int(game.get("season", 0))
+	var difficulty := GameState.RULES.find_difficulty(StringName(str(game.get("difficulty", "standard"))))
+	return {
+		"season": seasons[posmod(season_index, seasons.size())].display_name if not seasons.is_empty() else "",
+		"day": int(game.get("day", 1)),
+		"year": int(game.get("year", 1)),
+		"gold": int(game.get("gold", 0)),
+		"difficulty": difficulty.display_name if difficulty != null else str(game.get("difficulty", "")),
+	}
 
 
 ## Called once by the boot scene. Loads the save if there is one and returns
@@ -207,6 +262,7 @@ func has_save() -> bool:
 func load_or_new_game() -> bool:
 	_active = true
 	load_problem = ""
+	slot = clampi(Settings.slot, 1, SLOTS)
 	if not has_save():
 		GameState.new_game()
 		return false
@@ -214,11 +270,11 @@ func load_or_new_game() -> bool:
 	if problem != "":
 		load_problem = problem
 		push_error("Couldn't load the save (%s). Starting a new game; the old file has been kept as %s"
-				% [problem, ProjectSettings.globalize_path(SET_ASIDE_PATH)])
-		DirAccess.rename_absolute(SAVE_PATH, SET_ASIDE_PATH)
+				% [problem, ProjectSettings.globalize_path(_set_aside_path())])
+		DirAccess.rename_absolute(save_path(), _set_aside_path())
 		GameState.new_game()
 		return false
-	print("Loaded save: day %d, %s" % [GameState.day, GameState.difficulty.display_name])
+	print("Loaded save %d: day %d, %s" % [slot, GameState.day, GameState.difficulty.display_name])
 	EventBus.game_loaded.emit()
 	return true
 
@@ -240,7 +296,7 @@ func save_game() -> void:
 	if not _active:
 		return
 	var data := {"save_version": CURRENT_VERSION, "game": GameState.to_save()}
-	var temp_path := SAVE_PATH + ".tmp"
+	var temp_path := save_path() + ".tmp"
 	var file := FileAccess.open(temp_path, FileAccess.WRITE)
 	if file == null:
 		push_error("Couldn't write the save: %s" % error_string(FileAccess.get_open_error()))
@@ -249,7 +305,7 @@ func save_game() -> void:
 	# save_version, gold and day at the top and the long list of tiles last.
 	file.store_string(JSON.stringify(data, "\t", false))
 	file.close()
-	var error := DirAccess.rename_absolute(temp_path, SAVE_PATH)
+	var error := DirAccess.rename_absolute(temp_path, save_path())
 	if error != OK:
 		push_error("Couldn't replace the save file: %s" % error_string(error))
 		return
@@ -259,7 +315,7 @@ func save_game() -> void:
 ## Read, upgrade, check and apply the save. Returns "" on success, otherwise
 ## what went wrong — in which case the game in memory is unchanged.
 func _load() -> String:
-	var text := FileAccess.get_file_as_string(SAVE_PATH)
+	var text := FileAccess.get_file_as_string(save_path())
 	if text == "":
 		return "the file is empty or can't be opened"
 	var json := JSON.new()

@@ -1,9 +1,10 @@
 # Godot 4 editor cache and imported assets — regenerated on open, never committed.
 .godot/
 
-# Exported builds
+# Exported builds. They contain the bought packs' pictures (see below), so they
+# are never committed or shared. export_presets.cfg IS kept (DECISIONS 091).
 builds/
-export_presets.cfg
+build/
 *.tmp
 
 # OS clutter

@@ -11,6 +11,13 @@ extends MenuScreen
 ## (DifficultyMenu, as Ctrl+N does) and starts again; the save file isn't
 ## touched until the new game's first night, as before (DECISIONS 040).
 ##
+## Saved games (DECISIONS 090): three games, each its own file. The "Saved
+## games" page lists them; picking another one goes back through the boot
+## scene, which loads it and puts this title over it again. Picking an empty
+## one does the same, and the title then offers a new game for it.
+## Credits (DECISIONS 090): who made what, from CREDITS.md in words for
+## players (Credits, credits.gd).
+##
 
 ## The save couldn't be read (SaveSystem set it aside), so say so.
 var save_was_unreadable: bool = false
@@ -82,9 +89,67 @@ func _show_main() -> void:
 	elif save_was_unreadable:
 		new_detail = "Your saved game couldn't be read, so it's been put aside as save.unreadable.json. Start a new farm."
 	_button("New game", new_detail, _ask_difficulty)
-	_button("Settings", "Music and sound volume, window or full screen.", _show_settings)
+	_button("Saved games", "Game %d of %d. Pick another saved game, or an empty one to start a second farm." % [
+			SaveSystem.slot, SaveSystem.SLOTS], _show_slots)
+	_button("Settings", "Music and sound volume, window or full screen, the toolbar's size.", _show_settings)
 	_button("Controls", "Which key does what.", _show_controls)
+	_button("Credits", "Who made the game, its pictures, fonts and music.", _show_credits)
 	_button("Quit", "Close the game.", _quit_game)
+	_focus_first()
+
+
+## The three saved games: what's in each, and the one being played picked.
+func _show_slots() -> void:
+	_page("Saved games")
+	var current: Button = null
+	for number in range(1, SaveSystem.SLOTS + 1):
+		var info := SaveSystem.peek(number)
+		var text := "Game %d   " % number
+		var detail := ""
+		if info.get("empty", false):
+			text += "(empty)"
+			detail = "No farm here yet. Pick it, then New game to start one."
+		elif info.get("unreadable", false):
+			text += "(can't be read)"
+			detail = "This saved game couldn't be read. Pick it to put it aside and start a new farm here."
+		else:
+			text += "%s %d, year %d  ·  %dg" % [info["season"], info["day"], info["year"], info["gold"]]
+			detail = "%s %d, year %d  ·  %d gold  ·  %s." % [info["season"], info["day"], info["year"],
+					info["gold"], info["difficulty"]]
+		if number == SaveSystem.slot:
+			detail = "The game you're playing. " + detail
+		var button := _button(text, detail, _pick_slot.bind(number))
+		if number == SaveSystem.slot:
+			current = button
+	_button("Back", "", _show_main)
+	if current != null:
+		current.grab_focus()
+
+
+## Saved game `number` picked: the one in hand goes back to the first page;
+## another is loaded through the boot scene, with the title over it again.
+func _pick_slot(number: int) -> void:
+	if number == SaveSystem.slot:
+		_show_main()
+		return
+	SaveSystem.choose_slot(number)
+	close()
+	get_tree().change_scene_to_file(SaveSystem.BOOT_SCENE)
+
+
+func _show_credits() -> void:
+	_page("Credits")
+	_hint.text = "Esc: back"
+	# No line under the buttons on this page: the credits need the room.
+	_detail.visible = false
+	for line: Array in Credits.LINES:
+		var label := Label.new()
+		label.text = line[1]
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.custom_minimum_size.x = PANEL_WIDTH - 24
+		UiStyle.style_panel_label(label, 8, UiStyle.GOLD if line[0] == "h" else UiStyle.TEXT)
+		_column.add_child(label)
+	_button("Back", "", _show_main)
 	_focus_first()
 
 
