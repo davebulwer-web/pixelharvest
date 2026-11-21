@@ -170,6 +170,9 @@ func talk(npc_id: StringName) -> Array[String]:
 	if _gift_waiting(event):
 		lines.append_array(event.host_lines)
 		lines.append(_give_gift(event))
+		# Lantern night: the mayor reads out the year (DECISIONS 085).
+		if event.year_review:
+			lines.append_array(Almanac.give_review())
 		return lines
 	var contest := event.contest
 	if contest == null:

@@ -110,6 +110,7 @@ static func panel(padding: int = 8) -> StyleBox:
 	else:
 		style = box(PANEL, PANEL_EDGE, padding)  # no theme (shouldn't happen)
 	style.set_content_margin_all(PANEL_BORDER + padding)
+	PackLook.track_panel(style)  # TEST (DECISIONS 081): the Wood theme
 	return style
 
 

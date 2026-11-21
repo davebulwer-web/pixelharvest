@@ -1,13 +1,18 @@
-[gd_resource type="Resource" script_class="LocationDef" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="LocationDef" format=3 uid="uid://chp2g5i1xujj5"]
 
-[ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
-[ext_resource type="Texture2D" path="res://assets/sprites/lane/dot_yard.png" id="2_ext"]
+[ext_resource type="Script" uid="uid://bt06um2iu5c88" path="res://scripts/resources/exit_def.gd" id="1_21ul6"]
+[ext_resource type="Script" uid="uid://q3pvgaf8tn4u" path="res://scripts/resources/location_def.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://cmfk2xp336nxk" path="res://assets/sprites/lane/dot_yard.png" id="2_ext"]
 
 [resource]
 script = ExtResource("1_def")
 id = &"dot_yard"
 display_name = "Dot's yard"
+scene_path = "res://scenes/home.tscn"
 outside = &"lane"
 door_cell = Vector2i(41, 21)
 exterior = ExtResource("2_ext")
 door_words = "Dot the carrier's shed. A slate on the door says: \"At the gate, or out on my rounds.\""
+resident_cell = Vector2i(5, 4)
+open_from = 480
+open_until = 1200

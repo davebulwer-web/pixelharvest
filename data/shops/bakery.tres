@@ -1,24 +1,23 @@
-[gd_resource type="Resource" script_class="ShopDef" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="ShopDef" format=3 uid="uid://dxyqkaab35tnt"]
 
-[ext_resource type="Script" path="res://scripts/resources/shop_def.gd" id="1_shop"]
-[ext_resource type="Texture2D" path="res://assets/sprites/town/baker.png" id="2_keeper"]
-[ext_resource type="Texture2D" path="res://assets/sprites/portraits/baker.png" id="80_portrait"]
-[ext_resource type="Script" path="res://scripts/resources/demand_def.gd" id="90_demand"]
+[ext_resource type="Script" uid="uid://c8rav5v6m6jx3" path="res://scripts/resources/shop_def.gd" id="1_shop"]
+[ext_resource type="Texture2D" uid="uid://buf7ix2whppys" path="res://assets/sprites/town/baker.png" id="2_keeper"]
+[ext_resource type="Texture2D" uid="uid://dmnmx0giists2" path="res://assets/sprites/portraits/baker.png" id="80_portrait"]
+[ext_resource type="Script" uid="uid://dksxjico5whwj" path="res://scripts/resources/demand_def.gd" id="90_demand"]
 
 [sub_resource type="Resource" id="Demand_plenty"]
 script = ExtResource("90_demand")
 full_price_count = 6
 drop_per_extra = 0.05
-lowest_rate = 0.5
 
 [resource]
 script = ExtResource("1_shop")
 id = &"bakery"
 display_name = "Mabel's Bakery"
 keeper_name = "Mabel"
-keeper_id = &"baker"
 keeper_sprite = ExtResource("2_keeper")
 keeper_portrait = ExtResource("80_portrait")
+keeper_id = &"baker"
 greetings = Array[String](["[happy] Fresh out of the oven. A roll'll keep you going till noon, a pasty till supper.", "Bring me fruit and I'll pay you better than any bin. Half a dozen of a kind, mind: I can only bake so many pies.", "Honey, pumpkins, a basket of berries: if it goes in a pie, I'll buy it.", "Up at four, sold out by two. That's a baker's day."])
 buys_produce = true
 produce_pay_rate = 1.1

@@ -20,3 +20,4 @@ host_lines = Array[String](["Lantern night! The last night of the year, and the 
 gift_items = Dictionary[Resource, int]({ExtResource("3_r"): 1})
 gift_line = "Here, one for your farm. Hang it up and remember the year by it."
 decorations = Dictionary[Vector2i, StringName]({Vector2i(16, 16): &"festival_lantern", Vector2i(24, 16): &"festival_lantern", Vector2i(16, 20): &"festival_lantern", Vector2i(24, 20): &"festival_lantern"})
+year_review = true

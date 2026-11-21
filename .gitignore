@@ -10,3 +10,19 @@ export_presets.cfg
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# The cozy ground test (DECISIONS 076): built from a bought asset pack whose
+# licence forbids passing its pictures on as files, and this repository is
+# public. art/build_cozy_ground.py makes it again from the pack.
+assets/tilesets/cozy/
+
+# The packs' props, festival dressing and wooden UI test (DECISIONS 081): the
+# same licence. art/build_pack_look.py makes it again from the four packs.
+assets/packs/
+
+# Dave's scenery (DECISIONS 082): the picture library cut from the same packs
+# (art/build_scenery_library.py makes it again), and the map snapshots behind
+# the scenery scenes (they show the packs' ground; Ctrl+B in the game makes
+# them again). The scenes themselves, scenery/*.tscn, ARE kept in git.
+assets/scenery/
+scenery/backdrops/

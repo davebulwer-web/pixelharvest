@@ -1,13 +1,18 @@
-[gd_resource type="Resource" script_class="LocationDef" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="LocationDef" format=3 uid="uid://3rs0dfjtkq7k"]
 
-[ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
-[ext_resource type="Texture2D" path="res://assets/sprites/cove/tam_shed.png" id="2_ext"]
+[ext_resource type="Script" uid="uid://q3pvgaf8tn4u" path="res://scripts/resources/location_def.gd" id="1_def"]
+[ext_resource type="Script" uid="uid://bt06um2iu5c88" path="res://scripts/resources/exit_def.gd" id="1_u6tjm"]
+[ext_resource type="Texture2D" uid="uid://bxqjlrqn23xww" path="res://assets/sprites/cove/tam_shed.png" id="2_ext"]
 
 [resource]
 script = ExtResource("1_def")
 id = &"tam_shed"
 display_name = "Tam's fish shed"
+scene_path = "res://scenes/home.tscn"
 outside = &"cove"
 door_cell = Vector2i(10, 13)
 exterior = ExtResource("2_ext")
 door_words = "Tam's fish shed. It smells of tar and bait. A note pinned to the door says: \"Out on the boat. Back when the tide turns. Tam.\""
+resident_cell = Vector2i(5, 4)
+open_from = 480
+open_until = 1200

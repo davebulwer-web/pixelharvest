@@ -32,7 +32,8 @@ extends Node
 ## Indoors (DECISIONS 068): a room people spend time in, the Wheatsheaf,
 ## adds one too (create_inside), with the room's door: everyone comes in at
 ## it and goes out by it. The room's keeper (Nell behind the bar) is the
-## room's own, so she is left out here.
+## room's own, so she is left out here. The townsfolk's homes add one as
+## well (DECISIONS 084): whoever's at home stands at the home's resting spot.
 ##
 
 const TILE_PX := 16
@@ -52,6 +53,10 @@ var _counter: ShopCounter
 var _has_door: bool = false
 var _door: Vector2i
 var _exclude: Array[StringName] = []
+
+## Indoors, in a home (DECISIONS 084): where someone stands whose stop is
+## just "at home" (no cell of its own). (-1, -1): no such spot.
+var _rest_cell: Vector2i = Vector2i(-1, -1)
 
 ## Everyone standing or walking here, by character id, and where each was
 ## last told to be.
@@ -91,12 +96,15 @@ static func create(place: StringName, entities: Node2D, size: Vector2i, dialogue
 ## The same, for a room (DECISIONS 068): people whose stop is `place` stand
 ## on their cells in it, coming in and going out by `door_cell`; `exclude`
 ## are left to the room (its keeper).
+## In a home (DECISIONS 084), `rest_cell` is where whoever's at home stands.
 static func create_inside(place: StringName, entities: Node2D, size: Vector2i, dialogue, menu,
-		door_cell: Vector2i, exclude: Array[StringName] = []) -> PeopleHere:
+		door_cell: Vector2i, exclude: Array[StringName] = [],
+		rest_cell: Vector2i = Vector2i(-1, -1)) -> PeopleHere:
 	var people := create(place, entities, size, dialogue, menu)
 	people._has_door = true
 	people._door = door_cell
 	people._exclude = exclude
+	people._rest_cell = rest_cell
 	return people
 
 
@@ -107,7 +115,7 @@ func _ready() -> void:
 		var stop := Schedules.stop_now(person)
 		_stops[person.id] = stop
 		if stop.place == _place:
-			_add_npc(person, _base_of(stop.cell))
+			_add_npc(person, _base_of(_cell_of(stop)))
 	EventBus.time_changed.connect(func(_m: int) -> void: _update())
 	EventBus.weather_changed.connect(func(_w: StringName) -> void: _update())
 	EventBus.npc_talked_to.connect(_on_talked_to)
@@ -171,9 +179,9 @@ func _move(person: CharacterDef, from_place: StringName, stop: ScheduleStop) -> 
 		if walker == null:
 			# Coming in: along the road from where they were, or out of the
 			# door of the building they were in.
-			var entry := _gate_toward(from_place, stop.cell)
+			var entry := _gate_toward(from_place, _cell_of(stop))
 			walker = _add_npc(person, _base_of(entry))
-		_walk(walker, stop.cell, false)
+		_walk(walker, _cell_of(stop), false)
 	elif walker != null:
 		# Going: to the road that leads to their next place, or to its door.
 		_walk(walker, _gate_toward(stop.place, walker.cell()), true)
@@ -318,6 +326,14 @@ func _remove(id: StringName) -> void:
 	_markers.erase(id)
 	if walker != null:
 		walker.queue_free()
+
+
+## Where a stop here puts someone: its own cell, or, for plain "at home" in a
+## home (a stop with no cell), the home's resting spot (DECISIONS 084).
+func _cell_of(stop: ScheduleStop) -> Vector2i:
+	if stop.cell == Vector2i.ZERO and _rest_cell != Vector2i(-1, -1):
+		return _rest_cell
+	return stop.cell
 
 
 func _base_of(cell: Vector2i) -> Vector2:

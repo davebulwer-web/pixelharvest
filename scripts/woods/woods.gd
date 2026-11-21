@@ -72,6 +72,7 @@ func _ready() -> void:
 	_place_objects()
 	_place_forage()
 	_place_logs()
+	Scenery.add_to(self, _entities, WOODS_ID)  # Dave's scenery (DECISIONS 082)
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
 	EventBus.weather_changed.connect(func(_w: StringName) -> void: SeasonLook.apply_overlay(_weather))

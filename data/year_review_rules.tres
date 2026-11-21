@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="YearReviewRules" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/year_review_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+gold_per_point = 500
+points_per_crop_kind = 3
+points_per_fish_kind = 2
+points_per_forage_kind = 1
+points_per_dish_kind = 1
+points_per_request = 2
+points_per_festival_win = 6
+points_per_festival_place = 2
+titles = Array[String](["A promising start", "Finding your feet", "A good pair of hands", "The valley's grower", "Talk of the town", "Pride of the valley"])
+title_scores = Array[int]([0, 40, 90, 150, 210, 280])
+title_lines = Array[String](["Every farm starts with thistles. Next year's yours for the taking.", "You've found your feet. The old place is waking up.", "Folk have started asking where their parsnips came from. Well done.", "Half the valley's suppers came off your farm this year.", "Rosa says the city buyers ask for you by name. Talk of the town!", "[happy]Your grandfather would hardly know the place. The pride of the valley, and I'll hear no different."])
+intro_lines = Array[String](["Now then. Every lantern night I read out the year for whoever farms the old place. Here's yours."])
+partial_line = "Now then. I only started keeping my book partway through the year, so forgive an old man if I've missed some. Here's your year."

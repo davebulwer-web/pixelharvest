@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/unlock_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"year_two"
+display_name = "The second year"
+announcement = "A new year on the old farm! Rosa says the city buyers want bigger orders this year, and Mayor Bramble has a question about your almanac."
+on_day = 113

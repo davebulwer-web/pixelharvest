@@ -149,6 +149,9 @@ func new_game(chosen_difficulty: DifficultyDef = null) -> void:
 	finds_on_day = 0
 	finds_today = 0
 	crab_pots = {}
+	collections = {"grown": {}, "foraged": {}}
+	year_stats = fresh_year_stats(1)
+	year_reviews = []
 	# Anything the calendar opens on day 1 is there from the start.
 	open_due_unlocks()
 	location = RULES.starting_location
@@ -792,6 +795,121 @@ func _festival_log_from_save(data: Variant) -> void:
 		festival_log.append(kept)
 
 
+# --- The almanac and the year review (DECISIONS 085) ---------------------------
+# The almanac's pages are worked out from content and from what's kept here
+# and elsewhere in this file: crops grown and wild things found are kept
+# below; fish come from fish_log and dishes from recipes. The Almanac service
+# (scripts/autoload/almanac.gd) listens on EventBus and writes these; this
+# file only holds them and saves them (save version 26).
+
+## Crops picked and wild things found, ever: {"grown": {crop id: how many
+## times picked}, "foraged": {forage id: how many found}}.
+var collections: Dictionary = {"grown": {}, "foraged": {}}
+
+## This year's tally, for the mayor's review at lantern night: see
+## fresh_year_stats() for what's in it. "year" says which year it's for, so
+## the night the year turns can close it.
+var year_stats: Dictionary = {}
+
+## Every year's review, oldest first: {"year": 1, "title": "…", "score": 87,
+## "heard": true if the mayor read it out at lantern night, "stats": the
+## year's tally as it stood when the year ended}.
+var year_reviews: Array[Dictionary] = []
+
+
+## An empty tally for `for_year`. Kinds are kept as lists of ids, so the
+## review can count different kinds as well as how many.
+static func fresh_year_stats(for_year: int) -> Dictionary:
+	return {
+		"year": for_year,
+		"earned": 0,
+		"harvested": 0,
+		"crops": [],
+		"fish": 0,
+		"fish_kinds": [],
+		"foraged": 0,
+		"forage_kinds": [],
+		"cooked": 0,
+		"dish_kinds": [],
+		"requests": 0,
+		"new_entries": 0,
+	}
+
+
+## {"grown": {"parsnip": 12}, …}: as it's kept, ids as Strings, plain numbers.
+func _collections_to_save() -> Dictionary:
+	var data := {}
+	for part: String in ["grown", "foraged"]:
+		var counts := {}
+		var kept: Dictionary = collections.get(part, {})
+		for id: Variant in kept:
+			counts[String(id)] = int(kept[id])
+		data[part] = counts
+	return data
+
+
+## Crops and wild things the game no longer has are dropped with a warning,
+## like items. "seen" (written by the version 26 upgrade) lists what was in
+## the bag then: a crop's produce or a wild thing there counts as grown or
+## found once, so an upgraded game doesn't start with a blank book.
+func _collections_from_save(data: Variant) -> void:
+	collections = {"grown": {}, "foraged": {}}
+	if typeof(data) != TYPE_DICTIONARY:
+		return
+	for key: Variant in data.get("grown", {}):
+		if ContentDB.crop(StringName(key)) == null:
+			push_warning("Save's almanac has a crop '%s' the game doesn't know; it's been removed" % key)
+			continue
+		collections["grown"][StringName(key)] = int(data["grown"][key])
+	for key: Variant in data.get("foraged", {}):
+		if not (ContentDB.item(StringName(key)) is ForageDef):
+			push_warning("Save's almanac has a wild thing '%s' the game doesn't know; it's been removed" % key)
+			continue
+		collections["foraged"][StringName(key)] = int(data["foraged"][key])
+	var seen: Variant = data.get("seen", [])
+	if typeof(seen) != TYPE_ARRAY:
+		return
+	for key: Variant in seen:
+		var item := ContentDB.item(StringName(key))
+		if item is ForageDef:
+			if not collections["foraged"].has(item.id):
+				collections["foraged"][item.id] = 1
+		elif item != null:
+			var crop := ContentDB.crop_giving(item)
+			if crop != null and not collections["grown"].has(crop.id):
+				collections["grown"][crop.id] = 1
+
+
+## A tally from the save, with anything missing filled in empty, so a damaged
+## or hand-edited file can't leave a key out.
+func _year_stats_from_save(data: Variant) -> void:
+	year_stats = fresh_year_stats(year)
+	if typeof(data) != TYPE_DICTIONARY:
+		return
+	for key: String in year_stats:
+		var value: Variant = data.get(key)
+		if typeof(year_stats[key]) == TYPE_ARRAY:
+			if typeof(value) == TYPE_ARRAY:
+				year_stats[key] = value.map(func(v: Variant) -> String: return str(v))
+		elif typeof(value) in [TYPE_FLOAT, TYPE_INT]:
+			year_stats[key] = int(value)
+	if data.get("partial", false):
+		year_stats["partial"] = true
+
+
+func _year_reviews_from_save(data: Variant) -> void:
+	year_reviews = []
+	if typeof(data) != TYPE_ARRAY:
+		return
+	for entry: Variant in data:
+		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("year")) not in [TYPE_FLOAT, TYPE_INT]:
+			continue
+		var stats: Variant = entry.get("stats", {})
+		year_reviews.append({"year": int(entry["year"]), "title": str(entry.get("title", "")),
+				"score": int(entry.get("score", 0)), "heard": bool(entry.get("heard", false)),
+				"stats": stats.duplicate(true) if typeof(stats) == TYPE_DICTIONARY else {}})
+
+
 # --- Cooking and eating (DECISIONS 056) ---------------------------------------
 # Recipes are data (RecipeDef, data/recipes/); dishes are ToolDefs with an
 # EatAction (data/dishes/). All that's kept here is which recipes the farmer
@@ -1300,6 +1418,9 @@ func to_save() -> Dictionary:
 		"festivals": festival_log.duplicate(true),
 		"finds": _finds_to_save(),
 		"crab_pots": _crab_pots_to_save(),
+		"collections": _collections_to_save(),
+		"year_stats": year_stats.duplicate(true),
+		"year_reviews": year_reviews.duplicate(true),
 	}
 
 
@@ -1405,6 +1526,11 @@ func load_from_save(data: Dictionary) -> void:
 	_finds_from_save(data["finds"])
 	# Crab pots set off the Cove's pier (save version 24).
 	_crab_pots_from_save(data["crab_pots"])
+	# The almanac's crops and wild things, this year's tally for the mayor's
+	# review, and every year's review so far (save version 26).
+	_collections_from_save(data["collections"])
+	_year_stats_from_save(data["year_stats"])
+	_year_reviews_from_save(data["year_reviews"])
 	unlocks = []
 	for id: Variant in data["unlocks"]:
 		if StringName(id) not in unlocks:

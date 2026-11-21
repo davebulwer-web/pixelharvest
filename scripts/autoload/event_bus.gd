@@ -275,6 +275,17 @@ signal festival_judged(event_id: StringName, place: int, prize: String)
 ## A festival's host gave the farmer its keepsake (lantern night's lantern).
 signal festival_gift_given(event_id: StringName)
 
+# --- The almanac and the year review (DECISIONS 085) -----------------------------
+
+## Something went into the almanac for the first time: `entry_id` (a crop,
+## fish, wild thing or recipe id) on page `page` (Almanac.PAGES: &"crops",
+## &"fish", &"sea_fish", &"forage", &"sea_forage", &"recipes").
+signal almanac_entry_added(page: StringName, entry_id: StringName)
+
+## The mayor gave the year's review: `year` earned `title`. `heard` is false
+## when the farmer missed lantern night and it was left as a note.
+signal year_reviewed(year: int, title: String, heard: bool)
+
 ## Something the player should be told, in the HUD's message line.
 signal message_posted(text: String)
 

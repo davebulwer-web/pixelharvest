@@ -89,6 +89,8 @@ func _ready() -> void:
 	_add_furniture()
 	_add_keeper()
 	_add_door()
+	# TEST (DECISIONS 083): the Cozy Interiors pack's furniture, if built (Ctrl+R).
+	InteriorLook.dress(self, _entities, &"tavern", ROOM, DOOR_CELLS)
 	var exclude: Array[StringName] = [_shop.keeper_id]
 	_people = PeopleHere.create_inside(_location.id, _entities, ROOM, _dialogue, _menu,
 			Vector2i(DOOR_CELLS[0], ROOM.y), exclude)

@@ -131,6 +131,8 @@ func _ready() -> void:
 	_add_bridge(bridge_open)
 	_place_objects()
 	_place_festival_decorations()
+	PackLook.dress(_entities, TOWN_ID)  # TEST (DECISIONS 081)
+	Scenery.add_to(self, _entities, TOWN_ID)  # Dave's scenery (DECISIONS 082)
 	_mark_notice_board()
 	_people = PeopleHere.create(TOWN_ID, _entities, TownLayout.SIZE, _dialogue, _menu)
 	add_child(_people)

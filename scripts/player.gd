@@ -21,6 +21,12 @@ extends CharacterBody2D
 ## the ground ahead of you, as in every game of this kind. Upgraded tools
 ## (Stage 5) cover more tiles, starting from that one and running ahead.
 ##
+## E is more forgiving than a tool (DECISIONS 079): it tries the tile ahead
+## first, exactly as a tool would, and if nothing's there it reaches for the
+## nearest thing around the farmer that isn't behind them: a mushroom at a
+## corner, someone walking past, a keeper half a tile along the counter, or
+## the tile they're standing on. Tools stay tile-exact.
+##
 
 ## Pixels per second. At 16px tiles this is roughly 4.4 tiles a second.
 const SPEED := 70.0
@@ -35,6 +41,12 @@ const STANDING_PROBE := Vector2(0, -4)
 
 ## The cell ahead for each straight facing (Facing.STRAIGHT).
 const FACING_VECTORS: Dictionary = Facing.STRAIGHT
+
+## How far in front of the feet E reaches for the near miss (DECISIONS 079),
+## in pixels: a little under a tile. Whatever is on the tiles around the
+## farmer is tried nearest this point first, so what's in front beats what's
+## beside, and nothing behind the farmer is reached at all.
+const REACH_PX := 12.0
 
 @onready var _sprite: AnimatedSprite2D = $Sprite
 
@@ -187,15 +199,68 @@ func _use_tool_away() -> void:
 ##
 ## Anything usable joins the "interactable" group and offers occupies(cell)
 ## and interact(), so this never grows a list of things it knows about.
+##
+## The near miss (DECISIONS 079): when the tile straight ahead has nothing
+## for E, the tiles around the farmer are tried, nearest the point just in
+## front of them first (_reach_cells). Only things that do no harm if they
+## weren't quite what you meant are reached this way: a ready crop, and any
+## interactable that doesn't ask to be aimed at exactly (aim_exactly(): a
+## sprinkler or a decoration, which E would pick up). Weeds and brambles cost
+## energy, so they stay on the tile ahead, like the tools.
 func _interact() -> void:
-	var cell := target_cell()
-	if can_farm and (GameState.harvest(cell) or GameState.pull_weeds(cell)
-			or GameState.clear_by_hand(cell)):
+	var ahead := target_cell()
+	if can_farm and (GameState.harvest(ahead) or GameState.pull_weeds(ahead)
+			or GameState.clear_by_hand(ahead)):
 		return
-	for node in get_tree().get_nodes_in_group(&"interactable"):
-		if node.occupies(cell):
+	var usable := get_tree().get_nodes_in_group(&"interactable")
+	for node in usable:
+		if node.occupies(ahead):
 			node.interact()
 			return
+	for cell in _reach_cells():
+		if can_farm and GameState.harvest(cell):
+			return
+		for node in usable:
+			if is_instance_valid(node) and node.occupies(cell) and not _aim_exactly(node):
+				node.interact()
+				return
+
+
+## The tiles E may reach for when the one ahead has nothing (DECISIONS 079):
+## the eight around the farmer and the one under them, leaving out the tile
+## ahead (already tried) and any tile behind them, nearest first to a point
+## REACH_PX in front of the feet, the way they face (all eight ways, so
+## facing down-right reaches the corner tile first).
+func _reach_cells() -> Array[Vector2i]:
+	var feet := position + STANDING_PROBE
+	var way := Vector2.RIGHT.rotated(Facing.EIGHT.find(_facing) * TAU / 8.0)
+	var reach := feet + way * REACH_PX
+	var here := standing_cell()
+	var ahead := target_cell()
+	var cells: Array[Vector2i] = []
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var cell := here + Vector2i(dx, dy)
+			if cell == ahead:
+				continue
+			# Behind: more than about half a tile back from the feet, the
+			# way they face. Beside them (and under them) still counts.
+			if cell != here and (_cell_centre(cell) - feet).dot(way) < -TILE_PX * 0.6:
+				continue
+			cells.append(cell)
+	cells.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return _cell_centre(a).distance_squared_to(reach) < _cell_centre(b).distance_squared_to(reach))
+	return cells
+
+
+func _cell_centre(cell: Vector2i) -> Vector2:
+	return (Vector2(cell) + Vector2(0.5, 0.5)) * TILE_PX
+
+
+## True for an interactable that should only answer E on the tile ahead: it
+## says so with aim_exactly() (PlacedObject: E would pick it up).
+func _aim_exactly(node: Node) -> bool:
+	return node.has_method(&"aim_exactly") and node.aim_exactly()
 
 
 ## Movement is eight-way, and so is the picture where the sprite sheet has the

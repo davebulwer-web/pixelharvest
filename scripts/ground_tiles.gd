@@ -201,6 +201,40 @@ static func foam_tile(mask: int) -> Vector2i:
 	return Vector2i(mask, FOAM_ROW)
 
 
+## TEST (DECISIONS 078): the cliffs drawn as raised ground, one picture per
+## mix of open sides, in a row of the edge pictures after the foam's. Only the
+## calm test's tilesets have this row; without it a cliff is the plain CLIFF
+## tile, square, as before. `open_sides` adds 1 if the cell to the north is
+## not cliff, 2 east, 4 south, 8 west.
+const CLIFF_ROW := 31
+
+
+## The cliff picture for a cliff cell with these open sides. A cliff two
+## cells or more from top to bottom has a face two tiles high: the cell just
+## above the foot (`above_face`) shows the face's upper half, from the next
+## row, whose columns are chosen the same way.
+static func cliff_tile(open_sides: int, above_face: bool = false) -> Vector2i:
+	return Vector2i(open_sides, CLIFF_ROW + 1 if above_face else CLIFF_ROW)
+
+
+## TEST (DECISIONS 080): the harbour's pictures, after the cliffs' rows, only
+## in the harbour test's tilesets. The pier's deck, one picture per mix of
+## open sides (as the cliffs), and what stands in the sea just south of the
+## harbour's edges (FRONT_ROW: animated, four frames down): the quay wall, the
+## pier's posts and the breakwater's foot.
+const PIER_ROW := 33
+const FRONT_ROW := 34
+enum Front { QUAY, QUAY_LADDER, QUAY_LEFT, QUAY_RIGHT, POSTS_LEFT, POSTS_MID, POSTS_RIGHT, POSTS_SINGLE, BREAKWATER, BREAKWATER_END }
+
+
+static func pier_tile(open_sides: int) -> Vector2i:
+	return Vector2i(open_sides, PIER_ROW)
+
+
+static func front_tile(front: Front) -> Vector2i:
+	return Vector2i(front, FRONT_ROW)
+
+
 ## A scatter piece for a join between the grounds `kinds` at `corner`, or
 ## (-1, -1) for a join that takes none (water's edge, the tilled beds, the
 ## sea). Grass joins get tufts, flowers or a stone; sandy and stony joins a

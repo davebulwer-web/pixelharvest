@@ -51,6 +51,8 @@ var _portrait_strip: Texture2D = null
 var _mood: StringName = &"neutral"
 var _frame: Control
 var _portrait: TextureRect
+var _paper: ColorRect
+var _border: NinePatchRect
 
 ## While asking: the answers, one label each, and which is highlighted.
 var _choice_list: VBoxContainer
@@ -61,6 +63,18 @@ var _picked: int = 0
 func _ready() -> void:
 	_build()
 	visible = false
+	add_to_group(&"pack_ui")  # TEST (DECISIONS 081)
+	pack_ui_changed()
+
+
+## TEST (DECISIONS 081): the Wood theme's portrait frame and paper, or ours.
+func pack_ui_changed() -> void:
+	var wood := PackLook.ui_texture("portrait_frame")
+	_border.texture = wood if wood != null else PORTRAIT_FRAME
+	var margin := PackLook.ui_margin("portrait_frame") if wood != null else 0
+	for side: Side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		_border.set_patch_margin(side, margin)
+	_paper.color = PackLook.WOOD_PAPER if wood != null else UiStyle.PAPER
 
 
 ## Show `lines` one after another, attributed to `speaker`, with their
@@ -253,20 +267,21 @@ func _build() -> void:
 	_frame.visible = false
 	anchor.add_child(_frame)
 	var inset := (FRAME_SIZE - 64) / 2.0
-	var paper := ColorRect.new()
-	paper.color = UiStyle.PAPER
-	paper.position = Vector2(inset, inset)
-	paper.size = Vector2(64, 64)
-	_frame.add_child(paper)
+	_paper = ColorRect.new()
+	_paper.color = UiStyle.PAPER
+	_paper.position = Vector2(inset, inset)
+	_paper.size = Vector2(64, 64)
+	_frame.add_child(_paper)
 	_portrait = TextureRect.new()
 	_portrait.position = Vector2(inset, inset)
 	_portrait.size = Vector2(64, 64)
 	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
 	_frame.add_child(_portrait)
-	var border := TextureRect.new()
-	border.texture = PORTRAIT_FRAME
-	border.size = Vector2(FRAME_SIZE, FRAME_SIZE)
-	_frame.add_child(border)
+	# A nine-patch so the Wood frame (54px) can stretch to ours (DECISIONS 081).
+	_border = NinePatchRect.new()
+	_border.texture = PORTRAIT_FRAME
+	_border.size = Vector2(FRAME_SIZE, FRAME_SIZE)
+	_frame.add_child(_border)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override(&"separation", 0)
 	panel.add_child(column)

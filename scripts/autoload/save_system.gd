@@ -116,7 +116,14 @@ const SET_ASIDE_PATH := "user://save.unreadable.json"
 ##       terrain and whatever was on them is given back, as version 18 did;
 ##       the workbench, which stood against the old farmhouse's east wall,
 ##       moves to stand against the new one. No new fields.
-const CURRENT_VERSION := 25
+##  26 — the almanac and the year review (DECISIONS 085): crops grown and
+##       wild things found ("collections": {"grown", "foraged"}, id -> how
+##       many), this year's tally for the mayor ("year_stats") and every
+##       year's review ("year_reviews"). An older game's book starts with
+##       what's in its bag ("collections"."seen"), its tally starts on the
+##       day it's upgraded (marked "partial", with the fish already caught
+##       if it's still year 1), and it has had no reviews.
+const CURRENT_VERSION := 26
 
 ## Fields GameState.load_from_save() relies on, and the kind of value each
 ## must be. Checked before anything is replaced, so a damaged save can't leave
@@ -144,6 +151,9 @@ const REQUIRED_FIELDS: Dictionary = {
 	"festivals": TYPE_ARRAY,
 	"finds": TYPE_DICTIONARY,
 	"crab_pots": TYPE_ARRAY,
+	"collections": TYPE_DICTIONARY,
+	"year_stats": TYPE_DICTIONARY,
+	"year_reviews": TYPE_ARRAY,
 }
 
 ## Saving is switched on by load_or_new_game(), i.e. only when the game was
@@ -362,6 +372,8 @@ func _upgrade(data: Dictionary) -> String:
 				_upgrade_23_to_24(data["game"])
 			24:
 				_upgrade_24_to_25(data["game"])
+			25:
+				_upgrade_25_to_26(data["game"])
 			_:
 				return "there's no way to upgrade a version %d save" % version
 		version += 1
@@ -1063,3 +1075,41 @@ func _v25_workbench_spot(by_cell: Dictionary) -> Vector2i:
 				best = cell
 				best_distance = distance
 	return best
+
+
+## Version 25 -> 26: the almanac and the year review (DECISIONS 085).
+##
+## Nothing kept count of crops grown or wild things found before, so the
+## book can't know them. What it can see is the bag: its item ids go in
+## "seen", and loading counts any crop's produce or wild thing among them as
+## grown or found once (which ids those are is today's content's business,
+## so it's left to load time, not written into this step).
+##
+## The year's tally starts now, marked "partial" so the mayor says he started
+## his book late. In year 1 the fish log already says what's been caught this
+## year, so that much is carried over; in a later year it can't be told apart
+## from earlier years, so the tally starts empty.
+func _upgrade_25_to_26(game: Dictionary) -> void:
+	var seen: Array = []
+	var inventory: Variant = game.get("inventory")
+	if typeof(inventory) == TYPE_ARRAY:
+		for stack: Variant in inventory:
+			if typeof(stack) == TYPE_DICTIONARY and typeof(stack.get("id")) == TYPE_STRING \
+					and not seen.has(stack["id"]):
+				seen.append(stack["id"])
+	game["collections"] = {"grown": {}, "foraged": {}, "seen": seen}
+	var year := int(game.get("year", 1))
+	var stats := {
+		"year": year, "earned": 0, "harvested": 0, "crops": [], "fish": 0, "fish_kinds": [],
+		"foraged": 0, "forage_kinds": [], "cooked": 0, "dish_kinds": [], "requests": 0,
+		"new_entries": 0, "partial": true,
+	}
+	var fish_log: Variant = game.get("fish_log")
+	if year == 1 and typeof(fish_log) == TYPE_DICTIONARY:
+		for fish_id: Variant in fish_log:
+			var entry: Variant = fish_log[fish_id]
+			if typeof(entry) == TYPE_DICTIONARY and int(entry.get("caught", 0)) > 0:
+				stats["fish"] += int(entry["caught"])
+				stats["fish_kinds"].append(str(fish_id))
+	game["year_stats"] = stats
+	game["year_reviews"] = []

@@ -87,6 +87,8 @@ func _ready() -> void:
 	Exits.add(self, location, _spawns)
 	_add_buildings(buildings)
 	_place_objects()
+	PackLook.dress(_entities, COVE_ID)  # TEST (DECISIONS 081)
+	Scenery.add_to(self, _entities, COVE_ID)  # Dave's scenery (DECISIONS 082)
 	_place_strand_forage()
 	if _tide_out:
 		_place_pool_forage()

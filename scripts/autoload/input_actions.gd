@@ -25,11 +25,26 @@ const ACTIONS: Dictionary = {
 	&"interact": [KEY_E],
 	&"open_inventory": [KEY_I],
 	&"quest_log": [KEY_J],
+	&"almanac": [KEY_L],
 	&"next_tool": [KEY_TAB],
 	&"prev_tool": [KEY_Q],
 	&"sleep": [KEY_ENTER],
 	&"new_game": [KEY_N | KEY_MASK_CTRL],
 	&"mute": [KEY_M],
+	# TEST (DECISIONS 076): swap the ground between our look and the cozy pack's.
+	&"swap_ground_look": [KEY_G | KEY_MASK_CTRL],
+	# TEST (DECISIONS 078): swap the calmer cliffs and paving on and off.
+	&"swap_calm_look": [KEY_K | KEY_MASK_CTRL],
+	# TEST (DECISIONS 080): swap the Cove's harbour pictures on and off.
+	&"swap_harbour_look": [KEY_H | KEY_MASK_CTRL],
+	# TEST (DECISIONS 081): swap the packs' props and dressing, and the wooden UI.
+	&"swap_pack_props": [KEY_P | KEY_MASK_CTRL],
+	&"swap_pack_ui": [KEY_U | KEY_MASK_CTRL],
+	# Dave's scenery (DECISIONS 082): photograph this map for the scenery
+	# scene's backdrop (only when run from the editor).
+	&"scenery_backdrop": [KEY_B | KEY_MASK_CTRL],
+	# TEST (DECISIONS 083): swap the rooms' Cozy Interiors furniture on and off.
+	&"swap_interior_look": [KEY_R | KEY_MASK_CTRL],
 	# Godot's built-in menu actions already have the arrow keys; adding WASD
 	# lets the shop menu be driven from the same hand as walking.
 	&"ui_up": [KEY_W],

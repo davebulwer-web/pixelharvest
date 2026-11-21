@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="LocationDef" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="LocationDef" format=3 uid="uid://decag6y50n4gx"]
 
-[ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="1_def"]
-[ext_resource type="Script" path="res://scripts/resources/exit_def.gd" id="9_exit"]
+[ext_resource type="Script" uid="uid://q3pvgaf8tn4u" path="res://scripts/resources/location_def.gd" id="1_def"]
+[ext_resource type="Script" uid="uid://bt06um2iu5c88" path="res://scripts/resources/exit_def.gd" id="9_exit"]
 
 [sub_resource type="Resource" id="Exit_town"]
 script = ExtResource("9_exit")

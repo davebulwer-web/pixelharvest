@@ -89,6 +89,13 @@ extends Resource
 ## Null: the chalkboard is blank, and there's no darts night.
 @export var tavern: TavernRules
 
+## --- The almanac and the year review (DECISIONS 085) -------------------------
+
+## What the mayor's year review at lantern night counts, and the titles it
+## gives: data/year_review_rules.tres. Null: the mayor reads out the year but
+## gives no title.
+@export var year_review: YearReviewRules
+
 ## --- Cooking (DECISIONS 056) ------------------------------------------------
 
 ## What opens the farmhouse kitchen, so the stove cooks: Mabel's lessons give

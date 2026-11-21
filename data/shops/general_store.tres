@@ -1,15 +1,12 @@
-[gd_resource type="Resource" script_class="ShopDef" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="ShopDef" format=3 uid="uid://dy8bdvjh15d71"]
 
-[ext_resource type="Script" path="res://scripts/resources/shop_def.gd" id="1_shop"]
-[ext_resource type="Texture2D" path="res://assets/sprites/town/keeper_general.png" id="2_keeper"]
-[ext_resource type="Texture2D" path="res://assets/sprites/portraits/keeper_general.png" id="80_portrait"]
-[ext_resource type="Script" path="res://scripts/resources/demand_def.gd" id="90_demand"]
+[ext_resource type="Script" uid="uid://c8rav5v6m6jx3" path="res://scripts/resources/shop_def.gd" id="1_shop"]
+[ext_resource type="Texture2D" uid="uid://dxp1hvokslaoe" path="res://assets/sprites/town/keeper_general.png" id="2_keeper"]
+[ext_resource type="Texture2D" uid="uid://ccxl2fr26vlis" path="res://assets/sprites/portraits/keeper_general.png" id="80_portrait"]
+[ext_resource type="Script" uid="uid://dksxjico5whwj" path="res://scripts/resources/demand_def.gd" id="90_demand"]
 
 [sub_resource type="Resource" id="Demand_plenty"]
 script = ExtResource("90_demand")
-full_price_count = 20
-drop_per_extra = 0.02
-lowest_rate = 0.5
 
 [resource]
 script = ExtResource("1_shop")
@@ -22,7 +19,6 @@ greetings = Array[String](["[happy] Welcome in! I'll buy your produce, and sell 
 sells_decorations = true
 upgrade_categories = Array[StringName]([&"energy", &"land"])
 buys_produce = true
-produce_pay_rate = 0.8
+demand = SubResource("Demand_plenty")
 opens_at = 480
 closes_at = 1200
-demand = SubResource("Demand_plenty")

@@ -90,6 +90,8 @@ static func rows_for(r: DayRecord) -> Array[PackedStringArray]:
 ## that it's ending. Separate from the drawing, like rows_for.
 static func news_for(r: DayRecord) -> Array[String]:
 	var news: Array[String] = []
+	# A year review left as a note: lantern night was missed (DECISIONS 085).
+	news.append_array(Almanac.news_today())
 	var weather := Notices.weather_report()
 	if weather != "":
 		news.append(weather)

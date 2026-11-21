@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/almanac_goal.gd" id="2_r"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="3_r"]
+[ext_resource type="Resource" path="res://data/decorations/bird_bath.tres" id="4_r"]
+[ext_resource type="Resource" path="res://data/unlocks/year_two.tres" id="5_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+amount = 12
+
+[resource]
+script = ExtResource("1_r")
+id = &"mayor_almanac"
+title = "The valley's almanac"
+giver = &"mayor"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["A new year! Now, that almanac of yours. My father kept one for the valley: every crop, every fish, every mushroom, all written down.", "His has gaps I'd dearly like filled. Find me twelve things that aren't in your book yet, grown, caught, found or cooked, and come and tell me. Press L to see what's missing."])
+reminder_line = "Twelve new things for the almanac, farmer. The greyed-out ones have hints!"
+thanks_lines = Array[String](["[happy]Twelve new pages! Father would have been delighted.", "Take this bird bath. It was his: he used to sit by it and write up the birds."])
+reward_gold = 600
+reward_items = Dictionary[ExtResource("3_r"), int]({
+ExtResource("4_r"): 1
+})
+first_day = 113
+requires_unlock = ExtResource("5_r")

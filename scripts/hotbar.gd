@@ -33,6 +33,11 @@ func _ready() -> void:
 	# Seeds grey out and come back as the seasons turn.
 	EventBus.season_changed.connect(func(_s: int) -> void: queue_redraw())
 	resized.connect(queue_redraw)
+	add_to_group(&"pack_ui")  # TEST (DECISIONS 081): Ctrl+U redraws it
+
+
+func pack_ui_changed() -> void:
+	queue_redraw()
 
 
 func _draw() -> void:
@@ -73,8 +78,13 @@ func _draw() -> void:
 func _draw_slot(at: Vector2, item: ItemDef, is_selected: bool, show_count: bool,
 		usable: bool = true) -> void:
 	var rect := Rect2(at, Vector2(SLOT_PX, SLOT_PX))
-	draw_rect(rect, UiStyle.SLOT)
-	draw_rect(rect.grow(-0.5), UiStyle.HIGHLIGHT if is_selected else UiStyle.SLOT_EDGE, false, 1.0)
+	# TEST (DECISIONS 081): the Wood theme's slots, if switched on.
+	var wood := PackLook.ui_texture("slot_selected" if is_selected else "slot")
+	if wood != null:
+		draw_texture_rect(wood, rect, false)
+	else:
+		draw_rect(rect, UiStyle.SLOT)
+		draw_rect(rect.grow(-0.5), UiStyle.HIGHLIGHT if is_selected else UiStyle.SLOT_EDGE, false, 1.0)
 	if item.icon != null:
 		draw_texture(item.icon, at + Vector2(1, 1), Color.WHITE if usable else UNUSABLE_TINT)
 	if show_count:

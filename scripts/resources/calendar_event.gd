@@ -77,6 +77,10 @@ extends Resource
 ## up on the event's map for the day, like the town's own objects.
 @export var decorations: Dictionary[Vector2i, StringName] = {}
 
+## True for the festival where the host reads out the farmer's year when
+## giving the keepsake: lantern night's year review (DECISIONS 085).
+@export var year_review: bool = false
+
 
 ## True if someone runs it (a festival), rather than only setting up stalls.
 func is_festival() -> bool:

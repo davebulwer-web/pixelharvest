@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="QuestDef" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/quest_def.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/quests/almanac_goal.gd" id="2_r"]
+[ext_resource type="Resource" path="res://data/unlocks/year_two.tres" id="3_r"]
+
+[sub_resource type="Resource" id="Resource_goal"]
+script = ExtResource("2_r")
+amount = 5
+
+[resource]
+script = ExtResource("1_r")
+id = &"child_almanac"
+title = "Pip's shadows"
+giver = &"child"
+goal = SubResource("Resource_goal")
+offer_lines = Array[String](["Is it true you've got a book with everything in it? Can I see? ...Some of them are just shadows!", "I want to know what the shadows are. Find five things that aren't in the book yet, and then tell me what they were!"])
+reminder_line = "Any shadows filled in yet? Five! The book has hints under the shadows."
+thanks_lines = Array[String](["[happy]Five! So that's what that shadow was. I knew it had teeth!", "Here, I saved my pocket money for when you did it."])
+reward_gold = 300
+first_day = 141
+requires_unlock = ExtResource("3_r")

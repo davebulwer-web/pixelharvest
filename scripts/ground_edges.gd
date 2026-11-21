@@ -69,6 +69,9 @@ var _layers: Array[TileMapLayer] = []
 var _scatter: TileMapLayer
 var _square: TileMapLayer
 var _foam: TileMapLayer
+## TEST (DECISIONS 080): the harbour's fronts in the sea (quay wall, pier
+## posts, breakwater foot), on the game's grid, over the soft layers.
+var _front: TileMapLayer
 
 ## Corners waiting to be redrawn at the end of the frame.
 var _dirty: Dictionary = {}  # Vector2i -> true
@@ -113,12 +116,74 @@ func mark(cell: Vector2i) -> void:
 		_flush.call_deferred()
 
 
+## TEST (DECISIONS 076): Ctrl+G swaps between our own ground and the cozy
+## pack's, if it's built. Every outdoor map has one of these, so it works
+## everywhere outside.
+func _unhandled_input(event: InputEvent) -> void:
+	if _swap_calm(event) or _swap_harbour(event) or _swap_pack(event):
+		return
+	if not event.is_action_pressed(&"swap_ground_look") or not SeasonLook.has_cozy_ground():
+		return
+	get_viewport().set_input_as_handled()
+	SeasonLook.cozy_ground = not SeasonLook.cozy_ground
+	SeasonLook.apply_ground(_ground)
+	EventBus.message_posted.emit("Ground look: %s (Ctrl+G to swap)."
+			% ("Cozy pack" if SeasonLook.cozy_ground else "our own"))
+
+
+## TEST (DECISIONS 080): Ctrl+H swaps the harbour's pictures on and off.
+func _swap_harbour(event: InputEvent) -> bool:
+	if not event.is_action_pressed(&"swap_harbour_look") or not SeasonLook.has_harbour_test():
+		return false
+	get_viewport().set_input_as_handled()
+	SeasonLook.harbour_test = not SeasonLook.harbour_test
+	SeasonLook.apply_ground(_ground)
+	EventBus.message_posted.emit("Harbour look: %s (Ctrl+H to swap)."
+			% ("on" if SeasonLook.harbour_test else "off"))
+	return true
+
+
+## TEST (DECISIONS 081): Ctrl+P swaps the packs' props and dressing, Ctrl+U
+## the wooden UI.
+func _swap_pack(event: InputEvent) -> bool:
+	var props := event.is_action_pressed(&"swap_pack_props")
+	var ui := event.is_action_pressed(&"swap_pack_ui")
+	if not (props or ui) or not PackLook.has_pack():
+		return false
+	get_viewport().set_input_as_handled()
+	PackLook.set_on(PackLook.props_on != props, PackLook.ui_on != ui)
+	if props:
+		EventBus.message_posted.emit("Pack props and dressing: %s (Ctrl+P to swap)."
+				% ("on" if PackLook.props_on else "off"))
+	else:
+		EventBus.message_posted.emit("Wooden UI: %s (Ctrl+U to swap)."
+				% ("on" if PackLook.ui_on else "off"))
+	return true
+
+
+## TEST (DECISIONS 078): Ctrl+K swaps the calmer cliffs and paving on and off
+## (over the cozy ground only).
+func _swap_calm(event: InputEvent) -> bool:
+	if not event.is_action_pressed(&"swap_calm_look") or not SeasonLook.has_calm_test():
+		return false
+	get_viewport().set_input_as_handled()
+	SeasonLook.calm_test = not SeasonLook.calm_test
+	SeasonLook.apply_ground(_ground)
+	EventBus.message_posted.emit("Calm cliffs and paving: %s (Ctrl+K to swap)."
+			% ("on" if SeasonLook.calm_test else "off"))
+	return true
+
+
 ## The season changed the ground's tileset: every layer here shows the same
 ## tileset (its edge pictures are a second source in each season's ground
 ## tileset), so they follow.
 func follow_tileset() -> void:
 	for layer in _all_layers():
 		layer.tile_set = _ground.tile_set
+	# The calm test's cliffs (DECISIONS 078) are only in some tilesets, so
+	# the square layer is redrawn: with them or without.
+	for cell in _ground.get_used_cells():
+		mark(cell)
 
 
 func _build_layers() -> void:
@@ -129,6 +194,7 @@ func _build_layers() -> void:
 			# foam's inner half and only the ring out on the water shows.
 			_foam = _new_layer("Foam", HALF_TILE)
 	_scatter = _new_layer("EdgeScatter", HALF_TILE)
+	_front = _new_layer("HarbourFront", Vector2.ZERO)
 	_square = _new_layer("SquareGround", Vector2.ZERO)
 
 
@@ -149,6 +215,7 @@ func _all_layers() -> Array[TileMapLayer]:
 	result.append(_scatter)
 	result.append(_square)
 	result.append(_foam)
+	result.append(_front)
 	return result
 
 
@@ -237,13 +304,105 @@ func _maybe_scatter(corner: Vector2i, kinds: Dictionary) -> void:
 
 
 ## Square ground (cliff, pier) drawn again on top, on the game's grid.
+## With the calm test's tileset (DECISIONS 078) a cliff is drawn as raised
+## ground instead, its picture chosen by which sides open onto something else.
 func _draw_square(cell: Vector2i) -> void:
 	var source := _ground.get_cell_source_id(cell)
 	var coords := _ground.get_cell_atlas_coords(cell)
-	if source == GroundTiles.SOURCE_ID and GroundTiles.edge_ground(coords) < 0:
+	_draw_front(cell)
+	if source == GroundTiles.SOURCE_ID and coords == GroundTiles.PIER and _has_edge_tile(GroundTiles.pier_tile(0)):
+		_square.set_cell(cell, GroundTiles.EDGE_SOURCE_ID,
+				GroundTiles.pier_tile(_open_sides(cell, [GroundTiles.PIER, GroundTiles.PAVING])))
+	elif source == GroundTiles.SOURCE_ID and coords == GroundTiles.CLIFF and _has_cliff_pictures():
+		var sides := _open_sides(cell)
+		# The cell above a cliff's foot shows the upper half of a taller face.
+		var below := cell + Vector2i.DOWN
+		var above_face := sides & 4 == 0 and _is_cliff(below) and _open_sides(below) & 4 != 0
+		_square.set_cell(cell, GroundTiles.EDGE_SOURCE_ID,
+				GroundTiles.cliff_tile(sides, above_face))
+	elif source == GroundTiles.SOURCE_ID and GroundTiles.edge_ground(coords) < 0:
 		_square.set_cell(cell, source, coords, _ground.get_cell_alternative_tile(cell))
 	else:
 		_square.erase_cell(cell)
+
+
+## Whether the ground's tileset has the calm test's cliff pictures.
+func _has_cliff_pictures() -> bool:
+	return _has_edge_tile(GroundTiles.cliff_tile(0))
+
+
+## Whether the ground's tileset has edge picture `coords` (the tests' extra
+## rows are only in their own tilesets).
+func _has_edge_tile(coords: Vector2i) -> bool:
+	var tiles := _ground.tile_set
+	if tiles == null or not tiles.has_source(GroundTiles.EDGE_SOURCE_ID):
+		return false
+	var edges := tiles.get_source(GroundTiles.EDGE_SOURCE_ID) as TileSetAtlasSource
+	return edges != null and edges.has_tile(coords)
+
+
+## TEST (DECISIONS 080): on a sea cell just south of the quay, the pier or
+## the breakwater, what stands in the water there: the quay's wall, the
+## pier's posts, the breakwater's foot. Pictures only, like everything here.
+func _draw_front(cell: Vector2i) -> void:
+	_front.erase_cell(cell)
+	if _coords_at(cell) != GroundTiles.SEA or not _has_edge_tile(GroundTiles.front_tile(GroundTiles.Front.QUAY)):
+		return
+	var above := _coords_at(cell + Vector2i.UP)
+	var left_same := _coords_at(cell + Vector2i(-1, -1)) == above and _coords_at(cell + Vector2i.LEFT) == GroundTiles.SEA
+	var right_same := _coords_at(cell + Vector2i(1, -1)) == above and _coords_at(cell + Vector2i.RIGHT) == GroundTiles.SEA
+	var front := -1
+	if above == GroundTiles.PAVING:
+		if left_same and right_same:
+			# A ladder down to the water now and then along the wall.
+			front = GroundTiles.Front.QUAY_LADDER if GroundTiles.pick(cell, 13, 7) == 0 else GroundTiles.Front.QUAY
+		else:
+			front = GroundTiles.Front.QUAY_LEFT if not left_same and right_same \
+					else GroundTiles.Front.QUAY_RIGHT if left_same and not right_same else GroundTiles.Front.QUAY
+	elif above == GroundTiles.PIER:
+		var pier_left := _coords_at(cell + Vector2i(-1, -1)) == GroundTiles.PIER
+		var pier_right := _coords_at(cell + Vector2i(1, -1)) == GroundTiles.PIER
+		if pier_left and pier_right:
+			front = GroundTiles.Front.POSTS_MID
+		elif pier_right:
+			front = GroundTiles.Front.POSTS_LEFT
+		elif pier_left:
+			front = GroundTiles.Front.POSTS_RIGHT
+		else:
+			front = GroundTiles.Front.POSTS_SINGLE
+	elif above == GroundTiles.ROCKS:
+		front = GroundTiles.Front.BREAKWATER
+	if front >= 0:
+		_front.set_cell(cell, GroundTiles.EDGE_SOURCE_ID, GroundTiles.front_tile(front))
+
+
+## The ground tile at `cell`, or (-1, -1) for none.
+func _coords_at(cell: Vector2i) -> Vector2i:
+	if _ground.get_cell_source_id(cell) != GroundTiles.SOURCE_ID:
+		return Vector2i(-1, -1)
+	return _ground.get_cell_atlas_coords(cell)
+
+
+func _is_cliff(cell: Vector2i) -> bool:
+	return _ground.get_cell_source_id(cell) == GroundTiles.SOURCE_ID \
+			and _ground.get_cell_atlas_coords(cell) == GroundTiles.CLIFF
+
+
+## Which sides of the cliff cell `cell` open onto something that isn't cliff:
+## 1 north, 2 east, 4 south, 8 west. Beyond the map's drawn cells counts as
+## cliff, so the map's border shows no edge on its outer side.
+## `joined` lists the ground that counts as the same (the pier joins the
+## quay's paving).
+func _open_sides(cell: Vector2i, joined: Array = [GroundTiles.CLIFF]) -> int:
+	var sides := 0
+	var steps: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+	for i in 4:
+		var beside := cell + steps[i]
+		if _ground.get_cell_source_id(beside) == -1:
+			continue
+		if not _ground.get_cell_atlas_coords(beside) in joined:
+			sides |= 1 << i
+	return sides
 
 
 ## What the Ground layer shows at `cell`, as an edge-ground height, or -1 for

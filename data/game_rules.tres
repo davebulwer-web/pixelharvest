@@ -1,51 +1,52 @@
-[gd_resource type="Resource" script_class="GameRules" load_steps=48 format=3]
+[gd_resource type="Resource" script_class="GameRules" format=3 uid="uid://bwf8724bc3cw2"]
 
-[ext_resource type="Script" path="res://scripts/resources/game_rules.gd" id="1_rules"]
-[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_itemdef"]
-[ext_resource type="Resource" path="res://data/tools/hoe.tres" id="3_hoe"]
-[ext_resource type="Resource" path="res://data/tools/watering_can.tres" id="4_can"]
-[ext_resource type="Resource" path="res://data/tools/parsnip_seeds.tres" id="5_seeds"]
-[ext_resource type="Script" path="res://scripts/resources/location_def.gd" id="6_locdef"]
-[ext_resource type="Resource" path="res://data/locations/farm.tres" id="7_farm"]
-[ext_resource type="Resource" path="res://data/locations/town.tres" id="13_town"]
-[ext_resource type="Resource" path="res://data/locations/seed_shop.tres" id="14_seeds"]
-[ext_resource type="Resource" path="res://data/locations/general_store.tres" id="15_general"]
-[ext_resource type="Resource" path="res://data/locations/blacksmith.tres" id="16_smith"]
-[ext_resource type="Resource" path="res://data/locations/farmhouse.tres" id="17_house"]
-[ext_resource type="Resource" path="res://data/locations/woods.tres" id="24_woods"]
-[ext_resource type="Resource" path="res://data/locations/greenhouse.tres" id="27_greenhouse"]
-[ext_resource type="Resource" path="res://data/locations/lane.tres" id="28_lane"]
-[ext_resource type="Resource" path="res://data/locations/pip_cottage.tres" id="29_pip"]
-[ext_resource type="Resource" path="res://data/locations/dot_yard.tres" id="30_dot"]
-[ext_resource type="Script" path="res://scripts/resources/season_theme.gd" id="8_theme"]
+[ext_resource type="Script" uid="uid://ck0j5jgau67m1" path="res://scripts/resources/game_rules.gd" id="1_rules"]
+[ext_resource type="Script" uid="uid://rmvoo7nik6gs" path="res://scripts/resources/item_def.gd" id="2_itemdef"]
+[ext_resource type="Resource" uid="uid://bj0uhtqsssbms" path="res://data/tools/hoe.tres" id="3_hoe"]
+[ext_resource type="Resource" uid="uid://c2wytew3gxhv1" path="res://data/tools/watering_can.tres" id="4_can"]
+[ext_resource type="Resource" uid="uid://uxgragjvxvow" path="res://data/tools/parsnip_seeds.tres" id="5_seeds"]
+[ext_resource type="Script" uid="uid://q3pvgaf8tn4u" path="res://scripts/resources/location_def.gd" id="6_locdef"]
+[ext_resource type="Resource" uid="uid://ceskhru0smymf" path="res://data/locations/farm.tres" id="7_farm"]
+[ext_resource type="Script" uid="uid://c61wofjtn8pdy" path="res://scripts/resources/season_theme.gd" id="8_theme"]
 [ext_resource type="Resource" path="res://data/seasons/spring.tres" id="9_spring"]
 [ext_resource type="Resource" path="res://data/seasons/summer.tres" id="10_summer"]
 [ext_resource type="Resource" path="res://data/seasons/autumn.tres" id="11_autumn"]
 [ext_resource type="Resource" path="res://data/seasons/winter.tres" id="12_winter"]
-[ext_resource type="Script" path="res://scripts/resources/difficulty_def.gd" id="18_diffdef"]
+[ext_resource type="Resource" uid="uid://birm57yjab5ga" path="res://data/locations/town.tres" id="13_town"]
+[ext_resource type="Resource" path="res://data/locations/seed_shop.tres" id="14_seeds"]
+[ext_resource type="Resource" path="res://data/locations/general_store.tres" id="15_general"]
+[ext_resource type="Resource" path="res://data/locations/blacksmith.tres" id="16_smith"]
+[ext_resource type="Resource" path="res://data/locations/farmhouse.tres" id="17_house"]
+[ext_resource type="Script" uid="uid://cnqpmtcekol2x" path="res://scripts/resources/difficulty_def.gd" id="18_diffdef"]
 [ext_resource type="Resource" path="res://data/difficulties/relaxed.tres" id="19_relaxed"]
 [ext_resource type="Resource" path="res://data/difficulties/standard.tres" id="20_standard"]
 [ext_resource type="Resource" path="res://data/difficulties/hard.tres" id="21_hard"]
 [ext_resource type="Resource" path="res://data/hazard_rules.tres" id="22_hazards"]
-[ext_resource type="Resource" path="res://data/tools/trowel.tres" id="23_trowel"]
+[ext_resource type="Resource" uid="uid://cfbho0o56aggl" path="res://data/tools/trowel.tres" id="23_trowel"]
+[ext_resource type="Resource" uid="uid://j5wafbmai4hh" path="res://data/locations/woods.tres" id="24_woods"]
 [ext_resource type="Resource" path="res://data/fishing_rules.tres" id="25_fishing"]
 [ext_resource type="Resource" path="res://data/unlocks/farmhouse_kitchen.tres" id="26_kitchen"]
+[ext_resource type="Resource" path="res://data/locations/greenhouse.tres" id="27_greenhouse"]
+[ext_resource type="Resource" uid="uid://decag6y50n4gx" path="res://data/locations/lane.tres" id="28_lane"]
+[ext_resource type="Resource" uid="uid://vl3pp2n2fn5q" path="res://data/locations/pip_cottage.tres" id="29_pip"]
+[ext_resource type="Resource" uid="uid://chp2g5i1xujj5" path="res://data/locations/dot_yard.tres" id="30_dot"]
 [ext_resource type="Resource" path="res://data/locations/bakery.tres" id="31_bakery"]
 [ext_resource type="Resource" path="res://data/unlocks/workbench_mended.tres" id="32_bench"]
 [ext_resource type="Resource" path="res://data/produce/stone.tres" id="33_stone"]
-[ext_resource type="Script" path="res://scripts/resources/demand_def.gd" id="34_demand"]
+[ext_resource type="Script" uid="uid://dksxjico5whwj" path="res://scripts/resources/demand_def.gd" id="34_demand"]
 [ext_resource type="Resource" path="res://data/tide_rules.tres" id="35_tides"]
-[ext_resource type="Resource" path="res://data/locations/cove.tres" id="36_cove"]
-[ext_resource type="Resource" path="res://data/locations/tam_shed.tres" id="37_tam"]
-[ext_resource type="Resource" path="res://data/locations/rosa_cottage.tres" id="38_rosa"]
+[ext_resource type="Resource" uid="uid://cdsd40dcwdcs" path="res://data/locations/cove.tres" id="36_cove"]
+[ext_resource type="Resource" uid="uid://3rs0dfjtkq7k" path="res://data/locations/tam_shed.tres" id="37_tam"]
+[ext_resource type="Resource" uid="uid://yftbh543t84p" path="res://data/locations/rosa_cottage.tres" id="38_rosa"]
 [ext_resource type="Resource" path="res://data/locations/lighthouse.tres" id="39_lighthouse"]
 [ext_resource type="Resource" path="res://data/crab_pot_rules.tres" id="40_crab_pots"]
 [ext_resource type="Resource" path="res://data/locations/tavern.tres" id="41_tavern"]
-[ext_resource type="Resource" path="res://data/locations/mayor_house.tres" id="42_mayor"]
+[ext_resource type="Resource" uid="uid://dhuxio358j3ka" path="res://data/locations/mayor_house.tres" id="42_mayor"]
 [ext_resource type="Resource" path="res://data/locations/town_hall.tres" id="43_hall"]
-[ext_resource type="Resource" path="res://data/locations/wren_cottage.tres" id="44_wren"]
-[ext_resource type="Resource" path="res://data/locations/ivy_cottage.tres" id="45_ivy"]
+[ext_resource type="Resource" uid="uid://bddg2g8r5iygo" path="res://data/locations/wren_cottage.tres" id="44_wren"]
+[ext_resource type="Resource" uid="uid://b6pvlvpkssq3h" path="res://data/locations/ivy_cottage.tres" id="45_ivy"]
 [ext_resource type="Resource" path="res://data/tavern_rules.tres" id="46_tavern_rules"]
+[ext_resource type="Resource" path="res://data/year_review_rules.tres" id="85_review"]
 
 [sub_resource type="Resource" id="Demand_bin"]
 script = ExtResource("34_demand")
@@ -56,7 +57,6 @@ lowest_rate = 0.6
 [resource]
 script = ExtResource("1_rules")
 starting_gold = 100
-max_energy = 100.0
 starting_inventory = Dictionary[ExtResource("2_itemdef"), int]({
 ExtResource("3_hoe"): 1,
 ExtResource("4_can"): 1,
@@ -65,25 +65,16 @@ ExtResource("5_seeds"): 10
 })
 locations = Array[ExtResource("6_locdef")]([ExtResource("7_farm"), ExtResource("13_town"), ExtResource("14_seeds"), ExtResource("15_general"), ExtResource("16_smith"), ExtResource("17_house"), ExtResource("24_woods"), ExtResource("27_greenhouse"), ExtResource("28_lane"), ExtResource("29_pip"), ExtResource("30_dot"), ExtResource("31_bakery"), ExtResource("36_cove"), ExtResource("37_tam"), ExtResource("38_rosa"), ExtResource("39_lighthouse"), ExtResource("41_tavern"), ExtResource("42_mayor"), ExtResource("43_hall"), ExtResource("44_wren"), ExtResource("45_ivy")])
 starting_location = &"farmhouse"
-home_location = &"farmhouse"
 seasons = Array[ExtResource("8_theme")]([ExtResource("9_spring"), ExtResource("10_summer"), ExtResource("11_autumn"), ExtResource("12_winter")])
-days_per_season = 28
-day_start_minutes = 360
-day_end_minutes = 1560
 seconds_per_ten_minutes = 5
-late_warning_minutes = 1440
-people_walk_speed = 2.5
 hazards = ExtResource("22_hazards")
 fishing = ExtResource("25_fishing")
 tides = ExtResource("35_tides")
 crab_pots = ExtResource("40_crab_pots")
 tavern = ExtResource("46_tavern_rules")
+year_review = ExtResource("85_review")
 kitchen_unlock = ExtResource("26_kitchen")
 workbench_unlock = ExtResource("32_bench")
 workbench_mend_item = ExtResource("33_stone")
-workbench_mend_count = 3
 bin_demand = SubResource("Demand_bin")
-greenhouse_location = &"greenhouse"
-finds_per_day = 1
 difficulties = Array[ExtResource("18_diffdef")]([ExtResource("19_relaxed"), ExtResource("20_standard"), ExtResource("21_hard")])
-default_difficulty = &"standard"

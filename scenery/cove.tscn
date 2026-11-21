@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/scenery/scenery_layer.gd" id="1_layer"]
+
+[node name="CoveScenery" type="Node2D"]
+script = ExtResource("1_layer")
+map_id = &"cove"
+map_size = Vector2i(56, 36)
+
+[node name="OnTheGround" type="Node2D" parent="."]
+
+[node name="Standing" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Solid" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Overhead" type="Node2D" parent="."]
+z_index = 20

@@ -100,9 +100,14 @@ shortcut to be taken quietly.
 project.godot        Engine config — see DECISIONS.md 009 before changing display settings
 icon.svg
 scenes/              .tscn scene files
+scenery/             Dave's scenery: one scene per map that he fills by dragging pictures in
+                     the editor (how-to: scenery/HOW_TO.md); backdrops/ is git-ignored
+                     (DECISIONS 082)
 scripts/             Game code
   autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem,
-                     Audio, DayReport, Fishing, Festivals, Allotments, Tavern…)
+                     Audio, DayReport, Fishing, Festivals, Allotments, Tavern, Almanac…);
+                     Almanac keeps the collections book's counts and the year's tally,
+                     and the mayor's year review (DECISIONS 085)
   farm/              The farm's data and layout, the farmhouse with its bed and its
                      stove and cooking menu (Stove, CookMenu; DECISIONS 056), the
                      workbench by the farmhouse, which uses the same menu for its
@@ -114,8 +119,11 @@ scripts/             Game code
                      DECISIONS 063), people, notice board (Stage 7),
                      the river and the bridge to the Woods; Nell's tavern, the Wheatsheaf:
                      its room (tavern.gd), the chalkboard and dartboard (TavernFixture) and
-                     the darts game (DartsGame; DECISIONS 068); the town hall and the
-                     mayor's and Wren's homes are LocationDefs with door_words
+                     the darts game (DartsGame; DECISIONS 068); the town hall is a
+                     LocationDef with door_words; the townsfolk's homes (the mayor's,
+                     Wren's, and those on the Lane and in the Cove) share one room, Home
+                     (home.gd, scenes/home.tscn), shaped by each home's LocationDef and
+                     open 8 AM to 8 PM (DECISIONS 084)
   woods/             The Woods: their map, the day's forage (Forage, ForageSpot; DECISIONS 052)
                      and fallen logs (FallenLogs, FallenLog; DECISIONS 053)
   lane/              The Lane between the farm and the town: its map (LaneLayout), its
@@ -133,6 +141,9 @@ scripts/             Game code
                      their stops and talking (PeopleHere; DECISIONS 067); which of eight
                      ways someone faces and which animation that plays, falling back to
                      four (Facing; DECISIONS 074)
+  scenery/           Scenery: puts a map's scenery scene into it when it opens, animates
+                     strips, lights string lights, takes the backdrop (Ctrl+B);
+                     SceneryLayer: the scene's root, which helps in the editor (DECISIONS 082)
   exits.gd           Exits: builds a place's ways out from LocationDef.exits (ExitDef;
                      DECISIONS 060)
   ground_tiles.gd    GroundTiles: where each kind of ground is in the seasonal tilesets;
@@ -143,6 +154,8 @@ scripts/             Game code
                      from the theme (DECISIONS 074)
   dialogue_box.gd    DialogueBox: lines and questions, with the speaker's portrait in a
                      mood (DECISIONS 074)
+  almanac_book.gd    AlmanacBook: the almanac on screen (L), its pages and the Years page
+                     (DECISIONS 085)
   items/             Inventory
   fishing/           FishingLine: the float, the line and the reel bar (DECISIONS 054)
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
@@ -158,8 +171,8 @@ scripts/             Game code
                      biggest fish; DECISIONS 059)
   quests/            QuestGoal scripts (deliver, deliver any of, deliver one of each,
                      harvest, sell, give gold, grow a giant, deliver with a fee, catch
-                     fish, carry a parcel, do an allotment job: DECISIONS 062) and the
-                     saved QuestLog
+                     fish, carry a parcel, do an allotment job: DECISIONS 062; fill in new
+                     almanac entries: DECISIONS 085) and the saved QuestLog
 data/                Content resources (.tres), indexed by ContentDB
   game_rules.tres    Starting conditions and global numbers (GameRules)
   hazard_rules.tres  Thirst, weeds, crows and aphids: every number (HazardRules,
@@ -172,6 +185,8 @@ data/                Content resources (.tres), indexed by ContentDB
   crab_pot_rules.tres What baits a crab pot and what it catches (CrabPotRules, DECISIONS 065)
   tavern_rules.tres  Nell's chalkboard, her rumours' words and darts night's numbers
                      (TavernRules, DECISIONS 068)
+  year_review_rules.tres  What the mayor's year review counts and the titles it gives
+                     (YearReviewRules, DECISIONS 085)
   crops/             CropDef — how each plant grows and looks, and its rules (trellis,
                      perennial, hardy…; DECISIONS 047; giants and 2 × 2 trees, 048)
   produce/           ItemDef — what a harvest gives, and its sell price (and fibre, timber,
@@ -236,6 +251,8 @@ assets/ui/           The UI Theme (theme.tres, the project's theme) and its nine
                      pictures: panel, portrait frame, buttons (DECISIONS 074)
 assets/fonts/        monogram (text) and Pixelify Sans (headings), with their licences
 assets/tilesets/     Ground and world tilesets
+assets/scenery/      Pictures for Dave's scenery, cut from the bought packs by
+                     art/build_scenery_library.py (git-ignored: the packs' licence)
 assets/audio/        Sound effects (sfx/*.wav) and the weather's loops (ambience/*.ogg), made by
                      art/build_sounds.py; music (music/*.mp3: Dave's own tunes, two a season, on
                      each SeasonTheme; DECISIONS 066)

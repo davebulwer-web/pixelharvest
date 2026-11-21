@@ -1,6 +1,6 @@
 # Pixel Harvest — stage plan
 
-**Current stage: 24 — art: people and the UI.** Session 1 (code: the pixel font and UI theme, portraits with moods in the dialogue box, eight-way facing that falls back to four, walk cycles ready to drop in; DECISIONS 074, no save change) is built, waiting for Dave to try it. Sessions 2 and 3 are art (walk cycles and eight-way sheets from Pixellab, cloud env). Stage 23 (art: the world) is complete: all five sessions tested and committed by Dave (2026-11-19). Stage 22 (the tavern and people on the move) is complete: both sessions tested and committed by Dave (2026-11-18). Before that, from Stage 22: session 2 (Nell's tavern, the Wheatsheaf: rumours, the chalkboard, darts night, hot meals; Nell, Dot and Tam's requests; homes for the mayor, Wren and Ivy and the town hall, the town grown to 48 × 32; evenings at the tavern; DECISIONS 068, no save change) is built, waiting for Dave to try it. Session 1 (weekdays, schedules, people who walk; DECISIONS 067) is tested and committed by Dave (2026-11-18). Stage 21 (the Cove) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 20 (early days) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 19 (the Lane and the bigger farm) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
+**Current stage: 25 — almanac and year review.** Session 1 (the almanac on L, the mayor's year review and title at lantern night, year 2's first content; DECISIONS 085, save version 26) is built, waiting for Dave to try it. Stage 24 (art: people and the UI) is complete: the code session and the art were tested and committed by Dave (2026-11-19), and the side tests that followed (cozy ground, calm cliffs, harbour, pack props and wood UI, forgiving E, furnished rooms and homes, Dave's scenery; DECISIONS 076-084) were all kept by Dave (2026-11-20 and 21). Stage 23 (art: the world) is complete: all five sessions tested and committed by Dave (2026-11-19). Stage 22 (the tavern and people on the move) is complete: both sessions tested and committed by Dave (2026-11-18). Before that, from Stage 22: session 2 (Nell's tavern, the Wheatsheaf: rumours, the chalkboard, darts night, hot meals; Nell, Dot and Tam's requests; homes for the mayor, Wren and Ivy and the town hall, the town grown to 48 × 32; evenings at the tavern; DECISIONS 068, no save change) is built, waiting for Dave to try it. Session 1 (weekdays, schedules, people who walk; DECISIONS 067) is tested and committed by Dave (2026-11-18). Stage 21 (the Cove) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 20 (early days) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 19 (the Lane and the bigger farm) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-17). Stage 18 (festivals) session 1 is tested and committed by Dave (2026-11-17); its session 2 and art are still open. Stage 17 (greenhouse, bees and late tools) is complete apart from its Pixellab art: session 2 (fertilisers, the sickle, the brass sprinkler; save version 19) tested and committed by Dave (2026-11-16). Stage 17 session 1 (the farm's old greenhouse, mended by Ivy's last request, with a plot inside that ignores seasons and weather; bee hives and honey; save version 18) is tested and committed by Dave (2026-11-16). Stage 16 (kitchen and cooking) is complete apart from its Pixellab art: tested and committed by Dave (2026-11-16). Stage 15 (fishing with Wren) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-16). Stage 14 (the Woods and foraging) is complete apart from its Pixellab art, which waits for an art session: both sessions tested and committed by Dave (2026-11-16). Stage 13 (questlines) is complete: both sessions tested and committed by Dave (2026-11-15); still to come from it are Ivy's Pixellab art and Dave playing a full year. Stage 12 (crops with rules) is complete apart from its Pixellab art: both sessions tested and committed by Dave (2026-11-15). Stage 11 (hazards and weather) is complete: both sessions tested and committed by Dave (2026-11-15); pests and storm-flattening moved to Stage 12. Stage 10 (pacing and unlocks) is complete: Dave played the spring and the pacing looks good (2026-11-15). Stage 9 session 1 (feel) is built; its release half moved to Stage 20. Stages 10–20 come from `ROADMAP.md`, agreed by Dave on 2026-11-15: read it before starting any of them. The clock runs at 5 seconds per 10 game minutes since 2026-11-16 (DECISIONS 051).
 
 Stages 0–3 are the real investment. Get them right and 4–9 are genuinely additive; rush
 them and there'll be a rebuild around Stage 5. Realistically 20–30 sessions in total.
@@ -1435,21 +1435,166 @@ pictures. Cells don't change; only the drawing does.
 - [x] Verified in the sandbox: headless import and run clean; every SpriteFrames loads
       with 16 animations (8 idle of 1 frame, 8 walk of 8 frames, all 56 × 56) and Facing
       finds all eight walks; walk preview GIFs made for Dave
-- [ ] Dave confirms the look and that people walk correctly on Windows
+- [x] Dave confirms the look and that people walk correctly on Windows (committed 2026-11-19)
 - [ ] Optional: more lines tagged with `[happy]` / `[worried]` where a face would help
+
+**Side test (2026-11-20) — calmer ground from the Cozy Village & Farm pack (DECISIONS 076, no save change)**
+
+- [x] The pack's ground (grass, path, paving, soil, pond, sand, sea and their soft edges)
+      built into our layout by `art/build_cozy_ground.py` into `assets/tilesets/cozy/`
+      (kept out of git: pack licence, public repository)
+- [x] On by default when that folder exists; **Ctrl+G** swaps between it and our own ground
+      in the game; with it off the game looks exactly as before
+- [x] Verified in the sandbox: headless import and run clean; before/after screenshots of the
+      farm, Lane, town and Cove (spring, summer, autumn, winter, low tide)
+- [x] Dave compares on Windows and decides: **keep** (2026-11-20, DECISIONS 077): palette
+      rebuilt to 74 colours, CREDITS.md started, Ctrl+G kept as a debug switch, the pictures
+      stay git-ignored while the repository is public
+- [x] Later, separately: the pack's props (fences, stone wall, well, stalls, lamps, benches),
+      and maybe its trees, bushes and rocks (props: DECISIONS 081; the rest is Dave's
+      scenery, 082)
+
+**Side test (2026-11-20) — calmer cliffs and paving (DECISIONS 078, no save change)**
+
+- [x] Cliffs drawn as the cozy pack's raised ground (grassy or snowy top, outline, earth
+      face; two tiles high where the cliff is deep), chosen per cell by its open sides
+- [x] Paving (the Cove's quay outside Tam's shed, and the town square) as calm flagstones
+- [x] Built by `art/build_calm_test.py` into `assets/tilesets/cozy/calm_*` (git-ignored);
+      on by default, **Ctrl+K** swaps it off and on; off is exactly the kept cozy look
+- [x] Verified in the sandbox: import and run clean; before/after shots of the Cove (quay,
+      cliffs, winter), town, farm, Lane and Woods
+- [x] Dave compares on Windows and decides: **keep** (2026-11-20, DECISIONS 080; Ctrl+K
+      stays as a debug switch)
+- [x] Dave picks what to take from the Coast, Seasons & Festivals and UI Kit packs: the
+      harbour, its props, festival dressing, the Wood UI and the cozy props (DECISIONS 080, 081)
+
+**Side test (2026-11-20) — a proper harbour in the Cove (DECISIONS 080, no save change)**
+
+- [x] Quay wall standing in the sea south of the paving (ends, a ladder now and then), the
+      pier's deck on posts, the breakwater's top and foot, a calmer rock shelf
+- [x] Built by `art/build_harbour_test.py` into `assets/tilesets/cozy/harbour_*` (git-ignored);
+      on by default, **Ctrl+H** swaps it off and on
+- [x] Verified in the sandbox: import and run clean; before/after shots of the Cove
+- [x] Dave compares on Windows and decides: **keep** (2026-11-21: "happy with all of the changes")
+
+**Side test (2026-11-20) — the packs' props, festival dressing and wooden UI (DECISIONS 081, no save change)**
+
+- [x] Cozy pack props on our bench, lamp post, well, hay bale, log pile, notice board,
+      scarecrow, bee hive, cart; fences and the stone wall join up from their 4-bit sets
+- [x] Harbour clutter in the Cove; dressing in town for the flower show, fishing contest,
+      harvest fair, lantern night and market day (only on its day)
+- [x] Wood UI: panels, buttons, hotbar slots, portrait frame; our fonts kept
+- [x] Built by `art/build_pack_look.py` into `assets/packs/` (git-ignored); on by default,
+      **Ctrl+P** swaps props and dressing, **Ctrl+U** the UI
+- [x] Verified in the sandbox: import and run clean; before/after shots of the Cove, each
+      festival day, market day, the Lane's fences and the dialogue box
+- [x] Dave compares on Windows and decides: **keep** all of it (2026-11-21)
+
+**Side fix (2026-11-20) — E forgives a near miss (DECISIONS 079, no save change)**
+
+- [x] E tries the tile ahead first as before, then the nearest of the tiles around the
+      farmer (not behind them), in all eight facings: forage, people (walking too), keepers
+      across a counter or stall, boards, the bin, bed and stove, and ready crops by hand
+- [x] Sprinklers and decorations still need aiming at exactly (E picks them up); weeds,
+      brambles and every tool stay tile-exact
+- [x] Verified in the sandbox: headless import and run clean; 15 checks on the real farmer
+      (ahead first, corners, own tile, behind and two away ignored, down-right, sprinkler
+      kept, counter end, a person mid-walk)
+- [x] Dave confirms on Windows that picking up and talking feel right (2026-11-21)
+
+**Side test (2026-11-21) — the rooms furnished from the Cozy Interiors pack (DECISIONS 083, no save change)**
+
+- [x] The four shops each their own: Hollis's warm wood with sacks and barrels, Marlow's
+      plaster and birch, Mabel's cream wallpaper and terracotta with the oven going, Brann's
+      stone with the forge; pack counters over ours, shelves, wall hangings, lanterns
+- [x] The farmhouse (bed, kitchen corner, grandfather clock, a sleeping cat) and the
+      Wheatsheaf (bar with taps, kegs, the stone fireplace, tables set, a cat by the fire)
+- [x] Windows show night after 7 PM; our counter, bed, bar, tables and fireplace keep
+      their collision and E; a few new pieces along the walls are solid
+- [x] Built by `art/build_interior_look.py` into `assets/packs/interiors/` (git-ignored); on
+      by default, **Ctrl+R** in a room swaps it off and on
+- [x] Verified in the sandbox: import and run clean; before/after shots of every room,
+      night windows, Ctrl+R
+- [x] Dave compares on Windows and decides: **keep** (2026-11-21: "happy with all of the
+      additions"); palette grows to 88 with its colours; Ctrl+R stays as a debug switch
+
+**Side task (2026-11-21) — the townsfolk's homes, furnished (DECISIONS 084, no save change)**
+
+- [x] Seven homes you can go into: the mayor's, Wren's, Pip's family's, Ivy's, Dot's yard,
+      Tam's shed and Rosa's; one room scene for all, its shape on each home's LocationDef
+- [x] Each furnished to suit its owner from the Cozy Interiors pack
+      (`art/build_interior_look.py`, git-ignored output); night windows; Ctrl+R swaps the
+      look as in the other rooms
+- [x] Doors open 8 AM to 8 PM; out of hours knocking works as before
+- [x] Whoever's at home is inside (their schedule decides), walks out when their day takes
+      them out, walks in when they come home, and talks as they do outside
+- [x] Verified in the sandbox: headless import and run clean; shots of all seven; hours,
+      walking in and out from town, knocking after 8 PM, Pip leaving and coming home,
+      talking to Ivy; the rooms without the pack
+- [x] Dave walks into a few homes on Windows and decides: **keep** (2026-11-21: "happy with them")
+
+**Side task (2026-11-21) — Dave's scenery (DECISIONS 082, no save change)**
+
+- [x] A scenery scene per map (`scenery/farm.tscn`, `town`, `lane`, `woods`, `cove`), loaded
+      when the map opens: OnTheGround, Standing, Solid (the farmer bumps into it) and Overhead
+- [x] In the editor: the map shown behind (Ctrl+B in the game takes the picture), each new
+      picture's origin moved to its feet, the first frame of a strip
+- [x] In the game: strips animate, string lights light after dark, seasonal pictures follow
+      the season
+- [x] A library of 571 pack pictures in `assets/scenery/` (git-ignored), built by
+      `art/build_scenery_library.py`; backdrops of all five maps
+- [x] How-to for Dave: `scenery/HOW_TO.md`
+- [x] Verified in the sandbox: headless import and run clean; a test scene on the farm
+      (seasonal tree in front of and behind the farmer, a solid fence he stops at, flowers
+      under him, bunting over him, a pingpong buoy, string lights lit at 21:40 and not by
+      day); Ctrl+B on all five maps; the editor opened on the scene with its backdrop, and
+      a picture added there got its origin moved to its feet
+- [x] Dave opens a scenery scene, places a few things, saves, and sees them in the game
+      (2026-11-21: "happy with them")
 
 ## Stage 25 — Almanac and year review · 1–2 sessions · Sonnet
 
 The old Stage 19 without "life in town". Save version 26 (Stage 23 took 25).
 
-- [ ] The collections book (crops, fish, sea fish, forage, sea forage, recipes)
-- [ ] The mayor's year review and title at lantern night; year-2 content
+**Session 1 (2026-11-21) — the almanac, the year review, year 2 (DECISIONS 085, save version 26)**
+
+- [x] The collections book (crops, fish, sea fish, forage, sea forage, recipes): **L**
+      opens it anywhere and pauses the game; Q / Tab turn the page, the arrows pick an
+      entry, L or Esc close it. Filled in once grown, caught, found or cooked; until then
+      a dark shape with a hint (when and where). Worked out from content: a new .tres is in
+      it with no code. 89 entries today
+- [x] A Years page: each year's review and this year so far
+- [x] The mayor's year review at lantern night: when he gives his lantern he reads out
+      the year (picked and sold, caught, found, cooked, requests, festivals, the almanac)
+      and gives a title from "A promising start" to "Pride of the valley"; every number
+      and title in `data/year_review_rules.tres`. Missed lantern night: the review is left
+      as a note, said in the first morning's summary
+- [x] Year 2 (`year_two`, spring 1 of year 2): Rosa's bigger city orders, the mayor's
+      "The valley's almanac" (12 new entries), Pip's "Pip's shadows" (5 new entries); a
+      new kind of request, AlmanacGoal
+- [x] Save version 26 (crops grown, wild things found, the year's tally, the reviews); an
+      older game's book starts from its bag, fish log and recipes;
+      `tests/saves/v25_example.json` made from the version 25 build
+- [x] Verified in the sandbox: headless import and run clean; every save from version 1
+      to 25 upgrades and loads; a version 26 save round-trips; first-time entries land
+      on the right pages (crops, river fish, sea fish, Woods and Cove forage, recipes);
+      the tally counts picking, selling at the bin and at counters, fish, forage,
+      cooking and requests; lantern night's lines with the review; the year turns, the
+      tally starts again and year 2 opens; a missed lantern night leaves a note; rendered
+      the review in the dialogue box, every almanac page, the Years page and the morning
+      note
+- [ ] Dave plays it on Windows: L on the farm and in town, a page or two, and (with a
+      save near the end of winter, or a new game played on) lantern night with the mayor
+- [ ] Later, with art: Hollis's rare catalogue and Fennel's exotic greenhouse seeds (ROADMAP
+      section 3), and a keepsake of its own for each title if Dave wants one
 
 ## Stage 26 — Balance and release · 2 sessions · Opus for balance
 
 The old Stage 20 (Stage 9's second half).
 
-- [ ] Title screen, settings (with volume), save slots, credits (the fonts named)
+- [ ] Title screen, settings (with volume), save slots, credits (from CREDITS.md: the fonts and
+      the Cozy Village & Farm pack); decide the repository: private, or build the release on
+      Dave's PC where `assets/tilesets/cozy/` exists (DECISIONS 077)
 - [ ] Full balance pass across a simulated year, including the clock now that travel is
       longer (`seconds_per_ten_minutes`, 5 now; 6 may suit the bigger map)
 - [ ] Windows export, itch.io page

@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://de5of38j0ernk"]
+
+[ext_resource type="Script" uid="uid://o25gns3yvsch" path="res://scripts/scenery/scenery_layer.gd" id="1_layer"]
+
+[node name="FarmScenery" type="Node2D" unique_id=2014559247]
+script = ExtResource("1_layer")
+map_id = &"farm"
+
+[node name="OnTheGround" type="Node2D" parent="." unique_id=1467960939]
+
+[node name="Standing" type="Node2D" parent="." unique_id=1997771891]
+y_sort_enabled = true
+
+[node name="Solid" type="Node2D" parent="." unique_id=1616442325]
+y_sort_enabled = true
+
+[node name="Overhead" type="Node2D" parent="." unique_id=873863128]
+z_index = 20

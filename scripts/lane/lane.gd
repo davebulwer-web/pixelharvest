@@ -79,6 +79,7 @@ func _ready() -> void:
 	_people = PeopleHere.create(LANE_ID, _entities, LaneLayout.SIZE, _dialogue)
 	add_child(_people)
 	_place_allotments()
+	Scenery.add_to(self, _entities, LANE_ID)  # Dave's scenery (DECISIONS 082)
 	_place_player()
 	SeasonLook.apply_overlay(_weather)
 	EventBus.weather_changed.connect(func(_w: StringName) -> void: SeasonLook.apply_overlay(_weather))

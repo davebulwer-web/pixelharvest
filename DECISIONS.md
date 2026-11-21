@@ -3491,3 +3491,476 @@ regenerating the farmer's straight rows too (Dave already likes them).
 
 **Why.** STAGES.md Stage 24 sessions 2-3 and ROADMAP section 15: the art half of eight-way
 characters, landing on DECISIONS 074's fallback so each sheet just switches on.
+
+## 076 — A test of calmer ground from a bought asset pack, behind a switch, kept out of git
+
+**Decision.** A side test on 2026-11-20, not a stage (no save change, no rule change). Dave
+found our ground tiles busy (lots of speckle and in-between shades) and bought the "Cozy
+Village & Farm" 16 px pack (flat colours, clean outlines, its own palette). Its ground is
+fitted into our ground system as a second look that can be switched on and off; nothing
+else (buildings, people, props, our edge code's rules) changes.
+
+- *Same layout, so no code knows.* `art/build_cozy_ground.py <pack folder>` starts from our
+  own ground pictures for each season and puts the pack's tiles in our places (GroundTiles):
+  grass, flowery grass, the grass and path details, the path, tilled and watered soil, the
+  pond (ice in winter), paving (the pack's stone path), sand, wet sand (the pack's sand a
+  step darker) and the sea (the pack's deep water). The rock shelf, the rocks, the hedges,
+  the cliffs and the pier keep ours (the pack has none like them).
+- *The edges come from the pack's corner autotiles.* They are the same idea as our dual
+  grid (16 tiles by which corners are the upper ground; the pack numbers its corners TL TR
+  BL BR, we use 1 2 4 8), so each is read straight into our edge rows: grass from its grass
+  over dirt (grass pixels only; the shadow it throws becomes our see-through shadow, so it
+  suits any lower ground), the pond bank from grass over water (winter: snow over ice),
+  paving from stone path over grass, sand from sand over water with its pale surf line
+  becoming our foam (still, not animated: the pack's animated sheet only ripples the
+  water), pond over sea from its water over deep water. Path, tilled and watered soil have
+  no pack sheet, so they take grass's outline filled with their own tile and a dark rim.
+  The edge scatter row is left empty: fewer bits is the point.
+- *A switch.* Each season's cozy tileset (`assets/tilesets/cozy/ground_tileset_<season>.tres`)
+  is a copy of ours pointing at the cozy pictures, so it swaps in exactly like a season.
+  `SeasonLook.cozy_ground` (on by default) picks it when the folder exists, and **Ctrl+G**
+  flips it while playing (GroundEdges catches the key, so it works on every outdoor map).
+  With it off, or the folder gone, the game is pixel for pixel what it was (checked by
+  rendering every test view both ways). Reverting for good: delete `assets/tilesets/cozy/`;
+  the switch code can stay or go.
+- *Licence: kept out of git.* The pack may be used in the game but not passed on as files,
+  and the GitHub repository is public, so `assets/tilesets/cozy/` is in `.gitignore`. The
+  build script holds no pack art and is committed; anyone with the pack can rebuild.
+  If Dave keeps the look, before any release we decide between making the repository
+  private or keeping the pictures out of it (a build step from the pack on his PC).
+- *Palette: the pack's colours are kept exactly.* None of its 46 colours is in
+  `art/palette.png` (all 41 of ours differ), and recolouring the pack to ours would bring
+  back the busier shades the test is meant to judge. So for the test the checker is
+  expected to list them as off-palette. If Dave keeps the look, the palette is rebuilt from
+  the art as DECISIONS 015 says (it will then hold both sets while the rest of the art
+  catches up).
+
+Options considered: Godot's own terrain autotiling with the pack's sheets (a second system
+beside GroundEdges, one set per pair of grounds); recolouring the pack onto our palette;
+swapping our .png files in place (no quick way back, and the pack's pictures would land in
+the public repository).
+
+**Why.** Dave's request (2026-11-20): compare the Lane, town and farm with a calmer ground.
+
+**Credit.** Not added: the pack asks none; Dave may credit (and donate to) the author if he
+keeps it, and then it goes in the credits (Stage 26) and a README.
+
+## 077 — The cozy pack's ground is kept; the palette grows to 74; the pictures stay out of git
+
+**Decision.** Dave tried DECISIONS 076's test on 2026-11-20 and said "keep". So:
+
+- *The cozy ground is the game's ground.* `SeasonLook.cozy_ground` stays on by default.
+  The old ground pictures and tilesets stay where they are, because the game falls back to
+  them whenever `assets/tilesets/cozy/` is missing (a fresh copy from GitHub). **Ctrl+G stays
+  as a debug switch**: it only changes which pictures the ground layers show, never the
+  game's state or the save, and does nothing without the cozy folder, so it is harmless. It
+  can go at release (Stage 26) along with the old ground pictures if nobody needs them.
+- *The palette* (`art/palette.png`) is rebuilt as DECISIONS 015 says: our 41 colours, then
+  the 33 pack colours the ground uses (74; 128 × 160, darkest first in the new rows). The
+  checker now accepts the ground. New art should lean on the pack's colours.
+- *The pictures stay out of git* while the GitHub repository is public (the pack's licence
+  allows using them in the game, not sharing the files). `art/build_cozy_ground.py` rebuilds
+  them from the pack on Dave's PC. Before release, either the repository goes private (then
+  the folder can come out of `.gitignore` and be committed) or the release build is made on
+  Dave's PC, where the folder exists. Keep a copy of the pack's zip somewhere safe: it is
+  the only source.
+- *Credit.* `CREDITS.md` (new, at the top of the project) names the pack, the fonts and the music; the pack asks no credit,
+  but Dave wants to give it. The pack's files don't name the author, so the name comes from
+  the store page it was bought from (left for Dave to fill in).
+- *Not yet.* The pack's props (fences, the stone wall, the well, stalls, lamps, benches) are
+  a later, separate step. Its buildings are not planned: ours are bigger with sloped roofs.
+
+**Why.** Dave's verdict on the test, 2026-11-20.
+
+## 078 — A test of calmer cliffs and calmer paving, behind Ctrl+K; three more packs looked at
+
+**Decision.** A second side test on 2026-11-20, over the cozy ground DECISIONS 077 kept (no
+save change, no rule change, collision unchanged). Dave found the cliffs "a big jar" and the
+paving outside Tam's shed (the quay) too busy. Both are swapped for calmer pictures, as a
+look that can be switched on and off.
+
+- *The cliffs become raised ground.* Ours were one speckled dark-grey tile, repeated: a hard
+  band round every map and a dark block in the Cove. The Cozy Village & Farm pack draws a
+  cliff as a grassy top (snowy in winter) with a dark outline where it stops and a brown
+  earth face along its south side (`01_Terrain/Cliffs/cliffs_<season>.png`). GroundEdges
+  already redraws "square" ground (cliff, pier) on its own layer on the game's grid; with
+  the test's tileset it now draws each cliff cell from a row of sixteen pictures, chosen
+  by which of its four sides open onto something that isn't cliff (1 north, 2 east, 4
+  south, 8 west; `GroundTiles.cliff_tile`). South open gives the face; a cliff two cells or
+  more deep gets a face two tiles high (a second row: the face's upper half, for the cell
+  just above the foot). Beyond the map's edge counts as cliff, so a border shows no edge
+  on its outer side. The Ground layer underneath still holds the plain CLIFF tile and its
+  collision, so walking, the save and every map's code are untouched.
+- *The paving becomes flagstones.* The pack's stone path is small bright cobbles. The calm
+  paving is big 16 × 8 slabs in two of the pack's greys, a half slab apart, no highlights;
+  its soft edge takes grass's outline (as the path's does) rimmed in the seam colour.
+  Paving is also the town square, so the square changes too (the same tile: one look).
+- *Where it lives.* `art/build_calm_test.py <CozyVillageFarm folder>` (run after
+  `build_cozy_ground.py`) writes `assets/tilesets/cozy/calm_ground_<season>.png`,
+  `calm_edges_<season>.png` (two more rows at the bottom: 31 and 32) and
+  `calm_tileset_<season>.tres`. Same folder, so still git-ignored (licence, public repo).
+- *The switch.* `SeasonLook.calm_test` (on by default when the files exist) picks the calm
+  tileset over the cozy one; **Ctrl+K** flips it in the game (GroundEdges, like Ctrl+G). A
+  tileset without the cliff rows draws cliffs square as before, so with it off the game is
+  exactly the kept cozy look. `follow_tileset()` now re-marks every cell so the cliffs
+  redraw when the tileset changes. Reverting: delete the `calm_*` files.
+
+Also looked at (no art used yet): three more packs by the same author, Michel Clauwaert —
+Coast, Beach & Fishing; Seasons & Festivals; Game UI Kit. Same 16 px grid and style; their
+58-colour palette is the cozy pack's 46 plus 12 (25 of the 58 are not yet in
+`art/palette.png`). Same licence: use in the game, never pass the files on (the UI kit
+says so for its fonts too), so anything taken from them is git-ignored like the cozy
+ground. The pack's sea cliff (grey stone) was tried on paper and not used: its face is
+as speckled as ours. The findings and recommendations went to Dave for choosing.
+
+Options considered: Godot's own terrain autotiling for the cliffs; the Coast pack's stone
+quay tiles or its boardwalk for the quay (both still busy); the dirt path for the quay.
+
+**Why.** Dave's request, 2026-11-20: the cliffs and the path outside the fisherman's hut
+are too busy; keep everything on one theme.
+
+
+## 079 — E forgives a near miss: the tile ahead first, then the nearest tile around
+
+**Decision.** E (interact) still tries the tile straight ahead first, exactly as before. If
+nothing there answers, it now reaches for the tiles around the farmer: the eight
+neighbours and the tile under their feet, leaving out the three behind them. They are
+tried nearest first to a point 12 px in front of the feet, in the way the farmer faces,
+using all eight facings (so facing down-right reaches the corner tile first, and what's
+in front beats what's beside). Two tiles away is never reached.
+
+- *What a near miss reaches.* Every interactable (forage and driftwood, rockpools, crab
+  pots, people walking or standing, keepers behind a counter or stall, the tavern's
+  fixtures, the notice board, the job slate, signposts, the bin, the bed, the stove, the
+  workbench, allotment weeds), and a ready crop by hand on the farm, in the greenhouse and
+  on an allotment.
+- *What it doesn't.* A placed object (sprinkler, decoration, hive) only answers E on the
+  tile ahead, because E picks it up; the one exception is a hive with honey waiting, as E
+  collects that. It says so with an optional `aim_exactly()` on the interactable
+  (PlacedObject has it; nothing else needs one). Pulling weeds and clearing brambles by
+  hand cost energy, so they also stay on the tile ahead. Tools (hoe, can, seeds, axe, rod,
+  sickle…) are unchanged: tile-exact.
+- *Walking people.* An Npc's talk cell already follows it as it walks; the near miss means
+  catching someone as they pass no longer needs them exactly in front.
+- *Knocking* is stepping onto a door's zone (ExitZone), not E, so it's unchanged; the
+  person who comes to the door is then talked to with the forgiving E.
+- Where: `Player._interact()` and `_reach_cells()` (scripts/player.gd),
+  `PlacedObject.aim_exactly()`. No save change: nothing new is saved.
+
+Options considered: bigger `occupies()` areas on each interactable (many files, and every
+new thing would need to remember it); a physics Area2D in front of the farmer (another
+moving part, and harder to make prefer the nearest); a plain distance radius around the
+farmer ignoring facing (would talk to someone behind you).
+
+**Why.** Dave, 2026-11-20: picking up forage and talking to people needs you in exactly
+the right position.
+
+
+## 080 — The calm cliffs and flagstones are kept; a test of a proper harbour in the Cove, behind Ctrl+H
+
+**Decision.** Dave, 2026-11-20, chose from the report on DECISIONS 078: keep the calm cliffs
+and flagstones (Ctrl+K stays as a debug switch, like Ctrl+G), and try the Coast, Beach &
+Fishing pack's harbour in the Cove. A third side test over the calm look (no save change, no
+rule change, collision unchanged):
+
+- *The quay stands in the sea.* Every sea cell just south of paving shows the pack's stone
+  quay wall (four animated frames, the water lapping at it), with its left and right ends
+  where the paving stops, and a ladder now and then (picked by cell, so it never moves).
+- *The pier stands on posts.* Pier cells are drawn from the pack's wooden deck set, chosen by
+  which sides open onto something that isn't pier (as the cliffs are: 1 N, 2 E, 4 S, 8 W),
+  and the sea cell south of the pier's end shows its posts in the water (left, middle,
+  right, single).
+- *The breakwater and the rock shelf.* Rocks wear the pack's breakwater top, with its foot
+  in the water below; the rock shelf is the same stone, its light strokes softened, with
+  a small dark pool, so a whole shelf of them stays calm. Both keep a soft edge (grass's
+  outline filled with the stone, rimmed dark).
+- *How.* `art/build_harbour_test.py <CoastBeachFishing folder>` (after the calm test's
+  script) writes `assets/tilesets/cozy/harbour_ground_/harbour_edges_/harbour_tileset_<season>`:
+  the calm pictures plus row 33 (pier deck by open sides) and rows 34-37 (the fronts:
+  `GroundTiles.Front`, four frames down, 6 fps). GroundEdges draws the fronts on a layer of
+  their own ("HarbourFront") on the game's grid; the Ground layer and its collision are
+  untouched. `SeasonLook.harbour_test` picks the harbour tileset over the calm one;
+  **Ctrl+H** flips it. Without the files, or with it off, the game is exactly the calm look.
+  Still git-ignored (licence, public repo).
+
+**Why.** Dave's picks, 2026-11-20: the calm look stays; the Cove should read as a harbour.
+
+
+## 081 — A test of the packs' props, festival dressing and a wooden UI, behind Ctrl+P and Ctrl+U
+
+**Decision.** The rest of Dave's picks from DECISIONS 078's report, as one more side test
+(no save change, no rule change, nothing new to walk into):
+
+- *Props.* Our bench, lamp post, old well, hay bale, log pile, notice board, scarecrow, bee
+  hive and cart wear the Cozy Village & Farm pack's pictures; fences (wood), the garden fence
+  (white) and the stone wall wear its 4-bit sets, each piece picked from its neighbours of
+  the same kind (index N*8 + E*4 + S*2 + W*1), so rows join up and corners turn, and a
+  neighbour taken away (on the farm) re-picks. `SeasonLook.skin_object` asks
+  `PackLook.texture_for()` and keeps the bottom edge where ours was. Buildings, trees,
+  people and crops stay ours.
+- *Harbour clutter* in the Cove from the Coast pack: bollards and rope posts along the quay's
+  edge, dock lamps, a life-ring post, crates, a barrel, a net rack, a fish-drying rack
+  (animated), a net pile, a rope coil, an anchor, and two bobbing buoys.
+- *Festival dressing* in town from the Seasons & Festivals pack, only on its day: the flower
+  show (pastel bunting over the square, a maypole, a flower arch, flower barrels, a spring
+  banner); the fishing contest (rainbow bunting by the pond, kites, a beach umbrella, a
+  picnic blanket, a cooler, a lemonade stand); the harvest fair (harvest bunting, a pumpkin
+  booth, a banner, corn bundles, a hay stack, pumpkins, a cider barrel, a wheelbarrow of
+  pumpkins); lantern night (a lantern string, a lit tree, double lantern posts, paper
+  luminaria, a winter banner); market day (a fair banner, a balloon cart, a popcorn cart,
+  flag poles; these stand aside when a festival shares the day). Bunting and lantern
+  strings are drawn over people, as the pack says.
+- *Wooden UI* from the Game UI Kit: the panel (every panel: menus, the dialogue box, the
+  day's summary, shops), the buttons' hover/focus/pressed pictures, the hotbar's slots and
+  the portrait frame. Our fonts (monogram, Pixelify Sans) and ink colours stay. The
+  portrait frame became a nine-patch so the kit's 54 px frame fits ours.
+- *How.* `art/build_pack_look.py <cozy> <coast> <seasons> <ui>` copies the chosen pictures
+  into `assets/packs/` with `pack_look.json` (what goes where); `scripts/pack_look.gd`
+  (PackLook) reads it. Pieces are only looks: no collision, never saved. `assets/packs/` is
+  git-ignored like the cozy ground (licence, public repo).
+- *The switches.* `PackLook.props_on` and `PackLook.ui_on`, on by default when the folder
+  exists. **Ctrl+P** flips props and dressing, **Ctrl+U** the wooden UI (outdoors, where
+  GroundEdges listens). Without the folder the game is exactly as before.
+
+Options considered: the packs' buildings and characters (smaller and flatter than ours;
+not asked for); the UI kit's fonts (Dave asked to keep ours); putting the dressing in each
+CalendarEvent's `decorations` (those are ObjectDefs with their own scenes, and would put
+pack art into tracked data files).
+
+**Why.** Dave's picks, 2026-11-20: the harbour props, festival dressing, the Wood UI keeping
+our fonts, and the cozy pack's props, each as a switchable, git-ignored test.
+
+## 082 — Dave's scenery: a scene per map that he fills by dragging pictures in the editor
+
+**Decision.** Each outdoor map has a scenery scene, `scenery/<map>.tscn` (farm, town, Lane,
+Woods, Cove; the greenhouse may have one too), that Dave opens in the Godot editor and fills
+by dragging pictures from the FileSystem dock. The map loads it when it opens. It's
+decoration only: nothing is saved (no save change), no rule reads it, and a missing or
+broken scene leaves the map as it was.
+
+- *The scene.* Its root is a `SceneryLayer` (@tool) with four groups: `OnTheGround` (flat,
+  always under the farmer), `Standing` (sorted by their feet with the farmer and everyone
+  else), `Solid` (the same, but the farmer bumps into a small block at each picture's foot)
+  and `Overhead` (over everyone, z 20 like PackLook's bunting). A picture dropped on the
+  root counts as Standing. In the editor the root shows the map behind the pictures (the
+  backdrop, an internal child, so it's never saved and can't be picked), draws the map's
+  edge, moves each new picture's origin to its feet without moving it on screen (people
+  and things sort by their feet), and shows the first frame of a strip.
+- *The loader.* `Scenery.add_to(map, entities, id)`, one line at the end of each map's
+  `_ready()`. Standing and Solid are moved into the map's y-sorted `Entities` with y-sort on,
+  so their pictures sort among the people (a y-sorted node in a y-sorted node merges into
+  its sort). OnTheGround goes just before Entities. A picture named `..._4f.png` is played
+  as 4 frames side by side (`..._pingpong_3f` goes there and back; two-frame pictures sway
+  slowly); `..._on_off_2f` (string lights) is lit from 19:30 to 06:30; a name with a season
+  in it (`oak_summer.png`) turns into this season's picture when one is beside it.
+- *The backdrop.* **Ctrl+B** in the game, only when run from the editor, photographs the whole
+  map you're on (a second viewport sharing the world, the ground's used rectangle at 1:1,
+  with the farmer, the day's light, the weather and the scenery hidden) into
+  `scenery/backdrops/<map>.png` and its top-left corner into `<map>.json`. The maps are
+  drawn by code, so without it the editor would show an empty grey page.
+- *The pictures.* `art/build_scenery_library.py <cozy> <coast> <seasons>` copies the packs'
+  single pictures into `assets/scenery/` by kind (nature, props, harbour, seaside,
+  creatures, festival; 571 pictures), takes frame sizes out of the names, and cuts the
+  joining 4-bit sheets into stand-alone pieces (fence and wall runs and posts, bunting and
+  string-light spans). Ground tiles, buildings, characters, items, UI and the animals'
+  many-row sheets are left out. Our own pictures in `assets/sprites/` can be dragged too.
+- *Git.* `assets/scenery/` and `scenery/backdrops/` are git-ignored (the packs' licence; the
+  repository is public). The scenes, `scenery/*.tscn`, are kept in git: they hold only where
+  each picture goes and its file's name, no pictures. On a copy without the library a scene
+  with pack pictures in it doesn't load and the map is as before (a warning in the output).
+
+Options considered: placing scenery from a data file of cells and picture names (like
+PackLook's pieces; exact, but Dave would be typing coordinates, not placing things);
+editing the map scenes themselves (they're mostly built by code at run time, so there's
+nothing to see, and a slip could break a map); a painting tool inside the game (much more
+code to build for the same result). Solid things block only the farmer: townsfolk walk
+through scenery, so a Solid picture on a path won't trap anyone, but it could block the
+farmer's way to a door or an exit, which is why Solid is a group Dave chooses and not the
+default.
+
+**Why.** Dave (2026-11-20) wants to dress the world himself, dragging the packs' props in
+with the mouse, without touching code or saves.
+
+**Kept, 2026-11-21.** Dave: "happy with them" (the scenery layer and the furnished homes,
+084).
+
+## 083 — A test of furnished rooms from the Cozy Interiors pack, behind Ctrl+R
+
+**Decision.** Dave liked DECISIONS 079–081 ("happy with all of the changes", 2026-11-21)
+and sent the same author's **Cozy Interiors & Town Life** pack (v1.0) to fill the shops
+and houses. As before, a side test that changes only looks: no save change, no rule
+change, nothing new to do.
+
+- *Which rooms.* The ones you can walk into: the four shops (which until now shared one
+  bare room), the farmhouse and the Wheatsheaf. The greenhouse keeps its own look. The
+  townsfolk's homes have no rooms yet (they are LocationDefs with door_words), so there is
+  nothing to furnish there; making them enterable would be new rooms, a separate step.
+- *Each shop its own.* Hollis: warm planks, sacks, barrels of produce, herbs drying.
+  Marlow: plaster and birch, crates, a fabric shelf, a coat on a stand. Mabel: cream
+  wallpaper, terracotta tiles, the bakery oven (animated), bread counters, a menu board.
+  Brann: stone walls and flags, the forge (animated), grindstone, quench barrel, tool
+  racks, torches. The farmhouse: log walls, the pack's bed, a nightstand, a kitchen corner
+  either side of our stove, a grandfather clock and a sleeping cat. The tavern: the bar
+  with taps and mugs, a bottle shelf and keg rack, two tapped barrels, the stone fireplace
+  (animated), the three tables set with mugs, a pie, bread and a candle, stools, lanterns
+  and a grey cat asleep by the fire. Windows show their night picture after 7 PM.
+- *How.* `art/build_interior_look.py <CozyInteriors>` bakes one picture per room (the
+  pack's 2-tile wall faces across the back, its 47-piece wall tops round the edge, floor,
+  rugs, door mats, stools) and copies the standing pieces with `interior_look.json` into
+  `assets/packs/interiors/` (git-ignored with the rest of `assets/packs/`).
+  `scripts/interior_look.gd` (InteriorLook) is called with one line at the end of each
+  room's setup (interior.gd, farmhouse.gd, tavern.gd): it lays the picture over our tiles,
+  stands the pieces among the people (y-sorted), and hides our own sprites that a pack piece
+  stands in for (counter, shelves, bed, table, bar, tables, barrels, fireplace). Those keep
+  their collision and what E does, so the keeper, the bed, the stove, the chalkboard and
+  the dartboard all work as before. A few new pieces along the walls are solid (barrels,
+  plants, shelves); none is where anyone stands or walks, the tavern's schedule cells
+  included.
+- *Safe if rooms change.* The room sizes and doors are written into the build script; if a
+  room no longer matches, InteriorLook leaves it as ours (with a warning) rather than
+  showing a wrong picture.
+- *The switch.* `InteriorLook.on`, on by default when the folder exists. **Ctrl+R** in a
+  room flips it. Without the folder the rooms are exactly as before.
+- *Palette.* Every picture keeps the pack's colours exactly (the same 55-colour palette as
+  the other packs); the build script checks that and lists the 14 not yet in
+  `art/palette.png`. If Dave keeps it, the palette is rebuilt with them (DECISIONS 015, 077).
+
+Not used: the pack's people and pets' walk sheets (ours stay; only two sleeping cats),
+its doors and stairs (our doors are gaps in the bottom wall), its decorating and cooking
+UI, and its 47-blob rugs (the fixed rugs are enough). Options considered: swapping
+interior.png's five tiles (the pack's walls are two tiles tall and its tops a 47-piece
+set, so they don't fit one tile each); a TileMapLayer per room built at runtime (more
+moving parts for rooms that never change shape while you're in them).
+
+**Why.** Dave's ask, 2026-11-21: "interiors from the same set so we can fill out the shops
+and houses".
+
+**Kept, 2026-11-21.** Dave: "happy with all of the additions". `InteriorLook.on` stays on
+by default and **Ctrl+R** stays as a debug switch, like Ctrl+G and Ctrl+K. `art/palette.png`
+gains the 14 colours (74 to 88, 128 × 176, darkest first in the new rows), so the
+checker accepts the rooms. The pictures stay out of git with the other packs'.
+
+## 084 — The townsfolk's homes become rooms you can go into, furnished from the Cozy Interiors pack
+
+**Decision.** Dave liked the furnished shops, farmhouse and tavern (DECISIONS 083, kept)
+and asked for the townsfolk's houses next (2026-11-21: "Townsfolk houses decorate now
+please"). Until now the homes were pictures with a door that only spoke (`door_words`,
+DECISIONS 061) or brought whoever was in to the door (knocking, DECISIONS 067). Seven of
+them now have an inside. No save change, no new rules, nothing new to do.
+
+- *Which.* The seven homes: the mayor's house and Wren's cottage in town, Pip's family's
+  cottage, Ivy's cottage and Dot's yard on the Lane, Tam's fish shed and Rosa's cottage in
+  the Cove. Left as they were: the town hall (an office, with its own hours on the door)
+  and the lighthouse (padlocked).
+- *One room for all.* `scenes/home.tscn` with `scripts/town/home.gd`, as the four shops
+  share `interior.tscn`. Each home's LocationDef now names it (`scene_path`) and says its
+  shape: `room_size`, `room_door_x` (the left of the door's two cells) and `resident_cell`
+  (where whoever lives there stands). A new home is data, never code.
+- *Who's in.* The room adds a PeopleHere for itself, as the Wheatsheaf does (DECISIONS
+  068), so a person's schedule decides it: someone at home stands at the home's resting
+  spot and talks as they do outside (requests, Tam's counter, their line for the day);
+  someone whose day takes them out walks to the door and goes; someone coming home comes
+  in at the door and walks to their spot. PeopleHere gained one optional argument for
+  this, the resting spot, used for a stop that is plain "at home" (no cell of its own).
+- *Visiting hours.* A home's door is open from 8 AM to 8 PM (`open_from`, `open_until` on
+  the LocationDef, in minutes; -1 means never shut, as for the farmhouse). Out of hours it
+  behaves exactly as before: shut, knocking brings whoever's in to the door, and with
+  nobody in it says its `door_words`. You can stay inside past 8 PM; it just won't let
+  you back in. Options considered: always open (walking into a sleeping house at 1 AM
+  felt wrong), and open only while someone's in (Rosa is never home, being no
+  CharacterDef, so hers could never be seen, and doors would open and shut as people come
+  and go).
+- *What makes each one theirs.* `art/build_interior_look.py` gains seven rooms, built the
+  same way as 083's into `assets/packs/interiors/` (git-ignored). The mayor: red damask,
+  parquet, a marble fireplace with armchairs either side, a tall bookcase, a grandfather
+  clock, a globe, his writing desk, his own portrait, a piano. Wren: log planks, a stove,
+  fish drying on a rack, his rods in a rack, a mounted fish, a barrel of the catch. Pip's
+  family: yellow paper, the family kitchen, mum's bed, Pip's bunk and toy chest, a sea
+  picture for a would-be pirate, a hamster in its wheel, the dog asleep. Ivy: mint
+  stripes, plants everywhere, a spinning wheel, tea for two, a canary, herbs drying, a
+  white cat. Dot: parcels and sacks, the packing bench, her round pinned on a board, a
+  coat by the door, an unmade bed, her old dog. Tam: harbour boards, fish on the shelf and
+  in barrels, a hammock, the chart table, a ship's lantern. Rosa: whitewash and
+  terracotta, a grocer's kitchen, barrels of veg, geraniums under the windows, a black cat
+  by the stove. Windows go dark after 7 PM, as in 083.
+- *Solid pieces.* A piece can now be solid more than one row deep (`depth`, read by
+  InteriorLook), so nobody walks over the far end of a bed or a desk. Every room keeps a
+  clear way from the door to its resting spot.
+- *Without the pack* (a copy of the repository, which is public) a home is a plain room
+  with our interior tiles: everything still works, it just isn't furnished.
+- *Palette.* Two more of the pack's colours are used (#5a2f6e, #f2c29b); `art/palette.png`
+  grows from 88 to 90 (a twelfth row, 128 × 192).
+
+**A snag found in testing.** The room scene was first copied from the shops' room, which
+puts the farmer at a spot that, in a room ten cells wide, is on the doormat: physics saw
+them there for a moment and the door sent them straight back out. `home.gd` now places the
+farmer before it lays the door, and the scene's own spot for them is well inside.
+
+**Why.** Dave's ask, 2026-11-21. The homes were the last buildings you could only look at.
+
+**Kept, 2026-11-21.** Dave: "happy with them". The doors' hours stay 8 AM to 8 PM.
+
+## 085 — The almanac, the mayor's year review and a second year (Stage 25)
+
+**Decision.** Stage 25 as ROADMAP sections 3 and 13.6 describe it: a collections book, the
+mayor's review of the year with a title at lantern night, and the first things that only
+year 2 has. Save version 26.
+
+- *The almanac.* Press **L** anywhere. Six pages: crops, fish (river, stream and pond), sea
+  fish, forage (the Woods and the Lane), sea forage (the Cove) and recipes (dishes cooked
+  at the stove; the workbench's plans and the bakery's and tavern's food aren't in it). A
+  seventh page, Years, has each year's review and this year so far. 89 entries today. An
+  entry is filled in once it's been grown (picked), caught, found or cooked; until then
+  it's a dark shape with a hint under it (when and where it grows, bites or turns up).
+  Q / Tab turn the page, the arrows (or WASD) pick an entry, L or Esc close it. The game
+  is paused while it's open, as in a shop: it's a book you sit down with, and that keeps
+  the arrow keys from walking the farmer. It won't open over another menu.
+- *Pages are worked out from content.* A new crop, fish, wild thing or recipe .tres is in
+  the book with no code change (rule 3). Which page is decided by what it is: a fish that
+  lives only in the sea is a sea fish, a wild thing found in the Cove is sea forage. The
+  six pages themselves are a list in `Almanac.PAGES`; options considered were a
+  page Resource per page (more files for something that changes once in a blue moon) and
+  one long list (89 entries is too many to page through).
+- *What's kept.* Fish and dishes were already counted (the fish log, recipes cooked).
+  New in the save: crops picked and wild things found (`collections`), this year's tally
+  for the review (`year_stats`: gold earned by selling, crops picked and their kinds, fish
+  and their kinds, wild things and their kinds, dishes cooked and their kinds, requests
+  finished, new almanac entries) and every year's review (`year_reviews`). The Almanac
+  autoload listens on EventBus and writes them; GameState holds and saves them, so the
+  save is still exactly what GameState has.
+- *The year review.* At lantern night, when the mayor hands over his lantern, he reads out
+  the year: what you picked and sold, caught, found and cooked, the requests you finished
+  and how you did at the festivals, how full the almanac is, and then a title. The tally
+  becomes a score (a point per 500g earned; 3 per kind of crop, 2 per kind of fish, 1 per
+  kind of wild thing and of dish, 2 per request, 6 for a festival win and 2 for second or
+  third) and the score a title: "A promising start" (0), "Finding your feet" (40), "A good
+  pair of hands" (90), "The valley's grower" (150), "Talk of the town" (210), "Pride of the
+  valley" (280). Every number, title and line is in `data/year_review_rules.tres`
+  (YearReviewRules, on GameRules), for Stage 26's balance pass to tune. Kinds count more
+  than amounts on purpose: a year spent trying things should beat a year of nothing but
+  parsnips. In year 2 he says so if you've done better than last year.
+- *Missed lantern night.* The year still closes the night it turns. The review is written
+  down anyway, and the first morning's summary says the mayor left a note; the Years page
+  has it. Options considered: the mayor tells you next time you speak to him (he'd be
+  reading out a year that's already over, in spring), or no review at all (harsh for
+  missing one evening).
+- *A keepsake.* The lantern the mayor already gives at lantern night is the year's
+  keepsake; no new decoration was drawn.
+- *Year 2.* A calendar unlock, `year_two` (day 113, spring 1 of year 2), says so in the
+  morning's news. With it: Rosa's city orders (`rosa_city_orders`: twice the bin's price,
+  8 to 18 of a thing, crops plus honey, mackerel, cod and pollack; three times as likely
+  as her ordinary orders on market day), the mayor's request "The valley's almanac" (fill
+  in 12 new entries: 600g and his father's bird bath) and Pip's "Pip's shadows" (5 new
+  entries, from summer: 300g). Both use a new kind of request, AlmanacGoal, which counts
+  entries filled in after it's taken, on any page or one. Left for later, because they
+  need new art or people: Hollis's rare catalogue and Fennel's exotic greenhouse seeds
+  (ROADMAP section 3). Hollis already sells every season's seeds all year, so the
+  greenhouse is never short of something to grow.
+- *Older saves (25 -> 26).* Nothing counted crops or wild things before, so an upgraded
+  game's book starts with whatever's in its bag (a crop's produce or a wild thing there is
+  counted as grown or found once) plus the fish and dishes it already had. Its tally
+  starts on the day it's upgraded and is marked partial, so the mayor says he started his
+  book late; in year 1 the fish already caught are carried into it.
+
+**Why.** ROADMAP 13.6 (agreed 2026-11-17): the almanac gives the later game something to
+fill, the review gives the first year an ending, and year 2 needs a reason to be played.

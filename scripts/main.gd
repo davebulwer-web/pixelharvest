@@ -125,6 +125,8 @@ func _ready() -> void:
 	_place_objects()
 	_apply_season_overlay()
 	_place_crows()
+	# Dave's scenery: pictures he places in scenery/farm.tscn (DECISIONS 082).
+	Scenery.add_to(self, _entities, _scenery_id())
 	EventBus.tile_tilled.connect(_redraw_cell)
 	EventBus.tile_watered.connect(func(cell: Vector2i) -> void:
 		_redraw_cell(cell)
@@ -179,6 +181,12 @@ func _ready() -> void:
 
 
 ## The FarmData this scene shows. The greenhouse gives its own.
+## Which of Dave's scenery scenes this map shows (DECISIONS 082): the
+## greenhouse, which extends this script, has its own.
+func _scenery_id() -> StringName:
+	return LocationManager.FARM_ID
+
+
 func _plot() -> FarmData:
 	return GameState.farm
 

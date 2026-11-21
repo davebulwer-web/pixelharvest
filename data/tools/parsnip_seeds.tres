@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="ToolDef" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="ToolDef" format=3 uid="uid://uxgragjvxvow"]
 
-[ext_resource type="Script" path="res://scripts/resources/tool_def.gd" id="1_def"]
-[ext_resource type="Script" path="res://scripts/tools/plant_action.gd" id="2_action"]
+[ext_resource type="Script" uid="uid://b65d71kamaad7" path="res://scripts/resources/tool_def.gd" id="1_def"]
+[ext_resource type="Script" uid="uid://du8t1lwg6isay" path="res://scripts/tools/plant_action.gd" id="2_action"]
 [ext_resource type="Resource" path="res://data/crops/parsnip.tres" id="3_crop"]
-[ext_resource type="Texture2D" path="res://assets/sprites/items/parsnip_seeds.png" id="4_icon"]
+[ext_resource type="Texture2D" uid="uid://cl3tdi2u221mv" path="res://assets/sprites/items/parsnip_seeds.png" id="4_icon"]
+[ext_resource type="Script" uid="uid://d4h5510fs3imh" path="res://scripts/resources/tool_tier.gd" id="5_5l74y"]
 
 [sub_resource type="Resource" id="Resource_action"]
 script = ExtResource("2_action")
@@ -11,10 +12,10 @@ crop = ExtResource("3_crop")
 
 [resource]
 script = ExtResource("1_def")
+energy_cost = 1.0
+action = SubResource("Resource_action")
+consumed_on_use = true
 id = &"parsnip_seeds"
 display_name = "Parsnip seeds"
 icon = ExtResource("4_icon")
 buy_price = 20
-energy_cost = 1.0
-action = SubResource("Resource_action")
-consumed_on_use = true

@@ -1,11 +1,10 @@
-[gd_resource type="TileSet" load_steps=5 format=3]
+[gd_resource type="TileSet" format=3 uid="uid://knrn3fm8y0s3"]
 
-[ext_resource type="Texture2D" path="res://assets/tilesets/ground_spring.png" id="1_ground"]
-[ext_resource type="Texture2D" path="res://assets/tilesets/edges_spring.png" id="2_edges"]
+[ext_resource type="Texture2D" uid="uid://2y7hcdvwxtdh" path="res://assets/tilesets/ground_spring.png" id="1_ground"]
+[ext_resource type="Texture2D" uid="uid://dpf6k0fp6iby0" path="res://assets/tilesets/edges_spring.png" id="2_edges"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ground"]
 texture = ExtResource("1_ground")
-texture_region_size = Vector2i(16, 16)
 0:0/0 = 0
 1:0/0 = 0
 2:0/0 = 0
@@ -42,7 +41,6 @@ texture_region_size = Vector2i(16, 16)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_edges"]
 texture = ExtResource("2_edges")
-texture_region_size = Vector2i(16, 16)
 1:0/0 = 0
 2:0/0 = 0
 3:0/0 = 0
@@ -416,98 +414,84 @@ texture_region_size = Vector2i(16, 16)
 13:26/0 = 0
 14:26/0 = 0
 1:27/animation_columns = 1
-1:27/animation_frames_count = 4
 1:27/animation_frame_0/duration = 0.35
 1:27/animation_frame_1/duration = 0.35
 1:27/animation_frame_2/duration = 0.35
 1:27/animation_frame_3/duration = 0.35
 1:27/0 = 0
 2:27/animation_columns = 1
-2:27/animation_frames_count = 4
 2:27/animation_frame_0/duration = 0.35
 2:27/animation_frame_1/duration = 0.35
 2:27/animation_frame_2/duration = 0.35
 2:27/animation_frame_3/duration = 0.35
 2:27/0 = 0
 3:27/animation_columns = 1
-3:27/animation_frames_count = 4
 3:27/animation_frame_0/duration = 0.35
 3:27/animation_frame_1/duration = 0.35
 3:27/animation_frame_2/duration = 0.35
 3:27/animation_frame_3/duration = 0.35
 3:27/0 = 0
 4:27/animation_columns = 1
-4:27/animation_frames_count = 4
 4:27/animation_frame_0/duration = 0.35
 4:27/animation_frame_1/duration = 0.35
 4:27/animation_frame_2/duration = 0.35
 4:27/animation_frame_3/duration = 0.35
 4:27/0 = 0
 5:27/animation_columns = 1
-5:27/animation_frames_count = 4
 5:27/animation_frame_0/duration = 0.35
 5:27/animation_frame_1/duration = 0.35
 5:27/animation_frame_2/duration = 0.35
 5:27/animation_frame_3/duration = 0.35
 5:27/0 = 0
 6:27/animation_columns = 1
-6:27/animation_frames_count = 4
 6:27/animation_frame_0/duration = 0.35
 6:27/animation_frame_1/duration = 0.35
 6:27/animation_frame_2/duration = 0.35
 6:27/animation_frame_3/duration = 0.35
 6:27/0 = 0
 7:27/animation_columns = 1
-7:27/animation_frames_count = 4
 7:27/animation_frame_0/duration = 0.35
 7:27/animation_frame_1/duration = 0.35
 7:27/animation_frame_2/duration = 0.35
 7:27/animation_frame_3/duration = 0.35
 7:27/0 = 0
 8:27/animation_columns = 1
-8:27/animation_frames_count = 4
 8:27/animation_frame_0/duration = 0.35
 8:27/animation_frame_1/duration = 0.35
 8:27/animation_frame_2/duration = 0.35
 8:27/animation_frame_3/duration = 0.35
 8:27/0 = 0
 9:27/animation_columns = 1
-9:27/animation_frames_count = 4
 9:27/animation_frame_0/duration = 0.35
 9:27/animation_frame_1/duration = 0.35
 9:27/animation_frame_2/duration = 0.35
 9:27/animation_frame_3/duration = 0.35
 9:27/0 = 0
 10:27/animation_columns = 1
-10:27/animation_frames_count = 4
 10:27/animation_frame_0/duration = 0.35
 10:27/animation_frame_1/duration = 0.35
 10:27/animation_frame_2/duration = 0.35
 10:27/animation_frame_3/duration = 0.35
 10:27/0 = 0
 11:27/animation_columns = 1
-11:27/animation_frames_count = 4
 11:27/animation_frame_0/duration = 0.35
 11:27/animation_frame_1/duration = 0.35
 11:27/animation_frame_2/duration = 0.35
 11:27/animation_frame_3/duration = 0.35
 11:27/0 = 0
 12:27/animation_columns = 1
-12:27/animation_frames_count = 4
 12:27/animation_frame_0/duration = 0.35
 12:27/animation_frame_1/duration = 0.35
 12:27/animation_frame_2/duration = 0.35
 12:27/animation_frame_3/duration = 0.35
 12:27/0 = 0
 13:27/animation_columns = 1
-13:27/animation_frames_count = 4
 13:27/animation_frame_0/duration = 0.35
 13:27/animation_frame_1/duration = 0.35
 13:27/animation_frame_2/duration = 0.35
 13:27/animation_frame_3/duration = 0.35
 13:27/0 = 0
 14:27/animation_columns = 1
-14:27/animation_frames_count = 4
 14:27/animation_frame_0/duration = 0.35
 14:27/animation_frame_1/duration = 0.35
 14:27/animation_frame_2/duration = 0.35
@@ -515,7 +499,6 @@ texture_region_size = Vector2i(16, 16)
 14:27/0 = 0
 
 [resource]
-tile_size = Vector2i(16, 16)
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_ground")
 sources/1 = SubResource("TileSetAtlasSource_edges")

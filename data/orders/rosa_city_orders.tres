@@ -1,0 +1,55 @@
+[gd_resource type="Resource" script_class="OrderTemplate" load_steps=30 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/order_template.gd" id="1_t"]
+[ext_resource type="Script" path="res://scripts/resources/item_def.gd" id="2_t"]
+[ext_resource type="Resource" path="res://data/unlocks/year_two.tres" id="3_t"]
+[ext_resource type="Resource" path="res://data/produce/parsnip.tres" id="4_i"]
+[ext_resource type="Resource" path="res://data/produce/radish.tres" id="5_i"]
+[ext_resource type="Resource" path="res://data/produce/potato.tres" id="6_i"]
+[ext_resource type="Resource" path="res://data/produce/spring_onion.tres" id="7_i"]
+[ext_resource type="Resource" path="res://data/produce/pea.tres" id="8_i"]
+[ext_resource type="Resource" path="res://data/produce/garlic.tres" id="9_i"]
+[ext_resource type="Resource" path="res://data/produce/kale.tres" id="10_i"]
+[ext_resource type="Resource" path="res://data/produce/tomato.tres" id="11_i"]
+[ext_resource type="Resource" path="res://data/produce/green_bean.tres" id="12_i"]
+[ext_resource type="Resource" path="res://data/produce/corn.tres" id="13_i"]
+[ext_resource type="Resource" path="res://data/produce/watercress.tres" id="14_i"]
+[ext_resource type="Resource" path="res://data/produce/chilli.tres" id="15_i"]
+[ext_resource type="Resource" path="res://data/produce/cabbage.tres" id="16_i"]
+[ext_resource type="Resource" path="res://data/produce/beetroot.tres" id="17_i"]
+[ext_resource type="Resource" path="res://data/produce/leek.tres" id="18_i"]
+[ext_resource type="Resource" path="res://data/produce/brussels_sprouts.tres" id="19_i"]
+[ext_resource type="Resource" path="res://data/produce/pumpkin.tres" id="20_i"]
+[ext_resource type="Resource" path="res://data/produce/strawberry.tres" id="21_i"]
+[ext_resource type="Resource" path="res://data/produce/blueberry.tres" id="22_i"]
+[ext_resource type="Resource" path="res://data/produce/cranberry.tres" id="23_i"]
+[ext_resource type="Resource" path="res://data/produce/melon.tres" id="24_i"]
+[ext_resource type="Resource" path="res://data/produce/rhubarb.tres" id="25_i"]
+[ext_resource type="Resource" path="res://data/produce/honey.tres" id="26_i"]
+[ext_resource type="Resource" path="res://data/fish/mackerel.tres" id="27_i"]
+[ext_resource type="Resource" path="res://data/fish/cod.tres" id="28_i"]
+[ext_resource type="Resource" path="res://data/fish/pollack.tres" id="29_i"]
+
+[resource]
+script = ExtResource("1_t")
+id = &"rosa_city_orders"
+posted_at = &"market_grocer"
+client = ""
+title = "Rosa's city order: {count} {item}"
+choice_line = "The city wants twice what it took last year, and pays for it. Which can you manage? Twice what the bin gives, by next market day."
+offer_line = "{count} {item} for the city by next market day. {gold}g when you bring them. They've asked for you by name, you know."
+reminder_line = "The city's {count} {item}? Market day, remember."
+thanks_line = "The city buyers will be pleased. {gold}g, and they'll want more."
+news_line = "Market day: Rosa is taking the city's orders for next week."
+items = Array[ExtResource("2_t")]([ExtResource("4_i"), ExtResource("5_i"), ExtResource("6_i"), ExtResource("7_i"), ExtResource("8_i"), ExtResource("9_i"), ExtResource("10_i"), ExtResource("11_i"), ExtResource("12_i"), ExtResource("13_i"), ExtResource("14_i"), ExtResource("15_i"), ExtResource("16_i"), ExtResource("17_i"), ExtResource("18_i"), ExtResource("19_i"), ExtResource("20_i"), ExtResource("21_i"), ExtResource("22_i"), ExtResource("23_i"), ExtResource("24_i"), ExtResource("25_i"), ExtResource("26_i"), ExtResource("27_i"), ExtResource("28_i"), ExtResource("29_i")])
+count_min = 8
+count_max = 18
+max_value = 1600
+pay_rate = 2.0
+bonus_gold = 0
+deadline_days = 8
+choices = 3
+weight = 3
+first_day = 113
+on_event = &"market_day"
+requires_unlock = ExtResource("3_t")

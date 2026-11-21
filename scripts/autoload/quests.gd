@@ -92,6 +92,8 @@ func _ready() -> void:
 		_record(&"fish_caught", [fish_id, size, location_id, water, through_ice]), CONNECT_DEFERRED)
 	EventBus.allotment_worked.connect(func(plot: int, work: StringName, cell: Vector2i) -> void:
 		_record(&"allotment_worked", [plot, work, cell]), CONNECT_DEFERRED)
+	EventBus.almanac_entry_added.connect(func(page: StringName, entry_id: StringName) -> void:
+		_record(&"almanac_entry_added", [page, entry_id]), CONNECT_DEFERRED)
 	# Deliveries count what's in the bag, and gifts of gold the purse, so any
 	# change to either may finish one.
 	EventBus.item_added.connect(func(_id: StringName, _n: int) -> void: _check_ready(), CONNECT_DEFERRED)

@@ -43,9 +43,11 @@ func _on_body_entered(body: Node2D) -> void:
 	if _used or not body is Player:
 		return
 	# A home with someone in (DECISIONS 067): knocking brings them to the
-	# door, instead of the door's words.
+	# door, instead of the door's words. A home you can go into (DECISIONS
+	# 084) is knocked at only while its door is shut (out of visiting hours).
 	var home := LocationManager.find(destination)
-	if home != null and home.outside != &"" and not home.has_inside() \
+	if home != null and home.outside != &"" and home.shop == null \
+			and (not home.has_inside() or not home.open_at(GameState.minutes)) \
 			and not Schedules.people_at(destination).is_empty():
 		EventBus.door_knocked.emit(destination)
 		return

@@ -56,6 +56,8 @@ func _ready() -> void:
 	_add_table()
 	_add_stove()
 	_add_door()
+	# TEST (DECISIONS 083): the Cozy Interiors pack's furniture, if built (Ctrl+R).
+	InteriorLook.dress(self, _entities, &"farmhouse", ROOM, DOOR_CELLS)
 	_place_player()
 	_fit_camera()
 

@@ -37,6 +37,11 @@ const FLOOR_SOURCE_ID := 0
 @onready var _floor: TileMapLayer = $Floor
 
 
+## The greenhouse has its own scenery scene, not the farm's (DECISIONS 082).
+func _scenery_id() -> StringName:
+	return &"greenhouse"
+
+
 func _plot() -> FarmData:
 	return GameState.greenhouse
 

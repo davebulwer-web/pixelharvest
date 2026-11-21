@@ -14,9 +14,10 @@ extends RefCounted
 ## reads as up or down). So the art can arrive person by person, with no code
 ## change when it does.
 ##
-## Tools and talking always use the straight facing: the cell straight ahead
-## is what a hoe or a "hello" acts on, so a diagonal never reaches a corner
-## cell (ROADMAP section 15).
+## Tools always use the straight facing: the cell straight ahead is what a
+## hoe acts on, so a diagonal never reaches a corner cell (ROADMAP section
+## 15). E tries that cell first too, then reaches round about, all eight ways
+## (Player._reach_cells, DECISIONS 079).
 ##
 
 const STRAIGHT: Dictionary = {

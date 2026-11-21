@@ -27,6 +27,15 @@ func occupies(cell: Vector2i) -> bool:
 	return home_cell() == cell
 
 
+## E only reaches this on the tile straight ahead (DECISIONS 079), because E
+## picks it up: a sprinkler shouldn't come up because you missed the crop
+## beside it. Except while something waits in it (a hive's honey): then E
+## collects that, which does no harm, so a near miss is fine.
+func aim_exactly() -> bool:
+	var plot := GameState.plot_here()
+	return plot == null or plot.made_at(home_cell()) <= 0
+
+
 func interact() -> void:
 	if GameState.collect_from_object(home_cell()):
 		return
