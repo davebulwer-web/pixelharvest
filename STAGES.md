@@ -1552,6 +1552,41 @@ pictures. Cells don't change; only the drawing does.
 - [x] Dave opens a scenery scene, places a few things, saves, and sees them in the game
       (2026-11-21: "happy with them")
 
+**Side task (2026-11-21) — a calm hedge, drop-in music (DECISIONS 087, no save change)**
+
+- [x] The berry hedge redrawn calm, by `art/build_calm_hedge.py` (our own art, in git):
+      the Lane's hedgerows, the Woods' thickets and the farm's unbought fields, four
+      seasons, in our tilesets and the cozy test copies; `--restore` puts the berries back
+- [x] Music by file name in `assets/audio/music/`: `<season>_...`, `<event id>_...` (in
+      the event's place on its day), `any_...`; how-to `assets/audio/music/HOW_TO.md`
+- [x] Verified in the sandbox: headless import and run clean; shots of the Lane, the farm
+      and the Woods in all four seasons; which tunes play by season, on the Flower Show day
+      in town, in a shop off the square, on the farm and the day after
+- [ ] Dave walks the Lane (and past the farm's unbought fields) and decides: keep the calm
+      hedge or `--restore`
+- [ ] Dave drops in a tune of his own and hears it
+
+**Side task (2026-11-21) — little moving things (DECISIONS 088, no save change)**
+
+- [x] Chimney smoke on every building with a chimney (11 of them) and lit windows after
+      dark (14 buildings), from `data/ambience/buildings/`
+- [x] Things that come and go by themselves, one file each in `data/ambience/effects/`:
+      butterflies (spring, summer), songbirds (spring to autumn), gulls (Cove), falling
+      leaves (autumn), fireflies (summer nights), sparkles on the water, ripples and a
+      jumping fish on the pond, fish jumping in the Cove's sea, sparkles on the snow
+- [x] Pack pictures reused (copied into `assets/scenery/ambient/` and
+      `creatures/critters/` by `art/build_scenery_library.py`, git-ignored); our own
+      fish jump, songbird and window halo by `art/build_ambient_art.py` (in git)
+- [x] Off switch: Settings → Animations, or Ctrl+Y (kept in settings.cfg)
+- [x] Dave's scenery: a picture named "night" shows only after dark, one named "now and
+      then" plays now and then; how-to in `scenery/HOW_TO.md`
+- [x] Verified in the sandbox: headless import and run clean; shots and short clips of the
+      town by day and night, the pond, the Cove, the farm in autumn and at night, the
+      Woods on a summer night, the Lane in winter; the switch on and off; without the
+      packs' pictures (only our own pieces show, no errors)
+- [ ] Dave walks round in a few seasons and times of day and decides: keep, tone down, or
+      more of something
+
 ## Stage 25 — Almanac and year review · 1–2 sessions · Sonnet
 
 The old Stage 19 without "life in town". Save version 26 (Stage 23 took 25).
@@ -1592,9 +1627,22 @@ The old Stage 19 without "life in town". Save version 26 (Stage 23 took 25).
 
 The old Stage 20 (Stage 9's second half).
 
-- [ ] Title screen, settings (with volume), save slots, credits (from CREDITS.md: the fonts and
-      the Cozy Village & Farm pack); decide the repository: private, or build the release on
-      Dave's PC where `assets/tilesets/cozy/` exists (DECISIONS 077)
+- [x] Title screen, an Esc menu and settings, done early on their own (2026-11-21,
+      DECISIONS 086, no save change): the title over the loaded game (Continue, New game,
+      Settings, Controls, Quit); Esc in the world (Resume, Settings, Controls, New game,
+      Title screen, Quit, the last two asking first); settings in `user://settings.cfg`
+      (music and sound volume, window or full screen, window size ×1 to ×4, whole-pixel
+      scaling). Verified in the sandbox: headless import and run clean; rendered every page
+      and drove each path by keys (Continue, New game and Esc back to the title, a new game
+      started from it, the settings changed and written to the file, Esc to the menu and
+      back, the "are you sure?" page)
+- [ ] Dave tries it on Windows: F5 opens on the title; Continue; Esc in the world; Settings
+      with the music and sound levels, and (with the game in its own window, not embedded
+      in the editor) full screen and the window sizes
+- [ ] Save slots, credits (from CREDITS.md: the fonts and the Cozy Village & Farm pack; a
+      player-facing list, and CREDITS.md isn't exported by default); decide the repository:
+      private, or build the release on Dave's PC where `assets/tilesets/cozy/` exists
+      (DECISIONS 077)
 - [ ] Full balance pass across a simulated year, including the clock now that travel is
       longer (`seconds_per_ten_minutes`, 5 now; 6 may suit the bigger map)
 - [ ] Windows export, itch.io page

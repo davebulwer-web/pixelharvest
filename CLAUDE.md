@@ -107,7 +107,9 @@ scripts/             Game code
   autoload/          Global services (EventBus, ContentDB, GameState, Economy, SaveSystem,
                      Audio, DayReport, Fishing, Festivals, Allotments, Tavern, Almanac…);
                      Almanac keeps the collections book's counts and the year's tally,
-                     and the mayor's year review (DECISIONS 085)
+                     and the mayor's year review (DECISIONS 085); Settings keeps the
+                     player's volume and screen choices in user://settings.cfg, apart
+                     from the save (DECISIONS 086)
   farm/              The farm's data and layout, the farmhouse with its bed and its
                      stove and cooking menu (Stove, CookMenu; DECISIONS 056), the
                      workbench by the farmhouse, which uses the same menu for its
@@ -144,9 +146,14 @@ scripts/             Game code
   scenery/           Scenery: puts a map's scenery scene into it when it opens, animates
                      strips, lights string lights, takes the backdrop (Ctrl+B);
                      SceneryLayer: the scene's root, which helps in the editor (DECISIONS 082)
+  ambience/          Ambience: the little things that move by themselves on the outdoor
+                     maps (chimney smoke, lit windows, butterflies, birds, leaves,
+                     sparkles, fish), added with the scenery; off in Settings or Ctrl+Y
+                     (DECISIONS 088)
   exits.gd           Exits: builds a place's ways out from LocationDef.exits (ExitDef;
                      DECISIONS 060)
-  ground_tiles.gd    GroundTiles: where each kind of ground is in the seasonal tilesets;
+  ground_tiles.gd    GroundTiles: where each kind of ground is in the seasonal tilesets
+                     (the hedge is drawn by art/build_calm_hedge.py, DECISIONS 087);
   ground_edges.gd    GroundEdges: the soft edges where grounds meet, a display-only
                      dual grid over every outdoor map's ground (DECISIONS 072)
   ui_style.gd        UiStyle: the colours and sizes code asks for by name, text on the
@@ -156,6 +163,9 @@ scripts/             Game code
                      mood (DECISIONS 074)
   almanac_book.gd    AlmanacBook: the almanac on screen (L), its pages and the Years page
                      (DECISIONS 085)
+  menus/             The title screen (TitleScreen) the game opens on, over the game it
+                     loaded, and the Esc menu (PauseMenu); what they share, with the
+                     Settings, Controls and "are you sure?" pages (MenuScreen; DECISIONS 086)
   items/             Inventory
   fishing/           FishingLine: the float, the line and the reel bar (DECISIONS 054)
   tools/             ToolAction scripts (hoe, watering can, planting, placing objects
@@ -218,6 +228,9 @@ data/                Content resources (.tres), indexed by ContentDB
   quests/            QuestDef — requests from townsfolk or shopkeepers: who asks, for what,
                      and the reward
   difficulties/      DifficultyDef — chosen at new game: multipliers on prices, energy, growing
+  ambience/          The little moving things: AmbientEffect files (effects/: what, where,
+                     when, how often), BuildingAmbience files (buildings/: chimneys and
+                     windows in pixels of the picture) and AmbienceRules (DECISIONS 088)
   audio/             SoundBank — what each sound the game plays sounds like (DECISIONS 042)
   unlocks/           UnlockDef — things that open up over time, from a request or a date
                      (DECISIONS 043); content waits for one with `requires_unlock`
@@ -252,10 +265,14 @@ assets/ui/           The UI Theme (theme.tres, the project's theme) and its nine
 assets/fonts/        monogram (text) and Pixelify Sans (headings), with their licences
 assets/tilesets/     Ground and world tilesets
 assets/scenery/      Pictures for Dave's scenery, cut from the bought packs by
-                     art/build_scenery_library.py (git-ignored: the packs' licence)
+                     art/build_scenery_library.py (git-ignored: the packs' licence); ambient/ and
+                     creatures/critters/ feed the little moving things too
+assets/sprites/ambient/  Our own little moving things: a jumping fish, a songbird, a window
+                     halo (art/build_ambient_art.py; DECISIONS 088)
 assets/audio/        Sound effects (sfx/*.wav) and the weather's loops (ambience/*.ogg), made by
-                     art/build_sounds.py; music (music/*.mp3: Dave's own tunes, two a season, on
-                     each SeasonTheme; DECISIONS 066)
+                     art/build_sounds.py; music (music/: Dave's own tunes, DECISIONS 066; picked
+                     by file name, season_ or festival id_, no list to edit: music/HOW_TO.md,
+                     DECISIONS 087)
 art/                 Art specification and generation log (not shipped art); art/fonts/
                      holds monogram's original and the script that adds four characters
                      to it (ignored by Godot: .gdignore)

@@ -93,17 +93,18 @@ static func path_for(cell: Vector2i) -> Vector2i:
 	return PATH
 
 
-## How to lay down the tile `coords` at `cell` (0 = as drawn). Grass, path and
-## thicket are turned and mirrored at random, which hides the repeat of a
-## single 16 px tile — without it they show a lattice. (The thicket's
-## collision box is the whole square, so turning it changes nothing.) A detail
+## How to lay down the tile `coords` at `cell` (0 = as drawn). Grass and path
+## are turned and mirrored at random, which hides the repeat of a single 16 px
+## tile — without it they show a lattice. The hedge (thicket) is laid as drawn
+## since its calm picture (DECISIONS 087): it is lit from the top, and its
+## plain tile has to meet its edge pictures exactly. A detail
 ## is only mirrored left-right, so tufts and flowers still grow upwards.
 ## Everything else is drawn as is: the paving's stones only line up one way
 ## round, and the pond and cliffs look wrong turned. Sand and the rockpools are
 ## turned like grass. The sea is only mirrored (Stage 23): its wave crests run
 ## left to right, so turning it would stand them on end.
 static func transform_for(cell: Vector2i, coords: Vector2i) -> int:
-	if coords in [GRASS, GRASS_ALT, PATH, THICKET, SAND, WET_SAND, ROCKPOOL]:
+	if coords in [GRASS, GRASS_ALT, PATH, SAND, WET_SAND, ROCKPOOL]:
 		return _ALL_TRANSFORMS[_pick(cell, 4, _ALL_TRANSFORMS.size())]
 	if coords == SEA:
 		# The first four ways in the list: as is and the three mirrorings.

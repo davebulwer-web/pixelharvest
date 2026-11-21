@@ -3964,3 +3964,172 @@ year 2 has. Save version 26.
 
 **Why.** ROADMAP 13.6 (agreed 2026-11-17): the almanac gives the later game something to
 fill, the review gives the first year an ending, and year 2 needs a reason to be played.
+
+## 086 — A title screen over the game it loaded, an Esc menu, and settings in their own file
+
+**Decision.** The game opens on a title screen, Esc out in the world opens a menu, and both
+have a Settings page whose choices are kept in `user://settings.cfg`, not in the save. No
+save change (still version 26).
+
+- *The title screen* (`scripts/menus/title_screen.gd`, TitleScreen). The boot scene loads
+  the save as before (or sets up a fresh game), opens the place the farmer is in, and puts
+  the title over it: the game's name in Pixelify Sans at three times its clean size, and
+  Continue (with the saved day, gold and difficulty under it), New game, Settings,
+  Controls and Quit. The world behind is paused and dimmed, the HUD and hotbar are hidden,
+  and the season's music plays. Continue just takes the title away. New game opens the
+  difficulty menu (DifficultyMenu, DECISIONS 040; Esc comes back to the title) and starts
+  again; the old save is only replaced at the new game's first night, as with Ctrl+N. With
+  no save there's no Continue; with one that couldn't be read, New game says it was put
+  aside as save.unreadable.json.
+- *The Esc menu* (`scripts/menus/pause_menu.gd`, PauseMenu): Resume, Settings, Controls,
+  New game (Ctrl+N's menu), Title screen and Quit. The game saves each night, so Title
+  screen and Quit first ask, with "Back" picked, and say that today since this morning
+  will be lost. SaveSystem opens it, next to Ctrl+N, from its `_unhandled_input`, which
+  doesn't run while the game is paused: Esc still closes a shop, the almanac, a
+  conversation or the fishing line first. Ctrl+N stays as a shortcut.
+- *What they share* (`scripts/menus/menu_screen.gd`, MenuScreen): the panel over the
+  paused game, the line under the buttons saying what the picked one does, and the
+  Settings, Controls and "are you sure?" pages. Made in code and added to the root, like
+  DifficultyMenu, so the title survives the boot's change of scene. Everything is the
+  theme's (and so the Wood UI's when it's on): fonts, panel, buttons.
+- *Settings* (`scripts/autoload/settings.gd`, the Settings autoload): music and sound
+  volume in steps of 0 to 10 on the existing Music and SFX buses (10 is the old level, the
+  bus layout's own -4 dB for music is kept underneath; 0 mutes the bus), window or full
+  screen, the window's size in whole steps of 640 × 360 (×1 to ×4, only sizes that fit the
+  screen), and "Pixels": fill the screen, or whole-number scaling only (every pixel the same
+  size, with a border). A setting is changed with left/right (A/D) or by pressing it, takes
+  effect at once and is written straight away. M still mutes everything for the moment.
+- *In the editor.* When the game runs embedded in the editor's Game tab, the window
+  belongs to the editor, so the screen and window-size settings are kept but only take
+  effect when the game runs in a window of its own (the page says so). Volume and Pixels
+  work everywhere.
+
+Options considered:
+- *A title scene of its own with a painted backdrop*, loading the save only on Continue.
+  Cleaner on paper, but it needs a picture we don't have, and the real world behind the
+  title shows the season for free. The cost: the title always shows where the save is,
+  which is the farmhouse in the morning. If Dave would rather see the farm outside, the
+  title can open the farm behind it and Continue walk into the farmhouse.
+- *Settings in the save.* They'd change with each game and be lost with a damaged save,
+  and a new game would reset the volume; a separate ConfigFile is what players expect.
+- *Sliders for the volumes.* Godot's slider isn't in our theme and is fiddly with keys;
+  a row that reads "Music  <  80%  >" fits the monospaced font and works on keys and mouse.
+- *Credits on the title.* Left for Stage 26 with the export: CREDITS.md is written for us,
+  not for players, and a .md file isn't exported by default.
+
+**Why.** Dave asked for a title page with settings (2026-11-21). It is the first item of
+Stage 26, done early on its own.
+
+
+## 087 — A calm hedge drawn by us; Dave's music by file name, no lists
+
+**Decision (the hedge).** The hedge tile (GroundTiles.THICKET: the Lane's two hedgerows,
+the Woods' thickets and the farm's fields not yet bought) is redrawn as a calm, trimmed
+hedge: one body colour, a lighter band along its top, a darker face where it meets the
+ground, a thin dark outline, rounded ends and a soft shadow on the grass, with a few faint
+leaf marks inside. Each cell's stretch has a gently rounded top. Autumn turns it russet;
+winter keeps it green with snow along the top. It replaces the dark tile dotted with red
+berries, which Dave found busy, above all lining the Lane (2026-11-21).
+
+- *Our own art.* None of the bought packs has a hedge that tiles (the Cozy pack has
+  single bushes only), so `art/build_calm_hedge.py` draws it from scratch, in colours from
+  `art/palette.png` (the pack's greens, so it sits with the cozy grass). Being ours, it
+  is in git like the rest of our ground.
+- *Where.* The script writes the plain tile (ground_<season>.png, 8,0) and the hedge's
+  soft-edge rows (edges_<season>.png, rows 22-23) into our tilesets and, when they're
+  there, the cozy, calm and harbour test copies in `assets/tilesets/cozy/`. The cozy build
+  scripts copy our hedge anyway, so rebuilding them keeps it.
+- *Laid as drawn.* `GroundTiles.transform_for` no longer turns or mirrors the hedge: it is
+  lit from the top, and its plain tile must meet its edge pictures pixel for pixel.
+- *Undo.* The first run saved the old berry pictures to
+  `art/ground_sources/thicket_berry/`; `python art/build_calm_hedge.py --restore` puts
+  them back everywhere (and `git checkout` does it for our own tilesets). The berry tile
+  would then want turning again in transform_for, or it shows a lattice.
+
+Options considered:
+- *A switch (Ctrl+key) like the earlier tests.* The hedge's pictures sit at fixed places
+  in every season's tileset (sixteen tilesets with the tests'), so a live switch needs
+  new atlas places, collision and a redraw path in all of them; for one tile, a redraw
+  with a one-line undo is cheaper and leaves less test code behind.
+- *The pack's bushes stamped in a row.* They're 18 × 16 rounded single bushes with their
+  own outline: in a row they read as beads, and on the farm's big fields as polka dots.
+
+**Decision (music).** Music is drop-in. Every file in `assets/audio/music/` whose name
+starts with a season (`spring_`...) is one of that season's tunes; one that starts with
+a calendar event's id (`flower_show_`, `fishing_contest_`, `harvest_fair_`,
+`lantern_night_`, `market_day_`) plays in that event's place, and the shops off it, on
+its day, instead of the season's; `any_` tunes play in a season with none of its own. A
+place's own tune (LocationDef.music) still wins. The seasons' `music` lists are emptied
+(the folder holds the same eight files, already named by season) but still work, for a
+tune kept elsewhere. Audio reads the folder once, with ResourceLoader.list_directory (as
+ContentDB does, so it works in an exported game), and re-picks the music each morning,
+since a new day can be an event's. How-to for Dave: `assets/audio/music/HOW_TO.md`.
+No save change.
+
+Options considered:
+- *Keep the .tres lists and teach Dave the inspector.* It works, but it's a step he'd
+  have to remember, and deleting a file then breaks the list's reference.
+- *A folder per season.* Just as simple, but a name says when a tune plays even when the
+  file is copied somewhere else, and it is what the eight tunes already do.
+
+**Why.** Dave doesn't like the berry hedge, and wants to add his own music for each season
+and the festivals himself, without handing files over (2026-11-21).
+
+## 088 — Little moving things: chimney smoke, lit windows, critters, sparkles, from data files
+
+**Decision.** The outdoor maps get small animations that come and go by themselves, in
+the simple Stardew way: decoration only, nothing saved, nothing to bump into, no rule reads
+them. No save change (still version 26).
+
+- *Ambience* (`scripts/ambience/ambience.gd`). Each map's `Scenery.add_to()` adds one, so
+  it arrives on every outdoor map with Dave's scenery, without touching the map scripts.
+  It puts smoke on each building's chimneys and a lamp-lit glow on its windows, and starts
+  the moving things inside the camera's view only. They're plain Sprite2Ds moved from one
+  `_process`, capped (24 at once, and a number per kind), and freed when they finish or
+  leave the screen.
+- *What moves, as data.* One `AmbientEffect` file per kind in `data/ambience/effects/`:
+  its pictures, how it moves (plays once on a spot, wanders about, flies across, falls),
+  the ground it needs (grass, pond, sea, any water), the maps, seasons, weather and hours
+  it plays in, how often and how many. Ten to start: butterflies, songbirds, gulls,
+  falling leaves, fireflies (drawn as light, so they show at night), water sparkles, pond
+  ripples, a fish jumping in the pond and in the Cove's sea, snow sparkles. A new kind is
+  a copied file, no code.
+- *Chimneys and windows, as data.* One `BuildingAmbience` file per building in
+  `data/ambience/buildings/` (named by location id): chimney tops and window boxes in
+  pixels of its picture. After dark the glass inside each box (bluish pixels, or ones
+  already lit orange, never the frame or the wall) is coloured lamp-light and faded in
+  with the lamps (Daylight's `night_lights` group), with a soft halo. Shared numbers in
+  `data/ambience/ambience_rules.tres` (AmbienceRules).
+- *Pictures: the packs' first.* The Cozy pack's chimney smoke, falling leaves and
+  sparkles, the Seasons pack's butterflies, fireflies and other critters, the Coast pack's
+  gulls and water sparkle. `art/build_scenery_library.py` now also copies them into
+  `assets/scenery/ambient/` and `assets/scenery/creatures/critters/`, git-ignored like the
+  rest of the library. What the packs don't have is ours, drawn by
+  `art/build_ambient_art.py` from `art/palette.png` into `assets/sprites/ambient/` (in
+  git): a fish leaping with its ring and splash, a little songbird, a window halo. Paths
+  are kept as text in the data files, so a missing pack picture means that one effect
+  doesn't play, never a file that won't load.
+- *The switch.* Settings → Animations (on by default, kept in `user://settings.cfg`), and
+  Ctrl+Y does the same anywhere outdoors. Off hides the smoke and windows and stops the
+  rest.
+- *Dave's scenery.* Two new words in a picture's name (its file's, or its line's in the
+  Scene panel): "night" shows it only after dark, fading with the lamps; "now and then"
+  plays its strip once and then waits a few seconds out of sight. Any pack animation can be
+  dragged in as before (`_4f` strips play).
+- *Flags and bunting.* The pack's flag poles (2 frames) and kites already sway in the
+  scenery library and in the festival dressing (DECISIONS 081); they're placed by Dave or
+  on festival days, not spread about by code.
+
+Options considered:
+- *Godot's GPUParticles2D for leaves and sparkles.* Cheap too, but particles are hard to
+  keep on whole pixels, can't easily be limited to water or grass cells, and are fiddly to
+  tune in the inspector for someone new to Godot; a list of sprites is plain to read.
+- *Placing smoke and lights in Dave's scenery scenes.* Visual, but those scenes are his,
+  and a building moved in code would leave its smoke behind; the building files follow the
+  buildings wherever a map puts them.
+- *Finding windows automatically by colour.* Blue roofs and the town hall's pale blue walls
+  would light up too; a box per window plus the colour test inside it is exact.
+
+**Why.** Dave (2026-11-21) wants the world to feel alive with small animations like the
+fountain's: smoke, flags, water, leaves, critters, lit windows, a fish jumping, subtle and
+with a way to turn them off, and wants to add more himself.

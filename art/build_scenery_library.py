@@ -45,6 +45,18 @@ def _moored(rel):
     return "moored" in rel and "rider_overlay" not in rel
 
 
+def _ambient_fx(rel):
+    # The cozy pack's effects that suit the world going by on its own; not the
+    # ones that answer the player (coins, hearts, hits, harvest pops).
+    return any(rel.startswith(n) for n in (
+        "chimney_smoke", "falling_leaves", "sparkle", "water_ripple", "water_splash",
+        "dust_puff", "fire_small"))
+
+
+def _no_tints(rel):
+    return not rel.startswith("Tints")
+
+
 def _beach_props(rel):
     # Not the villagers' walk sheets (people, not scenery) or the swimmers' masks.
     return "water_line_mask" not in rel and "Villagers" not in rel and "_sheet" not in rel
@@ -65,6 +77,13 @@ SOURCES = [
     ("coast", "07_Sea_Creatures", "creatures", _all),
     ("seasons", "03_Festival_Props", "festival", _no_autotiles),
     ("seasons", "04_Festival_Lights", "festival/lights", _no_autotiles),
+    # The little moving things (DECISIONS 088): Ambience plays some of these by
+    # itself (smoke, sparkles, butterflies, leaves, fireflies, gulls), and Dave
+    # can drag any of them into a scenery scene.
+    ("cozy", "12_Effects", "ambient", _ambient_fx),
+    ("seasons", "09_Effects_Weather/Effects", "ambient", _all),
+    ("coast", "12_Coast_FX_Weather", "ambient", _no_tints),
+    ("seasons", "06_NPCs_Critters/Critters", "creatures/critters", _all),
 ]
 
 # 4-bit sheets cut into stand-alone pieces: (pack, file, library file stem,

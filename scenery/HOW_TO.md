@@ -68,6 +68,54 @@ it starts.
 - Fences and walls come as `..._horizontal`, `..._vertical` and `..._post` pieces; bunting
   and lights as `..._span`. Line copies up side by side.
 
+## Little moving things (smoke, birds, sparkles...)
+
+The game already adds some small animations by itself: chimney smoke, windows lit after
+dark, butterflies, songbirds, gulls, falling leaves, fireflies, sparkles on the water and
+snow, ripples and jumping fish. **Settings → Animations** (or **Ctrl+Y**) turns them all
+off and on. There are three ways to add more:
+
+**1. Drag one in by hand.** The animations are in `assets` → `scenery` → `ambient` (smoke,
+sparkles, ripples, splashes, fireflies, leaves) and `creatures` → `critters` (butterflies,
+robins, ducks, squirrels, frogs...) and `creatures` → `birds`. Our own are in `assets` →
+`sprites` → `ambient` (a jumping fish, a songbird). Drag them into a scenery scene like any
+picture; they play in the game. Two words in a picture's **name** change how it plays.
+Rename its line in the Scene panel (double-click the name):
+
+- **now and then**, e.g. `Fish now and then`: plays once, hides for a few seconds, plays
+  again. Good for a fish jumping in one spot, or a splash under the pier.
+- **night**, e.g. `Lantern night`: only shows after dark, fading in at dusk like the lamps.
+
+Put water things (ripples, fish, sparkles) in **OnTheGround**, flying and floating things
+in **Overhead**.
+
+**2. Smoke or lit windows on a building.** Each building has a file in
+`data/ambience/buildings/` (`bakery.tres` and so on). Double-click one and the Inspector
+shows two lists: **Chimneys** (the top middle of each chimney) and **Windows** (a box
+round each window: x, y, width, height). The numbers are pixels in the building's picture,
+counted from its top-left corner: open the picture in `assets/sprites/...` and hover the
+mouse over it in an image editor to read them. Press **+ Add Element** for another.
+
+**3. A new kind of thing that comes and goes by itself.** Each kind is a file in
+`data/ambience/effects/`. In FileSystem, right-click one (say `butterflies.tres`) →
+**Duplicate...**, give it a new name, and change it in the Inspector:
+
+| Setting | What it does |
+|---|---|
+| Pictures | the strip(s) to use; one is picked at random each time |
+| Motion | Once (plays on a spot), Wander (hovers about), Fly Across, Fall |
+| Ground | where it can appear: Grass, Pond, Sea, Water (pond or sea), Any |
+| Places | farm, lane, town, woods, cove (empty = everywhere) |
+| Seasons, Weather, Not Weather | when it may play (empty = always) |
+| From Minute / Until Minute | the hours: 360 is 6 AM, 1200 is 8 PM; both 0 = all day |
+| Per Minute, Most At Once, Flock | how often, how many, how many together |
+| Frame Seconds, Speed, Lifetime | how fast it plays and moves, how long it stays |
+| Glows | drawn as light, for things that shine at night |
+| Above | over people (birds, leaves) or on the ground under them (sparkles) |
+
+Stop and start the game (F5) to see a change. If a picture can't be found, that one just
+doesn't play; nothing breaks.
+
 ## Don't lose your work
 
 - **Save often** (Ctrl+S), and commit the `scenery` folder's `.tscn` files with the rest of the

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BuildingAmbience" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/building_ambience.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+location_id = &"general_store"
+chimneys = Array[Vector2i]([Vector2i(34, 1)])
+windows = Array[Rect2i]([Rect2i(8, 77, 19, 17), Rect2i(101, 77, 19, 17)])

@@ -12,9 +12,11 @@ extends Node
 ##     TimeSystem calls save_game(). Quitting mid-day loses that day's work, as
 ##     in most farming games. That's deliberate: a save is always a clean
 ##     morning, never half an action.
-##   - Loading happens once, at launch, from the boot scene.
-##   - With no save (or one that can't be read), the boot scene asks which
-##     difficulty to play at before the new game starts (DECISIONS 040).
+##   - Loading happens at launch, from the boot scene, which then shows the
+##     title screen over the game it loaded (DECISIONS 086); and again when
+##     the Esc menu goes back to the title.
+##   - With no save (or one that can't be read), the title screen offers only
+##     a new game, which asks which difficulty to play at (DECISIONS 040).
 ##
 ## Where: user://save.json. On Windows that's
 ##   %APPDATA%\Godot\app_userdata\Pixel Harvest\save.json
@@ -29,6 +31,10 @@ const SAVE_PATH := "user://save.json"
 ## Where a save that couldn't be loaded is moved to, so it's never silently
 ## overwritten. Only the most recent one is kept.
 const SET_ASIDE_PATH := "user://save.unreadable.json"
+
+## The scene that loads the save and shows the title (the Esc menu's "Title
+## screen" goes back to it).
+const BOOT_SCENE := "res://scenes/boot.tscn"
 
 ## The version this build of the game writes. Bump it whenever the shape of
 ## the saved data changes, and add a step to _upgrade() that converts the
@@ -162,14 +168,23 @@ const REQUIRED_FIELDS: Dictionary = {
 ## save.
 var _active: bool = false
 
+## Why the last load failed ("" if it didn't), so the title screen can say
+## the save was put aside.
+var load_problem: String = ""
+
 
 func _unhandled_input(event: InputEvent) -> void:
-	# A stopgap until Stage 9's title screen has a "New game" button. Nothing
-	# here runs while the game is paused (in a shop, a conversation, or this
-	# menu itself), so Ctrl+N only works out in the world.
+	# Nothing here runs while the game is paused (in a shop, a conversation,
+	# the title screen or these menus themselves), so both keys only work out
+	# in the world, and Esc closes whatever's open before it opens the menu.
+	# Ctrl+N is the shortcut from before there was a title screen; it's also
+	# on the Esc menu (DECISIONS 086).
 	if event.is_action_pressed(&"new_game"):
 		get_viewport().set_input_as_handled()
 		ask_for_new_game()
+	elif event.is_action_pressed(&"ui_cancel"):
+		get_viewport().set_input_as_handled()
+		get_tree().root.add_child(PauseMenu.new())
 
 
 ## Show the difficulty menu over the game; picking one starts a new game at
@@ -191,11 +206,13 @@ func has_save() -> bool:
 ## asks which difficulty to play at.
 func load_or_new_game() -> bool:
 	_active = true
+	load_problem = ""
 	if not has_save():
 		GameState.new_game()
 		return false
 	var problem := _load()
 	if problem != "":
+		load_problem = problem
 		push_error("Couldn't load the save (%s). Starting a new game; the old file has been kept as %s"
 				% [problem, ProjectSettings.globalize_path(SET_ASIDE_PATH)])
 		DirAccess.rename_absolute(SAVE_PATH, SET_ASIDE_PATH)

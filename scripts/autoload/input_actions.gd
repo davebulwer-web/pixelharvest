@@ -45,6 +45,9 @@ const ACTIONS: Dictionary = {
 	&"scenery_backdrop": [KEY_B | KEY_MASK_CTRL],
 	# TEST (DECISIONS 083): swap the rooms' Cozy Interiors furniture on and off.
 	&"swap_interior_look": [KEY_R | KEY_MASK_CTRL],
+	# The little moving things on the maps (DECISIONS 088), on and off; the
+	# same as Settings → Animations.
+	&"toggle_ambience": [KEY_Y | KEY_MASK_CTRL],
 	# Godot's built-in menu actions already have the arrow keys; adding WASD
 	# lets the shop menu be driven from the same hand as walking.
 	&"ui_up": [KEY_W],

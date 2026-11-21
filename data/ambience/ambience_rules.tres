@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AmbienceRules" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/ambience_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+smoke_picture = "res://assets/scenery/ambient/chimney_smoke_anim_5f.png"
+smoke_frame_seconds = 0.2
+smoke_opacity = 0.8
+window_colour = Color(1, 0.8, 0.42, 1)
+window_strength = Color(2.6, 2, 1.4, 1)
+window_halo = 0.35
+most_at_once = 24

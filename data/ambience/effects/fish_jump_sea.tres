@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AmbientEffect" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/ambient_effect.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"fish_jump_sea"
+pictures = PackedStringArray("res://assets/sprites/ambient/fish_jump_8f.png")
+motion = 0
+ground = 3
+places = Array[StringName]([&"cove"])
+from_minute = 360
+until_minute = 1230
+per_minute = 3.0
+most_at_once = 1
+frame_seconds = 0.09
+above = false

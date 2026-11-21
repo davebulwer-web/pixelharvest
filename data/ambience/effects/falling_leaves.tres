@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AmbientEffect" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/ambient_effect.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"falling_leaves"
+pictures = PackedStringArray("res://assets/scenery/ambient/falling_leaves_anim_4f.png")
+motion = 3
+ground = 0
+places = Array[StringName]([&"farm", &"lane", &"town", &"woods"])
+seasons = Array[StringName]([&"autumn"])
+per_minute = 9.0
+most_at_once = 6
+frame_seconds = 0.22
+speed = 9.0
+lifetime = 9.0

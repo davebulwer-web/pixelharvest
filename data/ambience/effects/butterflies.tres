@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="AmbientEffect" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/ambient_effect.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"butterflies"
+pictures = PackedStringArray("res://assets/scenery/creatures/critters/butterfly_white_4f.png", "res://assets/scenery/creatures/critters/butterfly_yellow_4f.png", "res://assets/scenery/creatures/critters/butterfly_orange_4f.png", "res://assets/scenery/creatures/critters/butterfly_blue_4f.png", "res://assets/scenery/creatures/critters/butterfly_pink_4f.png")
+motion = 1
+ground = 1
+places = Array[StringName]([&"farm", &"lane", &"town", &"woods"])
+seasons = Array[StringName]([&"spring", &"summer"])
+not_weather = Array[StringName]([&"rain", &"storm", &"snow"])
+from_minute = 420
+until_minute = 1110
+per_minute = 10.0
+most_at_once = 3
+frame_seconds = 0.1
+speed = 14.0
+lifetime = 25.0

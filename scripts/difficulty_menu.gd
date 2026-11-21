@@ -16,15 +16,18 @@ extends CanvasLayer
 ##
 ## Keys: W/S or arrows to choose, Space or Enter to start, Esc to go back
 ## (only from Ctrl+N: at first launch there's no game to go back to).
-## Placeholder UI until Stage 9's title screen, which can reuse it.
+## The title screen's and the Esc menu's "New game" open it too (DECISIONS 086).
 ##
 
 signal chosen(difficulty: DifficultyDef)
 
 const PANEL_WIDTH := 360
 
-## True when there's a game to go back to (Ctrl+N), so Esc closes the menu.
+## True when there's somewhere to go back to (Ctrl+N, the title screen), so
+## Esc closes the menu.
 var can_cancel: bool = false
+## What the hint says Esc goes back to.
+var cancel_words: String = "back to your game"
 
 var _detail: Label
 var _buttons: Array[Button] = []
@@ -100,7 +103,7 @@ func _build() -> void:
 	column.add_child(_detail)
 
 	var hint := Label.new()
-	hint.text = "Space / Enter: start" + ("     Esc: back to your game" if can_cancel else "")
+	hint.text = "Space / Enter: start" + ("     Esc: " + cancel_words if can_cancel else "")
 	UiStyle.style_panel_label(hint, 8, UiStyle.TEXT_DIM)
 	column.add_child(hint)
 

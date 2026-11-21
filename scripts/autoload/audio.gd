@@ -10,16 +10,24 @@ extends Node
 ## summary, call play() directly.)
 ##
 ## What each sound is lives in data/audio/sound_bank.tres (SoundBank). The
-## music is the season's (SeasonTheme.music, DECISIONS 066): its tunes play
-## one after another wherever you go, so walking from the farm to the Cove
-## doesn't change the tune, but the turn of the season does. A place can
-## still have a tune of its own instead (LocationDef.music). The weather's
+## music is the season's (DECISIONS 066): its tunes play one after another
+## wherever you go, so walking from the farm to the Cove doesn't change the
+## tune, but the turn of the season does. A place can still have a tune of
+## its own instead (LocationDef.music).
+##
+## Dave's music is drop-in (DECISIONS 087): every file in assets/audio/music/
+## whose name starts with a season ("spring_", "summer_"...) is one of that
+## season's tunes, and one starting with a calendar event's id
+## ("flower_show_", "lantern_night_", "market_day_"...) plays in that event's
+## place (and its shops) on its day, instead of the season's. Files starting
+## "any_" play in a season that has none of its own. No list to edit: the
+## folder is the list (how-to: assets/audio/music/HOW_TO.md). The weather's
 ## loop (rain on the leaves) is on its WeatherDef (`ambience`, DECISIONS
 ## 046): it plays all day, and quieter indoors.
 ##
-## Two buses, set up in default_bus_layout.tres: "Music" and "SFX", so the
-## settings screen (Stage 9 session 2) can give each its own volume. Until
-## then, M mutes and unmutes everything.
+## Two buses, set up in default_bus_layout.tres: "Music" and "SFX", each
+## with its own volume on the settings page (Settings, DECISIONS 086). M
+## still mutes and unmutes everything, for the moment.
 ##
 ## This node keeps running while the game is paused, because the shop menu
 ## and the day's summary pause the game and should still make sounds.
@@ -45,6 +53,12 @@ const QUIT_DELAY_SECONDS := 0.15
 const SFX_BUS := &"SFX"
 const MUSIC_BUS := &"Music"
 
+## Dave's music folder (DECISIONS 087) and the kinds of file read from it.
+const MUSIC_DIR := "res://assets/audio/music/"
+const MUSIC_TYPES: Array[String] = ["mp3", "ogg", "wav"]
+## The name start for tunes that play in any season without its own.
+const ANY_SEASON := "any"
+
 ## Sound name -> its player.
 var _players: Dictionary = {}
 
@@ -65,6 +79,11 @@ var _music_tweens: Dictionary = {}
 var _playlist: Array[AudioStream] = []
 var _music_volume_db: float = 0.0
 var _last_track: AudioStream
+
+## The music folder's tunes by file name (no extension), read the first time
+## music is asked for: name -> AudioStream.
+var _folder_music: Dictionary = {}
+var _folder_read := false
 
 ## The first scene of a session is opened by the boot, not by a door, so it
 ## doesn't get a door sound.
@@ -132,19 +151,82 @@ func play(sound_name: StringName) -> void:
 
 
 ## The tunes for a location: its own one if it has one (or its outside's: a
-## shop plays the town's), otherwise the season's (DECISIONS 066). Empty for
-## silence.
+## shop plays the town's); else, on an event's day in the event's place, the
+## event's tunes from the music folder, if it has any (DECISIONS 087);
+## otherwise the season's (DECISIONS 066). Empty for silence.
 func music_for(location_id: StringName) -> Array[AudioStream]:
 	var own := _own_music(location_id)
 	if own != null:
 		return [own]
+	var event_tunes := _event_music(location_id)
+	if not event_tunes.is_empty():
+		return event_tunes
+	return season_music()
+
+
+## The season's tunes: any listed on its SeasonTheme, and every file in the
+## music folder named after it; failing both, the folder's "any_" tunes.
+func season_music() -> Array[AudioStream]:
 	var tunes: Array[AudioStream] = []
 	var theme := GameState.current_season_theme()
-	if theme != null:
-		for tune: AudioStream in theme.music:
-			if tune != null:
+	if theme == null:
+		return tunes
+	for tune: AudioStream in theme.music:
+		if tune != null and not tunes.has(tune):
+			tunes.append(tune)
+	for tune in folder_music(String(theme.id)):
+		if not tunes.has(tune):
+			tunes.append(tune)
+	if tunes.is_empty():
+		tunes = folder_music(ANY_SEASON)
+	return tunes
+
+
+## Today's calendar events' tunes for `location_id`: those of every event
+## on today whose place this is, or this place's outside (a shop on the
+## square hears the festival), in event order.
+func _event_music(location_id: StringName) -> Array[AudioStream]:
+	var tunes: Array[AudioStream] = []
+	var here := LocationManager.find(location_id)
+	for event in GameState.events_today():
+		if event.location != location_id and (here == null or here.outside != event.location):
+			continue
+		for tune in folder_music(String(event.id)):
+			if not tunes.has(tune):
 				tunes.append(tune)
 	return tunes
+
+
+## The music folder's tunes whose file name is `prefix` or starts with
+## `prefix` and an underscore ("spring" finds spring_meadow.mp3), in name
+## order.
+func folder_music(prefix: String) -> Array[AudioStream]:
+	_read_music_folder()
+	var names: Array = _folder_music.keys()
+	names.sort()
+	var tunes: Array[AudioStream] = []
+	for file_name: String in names:
+		if file_name == prefix or file_name.begins_with(prefix + "_"):
+			tunes.append(_folder_music[file_name])
+	return tunes
+
+
+## Load every tune in the music folder, once. ResourceLoader.list_directory,
+## not DirAccess: in an exported game the files are converted and renamed,
+## and list_directory still reports the names they were given (as ContentDB
+## does for the .tres files).
+func _read_music_folder() -> void:
+	if _folder_read:
+		return
+	_folder_read = true
+	for file_name: String in ResourceLoader.list_directory(MUSIC_DIR):
+		if not MUSIC_TYPES.has(file_name.get_extension().to_lower()):
+			continue
+		var tune := load(MUSIC_DIR + file_name) as AudioStream
+		if tune == null:
+			push_warning("Music: couldn't load %s (has Godot imported it?)" % file_name)
+			continue
+		_folder_music[file_name.get_basename().to_lower()] = tune
 
 
 ## A location's own tune, or its outside's, or null if neither has one.
@@ -217,6 +299,8 @@ func _listen() -> void:
 	EventBus.location_changed.connect(_on_location_changed)
 	# The season's turn changes the tunes (DECISIONS 066).
 	EventBus.season_changed.connect(func(_s: int) -> void: _update_music(GameState.location))
+	# A new day may be an event's day, with its own tunes (DECISIONS 087).
+	EventBus.day_started.connect(func(_d: int, _s: int, _y: int) -> void: _update_music(GameState.location))
 	EventBus.weather_changed.connect(func(_w: StringName) -> void: _update_ambience())
 	EventBus.thunder_rolled.connect(func() -> void: play(&"thunder"))
 

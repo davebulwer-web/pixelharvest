@@ -1,27 +1,31 @@
 extends Node
 ##
-## Boot — the first scene the game runs. It shows nothing; it decides where
-## the player should be and sends them there.
+## Boot — the first scene the game runs. It shows nothing itself; it gets the
+## game ready and opens the title screen over it.
 ##
 ## First it asks SaveSystem to load the save, if there is one. If there isn't
-## (or it can't be read), it asks which difficulty to play at (DifficultyMenu,
-## DECISIONS 040) and starts a new game at that. Then it sends the player to
-## wherever the game says they are. Stage 9's title screen slots in here too.
+## (or it can't be read), SaveSystem leaves a fresh game at the default
+## difficulty. Either way it opens the place the farmer is in, so the title
+## screen (TitleScreen, DECISIONS 086) has the real world behind it, paused.
+## Continue takes the title away; New game asks the difficulty (DifficultyMenu,
+## DECISIONS 040) and starts again.
+##
+## The Esc menu's "Title screen" comes back here, which loads the save again.
 ## Keeping this out of the farm scene means the farm never has to know how the
 ## game started.
 ##
 
 func _ready() -> void:
-	if SaveSystem.load_or_new_game():
-		# Deferred: changing scene from inside the _ready of the scene being
-		# replaced is not allowed, so wait until this frame's setup is done.
-		LocationManager.go_to.call_deferred(GameState.location)
-		return
-	var menu := DifficultyMenu.new()
-	menu.chosen.connect(_start)
-	add_child(menu)
+	var loaded := SaveSystem.load_or_new_game()
+	# Deferred: changing scene from inside the _ready of the scene being
+	# replaced is not allowed, so wait until this frame's setup is done.
+	_open.call_deferred(loaded)
 
 
-func _start(difficulty: DifficultyDef) -> void:
-	GameState.new_game(difficulty)
+func _open(loaded: bool) -> void:
+	# The title is added to the root, not to this scene, so it stays when
+	# this scene is replaced by the farmer's place.
+	var title := TitleScreen.new()
+	title.save_was_unreadable = not loaded and SaveSystem.load_problem != ""
+	get_tree().root.add_child(title)
 	LocationManager.go_to(GameState.location)

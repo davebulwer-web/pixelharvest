@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AmbientEffect" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/ambient_effect.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"water_sparkle"
+pictures = PackedStringArray("res://assets/scenery/ambient/water_sparkle_6f.png")
+motion = 0
+ground = 4
+weather = Array[StringName]([&"sunny", &"heatwave", &"frost"])
+from_minute = 480
+until_minute = 1080
+per_minute = 40.0
+most_at_once = 6
+frame_seconds = 0.1
+above = false

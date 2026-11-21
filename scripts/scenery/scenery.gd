@@ -15,6 +15,11 @@ extends Node
 ## - plays animation strips (a picture named ..._4f.png, 4 frames side by
 ##   side; ..._pingpong_3f.png goes there and back); a picture named
 ##   ..._on_off_2f.png (string lights) shows its lit frame after dark;
+## - a picture whose name (its file's, or the line's in the Scene panel)
+##   says "now and then" or now_and_then plays its strip once, then waits a
+##   few seconds out of sight before it plays again (a fish jumping, a
+##   splash); one that says "night" shows only after dark, fading in at dusk
+##   like the lamps (DECISIONS 088);
 ## - swaps a seasonal picture for this season's (oak_summer.png becomes
 ##   oak_winter.png in winter when that file is beside it);
 ## - takes a new backdrop (Ctrl+B, only when the game is run from the editor):
@@ -36,6 +41,9 @@ const TWO_FRAME_SECONDS := 0.5
 ## When string lights are lit (minutes after midnight): 19:30 to 06:30.
 const LIT_FROM := 1170
 const LIT_UNTIL := 390
+## A "now and then" picture waits this many seconds, give or take, between goes.
+const NOW_AND_THEN_MIN := 3.0
+const NOW_AND_THEN_MAX := 10.0
 ## The farmer bumps into a block this tall at a Solid picture's foot.
 const FOOT_HEIGHT := 6.0
 const SEASONS: Array[String] = ["spring", "summer", "autumn", "winter"]
@@ -66,6 +74,9 @@ static func add_to(map: Node2D, entities: Node2D, id: StringName) -> Scenery:
 	scenery._entities = entities
 	map.add_child(scenery)
 	scenery._load()
+	# The little things that move by themselves come with the scenery, on
+	# every outdoor map (DECISIONS 088).
+	Ambience.add_to(map, entities, id)
 	return scenery
 
 
@@ -95,6 +106,10 @@ func _load() -> void:
 		_pictures.append(sprite)
 		_season(sprite)
 		_animate(sprite)
+		if _named(sprite, "night"):
+			# Daylight fades these in at dusk and out at dawn, like the lamps.
+			sprite.modulate.a = 0.0
+			sprite.add_to_group(Daylight.NIGHT_LIGHTS)
 	for node in solid.find_children("*", "Sprite2D", true, false):
 		_make_solid(node as Sprite2D)
 	# Standing and Solid join the map's y-sort: a y-sorted node inside a
@@ -159,6 +174,8 @@ func _animate(sprite: Sprite2D) -> void:
 		"seconds": seconds,
 		"pingpong": file.contains("pingpong"),
 		"lights": file.contains("on_off"),
+		"now_and_then": _named(sprite, "now_and_then"),
+		"rest": 0.0,
 		# Each starts at its own point, so a row of buoys doesn't bob as one.
 		"phase": randf() * seconds * frames,
 	})
@@ -178,6 +195,9 @@ func _process(delta: float) -> void:
 			# The packs draw these lit first, then unlit.
 			sprite.frame = 0 if lit else 1
 			continue
+		if moving["now_and_then"]:
+			_now_and_then(moving, sprite, frames, delta)
+			continue
 		var step := int((_clock + moving["phase"]) / moving["seconds"])
 		if moving["pingpong"]:
 			var span := frames * 2 - 2
@@ -185,6 +205,52 @@ func _process(delta: float) -> void:
 			sprite.frame = step if step < frames else span - step
 		else:
 			sprite.frame = step % frames
+
+
+## Play the strip once, then hide it for a few seconds before the next time.
+## "phase" counts down the wait, then up through the frames.
+func _now_and_then(moving: Dictionary, sprite: Sprite2D, frames: int, delta: float) -> void:
+	if moving["rest"] > 0.0:
+		moving["rest"] -= delta
+		sprite.visible = false
+		if moving["rest"] <= 0.0:
+			moving["phase"] = 0.0
+		return
+	sprite.visible = true
+	moving["phase"] += delta
+	var step := int(moving["phase"] / moving["seconds"])
+	if step >= frames:
+		moving["rest"] = randf_range(NOW_AND_THEN_MIN, NOW_AND_THEN_MAX)
+		sprite.visible = false
+		return
+	sprite.frame = step
+
+
+## True if the picture's file name, or its line's name in the Scene panel,
+## has `word` in it as a word of its own: "night" matches lamp_night.png and
+## "Lamp (night)" but not scarecrow_knight; "now_and_then" matches
+## fish_now_and_then.png, "Fish now and then" and "FishNowAndThen".
+static func _named(sprite: Sprite2D, word: String) -> bool:
+	var file := sprite.texture.resource_path.get_file().get_basename() if sprite.texture != null else ""
+	var wanted := " %s " % word.replace("_", " ")
+	for text in [file, String(sprite.name)]:
+		if (" %s " % " ".join(_words(text))).contains(wanted):
+			return true
+	return false
+
+
+## "FishNowAndThen_2" -> ["fish", "now", "and", "then", "2"].
+static func _words(text: String) -> PackedStringArray:
+	var spaced := ""
+	for i in text.length():
+		var ch := text[i]
+		if i > 0 and ch != ch.to_lower() and text[i - 1] == text[i - 1].to_lower():
+			spaced += " "  # a capital after a small letter starts a word
+		spaced += ch
+	var words := PackedStringArray()
+	for part in spaced.to_lower().replace("_", " ").replace("-", " ").replace("(", " ").replace(")", " ").split(" ", false):
+		words.append(part)
+	return words
 
 
 ## A block at the picture's foot, the width of the picture less a little, so

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="AmbientEffect" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/ambient_effect.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"fireflies"
+pictures = PackedStringArray("res://assets/scenery/ambient/fireflies_4f.png")
+motion = 1
+ground = 1
+places = Array[StringName]([&"farm", &"lane", &"woods"])
+seasons = Array[StringName]([&"summer"])
+not_weather = Array[StringName]([&"rain", &"storm"])
+from_minute = 1230
+until_minute = 240
+per_minute = 15.0
+most_at_once = 5
+frame_seconds = 0.25
+speed = 5.0
+lifetime = 18.0
+glows = true
+opacity = 0.9

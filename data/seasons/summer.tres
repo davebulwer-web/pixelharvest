@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SeasonTheme" load_steps=10 format=3]
+[gd_resource type="Resource" script_class="SeasonTheme" load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/season_theme.gd" id="1_theme"]
 [ext_resource type="TileSet" path="res://assets/tilesets/ground_tileset_summer.tres" id="2_tiles"]
@@ -7,8 +7,6 @@
 [ext_resource type="Resource" path="res://data/weather/rain.tres" id="w_rain"]
 [ext_resource type="Resource" path="res://data/weather/storm.tres" id="w_storm"]
 [ext_resource type="Resource" path="res://data/weather/heatwave.tres" id="w_heatwave"]
-[ext_resource type="AudioStream" path="res://assets/audio/music/summer_fields.mp3" id="m_1"]
-[ext_resource type="AudioStream" path="res://assets/audio/music/summer_harvest_path.mp3" id="m_2"]
 
 [resource]
 script = ExtResource("1_theme")
@@ -21,5 +19,5 @@ ExtResource("w_rain"): 1,
 ExtResource("w_storm"): 1,
 ExtResource("w_heatwave"): 2
 })
-music = Array[AudioStream]([ExtResource("m_1"), ExtResource("m_2")])
+music = Array[AudioStream]([])
 music_volume_db = -10.0

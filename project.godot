@@ -34,6 +34,7 @@ DayReport="*res://scripts/autoload/day_report.gd"
 Fishing="*res://scripts/autoload/fishing.gd"
 Festivals="*res://scripts/autoload/festivals.gd"
 Tavern="*res://scripts/autoload/tavern.gd"
+Settings="*res://scripts/autoload/settings.gd"
 
 [display]
 
